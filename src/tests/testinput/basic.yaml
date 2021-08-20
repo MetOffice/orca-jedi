@@ -1,0 +1,34 @@
+forecast length : P2D
+geometry : 
+  nemo names: 
+    sea_ice_area_fraction: iiceconc
+    sea_ice_category_area_fraction: iiceconc
+    sea_surface_foundation_temperature: votemper
+    sea_water_potential_temperature: votemper
+  grid name: ORCA2_T
+  number levels: 10
+initial condition : 
+  date: 2018-04-14T21:00:00Z
+  state variables: [ sea_ice_category_area_fraction ]
+  analytic_init: zeroed state
+  nemo field file: /scratch/tsearle/orca2_seaice_dummy.nc
+model :
+  name: PseudoModel 
+  tstep: P2D
+  state variables: [ sea_ice_category_area_fraction ]
+  states: 
+    - date: '2018-04-15T00:00:00Z'
+      fcstime: 1
+      nemo field file: /scratch/tsearle/orca2_seaice_dummy.nc
+window begin: 2018-04-14T21:00:00Z
+window length: P1D
+observations:
+- obs operator:
+    name: SeaIceFraction
+  obs space:
+    name: SeaIceFraction
+    obsdatain:
+      obsfile: ufo/test/Data/ufo/testinput_tier_1/icec-2018-04-15.nc
+    obsdataout:
+      obsfile:  test_out.nc
+    simulated variables: [sea_ice_category_area_fraction]

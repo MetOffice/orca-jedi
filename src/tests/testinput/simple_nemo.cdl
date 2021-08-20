@@ -1,0 +1,23 @@
+netcdf simple_fdbk {
+dimensions:
+	x = 3 ;
+	y = 2 ;
+        t = 1 ; 
+variables:
+        double nav_lat(y, x) ;
+	double nav_lon(y, x) ;
+        double iiceconc(t, y, x) ;
+data:
+
+ nav_lat =
+  0, 0, 0,
+  1, 1, 1;
+ 
+ nav_lon =
+  10, 11, 12,
+  10, 11, 12;
+
+ iiceconc =
+  120, 130, 140,
+  150, 160, 170;
+}
