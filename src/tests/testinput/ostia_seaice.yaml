@@ -18,7 +18,6 @@ model :
   states: 
     - date: '2021-06-30T00:00:00Z'
       fcstime: 1
-      #nemo field file: /scratch/tsearle/orca2_seaice_dummy.nc
       nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
@@ -26,7 +25,6 @@ observations:
 - obs space:
     name: Sea Ice
     obsdatain:
-      #obsfile: /scratch/tsearle/obs_seaice_20210701T0000Z_0.nc
       obsfile: orca-jedi/src/tests/testinput/ostia_seaice_obs.nc
       max frame size: 1000000
     obsdataout:

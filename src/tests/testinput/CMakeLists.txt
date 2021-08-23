@@ -1,6 +1,7 @@
 
 list( APPEND orcajedi_test_input
   basic.yaml
+  ostia_seaice_obs.yaml
 )
 
 foreach(FILENAME ${orcajedi_test_input})
