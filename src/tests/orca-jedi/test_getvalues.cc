@@ -67,7 +67,6 @@ CASE ("test basic getvalues") {
   std::vector<double> testvals = {1, 0, 0};
 
   for (size_t i=0; i<vals.size(); ++i) {
-    std::cout << vals[i] <<std::endl;
     EXPECT_EQUAL(vals[i], testvals[i]);
   }
 

@@ -21,14 +21,14 @@
 namespace orcamodel {
 
 NemoFieldReader::NemoFieldReader( eckit::PathName& filename ) {
-  oops::Log::debug() << "orcajedi::NemoFieldReader::NemoFieldReader filename : " 
+  oops::Log::debug() << "orcamodel::NemoFieldReader::NemoFieldReader filename : " 
                      << filename.fullName().asString() << std::endl;
   if( !(filename.exists()) ) {
-    throw("orcajedi::NemoFieldReader::NemoFieldReader filename doesn't exist ");
+    throw("orcamodel::NemoFieldReader::NemoFieldReader filename doesn't exist ");
   }
   ncFile = std::make_unique<netCDF::NcFile>(filename.fullName().asString(), netCDF::NcFile::read);
   if(ncFile->isNull()) {
-    throw("orcajedi::NemoFieldReader::NemoFieldReader " + filename + " not found");
+    throw("orcamodel::NemoFieldReader::NemoFieldReader " + filename + " not found");
   }
 }
 
@@ -36,9 +36,10 @@ size_t NemoFieldReader::read_dim_size( const std::string& name ) {
 
   auto dim = ncFile->getDim( name );
   if ( dim.isNull() ) {
-    throw ( "orcajedi::NemoFieldReader::read_locs Dimension '" + name + "' is not present in NetCDF file" );
+    throw ( "orcamodel::NemoFieldReader::read_locs Dimension '" + name + "' is not present in NetCDF file" );
   }
-  std::cout << "group name " + ncFile->getName(true) + " dim name: " + name <<std::endl;
+  oops::Log::debug() << "orcamodel::NemoFieldReader:: group name " 
+                     << ncFile->getName(true) << " dim name: "  << name <<std::endl;
 
   return dim.getSize();
 }
@@ -53,7 +54,7 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
     std::string varname = "nav_lat";
     netCDF::NcVar nc_var_lat = ncFile->getVar(varname);
     if(nc_var_lat.isNull()) {
-      throw("orcajedi::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
+      throw("orcamodel::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
     }
 
     std::vector<double> lats(nx*ny);
@@ -63,7 +64,7 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
     varname = "nav_lon";
     netCDF::NcVar nc_var_lon = ncFile->getVar(varname);
     if(nc_var_lon.isNull()) {
-      throw("orcajedi::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
+      throw("orcamodel::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
     }
 
     std::vector<double> lons(nx*ny);
@@ -81,7 +82,7 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
   } catch(netCDF::exceptions::NcException& e)
   {
     e.what();
-    std::cout<< "orcajedi::NemoFieldReader::read_locs ERROR: " <<std::endl;
+    oops::Log::debug() << "orcamodel::NemoFieldReader::read_locs ERROR: " <<std::endl;
     throw(e);
   }
 }
@@ -95,7 +96,7 @@ std::vector<double> NemoFieldReader::read_surf_var(std::string varname) {
 
     netCDF::NcVar nc_var = ncFile->getVar(varname);
     if(nc_var.isNull()) {
-      throw("orcajedi::NemoFieldReader::read_surf_var ncVar " 
+      throw("orcamodel::NemoFieldReader::read_surf_var ncVar " 
             + varname + " is not present in NetCDF file");
     }
 
@@ -108,7 +109,7 @@ std::vector<double> NemoFieldReader::read_surf_var(std::string varname) {
   } catch(netCDF::exceptions::NcException& e)
   {
     e.what();
-    std::cout<< "orcajedi::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
+    oops::Log::debug() << "orcamodel::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
     throw(e);
   }
 }
@@ -121,13 +122,13 @@ void NemoFieldReader::read_surf_var(std::string varname, atlas::array::ArrayView
     size_t ny = read_dim_size("y");
 
     if (field_view.size() != nx*ny ) {
-      throw("orcajedi::NemoFieldReader::read_surf_var field_view dimensions "
+      throw("orcamodel::NemoFieldReader::read_surf_var field_view dimensions "
             "do not match dimensions in netCDF file ");
     }
 
     netCDF::NcVar nc_var = ncFile->getVar(varname);
     if(nc_var.isNull()) {
-      throw("orcajedi::NemoFieldReader::read_surf_var ncVar " 
+      throw("orcamodel::NemoFieldReader::read_surf_var ncVar " 
             + varname + " is not present in NetCDF file");
     }
 
@@ -137,7 +138,7 @@ void NemoFieldReader::read_surf_var(std::string varname, atlas::array::ArrayView
   } catch(netCDF::exceptions::NcException& e)
   {
     e.what();
-    std::cout<< "orcajedi::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
+    oops::Log::debug() <<  "orcamodel::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
     throw(e);
   }
 }

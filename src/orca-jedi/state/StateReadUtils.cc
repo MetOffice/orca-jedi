@@ -16,21 +16,21 @@ void readFieldsFromFile(
   const Geometry & geom,
   atlas::FieldSet & fs) {
 
-    oops::Log::trace() << "orcajedi::readFieldsFromFile:: start "
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start "
                        << std::endl;
 
     // Open Nemo Feedback file
     std::string nemo_file_name = "";
 
-    oops::Log::debug() << "orcajedi::readFieldsFromFile:: configuration "
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: configuration "
                        << conf
                        << std::endl;
-    oops::Log::debug() << "orcajedi::readFieldsFromFile:: nemo field file " << conf.getString("nemo field file") 
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo field file " << conf.getString("nemo field file") 
                        << std::endl;
     nemo_file_name = conf.getString("nemo field file");
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
-    oops::Log::debug() << "orcajedi::readFieldsFromFile:: nemo_field_path "
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
     NemoFieldReader nemo_file(nemo_field_path);
 
@@ -41,13 +41,13 @@ void readFieldsFromFile(
     // NEMO names
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
-      oops::Log::debug() << "orcajedi::readFieldsFromFile:: field name = " << fieldName
+      oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = " << fieldName
                           << std::endl;
       auto field_view = atlas::array::make_view<double, 1>( field );
       nemo_file.read_surf_var(fieldName, field_view);
     }
 
-    oops::Log::trace() << "orcajedi::readFieldsFromFile:: readFieldsFromFile done "
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile done "
                        << std::endl;
 };
 

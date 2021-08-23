@@ -79,7 +79,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
       varSizes[i] = n_levels_;
     } else {
       std::stringstream err_stream;
-      err_stream << "orcajedi::Geometry::variableSizes variable name \" ";
+      err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
       err_stream << "\" " << vars[i] << " not recognised. " << std::endl;
       throw eckit::NotImplemented(err_stream.str(), Here());
     }
@@ -90,7 +90,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 // ----------------------------------------------------------------------------- 
 atlas::FunctionSpace * Geometry::atlasFunctionSpace() const {
   std::string err_message =
-    "orcajedi::Geometry::atlasFunctionSpace Not implemented ";
+    "orcamodel::Geometry::atlasFunctionSpace Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
   atlas::FunctionSpace* r = nullptr;
   return r;
@@ -98,7 +98,7 @@ atlas::FunctionSpace * Geometry::atlasFunctionSpace() const {
 
 atlas::FieldSet * Geometry::atlasFieldSet() const {
   std::string err_message =
-    "orcajedi::Geometry::atlasFieldSet Not implemented ";
+    "orcamodel::Geometry::atlasFieldSet Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
   atlas::FieldSet* r = nullptr;
   return r;

@@ -63,7 +63,6 @@ State::State(const Geometry & geom,
             atlas::option::name(nemo_var_name) ) );
     }
   }
-  std::cout << "statefields print in constructor: " << stateFields_ << std::endl; 
 
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
@@ -76,7 +75,7 @@ State::State(const Geometry & geom,
     , stateFields_()
 {
   std::stringstream config_stream; 
-  config_stream << "orcajedi::State:: config " << conf;
+  config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
   if (conf.has("analytic_init")) {
     this->analytic_init(conf, *geom_);
@@ -101,15 +100,15 @@ State::State(const Geometry & geom,
       readFieldsFromFile(conf, *geom_, stateFields_);
     }
 
-    std::cout << "statefields print in constructor: " << stateFields_ << std::endl; 
   }
+  oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
 State::State(const Geometry & resol,
              const State & other)
 { 
   std::string err_message =
-    "orcajedi::State::State created by interpolation Not implemented ";
+    "orcamodel::State::State created by interpolation Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
 
   oops::Log::trace() << "State(ORCA)::State created by interpolation."
@@ -120,7 +119,7 @@ State::State(const Geometry & resol,
 
 State::State(const State & other) {
   std::string err_message =
-      "orcajedi::State::State created by copy not implemented ";
+      "orcamodel::State::State created by copy not implemented ";
   throw eckit::NotImplemented(err_message, Here());
   oops::Log::trace() << "State(ORCA)::State copied." << std::endl;
 }
@@ -133,7 +132,7 @@ State::~State() {
 
 State & State::operator=(const State & rhs) {
   std::string err_message =
-      "orcajedi::State::State::operator= not implemented";
+      "orcamodel::State::State::operator= not implemented";
   throw eckit::NotImplemented(err_message, Here());
   return *this;
 }
@@ -142,7 +141,7 @@ State & State::operator=(const State & rhs) {
 
 void State::changeResolution(const State & other) {
   std::string err_message =
-      "orcajedi::State::State::changeResolution not implemented";
+      "orcamodel::State::State::changeResolution not implemented";
   throw eckit::NotImplemented(err_message, Here());
   oops::Log::trace() << "State(ORCA)::change resolution done" << std::endl;
 }
@@ -151,7 +150,7 @@ void State::changeResolution(const State & other) {
 
 State & State::operator+=(const Increment & dx) {
   std::string err_message =
-      "orcajedi::State::State::operator+= not implemented";
+      "orcamodel::State::State::operator+= not implemented";
   throw eckit::NotImplemented(err_message, Here());
   oops::Log::trace() << "State(ORCA)::add increment starting" << std::endl;
   oops::Log::trace() << "State(ORCA)::add increment done" << std::endl;
@@ -174,18 +173,17 @@ void State::read(const eckit::Configuration & config) {
 
 void State::analytic_init(const eckit::Configuration & config,
                           const Geometry & geom) {
-  oops::Log::trace() << "State analytic init starting" << std::endl;
+  oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
   stateFields_.add( geom_->funcSpace().createField<double> (
       atlas::option::name("iiceconc") ) );
   this->zero();
-  std::cout << "statefields print in analytic init: " << stateFields_ << std::endl; 
-  oops::Log::trace() << "State analytic init done" << std::endl;
+  oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;
 }
 
 void State::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
   std::string err_message =
-      "orcajedi::State::State::write not implemented";
+      "orcamodel::State::State::write not implemented";
   throw eckit::NotImplemented(err_message, Here());
 }
 
@@ -201,12 +199,12 @@ void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero starting" << std::endl;
 
   //std::string err_message =
-  //    "orcajedi::State::State::zero not implemented";
+  //    "orcamodel::State::State::zero not implemented";
   //throw eckit::NotImplemented(err_message, Here());
   //
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcajedi::State::read:: field name = " << fieldName
+    oops::Log::debug() << "orcamodel::State::read:: field name = " << fieldName
                         << std::endl;
     atlas::array::ArrayView<double, 1> field_view = atlas::array::make_view<double, 1>( field );
     for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
@@ -219,7 +217,7 @@ void State::zero() {
 
 double norm() {
   std::string err_message =
-      "orcajedi::State::State::norm not implemented";
+      "orcamodel::State::State::norm not implemented";
   throw eckit::NotImplemented(err_message, Here());
   return 0;
 }
@@ -228,7 +226,7 @@ void State::accumul(const double & zz, const State & xx) {
   oops::Log::trace() << "State(ORCA)::accumul starting" << std::endl;
 
   std::string err_message =
-      "orcajedi::State::State::accumul not implemented";
+      "orcamodel::State::State::accumul not implemented";
   throw eckit::NotImplemented(err_message, Here());
 
   oops::Log::trace() << "State(ORCA)::accumul done" << std::endl;

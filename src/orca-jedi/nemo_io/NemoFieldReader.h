@@ -24,6 +24,7 @@
 
 namespace orcamodel {
 
+/// \brief Manager of a NEMO field file for reading the pseudo-model state
 class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
 public:
     static const std::string classname() {return "orcamodel::NemoFieldReader";}

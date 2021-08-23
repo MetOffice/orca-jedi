@@ -48,10 +48,16 @@ namespace orcamodel {
   atlas::functionspace::PointCloud atlasObsFuncSpaceFactory (const ufo::Locations & locs) {
 
       size_t nlocs = locs.size();
+      if (nlocs == 0) {
+        std::stringstream err_stream;
+        err_stream << "orcamodel::GetValues:: Constructor called with no locations " << std::endl;
+        err_stream << locs << std::endl;
+        throw eckit::BadValue(err_stream.str(), Here());
+      }
 
       // Setup observation functionspace
       std::vector<atlas::PointXY> atlasPoints(nlocs);
-      oops::Log::trace() << "orcamodel::GetValues:: atlasPoints:" << std::endl;
+      oops::Log::trace() << "orcamodel::GetValues:: atlasPoints with nlocs = " << nlocs << std::endl;
       for (atlas::idx_t i=0; i < nlocs; ++i ) {
         atlasPoints[i] = atlas::PointXY(locs.lons()[i], locs.lats()[i]);
       }
@@ -74,8 +80,8 @@ namespace orcamodel {
   void GetValues::fillGeoVaLs(const State& state, const util::DateTime& dt_begin, 
                    const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const {
     std::size_t nlocs = geovals.nlocs();
-    std::cout << "statefields print: " << state.stateFields() << std::endl; 
 
+    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs starting " << std::endl; 
     // dummy "interpolation"
     std::vector<double> vals(nlocs);
     //std::string gv_varname = "sea_ice_category_area_fraction";
@@ -84,7 +90,7 @@ namespace orcamodel {
       auto gv_varname = geovals.getVars()[j];
       if (!state.variables().has(gv_varname)) {
         std::stringstream err_stream;
-        err_stream << "orcajedi::GetValues::fillGeoVals geovals varname \" ";
+        err_stream << "orcamodel::GetValues::fillGeoVals geovals varname \" ";
         err_stream << "\" " << gv_varname << " not found in the model state. " << std::endl;
         err_stream << "    add the variable to the state variables and ";
         err_stream << "add a mapping from the geometry to that variable." << std::endl;
@@ -101,13 +107,9 @@ namespace orcamodel {
       }
 
       geovals.putAtLevel(vals, gv_varname, 0);
-      std::vector<double> read_gv(nlocs);
-      std::cout << "read_gv size: " << read_gv.size() << std::endl; 
-      std::cout << "geovals print: " << geovals << std::endl; 
-      geovals.get(read_gv, gv_varname);
-      std::cout << "field_view first entry: " << field_view(0) << std::endl; 
-      std::cout << "geovals first entry: " << read_gv[0] << std::endl; 
     }
+    oops::Log::debug() << "orcamodel::GetValues::fillGeoVaLs geovals print: " << geovals << std::endl; 
+    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs done " << std::endl; 
   };
 
 }  // namespace orcamodel
