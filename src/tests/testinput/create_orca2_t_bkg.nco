@@ -1,0 +1,14 @@
+defdim("t", 2);
+
+t = {3600, 7200};
+t@units = "seconds since 1981-01-01 00:00:00";
+
+iiceconc[$t, $y, $x] = 0.0;
+iiceconc(0,:20,:) = 1.0;
+iiceconc(0,130:,:) = 1.0;
+
+votemper[$t, $z, $y, $x] = 18.0;
+votemper(0,0,:,:) = 18. + (nav_lat(:,:)/180.);
+votemper(1,0,:,:) = 18. + (nav_lat(:,:)/180.);
+votemper(0,1,:,:) = 18. + (nav_lon(:,:)/360.);
+votemper(1,1,:,:) = 18. + (nav_lon(:,:)/360.);

@@ -13,15 +13,13 @@ initial condition :
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   #analytic_init: zeroed state
   nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
-  variance field file: orca-jedi/src/tests/testinput/orca2_t_bkg.nc
+  variance field file: orca-jedi/src/tests/testinput/orca2_t_bkg_var.nc
 model :
   name: PseudoModel 
   tstep: P3D
   state variables: [ ice_area_fraction ]
-  states: 
-    - date: '2021-06-30T00:00:00Z'
-      fcstime: 1
-      nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
+  states:
+    - nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:

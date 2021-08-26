@@ -15,6 +15,7 @@
 
 
 #include "eckit/filesystem/PathName.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "atlas/runtime/Exception.h"
@@ -33,13 +34,16 @@ public:
 
     std::vector<atlas::PointXY> read_locs();
     size_t read_dim_size( const std::string& name );
+    void read_datetimes(const std::string& time_dimvar_name, std::vector<util::DateTime>& datetimes);
+    size_t get_nearest_datetime_index(util::DateTime& datetime);
     std::vector<double> read_surf_var(std::string varname);
-    void read_surf_var(std::string varname, 
+    void read_surf_var(std::string varname,
                        atlas::array::ArrayView<double, 1>& field_view);
 
 private:
     NemoFieldReader() : ncFile() {};
-    std::unique_ptr<netCDF::NcFile> ncFile = nullptr; 
+    std::unique_ptr<netCDF::NcFile> ncFile;
+    std::vector<util::DateTime> datetimes_;
 };
 }  // namespace orcamodel
 

@@ -1,5 +1,7 @@
 #include "eckit/log/Bytes.h"
 
+#include "oops/util/DateTime.h"
+
 #include "atlas/array.h"
 #include "atlas/util/Config.h"
 #include "eckit/testing/Test.h"
@@ -14,15 +16,15 @@ namespace test {
 CASE ("test opening the test file ") {
 
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
-  
+
   NemoFieldReader field_reader( test_data_path );
-  
+
 }
 
 CASE ("test reading the latitudes and longitudes arrays ") {
 
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
-  
+
   NemoFieldReader field_reader( test_data_path );
   std::vector<atlas::PointXY> ob_locs = field_reader.read_locs();
 
@@ -31,14 +33,26 @@ CASE ("test reading the latitudes and longitudes arrays ") {
   EXPECT_EQUAL(ob_locs[0].x(), 10);
   EXPECT_EQUAL(ob_locs[0].y(), 0);
   EXPECT_EQUAL(ob_locs[5].x(), 12);
-  EXPECT_EQUAL(ob_locs[5].y(), 1); 
-  
+  EXPECT_EQUAL(ob_locs[5].y(), 1);
+
+}
+
+CASE ("test get_nearest_datetime_index returns correct index") {
+
+  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+
+  NemoFieldReader field_reader( test_data_path );
+  util::DateTime test_datetime{"1970-01-01T00:00:00Z"};
+  size_t index = field_reader.get_nearest_datetime_index( test_datetime );
+
+  EXPECT_EQUAL( index, 0 );
+
 }
 
 CASE ("test read_surf_var reads vector") {
 
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
-  
+
   NemoFieldReader field_reader( test_data_path );
   std::vector<double> data = field_reader.read_surf_var( "iiceconc" );
 
@@ -50,7 +64,7 @@ CASE ("test read_surf_var reads vector") {
 CASE ("test read_surf_var reads field array view") {
 
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
-  
+
   atlas::idx_t num_points = 6;
   auto array_shape = atlas::array::ArrayShape{6};
   auto array_datatype = atlas::array::DataType::real64();
