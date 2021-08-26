@@ -29,6 +29,7 @@ CASE ("test basic getvalues") {
   nemo_var_mapping.set("sea_surface_foundation_temperature", "votemper");
   nemo_var_mapping.set("sea_water_potential_temperature", "votemper");
   config.set("nemo names", nemo_var_mapping);
+  config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
 
   eckit::LocalConfiguration getvalues_conf;  
@@ -50,6 +51,7 @@ CASE ("test basic getvalues") {
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
   state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
+  state_config.set("variance field file", "../testinput/orca2_t_bkg.nc");
   State state(geometry, state_config);
 
   // create geovals from the locations 

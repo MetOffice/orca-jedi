@@ -28,6 +28,7 @@ CASE ("test basic state") {
   nemo_var_mapping.set("sea_surface_foundation_temperature", "votemper");
   nemo_var_mapping.set("sea_water_potential_temperature", "votemper");
   config.set("nemo names", nemo_var_mapping);
+  config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
   const std::vector<int> channels{};
 
