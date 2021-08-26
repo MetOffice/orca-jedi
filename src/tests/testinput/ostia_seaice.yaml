@@ -2,15 +2,18 @@ forecast length : P3D
 geometry : 
   nemo names: 
     ice_area_fraction: iiceconc
-    ice_area_fraction_background_error: iiceconc
+    ice_area_fraction_background_error: sic_tot_var
     sea_surface_foundation_temperature: votemper
     sea_water_potential_temperature: votemper
   grid name: ORCA2_T
   number levels: 10
+  variance names: [ sic_tot_var ]
 initial condition : 
   date: 2021-06-29T21:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
-  analytic_init: zeroed state
+  #analytic_init: zeroed state
+  nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
+  variance field file: orca-jedi/src/tests/testinput/orca2_t_bkg.nc
 model :
   name: PseudoModel 
   tstep: P3D

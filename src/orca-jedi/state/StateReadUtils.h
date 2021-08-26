@@ -12,6 +12,7 @@ namespace orcamodel {
 void readFieldsFromFile(
   const eckit::Configuration & conf,
   const Geometry & geom,
-  atlas::FieldSet & fs);
+  atlas::FieldSet & fs,
+  std::string variable_type);
 
 }

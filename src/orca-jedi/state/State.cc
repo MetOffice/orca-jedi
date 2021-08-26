@@ -77,18 +77,18 @@ State::State(const Geometry & geom,
   std::stringstream config_stream; 
   config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
+  for (size_t i=0; i<vars_.size(); ++i){
+    // find the nemo name corresponding to the state variable name
+    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
+    // if it isn't already in stateFields, add it
+    if (!stateFields_.has_field(nemo_var_name)){
+      stateFields_.add( geom_->funcSpace().createField<double> (
+            atlas::option::name(nemo_var_name) ) );
+    }
+  }
   if (conf.has("analytic_init")) {
     this->analytic_init(conf, *geom_);
   } else {
-    for (size_t i=0; i<vars_.size(); ++i){
-      // find the nemo name corresponding to the state variable name
-      auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-      // if it isn't already in stateFields, add it
-      if (!stateFields_.has_field(nemo_var_name)){
-        stateFields_.add( geom_->funcSpace().createField<double> (
-              atlas::option::name(nemo_var_name) ) );
-      }
-    }
 
     if ( !conf.has("nemo field file") ) {
       oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
@@ -97,7 +97,8 @@ State::State(const Geometry & geom,
                          << std::endl;
       this->zero();
     } else {
-      readFieldsFromFile(conf, *geom_, stateFields_);
+      readFieldsFromFile(conf, *geom_, stateFields_, "background");
+      readFieldsFromFile(conf, *geom_, stateFields_, "background variance");
     }
 
   }
@@ -166,7 +167,7 @@ void State::read(const eckit::Configuration & config) {
                        << std::endl;
     throw eckit::AssertionFailed("State(ORCA):: cannot find field file in configuration", Here());
   } else {
-    readFieldsFromFile(config, *geom_, stateFields_);
+    readFieldsFromFile(config, *geom_, stateFields_, "background");
   }
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
@@ -174,9 +175,7 @@ void State::read(const eckit::Configuration & config) {
 void State::analytic_init(const eckit::Configuration & config,
                           const Geometry & geom) {
   oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
-  stateFields_.add( geom_->funcSpace().createField<double> (
-      atlas::option::name("iiceconc") ) );
-  this->zero();
+  //this->zero();
   oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;
 }
 
@@ -190,6 +189,15 @@ void State::write(const eckit::Configuration & config) const {
 void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
 
+  os << std::endl << " Model state valid at time: " << validTime() << std::endl;
+  os << "    " << vars_ <<  std::endl;
+  os << "    " << "atlas field norms: ";
+  for (atlas::Field field : stateFields_) {
+    std::string fieldName = field.name();
+    os << fieldName << ": " << norm(fieldName) << " ";
+  }
+  os <<  std::endl;
+
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
 }
 
@@ -198,15 +206,11 @@ void State::print(std::ostream & os) const {
 void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero starting" << std::endl;
 
-  //std::string err_message =
-  //    "orcamodel::State::State::zero not implemented";
-  //throw eckit::NotImplemented(err_message, Here());
-  //
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::State::read:: field name = " << fieldName
-                        << std::endl;
-    atlas::array::ArrayView<double, 1> field_view = atlas::array::make_view<double, 1>( field );
+    oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
+                       << std::endl;
+    auto field_view = atlas::array::make_view<double, 1>( field );
     for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
       field_view( j ) = 0;
     }
@@ -215,11 +219,15 @@ void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
 }
 
-double norm() {
-  std::string err_message =
-      "orcamodel::State::State::norm not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-  return 0;
+double State::norm(const std::string & field_name) const {
+
+  double norm = 0;
+
+  auto field_view = atlas::array::make_view<double, 1>( stateFields_[field_name] );
+  for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
+    norm += field_view( j )*field_view( j ) ;
+  }
+  return sqrt(norm)/field_view.shape( 0 );
 }
 
 void State::accumul(const double & zz, const State & xx) {

@@ -24,7 +24,7 @@
 
 namespace orcamodel {
 
-const std::vector<std::string> Geometry::surface_names({"iiceconc", "sst"});
+const std::vector<std::string> Geometry::surface_names({"iiceconc", "sst", "sic_tot_var"});
 const std::vector<std::string> Geometry::depth_names({"votemper"});
 
 oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
@@ -46,6 +46,7 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
 Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) : 
                       comm_(comm), vars_(orcaVariableFactory(config)), 
+                      variance_vars_(config, "variance names"),
                       grid_(config.getString("grid name")), 
                       n_levels_(config.getInt("number levels"))
 {
@@ -106,6 +107,15 @@ atlas::FieldSet * Geometry::atlasFieldSet() const {
 
 const oops::Variables & Geometry::variables() const {
   return vars_;
+}
+
+const bool Geometry::variable_in_variable_type(std::string variable_name, std::string variable_type) const {
+  bool is_bkg_var = variance_vars_.has(variable_name);
+  if (variable_type == "background variance"){
+    return is_bkg_var;
+  } else {
+    return !is_bkg_var;
+  }
 }
 
 void Geometry::print(std::ostream & os) const {

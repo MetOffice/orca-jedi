@@ -74,11 +74,13 @@ class Geometry : public util::Printable {
   const atlas::functionspace::NodeColumns & funcSpace() const {return funcSpace_;};
   const std::string nemo_var_name(std::string std_name) const {return nemo_var_config.getString(std_name);};
   const atlas::idx_t & source_mesh_halo() const {return 0;};
+  const bool variable_in_variable_type(std::string variable_name, std::string variable_type) const;
 
  private:
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
+  oops::Variables variance_vars_;
   eckit::LocalConfiguration nemo_var_config;
   size_t n_levels_;
   atlas::Grid grid_;

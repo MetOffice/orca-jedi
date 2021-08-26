@@ -14,7 +14,8 @@ namespace orcamodel {
 void readFieldsFromFile(
   const eckit::Configuration & conf,
   const Geometry & geom,
-  atlas::FieldSet & fs) {
+  atlas::FieldSet & fs,
+  std::string variable_type) {
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: start "
                        << std::endl;
@@ -25,9 +26,16 @@ void readFieldsFromFile(
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: configuration "
                        << conf
                        << std::endl;
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo field file " << conf.getString("nemo field file") 
+    if (variable_type == "background" ) {
+      nemo_file_name = conf.getString("nemo field file");
+    }
+    if (variable_type == "background variance" ) {
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: background variance has field file "
+                       << conf.has("variance field file") << std::endl;
+      nemo_file_name = conf.getString("variance field file");
+    }
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo field file " << nemo_file_name
                        << std::endl;
-    nemo_file_name = conf.getString("nemo field file");
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
@@ -42,9 +50,16 @@ void readFieldsFromFile(
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = " << fieldName
-                          << std::endl;
-      auto field_view = atlas::array::make_view<double, 1>( field );
-      nemo_file.read_surf_var(fieldName, field_view);
+                         << std::endl;
+
+      oops::Log::debug() << "orcamodel::readFieldsFromFile:: "
+                         << "geom.variable_in_variable_type(\"" << fieldName << "\", \"" << variable_type << "\") "
+                         << geom.variable_in_variable_type(fieldName, variable_type) << std::endl;
+      if (geom.variable_in_variable_type(fieldName, variable_type)) {
+
+        auto field_view = atlas::array::make_view<double, 1>( field );
+        nemo_file.read_surf_var(fieldName, field_view);
+      }
     }
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile done "
