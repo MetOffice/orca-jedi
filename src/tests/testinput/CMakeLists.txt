@@ -14,4 +14,6 @@ execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/simple_nemo.nc $
 
 execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/orca2_t_nemo.nc ${CMAKE_CURRENT_SOURCE_DIR}/orca2_t_nemo.cdl)
 
+execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/orca2_t_bkg.nc ${CMAKE_CURRENT_SOURCE_DIR}/orca2_t_bkg.cdl)
+
 execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/ostia_seaice_obs.nc ${CMAKE_CURRENT_SOURCE_DIR}/ostia_seaice_obs.cdl)
