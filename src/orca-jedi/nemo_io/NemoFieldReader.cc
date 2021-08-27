@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include "eckit/exception/Exceptions.h"
+
 #include "oops/util/Logger.h"
 #include "oops/util/Duration.h"
 
@@ -26,22 +28,48 @@ NemoFieldReader::NemoFieldReader( eckit::PathName& filename )
   , datetimes_() {
   oops::Log::debug() << "orcamodel::NemoFieldReader::NemoFieldReader filename : "
                      << filename.fullName().asString() << std::endl;
+  std::ostringstream err_stream;
   if( !(filename.exists()) ) {
-    throw("orcamodel::NemoFieldReader::NemoFieldReader filename doesn't exist ");
+     err_stream << "orcamodel::NemoFieldReader::NemoFieldReader filename: "
+                << filename.fullName().asString() << " doesn't exist " << std::endl;
+     eckit::BadValue(err_stream.str(), Here());
   }
   ncFile = std::make_unique<netCDF::NcFile>(filename.fullName().asString(), netCDF::NcFile::read);
   if(ncFile->isNull()) {
-    throw("orcamodel::NemoFieldReader::NemoFieldReader " + filename + " not found");
+    err_stream << "orcamodel::NemoFieldReader::NemoFieldReader cannot open " << filename
+               << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
   }
 
-  read_datetimes( "t", datetimes_);
+  time_dimvar_name_ = "";
+  netCDF::NcDim nc_dim_time;
+  netCDF::NcVar nc_var_time;
+  std::vector<std::string> possible_t_dimvars({"t", "time", "time_counter"});
+  for (auto & candidate_t_dimvar : possible_t_dimvars ) {
+    ncFile->getCoordVar(candidate_t_dimvar, nc_dim_time, nc_var_time);
+    if( (!nc_dim_time.isNull()) && (!nc_var_time.isNull()) ) {
+      time_dimvar_name_ = candidate_t_dimvar;
+      break;
+    }
+  }
+
+  if (time_dimvar_name_ == "") {
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar time coordinate"
+               << " is not present in NetCDF file" << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
+  }
+
+  read_datetimes( datetimes_);
 }
 
 size_t NemoFieldReader::read_dim_size( const std::string& name ) {
 
   auto dim = ncFile->getDim( name );
   if ( dim.isNull() ) {
-    throw ( "orcamodel::NemoFieldReader::read_dim_size Dimension '" + name + "' is not present in NetCDF file" );
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_dim_size Dimension '"
+               << name << "' is not present in NetCDF file" << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
   }
   oops::Log::debug() << "orcamodel::NemoFieldReader:: group name "
                      << ncFile->getName(true) << " dim name: "  << name <<std::endl;
@@ -50,14 +78,17 @@ size_t NemoFieldReader::read_dim_size( const std::string& name ) {
 }
 
 /// \brief retrieve the datetime for each time index in file.
-void NemoFieldReader::read_datetimes(const std::string& time_dimvar_name, std::vector<util::DateTime>& datetimes) {
+void NemoFieldReader::read_datetimes(std::vector<util::DateTime>& datetimes) {
 
   // read time indices from file
-  size_t n_times = read_dim_size(time_dimvar_name);
+  size_t n_times = read_dim_size(time_dimvar_name_);
 
-  netCDF::NcVar nc_var_time = ncFile->getVar(time_dimvar_name);
+  netCDF::NcVar nc_var_time = ncFile->getVar(time_dimvar_name_);
   if(nc_var_time.isNull()) {
-    throw("orcamodel::NemoFieldReader::read_datetimes ncVar " + time_dimvar_name + " is not present in NetCDF file");
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar " << time_dimvar_name_
+               << " is not present in NetCDF file" << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
   }
 
   std::vector<int64_t> timestamps(n_times);
@@ -68,7 +99,9 @@ void NemoFieldReader::read_datetimes(const std::string& time_dimvar_name, std::v
   std::string units_string;
   nc_att_units = nc_var_time.getAtt("units");
   if(nc_att_units.isNull()) {
-    throw("orcamodel::NemoFieldReader::read_datetimes ncVar units is not present in NetCDF file");
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar units is not present in NetCDF file";
+    eckit::BadValue(err_stream.str(), Here());
   }
   nc_att_units.getValues(units_string);
 
@@ -77,8 +110,10 @@ void NemoFieldReader::read_datetimes(const std::string& time_dimvar_name, std::v
     c = tolower(c);
   });
   if (units_string.substr(0,seconds_since.size()) != seconds_since) {
-    throw("orcamodel::NemoFieldReader::read_datetimes units attribute badly formatted: " +
-          units_string);
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes units attribute badly formatted: "
+               << units_string <<std::endl;
+    eckit::BadValue(err_stream.str(), Here());
   }
   units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
   units_string.append("Z");
@@ -93,7 +128,7 @@ void NemoFieldReader::read_datetimes(const std::string& time_dimvar_name, std::v
 }
 
 /// \brief get the time dimension index corresponding to the nearest datetime to a target datetime.
-size_t NemoFieldReader::get_nearest_datetime_index(util::DateTime& tgt_datetime) {
+size_t NemoFieldReader::get_nearest_datetime_index(const util::DateTime& tgt_datetime) {
 
   int64_t time_diff = INT64_MAX;
   size_t indx = 0;
@@ -120,7 +155,10 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
     std::string varname = "nav_lat";
     netCDF::NcVar nc_var_lat = ncFile->getVar(varname);
     if(nc_var_lat.isNull()) {
-      throw("orcamodel::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_locs ncVar " << varname
+                 << " is not present in NetCDF file" << std::endl;
+      eckit::BadValue(err_stream.str(), Here());
     }
 
     std::vector<double> lats(nx*ny);
@@ -130,7 +168,10 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
     varname = "nav_lon";
     netCDF::NcVar nc_var_lon = ncFile->getVar(varname);
     if(nc_var_lon.isNull()) {
-      throw("orcamodel::NemoFieldReader::read_locs ncVar " + varname + " is not present in NetCDF file");
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_locs ncVar '" << varname
+                 <<"' is not present in NetCDF file.";
+      eckit::BadValue(err_stream.str(), Here());
     }
 
     std::vector<double> lons(nx*ny);
@@ -147,13 +188,14 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
 
   } catch(netCDF::exceptions::NcException& e)
   {
-    e.what();
-    oops::Log::debug() << "orcamodel::NemoFieldReader::read_locs ERROR: " <<std::endl;
-    throw(e);
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_locs NetCDF exception: " <<std::endl;
+    err_stream << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
   }
 }
 
-std::vector<double> NemoFieldReader::read_surf_var(std::string varname) {
+std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname, const size_t t_indx) {
 
   try {
 
@@ -162,25 +204,29 @@ std::vector<double> NemoFieldReader::read_surf_var(std::string varname) {
 
     netCDF::NcVar nc_var = ncFile->getVar(varname);
     if(nc_var.isNull()) {
-      throw("orcamodel::NemoFieldReader::read_surf_var ncVar "
-            + varname + " is not present in NetCDF file");
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar '"
+                 << varname << "' is not present in NetCDF file";
+      eckit::BadValue(err_stream.str(), Here());
     }
 
     std::vector<double> var_data(nx*ny);
 
-    nc_var.getVar({0, 0, 0}, {1, ny, nx}, var_data.data());
+    nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, var_data.data());
 
     return var_data;
 
   } catch(netCDF::exceptions::NcException& e)
   {
-    e.what();
-    oops::Log::debug() << "orcamodel::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
-    throw(e);
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_surf_var NetCDF exception: " <<std::endl;
+    err_stream << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
   }
 }
 
-void NemoFieldReader::read_surf_var(std::string varname, atlas::array::ArrayView<double, 1>& field_view) {
+void NemoFieldReader::read_surf_var(const std::string& varname, const size_t t_indx,
+  atlas::array::ArrayView<double, 1>& field_view) {
 
   try {
 
@@ -188,24 +234,29 @@ void NemoFieldReader::read_surf_var(std::string varname, atlas::array::ArrayView
     size_t ny = read_dim_size("y");
 
     if (field_view.size() != nx*ny ) {
-      throw("orcamodel::NemoFieldReader::read_surf_var field_view dimensions "
-            "do not match dimensions in netCDF file ");
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_surf_var field_view dimensions "
+                 << "do not match dimensions in netCDF file ";
+      eckit::BadValue(err_stream.str(), Here());
     }
 
     netCDF::NcVar nc_var = ncFile->getVar(varname);
     if(nc_var.isNull()) {
-      throw("orcamodel::NemoFieldReader::read_surf_var ncVar "
-            + varname + " is not present in NetCDF file");
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar '"
+                 << varname << "' is not present in NetCDF file";
+      eckit::BadValue(err_stream.str(), Here());
     }
 
-    nc_var.getVar({0, 0, 0}, {1, ny, nx}, field_view.data());
+    nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, field_view.data());
 
 
   } catch(netCDF::exceptions::NcException& e)
   {
-    e.what();
-    oops::Log::debug() <<  "orcamodel::NemoFieldReader::read_surf_var ERROR: " <<std::endl;
-    throw(e);
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_surf_var NetCDF exception: " <<std::endl;
+    err_stream << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
   }
 }
 }  // namespace orcamodel

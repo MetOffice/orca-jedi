@@ -2,7 +2,7 @@ netcdf simple_fdbk {
 dimensions:
 	x = 3 ;
 	y = 2 ;
-        t = 1 ; 
+        t = 3 ;
 variables:
         double nav_lat(y, x) ;
 	double nav_lon(y, x) ;
@@ -12,17 +12,22 @@ variables:
 
 data:
 
- t = 0;
+ t = 0, 86400, 172800;
 
  nav_lat =
   0, 0, 0,
   1, 1, 1;
- 
+
  nav_lon =
   10, 11, 12,
   10, 11, 12;
 
  iiceconc =
   120, 130, 140,
-  150, 160, 170;
+  150, 160, 170,
+  121, 131, 141,
+  151, 161, 171,
+  122, 132, 142,
+  152, 162, 172 ;
+
 }

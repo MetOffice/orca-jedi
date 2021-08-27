@@ -1,6 +1,7 @@
 defdim("t", 2);
 
-t = {3600, 7200};
+t = {86400, 172800};
+
 t@units = "seconds since 1981-01-01 00:00:00";
 
 iiceconc[$t, $y, $x] = 0.0;

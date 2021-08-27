@@ -54,10 +54,10 @@ CASE ("test read_surf_var reads vector") {
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
 
   NemoFieldReader field_reader( test_data_path );
-  std::vector<double> data = field_reader.read_surf_var( "iiceconc" );
+  std::vector<double> data = field_reader.read_surf_var( "iiceconc", 1);
 
-  EXPECT_EQUAL( data[0], 120 );
-  EXPECT_EQUAL( data[5], 170 );
+  EXPECT_EQUAL( data[0], 121 );
+  EXPECT_EQUAL( data[5], 171 );
 
 }
 
@@ -75,10 +75,10 @@ CASE ("test read_surf_var reads field array view") {
     atlas::array::make_view<double, 1>( *test_array );
 
   NemoFieldReader field_reader( test_data_path );
-  field_reader.read_surf_var( "iiceconc", arrayView );
+  field_reader.read_surf_var( "iiceconc", 2, arrayView );
 
-  EXPECT_EQUAL( arrayView(0), 120 );
-  EXPECT_EQUAL( arrayView(5), 170 );
+  EXPECT_EQUAL( arrayView(0), 122 );
+  EXPECT_EQUAL( arrayView(5), 172 );
 
 }
 

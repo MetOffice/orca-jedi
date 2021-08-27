@@ -3,6 +3,7 @@
 
 #include "eckit/config/Configuration.h"
 #include "oops/util/Logger.h"
+#include "oops/util/DateTime.h"
 #include "atlas/field.h"
 
 #include "orca-jedi/geometry/Geometry.h"
@@ -14,28 +15,26 @@ namespace orcamodel {
 void readFieldsFromFile(
   const eckit::Configuration & conf,
   const Geometry & geom,
-  atlas::FieldSet & fs,
-  std::string variable_type) {
+  const util::DateTime & valid_date,
+  const std::string & variable_type,
+  atlas::FieldSet & fs) {
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: start "
                        << std::endl;
 
     // Open Nemo Feedback file
-    std::string nemo_file_name = "";
 
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: configuration "
                        << conf
                        << std::endl;
+
+    std::string nemo_file_name;
     if (variable_type == "background" ) {
       nemo_file_name = conf.getString("nemo field file");
     }
     if (variable_type == "background variance" ) {
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: background variance has field file "
-                       << conf.has("variance field file") << std::endl;
       nemo_file_name = conf.getString("variance field file");
     }
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo field file " << nemo_file_name
-                       << std::endl;
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
@@ -44,9 +43,9 @@ void readFieldsFromFile(
 
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
-    // the field file, perhaps change this or update "state variables" to use
-    // these names, or to be a dictionary between the standard anmes and the
-    // NEMO names
+    // the field file
+    size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = " << fieldName
@@ -58,7 +57,7 @@ void readFieldsFromFile(
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
 
         auto field_view = atlas::array::make_view<double, 1>( field );
-        nemo_file.read_surf_var(fieldName, field_view);
+        nemo_file.read_surf_var(fieldName, time_indx, field_view);
       }
     }
 
