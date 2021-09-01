@@ -16,7 +16,7 @@ set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
 ################################################################################
 # Required packages
 
-ecbuild_find_package( NAME eckit VERSION 1.16 REQUIRED )
+ecbuild_find_package( NAME eckit VERSION 1.16 COMPONENTS LZ4 REQUIRED )
 ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 
 #ecbuild_find_package( NAME atlas VERSION 0.25 REQUIRED )
