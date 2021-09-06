@@ -51,7 +51,7 @@ CASE ("test basic getvalues") {
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
   state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-  state_config.set("variance field file", "../testinput/orca2_t_bkg.nc");
+  state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
   State state(geometry, state_config);
 
   // create geovals from the locations 

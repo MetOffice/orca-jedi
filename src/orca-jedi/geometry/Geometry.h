@@ -28,21 +28,11 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/Printable.h"
 
-//#include "orca-jedi/geometry/GeometryBase.h"
-
 namespace atlas {
   class Field;
   class FieldSet;
   class Mesh;
 
-}
-
-namespace eckit {
-  class Configuration;
-}
-
-namespace oops {
-  class Variables;
 }
 
 namespace orcamodel {
