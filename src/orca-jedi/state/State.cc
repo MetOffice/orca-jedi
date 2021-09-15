@@ -132,9 +132,7 @@ State::~State() {
 // Basic operators
 
 State & State::operator=(const State & rhs) {
-  std::string err_message =
-      "orcamodel::State::State::operator= not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+  time_ = rhs.time_;
   return *this;
 }
 

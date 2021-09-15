@@ -30,6 +30,8 @@ state/StateReadUtils.cc
 nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 utilities/OrcaModelTraits.h
+variablechanges/model2geovals/VarChaModel2GeoVaLs.h
+variablechanges/model2geovals/VarChaModel2GeoVaLs.cc
 )
 
 
