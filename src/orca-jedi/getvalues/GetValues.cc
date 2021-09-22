@@ -51,6 +51,7 @@ namespace orcamodel {
       if (nlocs == 0) {
         std::stringstream err_stream;
         err_stream << "orcamodel::GetValues:: Constructor called with no locations " << std::endl;
+        err_stream << "                       this might mean that there are no observations within the time window" << std::endl;
         err_stream << locs << std::endl;
         throw eckit::BadValue(err_stream.str(), Here());
       }

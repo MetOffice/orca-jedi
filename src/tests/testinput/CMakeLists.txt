@@ -2,6 +2,10 @@
 list( APPEND orcajedi_test_input
   basic.yaml
   ostia_seaice_obs.yaml
+  hofx_odb_ice.yaml
+  odb_ice_query.yaml
+  odb_ice_mapping.yaml
+  ostia_seaice_obs.csv
 )
 
 foreach(FILENAME ${orcajedi_test_input})
