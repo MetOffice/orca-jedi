@@ -51,7 +51,7 @@ observations:
     initial prob gross error: 0.04
     PGE threshold: 0.5
   - filter: NEMO Feedback Writer
-    filename: /scratch/tsearle/nemo_fdbk_writer_out.nc
+    filename: odb_nemo_fdbk_writer_out.nc
     variables:
     - name: ice_area_fraction
       nemo name: ICECONC

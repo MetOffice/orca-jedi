@@ -34,7 +34,7 @@ public:
 
     std::vector<atlas::PointXY> read_locs();
     size_t read_dim_size( const std::string& name );
-    void read_datetimes(std::vector<util::DateTime>& datetimes);
+    void read_datetimes();
     size_t get_nearest_datetime_index(const util::DateTime& datetime);
     std::vector<double> read_surf_var(const std::string& varname, const size_t t_indx);
     void read_surf_var(const std::string& varname, const size_t t_indx,

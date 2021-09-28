@@ -98,7 +98,6 @@ class State : public util::Printable,
   void updateTime(const util::Duration & dt) {time_ += dt;}
 
 
-  // constructor used for testing!
   State(const Geometry & geom, const atlas::FieldSet & fs, util::DateTime & dt)
     : geom_(new Geometry(geom)), vars_(fs.field_names()), time_(dt)
     , stateFields_(fs) {}
@@ -110,6 +109,7 @@ class State : public util::Printable,
   oops::Variables & variables() {return vars_;}
 
  private:
+  void setupStateFields();
   void print(std::ostream &) const override;
   std::shared_ptr<const Geometry> geom_;
   oops::Variables vars_;

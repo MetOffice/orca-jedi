@@ -19,8 +19,8 @@ void readFieldsFromFile(
   const std::string & variable_type,
   atlas::FieldSet & fs) {
 
-    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start "
-                       << std::endl;
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date "
+                       << valid_date << std::endl;
 
     // Open Nemo Feedback file
 

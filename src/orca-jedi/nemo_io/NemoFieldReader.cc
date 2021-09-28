@@ -59,7 +59,7 @@ NemoFieldReader::NemoFieldReader( eckit::PathName& filename )
     eckit::BadValue(err_stream.str(), Here());
   }
 
-  read_datetimes( datetimes_);
+  read_datetimes();
 }
 
 size_t NemoFieldReader::read_dim_size( const std::string& name ) {
@@ -78,7 +78,7 @@ size_t NemoFieldReader::read_dim_size( const std::string& name ) {
 }
 
 /// \brief retrieve the datetime for each time index in file.
-void NemoFieldReader::read_datetimes(std::vector<util::DateTime>& datetimes) {
+void NemoFieldReader::read_datetimes() {
 
   // read time indices from file
   size_t n_times = read_dim_size(time_dimvar_name_);
@@ -88,6 +88,12 @@ void NemoFieldReader::read_datetimes(std::vector<util::DateTime>& datetimes) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar " << time_dimvar_name_
                << " is not present in NetCDF file" << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
+  }
+
+  if (n_times < 1) {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes n_times < 1 " << n_times <<std::endl;
     eckit::BadValue(err_stream.str(), Here());
   }
 
@@ -121,9 +127,9 @@ void NemoFieldReader::read_datetimes(std::vector<util::DateTime>& datetimes) {
   auto epoch = util::DateTime(units_string.substr(seconds_since.size()));
 
   // construct date times
-  datetimes.resize(n_times);
-  for ( size_t i; i < n_times; ++i) {
-    datetimes[i] = epoch + util::Duration(timestamps[i]);
+  datetimes_.resize(n_times);
+  for ( size_t i=0; i < n_times; ++i) {
+    datetimes_[i] = epoch + util::Duration(timestamps[i]);
   }
 }
 
@@ -135,7 +141,7 @@ size_t NemoFieldReader::get_nearest_datetime_index(const util::DateTime& tgt_dat
   util::Duration duration;
 
   for (size_t i=0; i < datetimes_.size(); ++i) {
-    duration = (datetimes_[i] - tgt_datetime);
+    duration = datetimes_[i] - tgt_datetime;
     if ( std::abs(duration.toSeconds()) < time_diff ) {
       time_diff = std::abs(duration.toSeconds());
       indx = i;

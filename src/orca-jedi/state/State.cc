@@ -54,17 +54,9 @@ State::State(const Geometry & geom,
 
   stateFields_ = atlas::FieldSet();
 
-  for (size_t i=0; i<vars_.size(); ++i){
-    // find the nemo name corresponding to the state variable name
-    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-    // if it isn't already in stateFields, add it
-    if (!stateFields_.has_field(nemo_var_name)){
-      stateFields_.add( geom_->funcSpace().createField<double> (
-            atlas::option::name(nemo_var_name) ) );
-    }
-  }
+  setupStateFields();
 
-  oops::Log::trace() << "State(ORCA)::State created." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State created for "<< validTime() << std::endl;
 }
 
 State::State(const Geometry & geom,
@@ -77,15 +69,10 @@ State::State(const Geometry & geom,
   std::stringstream config_stream; 
   config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
-  for (size_t i=0; i<vars_.size(); ++i){
-    // find the nemo name corresponding to the state variable name
-    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-    // if it isn't already in stateFields, add it
-    if (!stateFields_.has_field(nemo_var_name)){
-      stateFields_.add( geom_->funcSpace().createField<double> (
-            atlas::option::name(nemo_var_name) ) );
-    }
-  }
+  oops::Log::trace() << "State(ORCA)::State:: time: " << validTime() << std::endl;
+
+  setupStateFields();
+
   if (conf.has("analytic_init")) {
     this->analytic_init(conf, *geom_);
   } else {
@@ -133,6 +120,10 @@ State::~State() {
 
 State & State::operator=(const State & rhs) {
   time_ = rhs.time_;
+  stateFields_ = rhs.stateFields_;
+  vars_ = rhs.vars_;
+  geom_.reset();
+  geom_ = rhs.geom_;
   return *this;
 }
 
@@ -160,10 +151,13 @@ State & State::operator+=(const Increment & dx) {
 
 void State::read(const eckit::Configuration & config) {
   oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
+
+  oops::Log::trace() << "State(ORCA)::read time: " << validTime() << std::endl;
+
   if ( !config.has("nemo field file") ) {
-    oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
+    oops::Log::trace() << "State(ORCA)::read nemo field file not in configuration"
                        << std::endl;
-    throw eckit::AssertionFailed("State(ORCA):: cannot find field file in configuration", Here());
+    throw eckit::AssertionFailed("State(ORCA)::read cannot find field file in configuration", Here());
   } else {
     readFieldsFromFile(config, *geom_, validTime(), "background", stateFields_);
   }
@@ -175,6 +169,18 @@ void State::analytic_init(const eckit::Configuration & config,
   oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
   //this->zero();
   oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;
+}
+
+void State::setupStateFields() {
+  for (size_t i=0; i<vars_.size(); ++i){
+    // find the nemo name corresponding to the state variable name
+    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
+    // if it isn't already in stateFields, add it
+    if (!stateFields_.has_field(nemo_var_name)){
+      stateFields_.add( geom_->funcSpace().createField<double> (
+            atlas::option::name(nemo_var_name) ) );
+    }
+  }
 }
 
 void State::write(const eckit::Configuration & config) const {
