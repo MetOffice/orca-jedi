@@ -1,0 +1,9 @@
+Test     : State: 
+Test     :  Model state valid at time: 2021-06-29T21:00:00Z
+Test     :     2 variables: ice_area_fraction, ice_area_fraction_background_error
+Test     :     atlas field norms: iiceconc: 0.00314636 sic_tot_var: 0.00303628 
+
+Test     : H(x): 
+Test     : Sea Ice nobs= 11 Min=0, Max=1, RMS=0.301511
+
+Test     : End H(x)
