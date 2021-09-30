@@ -1,6 +1,6 @@
 lat@hdr:REAL,lon@hdr:REAL,numlev@hdr:INTEGER,andate@desc:INTEGER,antime@desc:INTEGER,creadate@desc:INTEGER,creatime@desc:INTEGER,date@hdr:INTEGER,time@hdr:INTEGER,receipt_date@hdr:INTEGER,receipt_time@hdr:INTEGER,initial_obsvalue@body:REAL,ops_obsgroup@hdr:INTEGER,vertco_type@body:INTEGER,entryno@body:INTEGER,seqno@hdr:INTEGER,varno@body:INTEGER,ops_report_flags@hdr:BITFIELD[final_reject:1;perm_reject:1;surplus:1;out_of_area:1;land_reject:1;used_in_super_ob:1;track_reject:1;track_suspect:1;super_ob:1;stability_checked:1;stability_rejected:1;trop_rejected:1;strat_rejected:1;no_pressure_sensor:1;missing_data:1;alt_report:1;good_constraint:1;thin_4d:1;thin_station_list:1]
 31.02939,168.338,1,20210701,0,0,0,20210630,120000,0,0,0.0,30,1,1,1,253,0
-62.43589,31.21495,1,20210701,0,0,0,20210630,120000,0,0,9.96921e+36,30,1,1,2,253,0
+62.43589,31.21495,1,20210701,0,0,0,20210630,120000,0,0,-3.33477e+38,30,1,1,2,253,0
 -65.28536,-24.91501,1,20210701,0,0,0,20210630,120000,0,0,0.9963,30,1,1,3,253,0
 -51.87979,-154.482,1,20210701,0,0,0,20210630,120000,0,0,0.0,30,1,1,4,253,0
 41.8942,38.443,1,20210701,0,0,0,20210630,120000,0,0,0.0,30,1,1,5,253,0
