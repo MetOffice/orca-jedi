@@ -8,8 +8,30 @@ iiceconc[$t, $y, $x] = 0.0;
 iiceconc(0,:20,:) = 1.0;
 iiceconc(0,130:,:) = 1.0;
 
+where(mask) iiceconc = -32768.;
+
 votemper[$t, $z, $y, $x] = 18.0;
-votemper(0,0,:,:) = 18. + (nav_lat(:,:)/180.);
-votemper(1,0,:,:) = 18. + (nav_lat(:,:)/180.);
-votemper(0,1,:,:) = 18. + (nav_lon(:,:)/360.);
-votemper(1,1,:,:) = 18. + (nav_lon(:,:)/360.);
+
+*var_tmp00 = 18. + (nav_lat(:,:)/180.);
+*var_tmp10 = 18. + (nav_lat(:,:)/180.);
+*var_tmp01 = 18. + (nav_lon(:,:)/360.);
+*var_tmp11 = 18. + (nav_lon(:,:)/360.);
+
+where (mask) {
+  var_tmp00 = -32768.;
+  var_tmp10 = -32768.;
+  var_tmp01 = -32768.;
+  var_tmp11 = -32768.;
+}
+votemper(0,0,:,:) = var_tmp00;
+votemper(1,0,:,:) = var_tmp10;
+votemper(0,1,:,:) = var_tmp01;
+votemper(1,1,:,:) = var_tmp11;
+
+ram_delete(var_tmp00);
+ram_delete(var_tmp10);
+ram_delete(var_tmp01);
+ram_delete(var_tmp11);
+
+iiceconc.set_miss(-32768.);
+votemper.set_miss(-32768.);

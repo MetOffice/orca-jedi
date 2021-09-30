@@ -43,7 +43,16 @@ CASE ("test basic state") {
     State state(geometry, oops_vars, datetime);
   }
 
+
   SECTION ("test constructor from config") {
+    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
+    state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
+    State state(geometry, state_config);
+    bool has_missing = state.stateFields()["iiceconc"].metadata().has("missing_value");
+    EXPECT_EQUAL(true, has_missing);
+  }
+
+  SECTION ("test constructor from config analytic_init") {
     state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
     state_config.set("analytic_init", "zeroed state");
     State state(geometry, state_config);

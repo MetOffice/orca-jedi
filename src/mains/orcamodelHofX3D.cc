@@ -20,7 +20,7 @@ int main(int argc,  char ** argv) {
   orcamodel::Run run(argc, argv);
   oops::instantiateModelFactory<orcamodel::OrcaModelTraits>();
   atlas::Library::instance().initialise();
-  ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
+  ufo::instantiateObsFilterFactory();
   oops::HofX3D<orcamodel::OrcaModelTraits , ufo::ObsTraits> hofx;
   int i = run.execute(hofx);
   atlas::Library::instance().finalise();

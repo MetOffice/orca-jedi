@@ -23,6 +23,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
@@ -104,7 +105,12 @@ namespace orcamodel {
       interpolator_.execute( state.stateFields()[nemo_var_name], tgt_field );
       auto field_view = atlas::array::make_view<double, 1>( tgt_field );
       for (std::size_t i=0; i<nlocs; i++) {
-        vals[i] = field_view( i ); 
+        if (state.stateFields()[nemo_var_name].metadata().has("missing_value") &&
+            (std::abs(state.stateFields()[nemo_var_name].metadata().getDouble("missing_value") - field_view( i )) < 1e-6)) {
+          vals[i] = util::missingValue(field_view( i ));
+        } else {
+          vals[i] = field_view( i );
+        }
       }
 
       geovals.putAtLevel(vals, gv_varname, 0);

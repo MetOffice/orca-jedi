@@ -36,6 +36,7 @@ public:
     size_t read_dim_size( const std::string& name );
     void read_datetimes();
     size_t get_nearest_datetime_index(const util::DateTime& datetime);
+    template<class T> T read_fillvalue(const std::string& name);
     std::vector<double> read_surf_var(const std::string& varname, const size_t t_indx);
     void read_surf_var(const std::string& varname, const size_t t_indx,
                        atlas::array::ArrayView<double, 1>& field_view);

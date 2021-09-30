@@ -133,6 +133,39 @@ void NemoFieldReader::read_datetimes() {
   }
 }
 
+/// \brief Read the _FillValue for a variable, defaulting to the minimum value for the datatype.
+template<class T> T NemoFieldReader::read_fillvalue(const std::string& name) {
+
+  netCDF::NcVar nc_var = ncFile->getVar(name);
+  if(nc_var.isNull()) {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_fillvalue ncVar " << time_dimvar_name_
+               << " is not present in NetCDF file" << std::endl;
+    eckit::BadValue(err_stream.str(), Here());
+  }
+
+  T fillvalue = std::numeric_limits<T>::min();
+
+  std::map<std::string,netCDF::NcVarAtt> attributeList = nc_var.getAtts();
+  auto myIter = attributeList.find("_FillValue");
+  if(myIter == attributeList.end()){
+    oops::Log::trace() << "orcamodel::NemoFieldReader::read_fillvalue fillvalue not found "
+                       << std::endl;
+  } else {
+    oops::Log::trace() << "orcamodel::NemoFieldReader::read_fillvalue found: " << myIter->first <<std::endl;
+    netCDF::NcVarAtt nc_att_fill = myIter->second;
+    nc_att_fill.getValues(&fillvalue);
+  }
+
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_fillvalue fillvalue = "<< fillvalue << std::endl;
+
+  return fillvalue;
+
+}
+template int NemoFieldReader::read_fillvalue<int>(const std::string& name);
+template float NemoFieldReader::read_fillvalue<float>(const std::string& name);
+template double NemoFieldReader::read_fillvalue<double>(const std::string& name);
+
 /// \brief get the time dimension index corresponding to the nearest datetime to a target datetime.
 size_t NemoFieldReader::get_nearest_datetime_index(const util::DateTime& tgt_datetime) {
 

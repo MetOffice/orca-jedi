@@ -49,6 +49,20 @@ CASE ("test get_nearest_datetime_index returns correct index") {
 
 }
 
+CASE ("test reading field _FillValue") {
+
+  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+
+  NemoFieldReader field_reader( test_data_path );
+
+  auto missing_value = field_reader.read_fillvalue<double>("iiceconc");
+  EXPECT_EQUAL( missing_value, -32768. );
+
+  auto default_missing_value = field_reader.read_fillvalue<double>("nav_lat");
+  EXPECT_EQUAL( default_missing_value, std::numeric_limits<double>::min() );
+
+}
+
 CASE ("test read_surf_var reads vector") {
 
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
@@ -83,25 +97,6 @@ CASE ("test read_surf_var reads field array view") {
 }
 
 
-CASE ("example test") {
-    struct Section {
-        std::string gridname;
-        size_t size;
-    };
-
-    std::vector<Section> sections{
-        {"ORCA2_T", 27118}, {"eORCA1_T", 120184},
-    };
-    for ( auto& section : sections ) {
-        std::string gridname = section.gridname;
-        SECTION( gridname ) {
-
-            size_t n = section.size;
-            EXPECT_EQUAL( n, section.size );
-
-        }
-    }
-}
 }  // namespace test
 }  // namespace orcamodel
 

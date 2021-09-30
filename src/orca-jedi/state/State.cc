@@ -167,7 +167,7 @@ void State::read(const eckit::Configuration & config) {
 void State::analytic_init(const eckit::Configuration & config,
                           const Geometry & geom) {
   oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
-  //this->zero();
+  this->zero();
   oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;
 }
 
@@ -226,12 +226,16 @@ void State::zero() {
 double State::norm(const std::string & field_name) const {
 
   double norm = 0;
+  int valid_points = 0;
 
   auto field_view = atlas::array::make_view<double, 1>( stateFields_[field_name] );
   for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
-    norm += field_view( j )*field_view( j ) ;
+    if (std::abs(stateFields_[field_name].metadata().getDouble("missing_value") - field_view( j )) > 1e-6) {
+      norm += field_view( j )*field_view( j ) ;
+      ++valid_points;
+    }
   }
-  return sqrt(norm)/field_view.shape( 0 );
+  return sqrt(norm)/valid_points;
 }
 
 void State::accumul(const double & zz, const State & xx) {

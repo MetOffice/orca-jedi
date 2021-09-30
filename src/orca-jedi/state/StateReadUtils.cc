@@ -58,6 +58,9 @@ void readFieldsFromFile(
 
         auto field_view = atlas::array::make_view<double, 1>( field );
         nemo_file.read_surf_var(fieldName, time_indx, field_view);
+
+        auto missing_value = nemo_file.read_fillvalue<double>(fieldName);
+        field.metadata().set("missing_value", missing_value);
       }
     }
 
