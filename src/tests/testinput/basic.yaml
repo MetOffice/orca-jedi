@@ -25,6 +25,10 @@ window length: P1D
 observations:
 - obs operator:
     name: SeaIceFraction
+  get values:
+    atlas-interpolator:
+      type: finite-element
+      non_linear: missing-if-all-missing
   obs space:
     name: SeaIceFraction
     obsdatain:

@@ -61,6 +61,8 @@ void readFieldsFromFile(
 
         auto missing_value = nemo_file.read_fillvalue<double>(fieldName);
         field.metadata().set("missing_value", missing_value);
+        field.metadata().set("missing_value_type", "approximately-equals");
+        field.metadata().set("missing_value_epsilon", 1e-6);
       }
     }
 

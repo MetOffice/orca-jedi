@@ -70,13 +70,14 @@ namespace orcamodel {
   GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs,
             const eckit::Configuration & conf) : 
       atlasObsFuncSpace_(atlasObsFuncSpaceFactory(locs)),
-      interpolator_(atlas::option::type("finite-element"),
+      interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
 
+    oops::Log::trace() << "orcamodel::GetValues:: conf:" << conf
+                       << std::endl;
     oops::Log::debug() << "orcamodel::GetValues:: atlasObsFuncSpace_:" << atlasObsFuncSpace_
                        << std::endl;
-
   };
 
   void GetValues::fillGeoVaLs(const State& state, const util::DateTime& dt_begin, 
@@ -84,7 +85,6 @@ namespace orcamodel {
     std::size_t nlocs = geovals.nlocs();
 
     oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs starting " << std::endl; 
-    // dummy "interpolation"
     std::vector<double> vals(nlocs);
     //std::string gv_varname = "sea_ice_category_area_fraction";
     size_t nvars = geovals.getVars().size();

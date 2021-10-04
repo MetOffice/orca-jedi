@@ -19,12 +19,12 @@ namespace test {
 //-----------------------------------------------------------------------------
 
 CASE ("test basic getvalues") {
-    
-  eckit::LocalConfiguration config;  
+
+  eckit::LocalConfiguration config;
   config.set("grid name", "ORCA2_T");
   config.set("number levels", 2);
 
-  eckit::LocalConfiguration nemo_var_mapping;  
+  eckit::LocalConfiguration nemo_var_mapping;
   nemo_var_mapping.set("sea_ice_area_fraction", "iiceconc");
   nemo_var_mapping.set("sea_surface_foundation_temperature", "votemper");
   nemo_var_mapping.set("sea_water_potential_temperature", "votemper");
@@ -32,7 +32,12 @@ CASE ("test basic getvalues") {
   config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
 
-  eckit::LocalConfiguration getvalues_conf;  
+  eckit::LocalConfiguration interp_conf;
+  interp_conf.set("type", "finite-element");
+  interp_conf.set("non_linear", "missing-if-all-missing");
+  eckit::LocalConfiguration getvalues_conf;
+  getvalues_conf.set("atlas-interpolator", interp_conf);
+
   std::vector<float> lons{0, 120, 270};
   std::vector<float> lats{88, 0, 30};
   std::vector<util::DateTime> times{
@@ -43,10 +48,9 @@ CASE ("test basic getvalues") {
   std::shared_ptr<const ioda::Distribution> distribution;
 
   ufo::Locations locations(lons, lats, times, distribution);
-  GetValues getvalues(geometry, locations, getvalues_conf);
 
-  // create a state from the test data 
-  eckit::LocalConfiguration state_config;  
+  // create a state from the test data
+  eckit::LocalConfiguration state_config;
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
@@ -54,7 +58,13 @@ CASE ("test basic getvalues") {
   state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
   State state(geometry, state_config);
 
-  // create geovals from the locations 
+  // THE GEOMETRY NEEDS TO KNOW THE MISSING VALUE INDICATOR? TO PASS TO GETVALUES AND TO THE FIELD?
+  // Geometry knows this via its functionspace, which is the same one used by
+  // state, so it should hopefully now be updated with some fields that have
+  // the data in???
+  GetValues getvalues(geometry, locations, getvalues_conf);
+
+  // create geovals from the locations
   std::vector<size_t> nlevs = {1};
   ufo::GeoVaLs geovals(locations, state.variables(), std::vector<size_t>{1, 1});
 
@@ -71,9 +81,7 @@ CASE ("test basic getvalues") {
 
   EXPECT_EQUAL(vals[0], testvals[0]);
   EXPECT_EQUAL(vals[1], testvals[1]);
-  // TODO: fix near coast points so that final element of this test doesn't
-  // interpolate a fill value
-  //EXPECT_EQUAL(vals[2], testvals[2]);
+  EXPECT_EQUAL(vals[2], testvals[2]);
 
 }
 

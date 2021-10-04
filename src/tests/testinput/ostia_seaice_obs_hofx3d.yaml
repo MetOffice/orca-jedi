@@ -25,6 +25,10 @@ observations:
       obsfile: test_out.nc
       max frame size: 1000000
     simulated variables: [ice_area_fraction]
+  get values:
+    atlas-interpolator:
+      type: finite-element
+      non_linear: missing-if-all-missing
   obs operator:
     name: Composite
     components:
