@@ -38,7 +38,6 @@ struct OrcaModelTraits {
   typedef orcamodel::ModelBiasIncrement        ModelAuxIncrement;
   typedef orcamodel::ModelBiasCovariance       ModelAuxCovariance;
   typedef orcamodel::State                     State;
-
 };
 
 }  // namespace orcamodel

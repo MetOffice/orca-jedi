@@ -3,10 +3,9 @@
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
- */ 
+ */
 
-#ifndef SRC_UMJEDI_GETVALUES_LINEARGETVALUES_H_
-#define SRC_UMJEDI_GETVALUES_LINEARGETVALUES_H_
+#pragma once
 
 #include <fstream>
 #include <map>
@@ -33,7 +32,7 @@
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 
-// ------------------------------------------------------------------------------------------------- 
+// ----------------------------------------------------------------------------
 
 namespace ufo {
   class GeoVaLs;
@@ -46,30 +45,30 @@ namespace orcamodel {
   class Geometry;
   struct UnifiedModelTraits;
 
-// ------------------------------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 
-class LinearGetValues : public util::Printable, private util::ObjectCounter<LinearGetValues> {
- public: 
+class LinearGetValues : public util::Printable,
+  private util::ObjectCounter<LinearGetValues> {
+ public:
   static const std::string classname() {return "orcamodel::LinearGetValues";}
 
-  LinearGetValues(const Geometry &, const ufo::Locations &, const eckit::Configuration &);
+  LinearGetValues(const Geometry &, const ufo::Locations &,
+      const eckit::Configuration &);
   virtual ~LinearGetValues();
 
-  void setTrajectory(const State & state, const util::DateTime & t1, const util::DateTime & t2,
-                     ufo::GeoVaLs & geovals) {};
-  void fillGeoVaLsTL(const Increment & inc, const util::DateTime & t1, const util::DateTime & t2,
-                     ufo::GeoVaLs & geovals) const {};
-  void fillGeoVaLsAD(Increment & inc, const util::DateTime & t1, const util::DateTime & t2,
-                     const ufo::GeoVaLs & geovals) const {};
+  void setTrajectory(const State & state, const util::DateTime & t1,
+      const util::DateTime & t2, ufo::GeoVaLs & geovals) {}
+  void fillGeoVaLsTL(const Increment & inc, const util::DateTime & t1,
+      const util::DateTime & t2, ufo::GeoVaLs & geovals) const {}
+  void fillGeoVaLsAD(Increment & inc, const util::DateTime & t1,
+      const util::DateTime & t2, const ufo::GeoVaLs & geovals) const {}
 
  private:
-
   void print(std::ostream &) const;
   ufo::Locations locs_;
   std::shared_ptr<const Geometry> geom_;
 };
 
-// ------------------------------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 
 }  // namespace orcamodel
-#endif // SRC_UMJEDI_GETVALUES_LINEARGETVALUES_H_

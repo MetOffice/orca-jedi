@@ -5,10 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <math.h>
+
 #include <algorithm>
 #include <string>
 #include <memory>
-#include <math.h>
 #include <vector>
 #include <functional>
 #include <numeric>
@@ -49,14 +50,14 @@ namespace orcamodel {
 State::State(const Geometry & geom,
              const oops::Variables & vars,
              const util::DateTime & time)
-  : geom_(new Geometry(geom)), vars_(vars), time_(time) 
+  : geom_(new Geometry(geom)), vars_(vars), time_(time)
 {
-
   stateFields_ = atlas::FieldSet();
 
   setupStateFields();
 
-  oops::Log::trace() << "State(ORCA)::State created for "<< validTime() << std::endl;
+  oops::Log::trace() << "State(ORCA)::State created for "<< validTime()
+                     << std::endl;
 }
 
 State::State(const Geometry & geom,
@@ -66,35 +67,35 @@ State::State(const Geometry & geom,
     , time_(util::DateTime(conf.getString("date")))
     , stateFields_()
 {
-  std::stringstream config_stream; 
+  std::stringstream config_stream;
   config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
-  oops::Log::trace() << "State(ORCA)::State:: time: " << validTime() << std::endl;
+  oops::Log::trace() << "State(ORCA)::State:: time: " << validTime()
+                     << std::endl;
 
   setupStateFields();
 
   if (conf.has("analytic_init")) {
     this->analytic_init(conf, *geom_);
   } else {
-
     if ( !conf.has("nemo field file") ) {
       oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
                          << std::endl;
-      oops::Log::trace() << "State(ORCA):: Zeroing state rather than reading from file"
-                         << std::endl;
+      oops::Log::trace() << "State(ORCA):: Zeroing state rather than reading "
+                         << "from file" << std::endl;
       this->zero();
     } else {
       readFieldsFromFile(conf, *geom_, validTime(), "background", stateFields_);
-      readFieldsFromFile(conf, *geom_, validTime(), "background variance", stateFields_);
+      readFieldsFromFile(conf, *geom_, validTime(), "background variance",
+          stateFields_);
     }
-
   }
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
 State::State(const Geometry & resol,
              const State & other)
-{ 
+{
   std::string err_message =
     "orcamodel::State::State created by interpolation Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
@@ -152,12 +153,14 @@ State & State::operator+=(const Increment & dx) {
 void State::read(const eckit::Configuration & config) {
   oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
 
-  oops::Log::trace() << "State(ORCA)::read time: " << validTime() << std::endl;
+  oops::Log::trace() << "State(ORCA)::read time: " << validTime()
+                     << std::endl;
 
   if ( !config.has("nemo field file") ) {
-    oops::Log::trace() << "State(ORCA)::read nemo field file not in configuration"
-                       << std::endl;
-    throw eckit::AssertionFailed("State(ORCA)::read cannot find field file in configuration", Here());
+    oops::Log::trace() << "State(ORCA)::read nemo field file not in "
+                       << "configuration" << std::endl;
+    throw eckit::AssertionFailed(
+        "State(ORCA)::read cannot find field file in configuration", Here());
   } else {
     readFieldsFromFile(config, *geom_, validTime(), "background", stateFields_);
   }
@@ -172,13 +175,13 @@ void State::analytic_init(const eckit::Configuration & config,
 }
 
 void State::setupStateFields() {
-  for (size_t i=0; i<vars_.size(); ++i){
+  for (size_t i=0; i < vars_.size(); ++i) {
     // find the nemo name corresponding to the state variable name
     auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
     // if it isn't already in stateFields, add it
-    if (!stateFields_.has_field(nemo_var_name)){
-      stateFields_.add( geom_->funcSpace().createField<double> (
-            atlas::option::name(nemo_var_name) ) );
+    if (!stateFields_.has_field(nemo_var_name)) {
+      stateFields_.add(geom_->funcSpace().createField<double>(
+            atlas::option::name(nemo_var_name)));
     }
   }
 }
@@ -214,9 +217,9 @@ void State::zero() {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    auto field_view = atlas::array::make_view<double, 1>( field );
-    for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
-      field_view( j ) = 0;
+    auto field_view = atlas::array::make_view<double, 1>(field);
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      field_view(j) = 0;
     }
   }
 
@@ -224,14 +227,20 @@ void State::zero() {
 }
 
 double State::norm(const std::string & field_name) const {
-
   double norm = 0;
   int valid_points = 0;
 
-  auto field_view = atlas::array::make_view<double, 1>( stateFields_[field_name] );
-  for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
-    if (std::abs(stateFields_[field_name].metadata().getDouble("missing_value") - field_view( j )) > 1e-6) {
-      norm += field_view( j )*field_view( j ) ;
+  auto field_view = atlas::array::make_view<double, 1>(
+      stateFields_[field_name]);
+  bool has_mv = stateFields_[field_name].metadata().has("missing_value");
+  double mv;
+  if (has_mv) {
+    mv = stateFields_[field_name].metadata()
+        .getDouble("missing_value");
+  }
+  for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+    if (has_mv && std::abs(mv - field_view(j)) > 1e-6) {
+      norm += field_view(j)*field_view(j);
       ++valid_points;
     }
   }

@@ -1,3 +1,10 @@
+/*
+ * (C) British Crown Copyright 2020-2021 Met Office
+ * 
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ */
+
 #include "eckit/log/Bytes.h"
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"
@@ -18,8 +25,7 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 
-CASE ("test basic getvalues") {
-
+CASE("test basic getvalues") {
   eckit::LocalConfiguration config;
   config.set("grid name", "ORCA2_T");
   config.set("number levels", 2);
@@ -58,10 +64,6 @@ CASE ("test basic getvalues") {
   state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
   State state(geometry, state_config);
 
-  // THE GEOMETRY NEEDS TO KNOW THE MISSING VALUE INDICATOR? TO PASS TO GETVALUES AND TO THE FIELD?
-  // Geometry knows this via its functionspace, which is the same one used by
-  // state, so it should hopefully now be updated with some fields that have
-  // the data in???
   GetValues getvalues(geometry, locations, getvalues_conf);
 
   // create geovals from the locations
@@ -82,12 +84,11 @@ CASE ("test basic getvalues") {
   EXPECT_EQUAL(vals[0], testvals[0]);
   EXPECT_EQUAL(vals[1], testvals[1]);
   EXPECT_EQUAL(vals[2], testvals[2]);
-
 }
 
 }  // namespace test
 }  // namespace orcamodel
 
-int main( int argc, char** argv ) {
+int main(int argc, char** argv) {
     return orcamodel::test::run( argc, argv );
 }

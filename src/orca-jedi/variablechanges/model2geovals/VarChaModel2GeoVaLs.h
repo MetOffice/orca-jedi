@@ -18,12 +18,14 @@
 
 namespace orcamodel {
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 class VarChaModel2GeoVaLs: public oops::VariableChangeBase<OrcaModelTraits>,
                            private util::ObjectCounter<VarChaModel2GeoVaLs> {
  public:
-  static const std::string classname() {return "orcamodel::VarChaModel2GeoVaLs";}
+  static const std::string classname() {
+    return "orcamodel::VarChaModel2GeoVaLs";
+  }
   VarChaModel2GeoVaLs(const Geometry &, const eckit::Configuration &);
   ~VarChaModel2GeoVaLs();
   void changeVar(const State &, State &) const override;
@@ -33,7 +35,5 @@ class VarChaModel2GeoVaLs: public oops::VariableChangeBase<OrcaModelTraits>,
   std::shared_ptr<const Geometry> geom_;
   void print(std::ostream &) const override;
 };
-
-// -------------------------------------------------------------------------------------------------
 
 }  // namespace orcamodel

@@ -72,19 +72,19 @@ class Increment : public util::Printable,
   virtual ~Increment();
 
 /// Basic operators
-  void diff(const State &, const State &) {};
-  void zero() {};
-  void zero(const util::DateTime &) {};
-  void ones() {};
-  //Increment & operator =(const Increment &);
-  //Increment & operator+=(const Increment &);
-  //Increment & operator-=(const Increment &);
-  //Increment & operator*=(const double &);
-  void axpy(const double &, const Increment &, const bool check = true) {};
-  double dot_product_with(const Increment &) const {return 0.0; };
-  void schur_product_with(const Increment &) {};
-  void random() {};
-  void dirac(const eckit::Configuration &) {};
+  void diff(const State &, const State &) {}
+  void zero() {}
+  void zero(const util::DateTime &) {}
+  void ones() {}
+  // Increment & operator =(const Increment &);
+  // Increment & operator+=(const Increment &);
+  // Increment & operator-=(const Increment &);
+  // Increment & operator*=(const double &);
+  void axpy(const double &, const Increment &, const bool check = true) {}
+  double dot_product_with(const Increment &) const {return 0.0; }
+  void schur_product_with(const Increment &) {}
+  void random() {}
+  void dirac(const eckit::Configuration &) {}
 
 /// Atlas interface to SABER (stubs at present)
   void setAtlas(atlas::FieldSet *) const;
@@ -92,9 +92,9 @@ class Increment : public util::Printable,
   void fromAtlas(atlas::FieldSet *);
 
 /// I/O and diagnostics
-  void read(const eckit::Configuration &) {};
-  void write(const eckit::Configuration &) const {};
-  double norm() const {return 0.0; };
+  void read(const eckit::Configuration &) {}
+  void write(const eckit::Configuration &) const {}
+  double norm() const {return 0.0; }
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
 
@@ -104,7 +104,7 @@ class Increment : public util::Printable,
   void deserialize(const std::vector<double> &, std::size_t &) override {}
 
 /// Other
-  void accumul(const double &, const State &) {};
+  void accumul(const double &, const State &) {}
 
 
 /// Utilities
@@ -123,8 +123,7 @@ class Increment : public util::Printable,
 
 /// Data
  private:
-  //void print(std::ostream &) const override;
-  
+  // void print(std::ostream &) const override;
   std::shared_ptr<const Geometry> geom_;
   oops::Variables vars_;
   util::DateTime time_;

@@ -1,9 +1,9 @@
-/* 
+/*
  * (C) British Crown Copyright 2017-2021 Met Office
- * 
- * This software is licensed under the terms of the Apache Licence Version 2.0 
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
- */ 
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
 
 #include <fstream>
 #include <memory>
@@ -46,78 +46,94 @@ namespace orcamodel {
   class State;
   class Geometry;
 
-  atlas::functionspace::PointCloud atlasObsFuncSpaceFactory (const ufo::Locations & locs) {
-
+  atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
+      const ufo::Locations & locs) {
       size_t nlocs = locs.size();
       if (nlocs == 0) {
         std::stringstream err_stream;
-        err_stream << "orcamodel::GetValues:: Constructor called with no locations " << std::endl;
-        err_stream << "                       this might mean that there are no observations within the time window" << std::endl;
+        err_stream << "orcamodel::GetValues::"
+                   << " Constructor called with no locations " << std::endl;
+        err_stream << "         "
+                   << "this might mean that there are no observations "
+                   << "within the time window" << std::endl;
         err_stream << locs << std::endl;
         throw eckit::BadValue(err_stream.str(), Here());
       }
 
       // Setup observation functionspace
       std::vector<atlas::PointXY> atlasPoints(nlocs);
-      oops::Log::trace() << "orcamodel::GetValues:: atlasPoints with nlocs = " << nlocs << std::endl;
-      for (atlas::idx_t i=0; i < nlocs; ++i ) {
+      oops::Log::trace() << "orcamodel::GetValues:: atlasPoints with nlocs = "
+                         << nlocs << std::endl;
+      for (atlas::idx_t i=0; i < nlocs; ++i) {
         atlasPoints[i] = atlas::PointXY(locs.lons()[i], locs.lats()[i]);
       }
-      return atlas::functionspace::PointCloud(atlasPoints);
 
-  };
+      return atlas::functionspace::PointCloud(atlasPoints);
+  }
 
   GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs,
-            const eckit::Configuration & conf) : 
+            const eckit::Configuration & conf) :
       atlasObsFuncSpace_(atlasObsFuncSpaceFactory(locs)),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
-
     oops::Log::trace() << "orcamodel::GetValues:: conf:" << conf
                        << std::endl;
-    oops::Log::debug() << "orcamodel::GetValues:: atlasObsFuncSpace_:" << atlasObsFuncSpace_
-                       << std::endl;
-  };
+    oops::Log::debug() << "orcamodel::GetValues:: atlasObsFuncSpace_:"
+                       << atlasObsFuncSpace_ << std::endl;
+  }
 
-  void GetValues::fillGeoVaLs(const State& state, const util::DateTime& dt_begin, 
-                   const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const {
+  void GetValues::fillGeoVaLs(const State& state,
+      const util::DateTime& dt_begin, const util::DateTime& dt_end,
+      ufo::GeoVaLs& geovals) const {
     std::size_t nlocs = geovals.nlocs();
 
-    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs starting " << std::endl; 
+    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs starting "
+                       << std::endl;
+
     std::vector<double> vals(nlocs);
-    //std::string gv_varname = "sea_ice_category_area_fraction";
     size_t nvars = geovals.getVars().size();
-    for ( size_t j=0; j < nvars; ++j) {
+    for (size_t j=0; j < nvars; ++j) {
       auto gv_varname = geovals.getVars()[j];
       if (!state.variables().has(gv_varname)) {
         std::stringstream err_stream;
-        err_stream << "orcamodel::GetValues::fillGeoVals geovals varname \" ";
-        err_stream << "\" " << gv_varname << " not found in the model state. " << std::endl;
-        err_stream << "    add the variable to the state variables and ";
-        err_stream << "add a mapping from the geometry to that variable." << std::endl;
+        err_stream << "orcamodel::GetValues::fillGeoVals geovals varname \" "
+                   << "\" " << gv_varname << " not found in the model state. "
+                   << std::endl;
+        err_stream << "    add the variable to the state variables and "
+                   << "add a mapping from the geometry to that variable."
+                   << std::endl;
         throw eckit::BadParameter(err_stream.str(), Here());
       }
-      
+
       auto nemo_var_name = state.geometry()->nemo_var_name(gv_varname);
-      
-      atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>( atlas::option::name( gv_varname ) );
-      interpolator_.execute( state.stateFields()[nemo_var_name], tgt_field );
-      auto field_view = atlas::array::make_view<double, 1>( tgt_field );
-      for (std::size_t i=0; i<nlocs; i++) {
-        if (state.stateFields()[nemo_var_name].metadata().has("missing_value") &&
-            (std::abs(state.stateFields()[nemo_var_name].metadata().getDouble("missing_value") - field_view( i )) < 1e-6)) {
-          vals[i] = util::missingValue(field_view( i ));
+
+      atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
+          atlas::option::name(gv_varname));
+      interpolator_.execute(state.stateFields()[nemo_var_name], tgt_field);
+      auto field_view = atlas::array::make_view<double, 1>(tgt_field);
+      bool has_mv = state.stateFields()[nemo_var_name].metadata()
+                      .has("missing_value");
+      double mv;
+      if (has_mv) {
+        mv = state.stateFields()[nemo_var_name].metadata()
+          .getDouble("missing_value");
+      }
+      for (std::size_t i=0; i < nlocs; i++) {
+        if (has_mv && std::abs(mv - field_view(i)) < 1e-6) {
+          vals[i] = util::missingValue(field_view(i));
         } else {
-          vals[i] = field_view( i );
+          vals[i] = field_view(i);
         }
       }
 
       geovals.putAtLevel(vals, gv_varname, 0);
     }
-    oops::Log::debug() << "orcamodel::GetValues::fillGeoVaLs geovals print: " << geovals << std::endl; 
-    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs done " << std::endl; 
-  };
+    oops::Log::debug() << "orcamodel::GetValues::fillGeoVaLs geovals print: "
+                       << geovals << std::endl;
+    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs done "
+                       << std::endl;
+  }
 
 }  // namespace orcamodel
 

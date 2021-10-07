@@ -1,8 +1,8 @@
 /*
  * (C) British Crown Copyright 2020 Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include <cmath>
@@ -42,14 +42,12 @@ ErrorCovariance::ErrorCovariance(const Geometry & resol,
 
 
 ErrorCovariance::~ErrorCovariance() {
-
     oops::Log::trace() << "ErrorCovariance(UM) destructed" << std::endl;
 }
 
 
 void ErrorCovariance::linearize(const State &,
                                 const Geometry & resol) {
-
     geom_.reset(new Geometry(resol));
     oops::Log::trace() << "ErrorCovariance(UM) linearize" << std::endl;
 }
@@ -57,26 +55,24 @@ void ErrorCovariance::linearize(const State &,
 
 void ErrorCovariance::multiply(const Increment & dxin,
                                Increment & dxout) const {
-
-    oops::Log::trace() << "ErrorCovariance(UM) multiply start dxin" <<  dxin << std::endl;
+    oops::Log::trace() << "ErrorCovariance(UM) multiply start dxin"
+                       <<  dxin << std::endl;
 
     if (covarianceType_ == "identity") {
         dxout = dxin;
     } else {
-
-        std::string err_message =
-                "umjedi::ErrorCovariance::multiply option " + covarianceType_ + " not implemented";
+        std::string err_message = "umjedi::ErrorCovariance::multiply option "
+            + covarianceType_ + " not implemented";
         throw eckit::NotImplemented(err_message, Here());
-
     }
 
-    oops::Log::trace() << "ErrorCovariance(UM) multiply end dxout" << dxout << std::endl;
+    oops::Log::trace() << "ErrorCovariance(UM) multiply end dxout"
+                       << dxout << std::endl;
 }
 
 
 void ErrorCovariance::inverseMultiply(const Increment & dxin,
                                       Increment & dxout) const {
-
     if (covarianceType_ == "identity") {
         dxout = dxin;
     } else {
@@ -89,7 +85,6 @@ void ErrorCovariance::inverseMultiply(const Increment & dxin,
 
 
 void ErrorCovariance::randomize(Increment & dx) const {
-
     oops::Log::trace() << "ErrorCovariance(UM) randomize" << std::endl;
     std::string err_message =
             "umjedi::ErrorCovariance::randomise not implemented ";
@@ -98,7 +93,6 @@ void ErrorCovariance::randomize(Increment & dx) const {
 
 
 void ErrorCovariance::print(std::ostream & os) const {
-
     os << "ErrorCovariance::print not implemented";
 }
 

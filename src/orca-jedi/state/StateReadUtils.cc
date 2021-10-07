@@ -1,3 +1,11 @@
+/*
+ * (C) British Crown Copyright 2020-2021 Met Office
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+#include "orca-jedi/state/StateReadUtils.h"
 
 #include <sstream>
 
@@ -10,6 +18,8 @@
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
+#define NEMO_FILL_TOL 1e-6
+
 namespace orcamodel {
 
 void readFieldsFromFile(
@@ -18,9 +28,8 @@ void readFieldsFromFile(
   const util::DateTime & valid_date,
   const std::string & variable_type,
   atlas::FieldSet & fs) {
-
-    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date "
-                       << valid_date << std::endl;
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date"
+                       << " " << valid_date << std::endl;
 
     // Open Nemo Feedback file
 
@@ -29,10 +38,10 @@ void readFieldsFromFile(
                        << std::endl;
 
     std::string nemo_file_name;
-    if (variable_type == "background" ) {
+    if (variable_type == "background") {
       nemo_file_name = conf.getString("nemo field file");
     }
-    if (variable_type == "background variance" ) {
+    if (variable_type == "background variance") {
       nemo_file_name = conf.getString("variance field file");
     }
 
@@ -48,26 +57,27 @@ void readFieldsFromFile(
 
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
-      oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = " << fieldName
-                         << std::endl;
+      oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = "
+                         << fieldName << std::endl;
 
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: "
-                         << "geom.variable_in_variable_type(\"" << fieldName << "\", \"" << variable_type << "\") "
-                         << geom.variable_in_variable_type(fieldName, variable_type) << std::endl;
+                         << "geom.variable_in_variable_type(\""
+                         << fieldName << "\", \"" << variable_type << "\") "
+                         << geom.variable_in_variable_type(fieldName,
+                              variable_type)
+                         << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
-
-        auto field_view = atlas::array::make_view<double, 1>( field );
+        auto field_view = atlas::array::make_view<double, 1>(field);
         nemo_file.read_surf_var(fieldName, time_indx, field_view);
-
         auto missing_value = nemo_file.read_fillvalue<double>(fieldName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
-        field.metadata().set("missing_value_epsilon", 1e-6);
+        field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
       }
     }
 
-    oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile done "
-                       << std::endl;
-};
-
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
+                       << "done" << std::endl;
 }
+
+}  // namespace orcamodel

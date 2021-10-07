@@ -24,7 +24,8 @@
 
 namespace orcamodel {
 
-const std::vector<std::string> Geometry::surface_names({"iiceconc", "sst", "sic_tot_var"});
+const std::vector<std::string> Geometry::surface_names(
+    {"iiceconc", "sst", "sic_tot_var"});
 const std::vector<std::string> Geometry::depth_names({"votemper"});
 
 oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
@@ -38,25 +39,24 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
       names.push_back(nemo_var_mapping.getString(std_name));
     }
   }
-  //return oops::Variables(config, "varnames");
+
   return oops::Variables(names, channels);
 }
 
 // -----------------------------------------------------------------------------
 Geometry::Geometry(const eckit::Configuration & config,
-                   const eckit::mpi::Comm & comm) : 
-                      comm_(comm), vars_(orcaVariableFactory(config)), 
+                   const eckit::mpi::Comm & comm) :
+                      comm_(comm), vars_(orcaVariableFactory(config)),
                       variance_vars_(config, "variance names"),
-                      grid_(config.getString("grid name")), 
+                      grid_(config.getString("grid name")),
                       n_levels_(config.getInt("number levels"))
 {
-    
     config.get("nemo names", nemo_var_config);
     auto meshgen_config = grid_.meshgenerator();
-    atlas::MeshGenerator meshgen( meshgen_config );
+    atlas::MeshGenerator meshgen(meshgen_config);
     auto partitioner_config = grid_.partitioner();
-    partitioner_ = atlas::grid::Partitioner( partitioner_config );
-    mesh_ = meshgen.generate( grid_, partitioner_.partition( grid_ ) );
+    partitioner_ = atlas::grid::Partitioner(partitioner_config);
+    mesh_ = meshgen.generate(grid_, partitioner_.partition(grid_));
 
     funcSpace_ = atlas::functionspace::NodeColumns(
         mesh_, atlas::option::halo(0));
@@ -73,10 +73,12 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
   std::vector<size_t> varSizes(vars.size());
   std::fill(varSizes.begin(), varSizes.end(), 0);
 
-  for (size_t i=0; i<vars.size(); ++i) {
-    if (std::find(surface_names.begin(), surface_names.end(), nemo_var_name(vars[i])) != surface_names.end()) {
+  for (size_t i=0; i < vars.size(); ++i) {
+    if (std::find(surface_names.begin(), surface_names.end(),
+          nemo_var_name(vars[i])) != surface_names.end()) {
       varSizes[i] = 1;
-    } else if (std::find(depth_names.begin(), depth_names.end(), nemo_var_name(vars[i])) != depth_names.end()) {
+    } else if (std::find(depth_names.begin(), depth_names.end(),
+          nemo_var_name(vars[i])) != depth_names.end()) {
       varSizes[i] = n_levels_;
     } else {
       std::stringstream err_stream;
@@ -88,7 +90,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
   return varSizes;
 }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 atlas::FunctionSpace * Geometry::atlasFunctionSpace() const {
   std::string err_message =
     "orcamodel::Geometry::atlasFunctionSpace Not implemented ";
@@ -109,9 +111,10 @@ const oops::Variables & Geometry::variables() const {
   return vars_;
 }
 
-const bool Geometry::variable_in_variable_type(std::string variable_name, std::string variable_type) const {
+const bool Geometry::variable_in_variable_type(std::string variable_name,
+  std::string variable_type) const {
   bool is_bkg_var = variance_vars_.has(variable_name);
-  if (variable_type == "background variance"){
+  if (variable_type == "background variance") {
     return is_bkg_var;
   } else {
     return !is_bkg_var;
@@ -123,4 +126,4 @@ void Geometry::print(std::ostream & os) const {
 }
 
 
-}
+}  // namespace orcamodel

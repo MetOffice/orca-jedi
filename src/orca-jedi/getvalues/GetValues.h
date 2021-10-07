@@ -1,9 +1,9 @@
-/* 
+/*
  * (C) British Crown Copyright 2017-2021 Met Office
- * 
- * This software is licensed under the terms of the Apache Licence Version 2.0 
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
- */ 
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
 
 #pragma once
 
@@ -45,20 +45,21 @@ namespace orcamodel {
   class State;
   class Geometry;
 
-atlas::functionspace::PointCloud atlasObsFuncSpaceFactory (const ufo::Locations & locs);
+atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
+    const ufo::Locations & locs);
 
-class GetValues : public util::Printable, private util::ObjectCounter<GetValues> {
-
+class GetValues : public util::Printable,
+  private util::ObjectCounter<GetValues> {
  public:
   static const std::string classname() {return "orcamodel::GetValues";}
 
   GetValues(const Geometry & geom, const ufo::Locations & locs,
-            const eckit::Configuration & conf);
+    const eckit::Configuration & conf);
 
-  virtual ~GetValues() {};
+  virtual ~GetValues() {}
 
-  void fillGeoVaLs(const State& state, const util::DateTime& dt_begin, 
-                   const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const ;
+  void fillGeoVaLs(const State& state, const util::DateTime& dt_begin,
+    const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const;
 
  private:
   void print(std::ostream &) const override {};

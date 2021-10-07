@@ -40,26 +40,26 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
  public:
   static const std::string classname() {return "orcamodel::Model";}
 
-  Model(const Geometry & geom, const eckit::Configuration & conf) 
-    : tstep_(0), geom_(geom), vars_(conf, "model variables") {};
-  ~Model() {};
+  Model(const Geometry & geom, const eckit::Configuration & conf)
+    : tstep_(0), geom_(geom), vars_(conf, "model variables") {}
+  ~Model() {}
 
 /// Prepare model integration
-  void initialize(State &) const {};
+  void initialize(State &) const {}
 
 /// Model integration
-  void step(State &, const ModelBias &) const {};
-  int saveTrajectory(State &, const ModelBias &) const { return 0;};
+  void step(State &, const ModelBias &) const {}
+  int saveTrajectory(State &, const ModelBias &) const { return 0;}
 
 /// Finish model integration
-  void finalize(State &) const {};
+  void finalize(State &) const {}
 
 /// Utilities
   const util::Duration & timeResolution() const {return tstep_;}
   const oops::Variables & variables() const {return vars_;}
 
  private:
-  void print(std::ostream &) const {};
+  void print(std::ostream &) const {}
   util::Duration tstep_;
   const Geometry geom_;
   const oops::Variables vars_;

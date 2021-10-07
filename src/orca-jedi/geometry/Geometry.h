@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#pragma once 
+#pragma once
 
 #include <map>
 #include <iostream>
@@ -44,8 +44,7 @@ namespace orcamodel {
 
 class Geometry : public util::Printable {
  public:
-
-  //Geometry(const Parameters_ &, const eckit::mpi::Comm &);
+  // Geometry(const Parameters_ &, const eckit::mpi::Comm &);
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 
@@ -60,11 +59,14 @@ class Geometry : public util::Printable {
 
   const oops::Variables & variables() const;
 
-  const atlas::Mesh & mesh() const {return mesh_;};
-  const atlas::functionspace::NodeColumns & funcSpace() const {return funcSpace_;};
-  const std::string nemo_var_name(std::string std_name) const {return nemo_var_config.getString(std_name);};
-  const atlas::idx_t & source_mesh_halo() const {return 0;};
-  const bool variable_in_variable_type(std::string variable_name, std::string variable_type) const;
+  const atlas::Mesh & mesh() const {return mesh_;}
+  const atlas::functionspace::NodeColumns & funcSpace() const
+    {return funcSpace_;}
+  const std::string nemo_var_name(std::string std_name) const
+    {return nemo_var_config.getString(std_name);}
+  const atlas::idx_t & source_mesh_halo() const {return 0;}
+  const bool variable_in_variable_type(std::string variable_name,
+    std::string variable_type) const;
 
  private:
   void print(std::ostream &) const;
@@ -83,4 +85,4 @@ class Geometry : public util::Printable {
 };
 // -----------------------------------------------------------------------------
 
-}  // namespace orcamodel 
+}  // namespace orcamodel
