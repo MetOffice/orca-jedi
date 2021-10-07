@@ -56,15 +56,15 @@ CASE("test basic state") {
     bool has_missing = state.stateFields()["iiceconc"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
+    EXPECT(std::abs(state.norm("iiceconc") - 0.00323467) < 1e-6);
   }
 
   SECTION("test constructor from config analytic_init") {
     state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
     state_config.set("analytic_init", "zeroed state");
     State state(geometry, state_config);
+    EXPECT_EQUAL(state.norm("iiceconc"), 0);
   }
-
-  EXPECT(true);
 }
 
 }  // namespace test

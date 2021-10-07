@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
+ * (C) British Crown Copyright 2020-2021 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -18,6 +18,7 @@
 
 #include "atlas/interpolation.h"
 #include "atlas/functionspace.h"
+#include "atlas/field/MissingValue.h"
 
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
@@ -112,15 +113,10 @@ namespace orcamodel {
           atlas::option::name(gv_varname));
       interpolator_.execute(state.stateFields()[nemo_var_name], tgt_field);
       auto field_view = atlas::array::make_view<double, 1>(tgt_field);
-      bool has_mv = state.stateFields()[nemo_var_name].metadata()
-                      .has("missing_value");
-      double mv;
-      if (has_mv) {
-        mv = state.stateFields()[nemo_var_name].metadata()
-          .getDouble("missing_value");
-      }
+      atlas::field::MissingValue mv(state.stateFields()[nemo_var_name]);
+      bool has_mv = static_cast<bool>(mv);
       for (std::size_t i=0; i < nlocs; i++) {
-        if (has_mv && std::abs(mv - field_view(i)) < 1e-6) {
+        if (has_mv && mv(field_view(i))) {
           vals[i] = util::missingValue(field_view(i));
         } else {
           vals[i] = field_view(i);

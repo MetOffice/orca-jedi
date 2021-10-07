@@ -19,6 +19,7 @@
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
+#include "atlas/field/MissingValue.h"
 #include "atlas/functionspace/NodeColumns.h"
 #include "atlas/grid/Grid.h"
 #include "atlas/parallel/mpi/mpi.h"
@@ -99,17 +100,13 @@ State::State(const Geometry & resol,
   std::string err_message =
     "orcamodel::State::State created by interpolation Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
-
-  oops::Log::trace() << "State(ORCA)::State created by interpolation."
-                     << "For now we are assuming that there is no resolution"
-                     << "change"
-                     << std::endl;
 }
 
-State::State(const State & other) {
-  std::string err_message =
-      "orcamodel::State::State created by copy not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
+State::State(const State & other)
+  : geom_(other.geom_)
+    , vars_(other.vars_)
+    , time_(other.time_)
+    , stateFields_(other.stateFields_) {
   oops::Log::trace() << "State(ORCA)::State copied." << std::endl;
 }
 
@@ -232,14 +229,10 @@ double State::norm(const std::string & field_name) const {
 
   auto field_view = atlas::array::make_view<double, 1>(
       stateFields_[field_name]);
-  bool has_mv = stateFields_[field_name].metadata().has("missing_value");
-  double mv;
-  if (has_mv) {
-    mv = stateFields_[field_name].metadata()
-        .getDouble("missing_value");
-  }
+  atlas::field::MissingValue mv(stateFields()[field_name]);
+  bool has_mv = static_cast<bool>(mv);
   for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-    if (has_mv && std::abs(mv - field_view(j)) > 1e-6) {
+    if ((!has_mv) || (has_mv && !mv(field_view(j)))) {
       norm += field_view(j)*field_view(j);
       ++valid_points;
     }
