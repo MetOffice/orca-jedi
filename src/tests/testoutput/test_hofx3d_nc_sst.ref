@@ -1,0 +1,10 @@
+Test     : State: 
+Test     :  Model state valid at time: 2021-06-29T21:00:00Z
+Test     :     2 variables: sea_surface_temperature, sea_surface_temperature_background_error
+Test     :     atlas field norms: votemper: 0.136432 t_tot_var: 0.000607255 
+Test     : H(x): 
+Test     : Sea Ice nobs= 7 Min=17.6445, Max=18.4389, RMS=18.0723
+
+Test     : End H(x)
+
+

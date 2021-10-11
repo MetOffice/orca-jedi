@@ -4,6 +4,7 @@ list( APPEND orcajedi_test_input
   ostia_seaice_obs.yaml
   ostia_seaice_obs_hofx3d.yaml
   hofx_odb_ice.yaml
+  hofx3d_nc_sst.yaml
   odb_ice_query.yaml
   odb_ice_mapping.yaml
   ostia_seaice_obs.csv
@@ -26,3 +27,4 @@ execute_process(COMMAND ncap2 -O -S ${CMAKE_CURRENT_SOURCE_DIR}/create_orca2_t_b
 
 # Make observation test data
 execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/ostia_seaice_obs.nc ${CMAKE_CURRENT_SOURCE_DIR}/ostia_seaice_obs.cdl)
+execute_process(COMMAND ncgen -4 -o ${CMAKE_CURRENT_BINARY_DIR}/hofx_sst_obs.nc ${CMAKE_CURRENT_SOURCE_DIR}/hofx_sst_obs.cdl)

@@ -26,7 +26,7 @@ namespace orcamodel {
 
 const std::vector<std::string> Geometry::surface_names(
     {"iiceconc", "sst", "sic_tot_var"});
-const std::vector<std::string> Geometry::depth_names({"votemper"});
+const std::vector<std::string> Geometry::depth_names({"votemper", "t_tot_var"});
 
 oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
   eckit::LocalConfiguration nemo_var_mapping;

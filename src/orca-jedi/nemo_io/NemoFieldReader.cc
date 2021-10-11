@@ -256,14 +256,26 @@ std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname,
 
     std::vector<double> var_data(nx*ny);
 
-    nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, var_data.data());
+    size_t n_dims = nc_var.getDimCount();
+    if (n_dims == 4) {
+      nc_var.getVar({t_indx, 0, 0, 0}, {1, 1, ny, nx}, var_data.data());
+    } else if (n_dims == 3) {
+      nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, var_data.data());
+    } else if (n_dims == 2) {
+      nc_var.getVar({0, 0}, {ny, nx}, var_data.data());
+    } else {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar '"
+                 << varname << "' has " << n_dims << " dimensions.";
+      eckit::BadValue(err_stream.str(), Here());
+    }
 
     return var_data;
   } catch(netCDF::exceptions::NcException& e)
   {
     std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_surf_var NetCDF exception: "
-               << std::endl << e.what();
+    err_stream << "orcamodel::NemoFieldReader::read_surf_var varname: "
+               << varname << " NetCDF exception: " << std::endl << e.what();
     throw eckit::ReadError(err_stream.str(), Here());
   }
 }
@@ -289,13 +301,24 @@ void NemoFieldReader::read_surf_var(const std::string& varname,
       eckit::BadValue(err_stream.str(), Here());
     }
 
-    nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, field_view.data());
+    size_t n_dims = nc_var.getDimCount();
+    if (n_dims == 4) {
+      nc_var.getVar({t_indx, 0, 0, 0}, {1, 1, ny, nx}, field_view.data());
+    } else if (n_dims == 3) {
+      nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, field_view.data());
+    } else if (n_dims == 2) {
+      nc_var.getVar({0, 0}, {ny, nx}, field_view.data());
+    } else {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar '"
+                 << varname << "' has " << n_dims << " dimensions.";
+      eckit::BadValue(err_stream.str(), Here());
+    }
   } catch(netCDF::exceptions::NcException& e)
   {
     std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_surf_var NetCDF exception: "
-               << std::endl;
-    err_stream << e.what();
+    err_stream << "orcamodel::NemoFieldReader::read_surf_var varname: "
+               << varname << " NetCDF exception: " << std::endl << e.what();
     throw eckit::ReadError(err_stream.str(), Here());
   }
 }

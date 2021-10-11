@@ -1,6 +1,7 @@
 
 list( APPEND orcajedi_test_output
   test_ostia_seaice_obs_hofx3d.ref
+  test_hofx3d_nc_sst.ref
 )
 
 foreach(FILENAME ${orcajedi_test_output})
