@@ -24,6 +24,7 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/state/StateParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -56,6 +57,8 @@ class State : public util::Printable,
  public:
   static const std::string classname() {return "orcamodel::State";}
 
+  typedef OrcaStateParameters Parameters_;
+
 /// Constructor, destructor
   State(const Geometry &,
         const oops::Variables &,
@@ -78,7 +81,7 @@ class State : public util::Printable,
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &);
-  void analytic_init(const eckit::Configuration &, const Geometry &);
+  void analytic_init(const Geometry &);
   void write(const eckit::Configuration &) const;
   double norm(const std::string & field_name) const;
   const util::DateTime & validTime() const {return time_;}
@@ -115,6 +118,7 @@ class State : public util::Printable,
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet stateFields_;
+  Parameters_ params_;
 };
 // -----------------------------------------------------------------------------
 

@@ -59,9 +59,9 @@ CASE("test basic state") {
     EXPECT(std::abs(state.norm("iiceconc") - 0.00323467) < 1e-6);
   }
 
-  SECTION("test constructor from config analytic_init") {
+  SECTION("test constructor from config analytic initialisation") {
     state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-    state_config.set("analytic_init", "zeroed state");
+    state_config.set("analytic initialisation", true);
     State state(geometry, state_config);
     EXPECT_EQUAL(state.norm("iiceconc"), 0);
   }

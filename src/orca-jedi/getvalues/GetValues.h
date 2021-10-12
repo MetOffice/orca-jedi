@@ -28,6 +28,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 
+#include "orca-jedi/getvalues/GetValuesParameters.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 
@@ -53,6 +54,8 @@ class GetValues : public util::Printable,
  public:
   static const std::string classname() {return "orcamodel::GetValues";}
 
+  typedef OrcaGetValuesParameters Parameters_;
+
   GetValues(const Geometry & geom, const ufo::Locations & locs,
     const eckit::Configuration & conf);
 
@@ -65,6 +68,7 @@ class GetValues : public util::Printable,
   void print(std::ostream &) const override {};
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
+  Parameters_ params_;
 };
 
 }  // namespace orcamodel

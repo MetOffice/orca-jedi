@@ -11,7 +11,6 @@ geometry :
 initial condition : 
   date: 2021-06-29T21:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
-  #analytic_init: zeroed state
   nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
   variance field file: orca-jedi/src/tests/testinput/orca2_t_bkg_var.nc
 model :

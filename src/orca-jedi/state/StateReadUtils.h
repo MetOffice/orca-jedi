@@ -14,11 +14,12 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/state/StateParameters.h"
 
 namespace orcamodel {
 
 void readFieldsFromFile(
-  const eckit::Configuration & conf,
+  const OrcaStateParameters & params,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const std::string & variable_type,

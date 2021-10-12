@@ -12,6 +12,7 @@ errorcovariance/ErrorCovariance.cc
 errorcovariance/ErrorCovariance.h
 geometry/Geometry.h
 geometry/Geometry.cc
+getvalues/GetValuesParameters.h
 getvalues/GetValues.h
 getvalues/GetValues.cc
 getvalues/LinearGetValues.h

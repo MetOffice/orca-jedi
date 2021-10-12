@@ -68,6 +68,7 @@ State::State(const Geometry & geom,
     , time_(util::DateTime(conf.getString("date")))
     , stateFields_()
 {
+  params_.validateAndDeserialize(conf);
   std::stringstream config_stream;
   config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
@@ -76,8 +77,8 @@ State::State(const Geometry & geom,
 
   setupStateFields();
 
-  if (conf.has("analytic_init")) {
-    this->analytic_init(conf, *geom_);
+  if (params_.analyticInit.value().value_or(false)) {
+    this->analytic_init(*geom_);
   } else {
     if ( !conf.has("nemo field file") ) {
       oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
@@ -86,8 +87,8 @@ State::State(const Geometry & geom,
                          << "from file" << std::endl;
       this->zero();
     } else {
-      readFieldsFromFile(conf, *geom_, validTime(), "background", stateFields_);
-      readFieldsFromFile(conf, *geom_, validTime(), "background variance",
+      readFieldsFromFile(params_, *geom_, validTime(), "background", stateFields_);
+      readFieldsFromFile(params_, *geom_, validTime(), "background variance",
           stateFields_);
     }
   }
@@ -159,13 +160,12 @@ void State::read(const eckit::Configuration & config) {
     throw eckit::AssertionFailed(
         "State(ORCA)::read cannot find field file in configuration", Here());
   } else {
-    readFieldsFromFile(config, *geom_, validTime(), "background", stateFields_);
+    readFieldsFromFile(params_, *geom_, validTime(), "background", stateFields_);
   }
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
 
-void State::analytic_init(const eckit::Configuration & config,
-                          const Geometry & geom) {
+void State::analytic_init(const Geometry & geom) {
   oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
   this->zero();
   oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;

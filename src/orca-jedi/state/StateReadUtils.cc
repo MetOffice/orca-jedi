@@ -23,7 +23,7 @@
 namespace orcamodel {
 
 void readFieldsFromFile(
-  const eckit::Configuration & conf,
+  const OrcaStateParameters & params,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const std::string & variable_type,
@@ -33,16 +33,16 @@ void readFieldsFromFile(
 
     // Open Nemo Feedback file
 
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: configuration "
-                       << conf
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: parameters "
+                       << params
                        << std::endl;
 
     std::string nemo_file_name;
     if (variable_type == "background") {
-      nemo_file_name = conf.getString("nemo field file");
+      nemo_file_name = params.nemoFieldFile.value();
     }
     if (variable_type == "background variance") {
-      nemo_file_name = conf.getString("variance field file");
+      nemo_file_name = params.varianceFieldFile.value().value_or("");
     }
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
