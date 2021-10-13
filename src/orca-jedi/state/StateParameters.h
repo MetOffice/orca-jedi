@@ -28,7 +28,8 @@ class OrcaStateParameters : public oops::Parameters {
     "variance field file", "", this};
   oops::OptionalParameter<bool> analyticInit{"analytic initialisation", this};
   oops::RequiredParameter<util::DateTime> date{"date", this};
-  oops::RequiredParameter<oops::Variables> stateVariables{"state variables", this};
+  oops::RequiredParameter<oops::Variables> stateVariables{"state variables",
+    this};
 };
 
 }  //  namespace orcamodel

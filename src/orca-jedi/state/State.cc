@@ -87,7 +87,8 @@ State::State(const Geometry & geom,
                          << "from file" << std::endl;
       this->zero();
     } else {
-      readFieldsFromFile(params_, *geom_, validTime(), "background", stateFields_);
+      readFieldsFromFile(params_, *geom_, validTime(), "background",
+          stateFields_);
       readFieldsFromFile(params_, *geom_, validTime(), "background variance",
           stateFields_);
     }
@@ -160,7 +161,8 @@ void State::read(const eckit::Configuration & config) {
     throw eckit::AssertionFailed(
         "State(ORCA)::read cannot find field file in configuration", Here());
   } else {
-    readFieldsFromFile(params_, *geom_, validTime(), "background", stateFields_);
+    readFieldsFromFile(params_, *geom_, validTime(), "background",
+        stateFields_);
   }
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }

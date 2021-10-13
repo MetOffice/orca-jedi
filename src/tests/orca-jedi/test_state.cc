@@ -29,11 +29,20 @@ CASE("test basic state") {
   config.set("grid name", "ORCA2_T");
   config.set("number levels", 2);
 
-  eckit::LocalConfiguration nemo_var_mapping;
-  nemo_var_mapping.set("sea_ice_area_fraction", "iiceconc");
-  nemo_var_mapping.set("sea_surface_foundation_temperature", "votemper");
-  nemo_var_mapping.set("sea_water_potential_temperature", "votemper");
-  config.set("nemo names", nemo_var_mapping);
+  std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
+  nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
+    .set("nemo field name", "iiceconc")
+    .set("type", "surface");
+  nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
+    .set("nemo field name", "sic_tot_var")
+    .set("type", "surface");
+  nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
+    .set("nemo field name", "votemper")
+    .set("type", "surface");
+  nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
+    .set("nemo field name", "votemper")
+    .set("type", "volume");
+  config.set("nemo variables", nemo_var_mappings);
   config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
   const std::vector<int> channels{};

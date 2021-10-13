@@ -10,6 +10,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 list( APPEND oops_orcamodel_src_files
 errorcovariance/ErrorCovariance.cc
 errorcovariance/ErrorCovariance.h
+geometry/GeometryParameters.h
 geometry/Geometry.h
 geometry/Geometry.cc
 getvalues/GetValuesParameters.h

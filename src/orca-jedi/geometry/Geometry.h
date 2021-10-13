@@ -28,6 +28,8 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/Printable.h"
 
+#include "orca-jedi/geometry/GeometryParameters.h"
+
 namespace atlas {
   class Field;
   class FieldSet;
@@ -44,6 +46,8 @@ namespace orcamodel {
 
 class Geometry : public util::Printable {
  public:
+  typedef OrcaGeometryParameters Parameters__;
+
   // Geometry(const Parameters_ &, const eckit::mpi::Comm &);
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
@@ -62,8 +66,7 @@ class Geometry : public util::Printable {
   const atlas::Mesh & mesh() const {return mesh_;}
   const atlas::functionspace::NodeColumns & funcSpace() const
     {return funcSpace_;}
-  const std::string nemo_var_name(std::string std_name) const
-    {return nemo_var_config.getString(std_name);}
+  const std::string nemo_var_name(const std::string std_name) const;
   const atlas::idx_t & source_mesh_halo() const {return 0;}
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;
@@ -73,15 +76,12 @@ class Geometry : public util::Printable {
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
   oops::Variables variance_vars_;
-  eckit::LocalConfiguration nemo_var_config;
   size_t n_levels_;
+  Parameters__ params_;
   atlas::Grid grid_;
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
-
-  static const std::vector<std::string> surface_names;
-  static const std::vector<std::string> depth_names;
 };
 // -----------------------------------------------------------------------------
 
