@@ -94,20 +94,30 @@ namespace orcamodel {
                        << std::endl;
 
     std::vector<double> vals(nlocs);
-    size_t nvars = geovals.getVars().size();
+    const oops::Variables geovalsVars = geovals.getVars();
+    const size_t nvars = geovalsVars.size();
     for (size_t j=0; j < nvars; ++j) {
-      auto gv_varname = geovals.getVars()[j];
-      if (!state.variables().has(gv_varname)) {
+      if (!state.variables().has(geovalsVars[j])) {
         std::stringstream err_stream;
         err_stream << "orcamodel::GetValues::fillGeoVals geovals varname \" "
-                   << "\" " << gv_varname << " not found in the model state. "
-                   << std::endl;
+                   << "\" " << geovalsVars[j]
+                   << " not found in the model state." << std::endl;
         err_stream << "    add the variable to the state variables and "
                    << "add a mapping from the geometry to that variable."
                    << std::endl;
         throw eckit::BadParameter(err_stream.str(), Here());
       }
-
+    }
+    const std::vector<size_t> varSizes =
+      state.geometry()->variableSizes(geovalsVars);
+    for (size_t j=0; j < nvars; ++j) {
+      auto gv_varname = geovalsVars[j];
+      if (varSizes[j] != 1) {
+        std::stringstream err_stream;
+        err_stream << "orcamodel::GetValues::fillGeoVals interpolating "
+                   << "data with levels > 1 not implemented." << std::endl;
+        throw eckit::NotImplemented(err_stream.str(), Here());
+      }
       atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
           atlas::option::name(gv_varname));
       interpolator_.execute(state.stateFields()[gv_varname], tgt_field);
@@ -121,7 +131,6 @@ namespace orcamodel {
           vals[i] = field_view(i);
         }
       }
-
       geovals.putAtLevel(vals, gv_varname, 0);
     }
     oops::Log::debug() << "orcamodel::GetValues::fillGeoVaLs geovals print: "

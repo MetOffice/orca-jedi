@@ -8,6 +8,8 @@
 #include "orca-jedi/state/StateReadUtils.h"
 
 #include <sstream>
+#include <vector>
+#include <map>
 
 #include "eckit/config/Configuration.h"
 #include "oops/util/Logger.h"
@@ -53,13 +55,17 @@ void readFieldsFromFile(
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
     // the field file
-    size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+    const size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
 
+    std::map<std::string, size_t> varSizeMap;
+    {
+      const oops::Variables vars = geom.variables();
+      const std::vector<size_t> varSizes = geom.variableSizes(vars);
+      for (int i=0; i < vars.size(); ++i) varSizeMap[vars[i]] = varSizes[i];
+    }
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
       std::string nemoName = geom.nemo_var_name(fieldName);
-      oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = "
-                         << fieldName << std::endl;
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: "
                          << "geom.variable_in_variable_type(\""
                          << fieldName << "\", \"" << variable_type << "\") "
@@ -67,6 +73,12 @@ void readFieldsFromFile(
                               variable_type)
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
+        if (varSizeMap[fieldName] != 1) {
+          std::stringstream err_stream;
+          err_stream << "orcamodel::readFieldsFromFile reading "
+                     << "data with levels > 1 not implemented." << std::endl;
+          throw eckit::NotImplemented(err_stream.str(), Here());
+        }
         auto field_view = atlas::array::make_view<double, 1>(field);
         nemo_file.read_surf_var(nemoName, time_indx, field_view);
         auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
