@@ -15,7 +15,7 @@ geometry :
       type: surface
   grid name: ORCA2_T
   number levels: 1
-  variance names: [ sic_tot_var, t_tot_var ]
+  variance names: [ ice_area_fraction_background_error, sea_surface_temperature_background_error ]
 state :
   date: 2021-06-29T21:00:00Z
   state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]

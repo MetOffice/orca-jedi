@@ -57,9 +57,9 @@ void readFieldsFromFile(
 
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
+      std::string nemoName = geom.nemo_var_name(fieldName);
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = "
                          << fieldName << std::endl;
-
       oops::Log::debug() << "orcamodel::readFieldsFromFile:: "
                          << "geom.variable_in_variable_type(\""
                          << fieldName << "\", \"" << variable_type << "\") "
@@ -68,8 +68,8 @@ void readFieldsFromFile(
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
         auto field_view = atlas::array::make_view<double, 1>(field);
-        nemo_file.read_surf_var(fieldName, time_indx, field_view);
-        auto missing_value = nemo_file.read_fillvalue<double>(fieldName);
+        nemo_file.read_surf_var(nemoName, time_indx, field_view);
+        auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);

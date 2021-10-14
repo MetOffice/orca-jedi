@@ -175,12 +175,10 @@ void State::analytic_init(const Geometry & geom) {
 
 void State::setupStateFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
-    // find the nemo name corresponding to the state variable name
-    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-    // if it isn't already in stateFields, add it
-    if (!stateFields_.has_field(nemo_var_name)) {
+    // add variable if it isn't already in stateFields
+    if (!stateFields_.has_field(vars_[i])) {
       stateFields_.add(geom_->funcSpace().createField<double>(
-            atlas::option::name(nemo_var_name)));
+            atlas::option::name(vars_[i])));
     }
   }
 }
@@ -196,13 +194,13 @@ void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
 
   os << std::endl << " Model state valid at time: " << validTime() << std::endl;
-  os << "    " << vars_ <<  std::endl;
-  os << "    " << "atlas field norms: ";
+  os << std::string(4, ' ') << vars_ <<  std::endl;
+  os << std::string(4, ' ') << "atlas field norms:" << std::endl;
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    os << fieldName << ": " << norm(fieldName) << " ";
+    os << std::string(8, ' ') << fieldName << ": " << norm(fieldName)
+       << std::endl;
   }
-  os <<  std::endl;
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
 }

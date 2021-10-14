@@ -108,13 +108,11 @@ namespace orcamodel {
         throw eckit::BadParameter(err_stream.str(), Here());
       }
 
-      auto nemo_var_name = state.geometry()->nemo_var_name(gv_varname);
-
       atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
           atlas::option::name(gv_varname));
-      interpolator_.execute(state.stateFields()[nemo_var_name], tgt_field);
+      interpolator_.execute(state.stateFields()[gv_varname], tgt_field);
       auto field_view = atlas::array::make_view<double, 1>(tgt_field);
-      atlas::field::MissingValue mv(state.stateFields()[nemo_var_name]);
+      atlas::field::MissingValue mv(state.stateFields()[gv_varname]);
       bool has_mv = static_cast<bool>(mv);
       for (std::size_t i=0; i < nlocs; i++) {
         if (has_mv && mv(field_view(i))) {

@@ -62,17 +62,17 @@ CASE("test basic state") {
     state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
     state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
     State state(geometry, state_config);
-    bool has_missing = state.stateFields()["iiceconc"].metadata()
+    bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    EXPECT(std::abs(state.norm("iiceconc") - 0.00323467) < 1e-6);
+    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - 0.00323467) < 1e-6);
   }
 
   SECTION("test constructor from config analytic initialisation") {
     state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
     State state(geometry, state_config);
-    EXPECT_EQUAL(state.norm("iiceconc"), 0);
+    EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);
   }
 }
 
