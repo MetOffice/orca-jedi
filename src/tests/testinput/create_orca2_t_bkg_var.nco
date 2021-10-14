@@ -1,0 +1,7 @@
+defdim("t", 1);
+t = {0};
+t@units = "seconds since 1981-01-01 00:00:00";
+
+sic_tot_var[$t, $y, $x] = 0.5;
+
+t_tot_var[$t, $z, $y, $x] = 0.1;

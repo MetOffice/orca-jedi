@@ -10,8 +10,10 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 list( APPEND oops_orcamodel_src_files
 errorcovariance/ErrorCovariance.cc
 errorcovariance/ErrorCovariance.h
+geometry/GeometryParameters.h
 geometry/Geometry.h
 geometry/Geometry.cc
+getvalues/GetValuesParameters.h
 getvalues/GetValues.h
 getvalues/GetValues.cc
 getvalues/LinearGetValues.h
@@ -21,8 +23,6 @@ model/ModelBiasCovariance.h
 model/ModelBias.h
 model/ModelBiasIncrement.h
 model/Model.h
-run/Run.cc
-run/Run.h
 state/State.h
 state/State.cc
 state/StateReadUtils.h
@@ -30,6 +30,8 @@ state/StateReadUtils.cc
 nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 utilities/OrcaModelTraits.h
+variablechanges/model2geovals/VarChaModel2GeoVaLs.h
+variablechanges/model2geovals/VarChaModel2GeoVaLs.cc
 )
 
 

@@ -1,0 +1,104 @@
+netcdf hofx_sst_obs.cdl {
+dimensions:
+	nlocs = 11 ;
+	nvars = 1 ;
+	ndatetime = 20 ;
+	nstring = 50 ;
+variables:
+	float ndatetime(ndatetime) ;
+		ndatetime:suggested_chunk_dim = 100LL ;
+	float nlocs(nlocs) ;
+		nlocs:suggested_chunk_dim = 100LL ;
+	float nstring(nstring) ;
+		nstring:suggested_chunk_dim = 100LL ;
+	float nvars(nvars) ;
+		nvars:suggested_chunk_dim = 100LL ;
+
+// global attributes:
+		string :_ioda_layout = "ObsGroup" ;
+		:_ioda_layout_version = 0 ;
+		:nvars = 1 ;
+		:date_time = 2021070100 ;
+		:odb_version = 2LL ;
+		:NCO = "netCDF Operators version 4.7.5 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)" ;
+		:nco_openmp_thread_number = 1 ;
+		:nlocs = 11 ;
+data:
+
+ ndatetime = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
+
+ nlocs = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
+
+ nstring = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0 ;
+
+ nvars = 0 ;
+
+group: MetaData {
+  variables:
+  	string datetime(nlocs) ;
+  	float latitude(nlocs) ;
+  	float longitude(nlocs) ;
+  	int ops_obsgroup(nlocs) ;
+  	int ops_subtype(nlocs) ;
+  	int record_number(nlocs) ;
+  	int sequence_number(nlocs) ;
+  	float time(nlocs) ;
+  data:
+
+   datetime = "2021-06-30T12:00:00Z", "2021-06-30T12:00:00Z", 
+      "2021-06-30T12:00:00Z", "2021-06-30T12:00:00Z", "2021-06-30T00:00:00Z", 
+      "2021-06-30T00:00:00Z", "2021-06-30T00:00:00Z", "2021-06-30T00:00:00Z", 
+      "2021-06-30T00:00:00Z", "2021-06-30T00:00:00Z", "2021-06-30T00:00:00Z" ;
+
+   latitude = -19.6166, -81, -64, -33, 4, 14, 28, 44, 51, 68, 79 ;
+
+   longitude = -0.1916, 31.21495, -24.91501, -154.482, 38.443, -148.293, 
+      25.115, -161.621, 11.787, -174.949, -1.685 ;
+
+   ops_obsgroup = 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 ;
+
+   ops_subtype = 11700, 11700, 11700, 11700, 11700, 11700, 11700, 11700, 
+      11700, 11700, 11700 ;
+
+   record_number = 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ;
+
+   sequence_number = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ;
+
+   time = -12, -12, -12, -12, -24, -24, -24, -24, -24, -24, -24 ;
+  } // group MetaData
+
+group: ObsError {
+  variables:
+  	float sea_surface_temperature(nlocs) ;
+  data:
+
+   sea_surface_temperature = 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04 ;
+  } // group ObsError
+
+group: ObsValue {
+  variables:
+  	float sea_surface_temperature(nlocs) ;
+  data:
+
+   sea_surface_temperature = 18.0, _, 18.0, 18.0, 18.0, 18.0, 18.0, 18.0, 18.0, 18.0, 18.0 ;
+  } // group ObsValue
+
+group: PreQC {
+  variables:
+  	float sea_surface_temperature(nlocs) ;
+  data:
+
+   sea_surface_temperature = 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 
+      1e+09, 1e+09, 1e+09, 1e+09 ;
+  } // group PreQC
+
+group: VarMetaData {
+  variables:
+  	string variable_names(nvars) ;
+  data:
+
+   variable_names = "sea_surface_temperature" ;
+  } // group VarMetaData
+}

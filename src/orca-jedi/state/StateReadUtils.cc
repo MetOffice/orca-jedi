@@ -1,33 +1,51 @@
+/*
+ * (C) British Crown Copyright 2020-2021 Met Office
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+#include "orca-jedi/state/StateReadUtils.h"
 
 #include <sstream>
+#include <vector>
+#include <map>
 
 #include "eckit/config/Configuration.h"
 #include "oops/util/Logger.h"
+#include "oops/util/DateTime.h"
 #include "atlas/field.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
+#define NEMO_FILL_TOL 1e-6
+
 namespace orcamodel {
 
 void readFieldsFromFile(
-  const eckit::Configuration & conf,
+  const OrcaStateParameters & params,
   const Geometry & geom,
+  const util::DateTime & valid_date,
+  const std::string & variable_type,
   atlas::FieldSet & fs) {
-
-    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start "
-                       << std::endl;
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date"
+                       << " " << valid_date << std::endl;
 
     // Open Nemo Feedback file
-    std::string nemo_file_name = "";
 
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: configuration "
-                       << conf
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: parameters "
+                       << params
                        << std::endl;
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo field file " << conf.getString("nemo field file") 
-                       << std::endl;
-    nemo_file_name = conf.getString("nemo field file");
+
+    std::string nemo_file_name;
+    if (variable_type == "background") {
+      nemo_file_name = params.nemoFieldFile.value();
+    }
+    if (variable_type == "background variance") {
+      nemo_file_name = params.varianceFieldFile.value().value_or("");
+    }
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
@@ -36,19 +54,42 @@ void readFieldsFromFile(
 
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
-    // the field file, perhaps change this or update "state variables" to use
-    // these names, or to be a dictionary between the standard anmes and the
-    // NEMO names
+    // the field file
+    const size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+
+    std::map<std::string, size_t> varSizeMap;
+    {
+      const oops::Variables vars = geom.variables();
+      const std::vector<size_t> varSizes = geom.variableSizes(vars);
+      for (int i=0; i < vars.size(); ++i) varSizeMap[vars[i]] = varSizes[i];
+    }
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
-      oops::Log::debug() << "orcamodel::readFieldsFromFile:: field name = " << fieldName
-                          << std::endl;
-      auto field_view = atlas::array::make_view<double, 1>( field );
-      nemo_file.read_surf_var(fieldName, field_view);
+      std::string nemoName = geom.nemo_var_name(fieldName);
+      oops::Log::debug() << "orcamodel::readFieldsFromFile:: "
+                         << "geom.variable_in_variable_type(\""
+                         << fieldName << "\", \"" << variable_type << "\") "
+                         << geom.variable_in_variable_type(fieldName,
+                              variable_type)
+                         << std::endl;
+      if (geom.variable_in_variable_type(fieldName, variable_type)) {
+        if (varSizeMap[fieldName] != 1) {
+          std::stringstream err_stream;
+          err_stream << "orcamodel::readFieldsFromFile reading "
+                     << "data with levels > 1 not implemented." << std::endl;
+          throw eckit::NotImplemented(err_stream.str(), Here());
+        }
+        auto field_view = atlas::array::make_view<double, 1>(field);
+        nemo_file.read_surf_var(nemoName, time_indx, field_view);
+        auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
+        field.metadata().set("missing_value", missing_value);
+        field.metadata().set("missing_value_type", "approximately-equals");
+        field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
+      }
     }
 
-    oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile done "
-                       << std::endl;
-};
-
+    oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
+                       << "done" << std::endl;
 }
+
+}  // namespace orcamodel

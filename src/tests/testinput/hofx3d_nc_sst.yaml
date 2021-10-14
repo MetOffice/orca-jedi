@@ -1,0 +1,54 @@
+forecast length : P3D
+geometry :
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      type: surface
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      type: surface
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      type: surface
+    - name: sea_surface_temperature_background_error
+      nemo field name: t_tot_var
+      type: surface
+  grid name: ORCA2_T
+  number levels: 1
+  variance names: [ ice_area_fraction_background_error, sea_surface_temperature_background_error ]
+state :
+  date: 2021-06-29T21:00:00Z
+  state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]
+  nemo field file: testinput/orca2_t_nemo.nc
+  variance field file: testinput/orca2_t_bkg_var.nc
+window begin: 2021-06-29T21:00:00Z
+window length: P1D
+observations:
+- obs space:
+    name: Sea Surface Temperature
+    obsdatain:
+      obsfile: testinput/hofx_sst_obs.nc
+      max frame size: 1000000
+    obsdataout:
+      obsfile: test_out.nc
+      max frame size: 1000000
+    simulated variables: [sea_surface_temperature]
+  get values:
+    atlas-interpolator:
+      type: finite-element
+      non_linear: missing-if-all-missing
+  obs operator:
+    name: Composite
+    components:
+    - name: Identity
+    - name: BackgroundErrorIdentity
+  obs filters:
+  - filter: Bayesian Background Check
+    filter variables:
+    - name: sea_surface_temperature
+    prob density bad obs: 1.0
+    initial prob gross error: 0.04
+    PGE threshold: 0.5
+  passedBenchmark: 4
+test:
+  reference filename: testoutput/test_hofx3d_nc_sst.ref

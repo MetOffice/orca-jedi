@@ -1,0 +1,12 @@
+ioda:
+  variables:
+  - name: MetaData/latitude
+    source: lat
+  - name: MetaData/longitude
+    source: lon
+  - name: QCFlags/ice_area_fraction
+    source: ops_report_flags
+      #- name: hofx/ice_area_fraction
+      #  source: seaice
+  - name: ObsValue/ice_area_fraction
+    source: 253

@@ -1,9 +1,9 @@
-/* 
+/*
  * (C) British Crown Copyright 2017-2021 Met Office
- * 
- * This software is licensed under the terms of the Apache Licence Version 2.0 
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
- */ 
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
 
 #pragma once
 
@@ -28,6 +28,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 
+#include "orca-jedi/getvalues/GetValuesParameters.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 
@@ -45,25 +46,29 @@ namespace orcamodel {
   class State;
   class Geometry;
 
-atlas::functionspace::PointCloud atlasObsFuncSpaceFactory (const ufo::Locations & locs);
+atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
+    const ufo::Locations & locs);
 
-class GetValues : public util::Printable, private util::ObjectCounter<GetValues> {
-
+class GetValues : public util::Printable,
+  private util::ObjectCounter<GetValues> {
  public:
   static const std::string classname() {return "orcamodel::GetValues";}
 
+  typedef OrcaGetValuesParameters Parameters_;
+
   GetValues(const Geometry & geom, const ufo::Locations & locs,
-            const eckit::Configuration & conf);
+    const eckit::Configuration & conf);
 
-  virtual ~GetValues() {};
+  virtual ~GetValues() {}
 
-  void fillGeoVaLs(const State& state, const util::DateTime& dt_begin, 
-                   const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const ;
+  void fillGeoVaLs(const State& state, const util::DateTime& dt_begin,
+    const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const;
 
  private:
   void print(std::ostream &) const override {};
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
+  Parameters_ params_;
 };
 
 }  // namespace orcamodel

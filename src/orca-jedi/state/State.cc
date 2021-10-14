@@ -5,10 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <math.h>
+
 #include <algorithm>
 #include <string>
 #include <memory>
-#include <math.h>
 #include <vector>
 #include <functional>
 #include <numeric>
@@ -18,6 +19,7 @@
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
+#include "atlas/field/MissingValue.h"
 #include "atlas/functionspace/NodeColumns.h"
 #include "atlas/grid/Grid.h"
 #include "atlas/parallel/mpi/mpi.h"
@@ -49,22 +51,14 @@ namespace orcamodel {
 State::State(const Geometry & geom,
              const oops::Variables & vars,
              const util::DateTime & time)
-  : geom_(new Geometry(geom)), vars_(vars), time_(time) 
+  : geom_(new Geometry(geom)), vars_(vars), time_(time)
 {
-
   stateFields_ = atlas::FieldSet();
 
-  for (size_t i=0; i<vars_.size(); ++i){
-    // find the nemo name corresponding to the state variable name
-    auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-    // if it isn't already in stateFields, add it
-    if (!stateFields_.has_field(nemo_var_name)){
-      stateFields_.add( geom_->funcSpace().createField<double> (
-            atlas::option::name(nemo_var_name) ) );
-    }
-  }
+  setupStateFields();
 
-  oops::Log::trace() << "State(ORCA)::State created." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State created for "<< validTime()
+                     << std::endl;
 }
 
 State::State(const Geometry & geom,
@@ -74,53 +68,47 @@ State::State(const Geometry & geom,
     , time_(util::DateTime(conf.getString("date")))
     , stateFields_()
 {
-  std::stringstream config_stream; 
+  params_.validateAndDeserialize(conf);
+  std::stringstream config_stream;
   config_stream << "orcamodel::State:: config " << conf;
   oops::Log::debug() << config_stream.str() << std::endl;
-  if (conf.has("analytic_init")) {
-    this->analytic_init(conf, *geom_);
-  } else {
-    for (size_t i=0; i<vars_.size(); ++i){
-      // find the nemo name corresponding to the state variable name
-      auto nemo_var_name = geom_->nemo_var_name(vars_[i]);
-      // if it isn't already in stateFields, add it
-      if (!stateFields_.has_field(nemo_var_name)){
-        stateFields_.add( geom_->funcSpace().createField<double> (
-              atlas::option::name(nemo_var_name) ) );
-      }
-    }
+  oops::Log::trace() << "State(ORCA)::State:: time: " << validTime()
+                     << std::endl;
 
+  setupStateFields();
+
+  if (params_.analyticInit.value().value_or(false)) {
+    this->analytic_init(*geom_);
+  } else {
     if ( !conf.has("nemo field file") ) {
       oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
                          << std::endl;
-      oops::Log::trace() << "State(ORCA):: Zeroing state rather than reading from file"
-                         << std::endl;
+      oops::Log::trace() << "State(ORCA):: Zeroing state rather than reading "
+                         << "from file" << std::endl;
       this->zero();
     } else {
-      readFieldsFromFile(conf, *geom_, stateFields_);
+      readFieldsFromFile(params_, *geom_, validTime(), "background",
+          stateFields_);
+      readFieldsFromFile(params_, *geom_, validTime(), "background variance",
+          stateFields_);
     }
-
   }
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
 State::State(const Geometry & resol,
              const State & other)
-{ 
+{
   std::string err_message =
     "orcamodel::State::State created by interpolation Not implemented ";
   throw eckit::NotImplemented(err_message, Here());
-
-  oops::Log::trace() << "State(ORCA)::State created by interpolation."
-                     << "For now we are assuming that there is no resolution"
-                     << "change"
-                     << std::endl;
 }
 
-State::State(const State & other) {
-  std::string err_message =
-      "orcamodel::State::State created by copy not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
+State::State(const State & other)
+  : geom_(other.geom_)
+    , vars_(other.vars_)
+    , time_(other.time_)
+    , stateFields_(other.stateFields_) {
   oops::Log::trace() << "State(ORCA)::State copied." << std::endl;
 }
 
@@ -131,9 +119,11 @@ State::~State() {
 // Basic operators
 
 State & State::operator=(const State & rhs) {
-  std::string err_message =
-      "orcamodel::State::State::operator= not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+  time_ = rhs.time_;
+  stateFields_ = rhs.stateFields_;
+  vars_ = rhs.vars_;
+  geom_.reset();
+  geom_ = rhs.geom_;
   return *this;
 }
 
@@ -161,23 +151,36 @@ State & State::operator+=(const Increment & dx) {
 
 void State::read(const eckit::Configuration & config) {
   oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
+
+  oops::Log::trace() << "State(ORCA)::read time: " << validTime()
+                     << std::endl;
+
   if ( !config.has("nemo field file") ) {
-    oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
-                       << std::endl;
-    throw eckit::AssertionFailed("State(ORCA):: cannot find field file in configuration", Here());
+    oops::Log::trace() << "State(ORCA)::read nemo field file not in "
+                       << "configuration" << std::endl;
+    throw eckit::AssertionFailed(
+        "State(ORCA)::read cannot find field file in configuration", Here());
   } else {
-    readFieldsFromFile(config, *geom_, stateFields_);
+    readFieldsFromFile(params_, *geom_, validTime(), "background",
+        stateFields_);
   }
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
 
-void State::analytic_init(const eckit::Configuration & config,
-                          const Geometry & geom) {
+void State::analytic_init(const Geometry & geom) {
   oops::Log::trace() << "State(ORCA)::analytic_init starting" << std::endl;
-  stateFields_.add( geom_->funcSpace().createField<double> (
-      atlas::option::name("iiceconc") ) );
   this->zero();
   oops::Log::trace() << "State(ORCA)::analytic_init done" << std::endl;
+}
+
+void State::setupStateFields() {
+  for (size_t i=0; i < vars_.size(); ++i) {
+    // add variable if it isn't already in stateFields
+    if (!stateFields_.has_field(vars_[i])) {
+      stateFields_.add(geom_->funcSpace().createField<double>(
+            atlas::option::name(vars_[i])));
+    }
+  }
 }
 
 void State::write(const eckit::Configuration & config) const {
@@ -190,6 +193,15 @@ void State::write(const eckit::Configuration & config) const {
 void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
 
+  os << std::endl << " Model state valid at time: " << validTime() << std::endl;
+  os << std::string(4, ' ') << vars_ <<  std::endl;
+  os << std::string(4, ' ') << "atlas field norms:" << std::endl;
+  for (atlas::Field field : stateFields_) {
+    std::string fieldName = field.name();
+    os << std::string(8, ' ') << fieldName << ": " << norm(fieldName)
+       << std::endl;
+  }
+
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
 }
 
@@ -198,28 +210,34 @@ void State::print(std::ostream & os) const {
 void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero starting" << std::endl;
 
-  //std::string err_message =
-  //    "orcamodel::State::State::zero not implemented";
-  //throw eckit::NotImplemented(err_message, Here());
-  //
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::State::read:: field name = " << fieldName
-                        << std::endl;
-    atlas::array::ArrayView<double, 1> field_view = atlas::array::make_view<double, 1>( field );
-    for ( atlas::idx_t j = 0; j < field_view.shape( 0 ); ++j ) {
-      field_view( j ) = 0;
+    oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
+                       << std::endl;
+    auto field_view = atlas::array::make_view<double, 1>(field);
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      field_view(j) = 0;
     }
   }
 
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
 }
 
-double norm() {
-  std::string err_message =
-      "orcamodel::State::State::norm not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-  return 0;
+double State::norm(const std::string & field_name) const {
+  double norm = 0;
+  int valid_points = 0;
+
+  auto field_view = atlas::array::make_view<double, 1>(
+      stateFields_[field_name]);
+  atlas::field::MissingValue mv(stateFields()[field_name]);
+  bool has_mv = static_cast<bool>(mv);
+  for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+    if ((!has_mv) || (has_mv && !mv(field_view(j)))) {
+      norm += field_view(j)*field_view(j);
+      ++valid_points;
+    }
+  }
+  return sqrt(norm)/valid_points;
 }
 
 void State::accumul(const double & zz, const State & xx) {
