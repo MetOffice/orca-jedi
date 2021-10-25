@@ -39,6 +39,7 @@ class OrcaGeometryParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> gridName
     {"grid name", this};
   oops::RequiredParameter<int> nLevels {"number levels", this};
+  oops::OptionalParameter<int> sourceMeshHalo {"source mesh halo", this};
 };
 
 }  //  namespace orcamodel

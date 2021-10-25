@@ -25,3 +25,8 @@ ecbuild_add_test( TARGET  test_orcajedi_getvalues.x
                   SOURCES test_getvalues.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
+
+ecbuild_add_test( TARGET  test_orcajedi_increment.x
+                  SOURCES test_increment.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  LIBS    orcamodel )

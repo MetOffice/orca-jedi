@@ -58,8 +58,7 @@ Geometry::Geometry(const eckit::Configuration & config,
     mesh_ = meshgen.generate(grid_, partitioner_.partition(grid_));
 
     funcSpace_ = atlas::functionspace::NodeColumns(
-        mesh_, atlas::option::halo(0));
-    //    mesh_, atlas::option::halo(this->source_mesh_halo()));
+        mesh_, atlas::option::halo(params_.sourceMeshHalo.value().value_or(0)));
 }
 
 // -----------------------------------------------------------------------------

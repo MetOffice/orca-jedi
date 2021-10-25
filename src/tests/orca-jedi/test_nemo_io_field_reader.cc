@@ -12,6 +12,7 @@
 #include "atlas/array.h"
 #include "atlas/util/Config.h"
 #include "eckit/testing/Test.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
@@ -20,9 +21,31 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 
+CASE("test non-existent file throws error") {
+  eckit::PathName test_data_path("NOTAFILE.not_nc");
+  EXPECT_THROWS_AS(NemoFieldReader field_reader(test_data_path),
+      eckit::BadValue);
+}
+
+CASE("test corrupted file throws error") {
+  eckit::PathName test_data_path("../testinput/hofx3d_nc_sst.yaml");
+  EXPECT_THROWS_AS(NemoFieldReader field_reader(test_data_path),
+      eckit::BadValue);
+}
+
+CASE("test opening bad test file ") {
+  eckit::PathName test_data_path("../testinput/orca2_t_coords.nc");
+  EXPECT_THROWS_AS(NemoFieldReader field_reader(test_data_path),
+      eckit::BadValue);
+}
+
 CASE("test opening the test file ") {
   eckit::PathName test_data_path("../testinput/simple_nemo.nc");
   NemoFieldReader field_reader(test_data_path);
+  SECTION("reading missing dimension throws error") {
+    EXPECT_THROWS_AS(field_reader.read_dim_size("NOTADIMENSION"),
+        eckit::BadValue);
+  }
 }
 
 CASE("test reading the latitudes and longitudes arrays ") {

@@ -61,7 +61,6 @@ class Geometry : public util::Printable {
   const atlas::functionspace::NodeColumns & funcSpace() const
     {return funcSpace_;}
   const std::string nemo_var_name(const std::string std_name) const;
-  const atlas::idx_t & source_mesh_halo() const {return 0;}
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;
 

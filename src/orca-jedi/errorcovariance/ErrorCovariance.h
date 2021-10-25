@@ -54,7 +54,6 @@ class ErrorCovariance : public util::Printable,
 
  private:
   void print(std::ostream &) const;
-  std::string covarianceType_;  // can be "identity" or "spectral"
   std::shared_ptr<const Geometry> geom_;
 
   util::DateTime time_;

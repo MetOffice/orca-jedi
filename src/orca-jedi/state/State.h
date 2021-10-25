@@ -71,7 +71,6 @@ class State : public util::Printable,
 
   State & operator=(const State &);
   void zero();
-  void accumul(const double &, const State &);
 
 /// Interactions with Increment
   State & operator+=(const Increment &);

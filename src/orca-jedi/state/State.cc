@@ -223,14 +223,4 @@ double State::norm(const std::string & field_name) const {
   return sqrt(norm)/valid_points;
 }
 
-void State::accumul(const double & zz, const State & xx) {
-  oops::Log::trace() << "State(ORCA)::accumul starting" << std::endl;
-
-  std::string err_message =
-      "orcamodel::State::State::accumul not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-
-  oops::Log::trace() << "State(ORCA)::accumul done" << std::endl;
-}
-
 }  // namespace orcamodel

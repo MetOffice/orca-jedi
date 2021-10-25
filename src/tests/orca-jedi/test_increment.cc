@@ -15,7 +15,7 @@
 
 #include "atlas/library/Library.h"
 
-#include "orca-jedi/geometry/Geometry.h"
+#include "orca-jedi/increment/Increment.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -23,7 +23,7 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 
-CASE("test basic geometry") {
+CASE("test create increment") {
   EXPECT(eckit::system::Library::exists("atlas-orca"));
 
   eckit::LocalConfiguration config;
@@ -47,30 +47,16 @@ CASE("test basic geometry") {
   config.set("number levels", 10);
   Geometry geometry(config, eckit::mpi::comm());
 
-  SECTION("test geometry variable names") {
-    EXPECT_THROWS_AS(geometry.nemo_var_name("NOTAVARIABLE"), eckit::BadValue);
-    EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction",
-                                              "background"));
-    EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction_error",
-                                              "background variance"));
-    EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction_error",
-                                               "background"));
-    EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction",
-                                               "background variance"));
-  }
+  const std::vector<int> channels{};
+  std::vector<std::string> varnames {"sea_ice_area_fraction",
+    "sea_water_potential_temperature"};
+  oops::Variables oops_vars(varnames, channels);
 
-  SECTION("test geometry variable sizes") {
-    const std::vector<int> channels{};
-    std::vector<std::string> varnames {"sea_ice_area_fraction",
-      "sea_water_potential_temperature"};
-    oops::Variables oops_vars(varnames, channels);
-    auto varsizes = geometry.variableSizes(oops_vars);
-    EXPECT_EQUAL(varsizes.size(), 2);
-    EXPECT_EQUAL(varsizes[0], 1);
-    EXPECT_EQUAL(varsizes[1], 10);
-    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
-    EXPECT_THROWS_AS(geometry.variableSizes(not_vars), eckit::BadValue);
-  }
+  util::DateTime datetime;
+
+  EXPECT_THROWS_AS(Increment increment(geometry, oops_vars, datetime),
+      eckit::NotImplemented);
+
 }
 
 }  // namespace test

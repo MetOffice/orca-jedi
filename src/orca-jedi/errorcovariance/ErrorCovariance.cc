@@ -33,7 +33,6 @@ ErrorCovariance::ErrorCovariance(const Geometry & resol,
                                  const eckit::Configuration & conf,
                                  const State &,
                                  const State &) :
-    covarianceType_(conf.getString("covariance type", "identity")),
     geom_(std::make_shared<const Geometry>(resol)),
     time_(conf.getString("date"))
 {
@@ -58,13 +57,10 @@ void ErrorCovariance::multiply(const Increment & dxin,
     oops::Log::trace() << "ErrorCovariance(UM) multiply start dxin"
                        <<  dxin << std::endl;
 
-    if (covarianceType_ == "identity") {
-        dxout = dxin;
-    } else {
-        std::string err_message = "umjedi::ErrorCovariance::multiply option "
-            + covarianceType_ + " not implemented";
-        throw eckit::NotImplemented(err_message, Here());
-    }
+    dxout = dxin;
+    std::string err_message = 
+      "umjedi::ErrorCovariance::multiply option not implemented";
+    throw eckit::NotImplemented(err_message, Here());
 
     oops::Log::trace() << "ErrorCovariance(UM) multiply end dxout"
                        << dxout << std::endl;
@@ -73,13 +69,10 @@ void ErrorCovariance::multiply(const Increment & dxin,
 
 void ErrorCovariance::inverseMultiply(const Increment & dxin,
                                       Increment & dxout) const {
-    if (covarianceType_ == "identity") {
-        dxout = dxin;
-    } else {
-        std::string err_message =
-                "umjedi::ErrorCovariance::inverseMultiply notimplemented ";
-        throw eckit::NotImplemented(err_message, Here());
-    }
+    dxout = dxin;
+    std::string err_message =
+            "umjedi::ErrorCovariance::inverseMultiply notimplemented ";
+    throw eckit::NotImplemented(err_message, Here());
     oops::Log::trace() << "ErrorCovariance(UM) inverseMultiply" << std::endl;
 }
 
