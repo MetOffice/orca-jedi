@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include<sstream>
+
 #include "eckit/log/Bytes.h"
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"
@@ -18,6 +20,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/getvalues/GetValues.h"
+#include "orca-jedi/getvalues/GetValuesParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -53,6 +56,9 @@ CASE("test basic getvalues") {
   eckit::LocalConfiguration getvalues_conf;
   getvalues_conf.set("atlas-interpolator", interp_conf);
 
+  OrcaGetValuesParameters params;
+  params.validateAndDeserialize(getvalues_conf);
+
   std::vector<float> lons{0, 120, 270};
   std::vector<float> lats{88, 0, 30};
   std::vector<util::DateTime> times{
@@ -73,26 +79,46 @@ CASE("test basic getvalues") {
   state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
   State state(geometry, state_config);
 
-  GetValues getvalues(geometry, locations, getvalues_conf);
-
-  // create geovals from the locations
-  std::vector<size_t> nlevs = {1};
-  ufo::GeoVaLs geovals(locations, state.variables(), std::vector<size_t>{1, 1});
-
   util::DateTime dt_begin("2018-04-14T00:00:00Z");
   util::DateTime dt_end("2018-04-16T00:00:00Z");
-  getvalues.fillGeoVaLs(state, dt_begin, dt_end, geovals);
 
-  // test fillGeoVaLs
-  std::vector<double> vals(geovals.nlocs());
-  geovals.get(vals, "sea_ice_area_fraction");
+  SECTION("test get values fails with no locations") {
+    ufo::Locations emptyLocations({}, {}, {}, distribution);
+    EXPECT_THROWS_AS(GetValues getvalues(geometry, emptyLocations,
+        getvalues_conf), eckit::BadValue);
+  }
 
-  double missing_value = util::missingValue(vals[0]);
-  std::vector<double> testvals = {1, missing_value, 0};
+  GetValues getvalues(geometry, locations, getvalues_conf);
 
-  EXPECT_EQUAL(vals[0], testvals[0]);
-  EXPECT_EQUAL(vals[1], testvals[1]);
-  EXPECT_EQUAL(vals[2], testvals[2]);
+  SECTION("test fillGeoVaLs fails missing variable") {
+    oops::Variables variables({"NOTAVARIABLE"});
+    ufo::GeoVaLs geovals(locations, variables, std::vector<size_t>{1, 1});
+    EXPECT_THROWS_AS(getvalues.fillGeoVaLs(state, dt_begin, dt_end, geovals),
+        eckit::BadParameter);
+  }
+
+  SECTION("test fillGeoVaLs") {
+    // create geovals from the locations
+    std::vector<size_t> nlevs = {1};
+    ufo::GeoVaLs geovals(locations, state.variables(),
+        std::vector<size_t>{1, 1});
+
+    std::stringstream os;
+    os << geovals;
+
+    getvalues.fillGeoVaLs(state, dt_begin, dt_end, geovals);
+
+    // test fillGeoVaLs
+    std::vector<double> vals(geovals.nlocs());
+    geovals.get(vals, "sea_ice_area_fraction");
+
+    double missing_value = util::missingValue(vals[0]);
+    std::vector<double> testvals = {1, missing_value, 0};
+
+    EXPECT_EQUAL(vals[0], testvals[0]);
+    EXPECT_EQUAL(vals[1], testvals[1]);
+    EXPECT_EQUAL(vals[2], testvals[2]);
+  }
 }
 
 }  // namespace test

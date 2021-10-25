@@ -56,7 +56,6 @@ CASE("test create increment") {
 
   EXPECT_THROWS_AS(Increment increment(geometry, oops_vars, datetime),
       eckit::NotImplemented);
-
 }
 
 }  // namespace test

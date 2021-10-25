@@ -44,7 +44,7 @@ NemoFieldReader::NemoFieldReader(eckit::PathName& filename)
                << filename << std::endl;
     err_stream << "NetCDF Exception: " << e.what() << std::endl;
     throw eckit::BadValue(err_stream.str(), Here());
-  } 
+  }
 
   time_dimvar_name_ = "";
   netCDF::NcDim nc_dim_time;

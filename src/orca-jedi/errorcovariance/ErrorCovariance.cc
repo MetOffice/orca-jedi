@@ -58,7 +58,7 @@ void ErrorCovariance::multiply(const Increment & dxin,
                        <<  dxin << std::endl;
 
     dxout = dxin;
-    std::string err_message = 
+    std::string err_message =
       "umjedi::ErrorCovariance::multiply option not implemented";
     throw eckit::NotImplemented(err_message, Here());
 

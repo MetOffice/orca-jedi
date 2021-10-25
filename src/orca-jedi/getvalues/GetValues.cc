@@ -139,6 +139,12 @@ namespace orcamodel {
                        << std::endl;
   }
 
+  void GetValues::print(std::ostream & os) const {
+    os << "orcamodel::GetValues: " << std::endl;
+    os << "  Obs function space " << atlasObsFuncSpace_ << std::endl;
+    os << "  Interpolator " << interpolator_ << std::endl;
+  }
+
 }  // namespace orcamodel
 
 
