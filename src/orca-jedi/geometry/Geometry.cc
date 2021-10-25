@@ -78,8 +78,8 @@ const std::string Geometry::nemo_var_name(const std::string std_name) const {
 // -----------------------------------------------------------------------------
 /// \brief Give the number of levels for each provided level - surface variables
 ///        have 1 level, volumetric variables have "number levels" levels.
-/// \param[in]     vars  variables to check. 
-/// \return        vector of number of levels in each variable. 
+/// \param[in]     vars  variables to check.
+/// \return        vector of number of levels in each variable.
 std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 {
   std::vector<size_t> varSizes(vars.size());
@@ -107,32 +107,15 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
   return varSizes;
 }
 
-// -----------------------------------------------------------------------------
-atlas::FunctionSpace * Geometry::atlasFunctionSpace() const {
-  std::string err_message =
-    "orcamodel::Geometry::atlasFunctionSpace Not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
-  atlas::FunctionSpace* r = nullptr;
-  return r;
-}
-
-atlas::FieldSet * Geometry::atlasFieldSet() const {
-  std::string err_message =
-    "orcamodel::Geometry::atlasFieldSet Not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
-  atlas::FieldSet* r = nullptr;
-  return r;
-}
-
 const oops::Variables & Geometry::variables() const {
   return vars_;
 }
 
 /// \brief Check if a variable's data is a member of a type (e.g if it can be
 ///        sourced from the background file, variance file, or MDT file).
-/// \param[in]     variable_name  Name of variable. 
-/// \param[in]     variable_type  Type of variable. 
-/// \return        Boolean for membership. 
+/// \param[in]     variable_name  Name of variable.
+/// \param[in]     variable_type  Type of variable.
+/// \return        Boolean for membership.
 const bool Geometry::variable_in_variable_type(std::string variable_name,
   std::string variable_type) const {
   bool is_bkg_var = variance_vars_.has(variable_name);

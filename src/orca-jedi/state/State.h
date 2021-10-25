@@ -73,9 +73,6 @@ class State : public util::Printable,
   void zero();
   void accumul(const double &, const State &);
 
-/// Interpolate full fields
-  void changeResolution(const State & xx);
-
 /// Interactions with Increment
   State & operator+=(const Increment &);
 

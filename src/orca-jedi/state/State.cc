@@ -96,14 +96,6 @@ State::State(const Geometry & geom,
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
-State::State(const Geometry & resol,
-             const State & other)
-{
-  std::string err_message =
-    "orcamodel::State::State created by interpolation Not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
-}
-
 State::State(const State & other)
   : geom_(other.geom_)
     , vars_(other.vars_)
@@ -125,15 +117,6 @@ State & State::operator=(const State & rhs) {
   geom_.reset();
   geom_ = rhs.geom_;
   return *this;
-}
-
-// Interpolate full fields
-
-void State::changeResolution(const State & other) {
-  std::string err_message =
-      "orcamodel::State::State::changeResolution not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-  oops::Log::trace() << "State(ORCA)::change resolution done" << std::endl;
 }
 
 // Interactions with Increments

@@ -55,12 +55,6 @@ class Geometry : public util::Printable {
   std::vector<size_t> variableSizes(const oops::Variables &) const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
 
-  // SABER interface (stubs at present)
-  // Note atlasFunctionSpace is incapable of dealing with horizontal and
-  //      vertical stagger.
-  atlas::FunctionSpace * atlasFunctionSpace() const;
-  atlas::FieldSet * atlasFieldSet() const;
-
   const oops::Variables & variables() const;
 
   const atlas::Mesh & mesh() const {return mesh_;}
