@@ -2,7 +2,7 @@
 ############################################################################################
 # orca-jedi
 
-cmake_minimum_required( VERSION 0.1 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
 
