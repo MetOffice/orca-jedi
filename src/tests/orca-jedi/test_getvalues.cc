@@ -75,8 +75,8 @@ CASE("test basic getvalues") {
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
-  state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-  state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
+  state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+  state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
   State state(geometry, state_config);
 
   util::DateTime dt_begin("2018-04-14T00:00:00Z");

@@ -28,19 +28,19 @@ CASE("test non-existent file throws error") {
 }
 
 CASE("test corrupted file throws error") {
-  eckit::PathName test_data_path("../testinput/hofx3d_nc_sst.yaml");
+  eckit::PathName test_data_path("../Data/hofx3d_nc_sst.yaml");
   EXPECT_THROWS_AS(NemoFieldReader field_reader(test_data_path),
       eckit::BadValue);
 }
 
 CASE("test opening bad test file ") {
-  eckit::PathName test_data_path("../testinput/orca2_t_coords.nc");
+  eckit::PathName test_data_path("../Data/orca2_t_coords.nc");
   EXPECT_THROWS_AS(NemoFieldReader field_reader(test_data_path),
       eckit::BadValue);
 }
 
 CASE("test opening the test file ") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
   NemoFieldReader field_reader(test_data_path);
   SECTION("reading missing dimension throws error") {
     EXPECT_THROWS_AS(field_reader.read_dim_size("NOTADIMENSION"),
@@ -49,7 +49,7 @@ CASE("test opening the test file ") {
 }
 
 CASE("test reading the latitudes and longitudes arrays ") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
   std::vector<atlas::PointXY> ob_locs = field_reader.read_locs();
@@ -63,7 +63,7 @@ CASE("test reading the latitudes and longitudes arrays ") {
 }
 
 CASE("test get_nearest_datetime_index returns correct index") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
   util::DateTime test_datetime{"1970-01-01T00:00:00Z"};
@@ -73,7 +73,7 @@ CASE("test get_nearest_datetime_index returns correct index") {
 }
 
 CASE("test reading field _FillValue") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
 
@@ -85,7 +85,7 @@ CASE("test reading field _FillValue") {
 }
 
 CASE("test read_surf_var reads vector") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
   std::vector<double> data = field_reader.read_surf_var("iiceconc", 1);
@@ -95,7 +95,7 @@ CASE("test read_surf_var reads vector") {
 }
 
 CASE("test read_surf_var reads field array view") {
-  eckit::PathName test_data_path("../testinput/simple_nemo.nc");
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   atlas::idx_t num_points = 6;
   auto array_shape = atlas::array::ArrayShape{6};

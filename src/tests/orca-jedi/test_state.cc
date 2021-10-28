@@ -56,8 +56,8 @@ CASE("test basic state") {
   state_config.set("date", "2018-04-15T00:00:00Z");
 
   SECTION("test state parameters") {
-    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-    state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
     OrcaStateParameters params;
     params.validateAndDeserialize(state_config);
     EXPECT(params.nemoFieldFile.value() ==
@@ -77,8 +77,8 @@ CASE("test basic state") {
   }
 
   SECTION("test constructor from config") {
-    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-    state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
     State state(geometry, state_config);
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
@@ -95,7 +95,7 @@ CASE("test basic state") {
   }
 
   SECTION("test constructor from config analytic initialisation") {
-    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
     State state(geometry, state_config);
     EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);

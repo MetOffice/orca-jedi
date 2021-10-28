@@ -18,15 +18,15 @@ geometry :
 state :
   date: 2021-06-29T21:00:00Z
   state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]
-  nemo field file: testinput/orca2_t_nemo.nc
-  variance field file: testinput/orca2_t_bkg_var.nc
+  nemo field file: Data/orca2_t_nemo.nc
+  variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:
 - obs space:
     name: Sea Surface Temperature
     obsdatain:
-      obsfile: testinput/hofx_sst_obs.nc
+      obsfile: Data/hofx_sst_obs.nc
       max frame size: 1000000
     obsdataout:
       obsfile: test_out.nc
