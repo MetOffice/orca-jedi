@@ -19,6 +19,7 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/state/StateParameters.h"
 #include "orca-jedi/getvalues/GetValues.h"
 #include "orca-jedi/getvalues/GetValuesParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
@@ -77,7 +78,9 @@ CASE("test basic getvalues") {
   state_config.set("date", "2018-04-15T00:00:00Z");
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
   state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
-  State state(geometry, state_config);
+  OrcaStateParameters stateParams;
+  stateParams.validateAndDeserialize(state_config);
+  State state(geometry, stateParams);
 
   util::DateTime dt_begin("2018-04-14T00:00:00Z");
   util::DateTime dt_end("2018-04-16T00:00:00Z");

@@ -62,9 +62,9 @@ class State : public util::Printable,
 /// Constructor, destructor
   State(const Geometry &,
         const oops::Variables &,
-        const util::DateTime &);  // Is it used?
+        const util::DateTime &);
   State(const Geometry &,
-        const eckit::Configuration &);
+        const Parameters_ &);
   State(const Geometry &, const State &);
   State(const State &);
   virtual ~State();
@@ -76,9 +76,9 @@ class State : public util::Printable,
   State & operator+=(const Increment &);
 
 /// I/O and diagnostics
-  void read(const eckit::Configuration &);
+  void read(const Parameters_ &);
   void analytic_init(const Geometry &);
-  void write(const eckit::Configuration &) const;
+  void write(const Parameters_ &) const;
   double norm(const std::string & field_name) const;
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}

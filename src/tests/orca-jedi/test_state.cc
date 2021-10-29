@@ -54,11 +54,11 @@ CASE("test basic state") {
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
+  OrcaStateParameters params;
 
   SECTION("test state parameters") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
-    OrcaStateParameters params;
     params.validateAndDeserialize(state_config);
     EXPECT(params.nemoFieldFile.value() ==
         state_config.getString("nemo field file"));
@@ -76,28 +76,28 @@ CASE("test basic state") {
     State state(geometry, oops_vars, datetime);
   }
 
-  SECTION("test constructor from config") {
+  SECTION("test constructor from state") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
-    State state(geometry, state_config);
+    params.validateAndDeserialize(state_config);
+    State state(geometry, params);
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
     double iceNorm = 0.00323467;
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
-    state.read(state_config);
+    state.read(params);
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
     State stateCopy(state);
     EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
-    eckit::LocalConfiguration emptyConfig;
-    EXPECT_THROWS_AS(state.read(emptyConfig), eckit::AssertionFailed);
-    EXPECT_THROWS_AS(state.write(emptyConfig), eckit::NotImplemented);
+    EXPECT_THROWS_AS(state.write(params), eckit::NotImplemented);
   }
 
   SECTION("test constructor from config analytic initialisation") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
-    State state(geometry, state_config);
+    params.validateAndDeserialize(state_config);
+    State state(geometry, params);
     EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);
   }
 }
