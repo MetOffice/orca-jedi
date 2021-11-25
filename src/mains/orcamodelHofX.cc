@@ -13,6 +13,9 @@
 
 #include "ufo/ObsTraits.h"
 #include "ufo/instantiateObsFilterFactory.h"
+#if defined(NEMO_FEEDBACK_EXISTS)
+  #include "nemo-feedback/instantiateObsFilterFactory.h"
+#endif
 
 #include "orca-jedi/utilities/OrcaModelTraits.h"
 
@@ -21,6 +24,9 @@ int main(int argc,  char ** argv) {
   oops::instantiateModelFactory<orcamodel::OrcaModelTraits>();
   atlas::Library::instance().initialise();
   ufo::instantiateObsFilterFactory();
+#if defined(NEMO_FEEDBACK_EXISTS)
+  nemo_feedback::instantiateObsFilterFactory<ufo::ObsTraits>();
+#endif
   oops::HofX4D<orcamodel::OrcaModelTraits , ufo::ObsTraits> hofx;
   int i = run.execute(hofx);
   atlas::Library::instance().finalise();
