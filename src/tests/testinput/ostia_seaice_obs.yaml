@@ -26,7 +26,10 @@ model :
   tstep: P3D
   state variables: [ ice_area_fraction ]
   states:
-    - nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+    - date: 2021-06-29T21:00:00Z
+      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      state variables: [ ice_area_fraction ]
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:
