@@ -1,4 +1,3 @@
-forecast length : P3D
 geometry :
   nemo variables:
     - name: ice_area_fraction
@@ -11,32 +10,25 @@ geometry :
       nemo field name: votemper
       type: volume
     - name: ice_area_fraction_background_error
-      nemo field name: sic_tot_var
+      nemo field name: seaice_tot_var
       type: surface
-  grid name: ORCA2_T
-  number levels: 10
+  grid name: eORCA12_T
+  number levels: 2
   variance names: [ ice_area_fraction_background_error ]
-initial condition :
+state :
   date: 2021-06-29T21:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
-  nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
-  variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-model :
-  name: PseudoModel
-  tstep: P3D
-  state variables: [ ice_area_fraction ]
-  states:
-    - date: 2021-06-29T21:00:00Z
-      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
-      variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-      state variables: [ ice_area_fraction ]
+  nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
+  variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:
 - obs space:
     name: Sea Ice
     obsdatain:
-      obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.nc
+      obsfile: /data/users/tsearle/jopa_ostia_start_data/seaice.odb
+      mapping file: ioda/test/testinput/odb_default_name_map.yml
+      query file: ioda/test/testinput/iodatest_odb_seaice.yml
       max frame size: 1000000
     obsdataout:
       obsfile: test_out.nc
@@ -46,6 +38,7 @@ observations:
     atlas-interpolator:
       type: finite-element
       non_linear: missing-if-all-missing
+      max_fraction_elems_to_try: 0.0
   obs operator:
     name: Composite
     components:
@@ -58,3 +51,12 @@ observations:
     prob density bad obs: 1.0
     initial prob gross error: 0.04
     PGE threshold: 0.5
+  - filter: NEMO Feedback Writer
+    filename: test_hofx_feedback_writer_out.nc
+    variables:
+    - name: ice_area_fraction
+      nemo name: ICECONC
+      additional variables:
+      - name: ice_area_fraction
+        feedback suffix: Hx
+        ioda group: HofX
