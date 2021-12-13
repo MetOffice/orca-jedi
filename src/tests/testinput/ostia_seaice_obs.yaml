@@ -56,6 +56,8 @@ observations:
     variables:
     - name: ice_area_fraction
       nemo name: ICECONC
+      long name: ice area fraction
+      units: Fraction
       additional variables:
       - name: ice_area_fraction
         feedback suffix: Hx

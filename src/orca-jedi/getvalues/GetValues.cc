@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <utility>
 
 #include "eckit/config/Configuration.h"
 #include "eckit/config/LocalConfiguration.h"
@@ -73,13 +74,15 @@ namespace orcamodel {
         arrv_t(i, 0) = lons[i];
         arrv_t(i, 1) = lats[i];
       }
+      oops::Log::trace() << "orcamodel::GetValues:: creating atlasObsFuncSpace "
+                         << "... done" << std::endl;
 
-      return atlas::functionspace::PointCloud(points);
+      return atlas::functionspace::PointCloud(std::move(points));
   }
 
   GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs,
             const eckit::Configuration & conf) :
-      atlasObsFuncSpace_(atlasObsFuncSpaceFactory(locs)),
+      atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(locs))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
