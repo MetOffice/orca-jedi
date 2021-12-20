@@ -18,8 +18,6 @@
 #include "eckit/exception/Exceptions.h"
 
 
-#include "oops/base/VariableChangeBase.h"
-
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
