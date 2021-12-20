@@ -14,11 +14,13 @@
 #include "orca-jedi/getvalues/GetValues.h"
 #include "orca-jedi/getvalues/LinearGetValues.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/variablechanges/LinearVariableChange.h"
 
 #include "orca-jedi/model/ModelBias.h"
 #include "orca-jedi/model/ModelBiasIncrement.h"
 #include "orca-jedi/model/ModelBiasCovariance.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/variablechanges/VariableChange.h"
 
 namespace orcamodel {
 
@@ -33,11 +35,13 @@ struct OrcaModelTraits {
   typedef orcamodel::GetValues                 GetValues;
   typedef orcamodel::LinearGetValues           LinearGetValues;
   typedef orcamodel::Increment                 Increment;
+  typedef orcamodel::LinearVariableChange      LinearVariableChange;
 
   typedef orcamodel::ModelBias                 ModelAuxControl;
   typedef orcamodel::ModelBiasIncrement        ModelAuxIncrement;
   typedef orcamodel::ModelBiasCovariance       ModelAuxCovariance;
   typedef orcamodel::State                     State;
+  typedef orcamodel::VariableChange            VariableChange;
 };
 
 }  // namespace orcamodel
