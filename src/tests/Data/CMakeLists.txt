@@ -14,6 +14,7 @@ orca2_t_coords.cdl
 ostia_seaice_obs.cdl
 ostia_seaice_obs.csv
 simple_nemo.cdl
+hofx_two_vars_obs.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
