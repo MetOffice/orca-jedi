@@ -23,3 +23,5 @@ else()
                           LIBS    orcamodel
                         )
 endif()
+oops_output_json_schema( "orcamodel_hofx.x" )
+oops_output_json_schema( "orcamodel_hofx3D.x" )
