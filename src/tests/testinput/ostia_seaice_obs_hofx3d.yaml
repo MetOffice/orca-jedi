@@ -42,11 +42,15 @@ observations:
     - name: Identity
     - name: BackgroundErrorIdentity
   obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: ice_area_fraction@GrossErrorProbability
+      type: float
+      value: 0.04
   - filter: Bayesian Background Check
     filter variables:
     - name: ice_area_fraction
     prob density bad obs: 1.0
-    initial prob gross error: 0.04
     PGE threshold: 0.5
 test:
   reference filename: testoutput/test_ostia_seaice_obs_hofx3d.ref

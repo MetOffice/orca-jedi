@@ -42,11 +42,15 @@ observations:
     - name: Identity
     - name: BackgroundErrorIdentity
   obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: sea_surface_temperature@GrossErrorProbability
+      type: float
+      value: 0.04
   - filter: Bayesian Background Check
     filter variables:
     - name: sea_surface_temperature
     prob density bad obs: 1.0
-    initial prob gross error: 0.04
     PGE threshold: 0.5
 test:
   reference filename: testoutput/test_hofx3d_nc_sst.ref
