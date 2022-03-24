@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <utility>
 
 #include "eckit/config/Configuration.h"
 #include "eckit/config/LocalConfiguration.h"
@@ -62,19 +63,26 @@ namespace orcamodel {
       }
 
       // Setup observation functionspace
-      std::vector<atlas::PointXY> atlasPoints(nlocs);
-      oops::Log::trace() << "orcamodel::GetValues:: atlasPoints with nlocs = "
-                         << nlocs << std::endl;
-      for (atlas::idx_t i=0; i < nlocs; ++i) {
-        atlasPoints[i] = atlas::PointXY(locs.lons()[i], locs.lats()[i]);
+      oops::Log::trace() << "orcamodel::GetValues:: creating atlasObsFuncSpace "
+                         << "with nlocs = " << nlocs << std::endl;
+      auto lons = locs.lons();
+      auto lats = locs.lats();
+      atlas::Field points("lonlat", atlas::array::make_datatype<double>(),
+          atlas::array::make_shape(nlocs, 2));
+      auto arrv_t = atlas::array::make_view<double, 2>(points);
+      for (atlas::idx_t i = 0; i < arrv_t.shape(0); ++i) {
+        arrv_t(i, 0) = lons[i];
+        arrv_t(i, 1) = lats[i];
       }
+      oops::Log::trace() << "orcamodel::GetValues:: creating atlasObsFuncSpace "
+                         << "... done" << std::endl;
 
-      return atlas::functionspace::PointCloud(atlasPoints);
+      return atlas::functionspace::PointCloud(std::move(points));
   }
 
   GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs,
             const eckit::Configuration & conf) :
-      atlasObsFuncSpace_(atlasObsFuncSpaceFactory(locs)),
+      atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(locs))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
@@ -137,6 +145,12 @@ namespace orcamodel {
                        << geovals << std::endl;
     oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs done "
                        << std::endl;
+  }
+
+  void GetValues::print(std::ostream & os) const {
+    os << "orcamodel::GetValues: " << std::endl;
+    os << "  Obs function space " << atlasObsFuncSpace_ << std::endl;
+    os << "  Interpolator " << interpolator_ << std::endl;
   }
 
 }  // namespace orcamodel

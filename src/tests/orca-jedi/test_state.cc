@@ -9,6 +9,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
@@ -17,6 +18,8 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "oops/util/parameters/Parameter.h"
+#include "orca-jedi/state/StateParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -51,6 +54,21 @@ CASE("test basic state") {
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
+  OrcaStateParameters params;
+
+  SECTION("test state parameters") {
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+    params.validateAndDeserialize(state_config);
+    EXPECT(params.nemoFieldFile.value() ==
+        state_config.getString("nemo field file"));
+    EXPECT(params.varianceFieldFile.value() ==
+        state_config.getString("variance field file"));
+    EXPECT(params.analyticInit.value().value_or(true));
+    auto datetime = static_cast<util::DateTime>(state_config.getString("date"));
+    EXPECT(params.date.value() == datetime);
+    EXPECT(params.stateVariables.value()[0] == state_variables[0]);
+  }
 
   SECTION("test constructor") {
     oops::Variables oops_vars(state_variables, channels);
@@ -58,20 +76,28 @@ CASE("test basic state") {
     State state(geometry, oops_vars, datetime);
   }
 
-  SECTION("test constructor from config") {
-    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
-    state_config.set("variance field file", "../testinput/orca2_t_bkg_var.nc");
-    State state(geometry, state_config);
+  SECTION("test constructor from state") {
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+    params.validateAndDeserialize(state_config);
+    State state(geometry, params);
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - 0.00323467) < 1e-6);
+    double iceNorm = 0.00323467;
+    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    state.read(params);
+    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    State stateCopy(state);
+    EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    EXPECT_THROWS_AS(state.write(params), eckit::NotImplemented);
   }
 
   SECTION("test constructor from config analytic initialisation") {
-    state_config.set("nemo field file", "../testinput/orca2_t_nemo.nc");
+    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
-    State state(geometry, state_config);
+    params.validateAndDeserialize(state_config);
+    State state(geometry, params);
     EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);
   }
 }

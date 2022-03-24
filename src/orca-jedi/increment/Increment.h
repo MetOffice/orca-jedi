@@ -69,7 +69,6 @@ class Increment : public util::Printable,
   Increment(const Geometry &, const Increment &);
   Increment(const Increment &, const bool);
   Increment(const Increment &);
-  virtual ~Increment();
 
 /// Basic operators
   void diff(const State &, const State &) {}
@@ -86,15 +85,11 @@ class Increment : public util::Printable,
   void random() {}
   void dirac(const eckit::Configuration &) {}
 
-/// Atlas interface to SABER (stubs at present)
-  void setAtlas(atlas::FieldSet *) const;
-  void toAtlas(atlas::FieldSet *) const;
-  void fromAtlas(atlas::FieldSet *);
-
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const {return 0.0; }
+  void print(std::ostream & os) const override {os << "Not Implemented";}
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
 

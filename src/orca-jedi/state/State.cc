@@ -62,16 +62,15 @@ State::State(const Geometry & geom,
 }
 
 State::State(const Geometry & geom,
-             const eckit::Configuration & conf)
+             const Parameters_ & params)
   : geom_(new Geometry(geom))
-    , vars_(conf, "state variables")
-    , time_(util::DateTime(conf.getString("date")))
-    , stateFields_()
+    , vars_(params.stateVariables)
+    , time_(params.date)
+    , stateFields_(), params_(params)
 {
-  params_.validateAndDeserialize(conf);
-  std::stringstream config_stream;
-  config_stream << "orcamodel::State:: config " << conf;
-  oops::Log::debug() << config_stream.str() << std::endl;
+  std::stringstream params_stream;
+  params_stream << "orcamodel::State:: params " << params_;
+  oops::Log::debug() << params_stream.str() << std::endl;
   oops::Log::trace() << "State(ORCA)::State:: time: " << validTime()
                      << std::endl;
 
@@ -80,28 +79,12 @@ State::State(const Geometry & geom,
   if (params_.analyticInit.value().value_or(false)) {
     this->analytic_init(*geom_);
   } else {
-    if ( !conf.has("nemo field file") ) {
-      oops::Log::trace() << "State(ORCA):: nemo field file not in configuration"
-                         << std::endl;
-      oops::Log::trace() << "State(ORCA):: Zeroing state rather than reading "
-                         << "from file" << std::endl;
-      this->zero();
-    } else {
-      readFieldsFromFile(params_, *geom_, validTime(), "background",
-          stateFields_);
-      readFieldsFromFile(params_, *geom_, validTime(), "background variance",
-          stateFields_);
-    }
+    readFieldsFromFile(params_, *geom_, validTime(), "background",
+       stateFields_);
+    readFieldsFromFile(params_, *geom_, validTime(), "background variance",
+       stateFields_);
   }
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
-}
-
-State::State(const Geometry & resol,
-             const State & other)
-{
-  std::string err_message =
-    "orcamodel::State::State created by interpolation Not implemented ";
-  throw eckit::NotImplemented(err_message, Here());
 }
 
 State::State(const State & other)
@@ -127,15 +110,6 @@ State & State::operator=(const State & rhs) {
   return *this;
 }
 
-// Interpolate full fields
-
-void State::changeResolution(const State & other) {
-  std::string err_message =
-      "orcamodel::State::State::changeResolution not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-  oops::Log::trace() << "State(ORCA)::change resolution done" << std::endl;
-}
-
 // Interactions with Increments
 
 State & State::operator+=(const Increment & dx) {
@@ -149,21 +123,14 @@ State & State::operator+=(const Increment & dx) {
 
 // I/O and diagnostics
 
-void State::read(const eckit::Configuration & config) {
+void State::read(const Parameters_ & params) {
   oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
 
   oops::Log::trace() << "State(ORCA)::read time: " << validTime()
                      << std::endl;
 
-  if ( !config.has("nemo field file") ) {
-    oops::Log::trace() << "State(ORCA)::read nemo field file not in "
-                       << "configuration" << std::endl;
-    throw eckit::AssertionFailed(
-        "State(ORCA)::read cannot find field file in configuration", Here());
-  } else {
-    readFieldsFromFile(params_, *geom_, validTime(), "background",
-        stateFields_);
-  }
+  readFieldsFromFile(params, *geom_, validTime(), "background",
+      stateFields_);
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
 
@@ -183,7 +150,7 @@ void State::setupStateFields() {
   }
 }
 
-void State::write(const eckit::Configuration & config) const {
+void State::write(const Parameters_ & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
   std::string err_message =
       "orcamodel::State::State::write not implemented";
@@ -238,16 +205,6 @@ double State::norm(const std::string & field_name) const {
     }
   }
   return sqrt(norm)/valid_points;
-}
-
-void State::accumul(const double & zz, const State & xx) {
-  oops::Log::trace() << "State(ORCA)::accumul starting" << std::endl;
-
-  std::string err_message =
-      "orcamodel::State::State::accumul not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-
-  oops::Log::trace() << "State(ORCA)::accumul done" << std::endl;
 }
 
 }  // namespace orcamodel

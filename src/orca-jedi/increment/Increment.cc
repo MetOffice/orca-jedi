@@ -45,7 +45,9 @@ Increment::Increment(const Geometry & geom,
   : geom_(new Geometry(geom)), vars_(), time_(time),
     incrementFields_()
 {
-  oops::Log::trace() << "Increment(orca)::create and zero 1" << std::endl;
+  std::string err_message =
+      "orcamodel::Increment::constructor not implemented";
+  throw eckit::NotImplemented(err_message, Here());
 }
 // -----------------------------------------------------------------------------
 Increment::Increment(const Geometry & geom,
@@ -53,46 +55,27 @@ Increment::Increment(const Geometry & geom,
   : geom_(new Geometry(geom)), vars_(other.vars_), time_(other.time_),
     incrementFields_()
 {
-//  unifiedmodel_increment_change_resol_f90(keyInc_, other.keyInc_);
-  oops::Log::trace() << "Increment(orca)::constr constructed from other."
-                     << std::endl;
+  std::string err_message =
+      "orcamodel::Increment::constructor(geom, other) not implemented";
+  throw eckit::NotImplemented(err_message, Here());
 }
 // -----------------------------------------------------------------------------
 Increment::Increment(const Increment & other, const bool copy)
   : geom_(other.geom_), vars_(other.vars_), time_(other.time_),
     incrementFields_()
 {
-    oops::Log::trace() << "Increment(orca)::constr create, zero"
-                       << "and copy = " << copy
-                       << std::endl;
+  std::string err_message =
+      "orcamodel::Increment::constructor(other, copy) not implemented";
+  throw eckit::NotImplemented(err_message, Here());
 }
 // -----------------------------------------------------------------------------
 Increment::Increment(const Increment & other)
   : geom_(other.geom_), vars_(other.vars_), time_(other.time_),
     incrementFields_()
 {
-  oops::Log::trace() << "Increment(orca)::constr create and copy 2"
-                     << std::endl;
-}
-// -----------------------------------------------------------------------------
-Increment::~Increment() {
-  oops::Log::trace() << "Increment(orca)::destructed" << std::endl;
-}
-
-// SABER interface (stubs at present)
-// -----------------------------------------------------------------------------
-void Increment::setAtlas(atlas::FieldSet * fs) const {
-  oops::Log::trace() << "Increment(orca)::setAtlas" << std::endl;
-}
-
-//------------------------------------------------------------------------
-void Increment::toAtlas(atlas::FieldSet * fs) const {
-  oops::Log::trace() << "Increment(orca)::toAtlas" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-void Increment::fromAtlas(atlas::FieldSet * fs)  {
-  oops::Log::trace() << "Increment(orca)::fromAtlas" << std::endl;
+  std::string err_message =
+      "orcamodel::Increment::copy constructor not implemented";
+  throw eckit::NotImplemented(err_message, Here());
 }
 
 

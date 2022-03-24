@@ -1,7 +1,7 @@
 forecast length : P3D
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
-geometry :
+geometry:
   nemo variables:
     - name: ice_area_fraction
       nemo field name: iiceconc
@@ -16,25 +16,28 @@ geometry :
       nemo field name: sic_tot_var
       type: surface
   grid name: ORCA2_T
-  number levels: 10
+  number levels: 2
   variance names: [ ice_area_fraction_background_error ]
 initial condition :
   date: 2021-06-29T21:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   #analytic_init: zeroed state
-  nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
-  variance field file: orca-jedi/src/tests/testinput/orca2_t_bkg_var.nc
+  nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+  variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
 model :
   name: PseudoModel
   tstep: P3D
   state variables: [ ice_area_fraction ]
   states:
-    - nemo field file: orca-jedi/src/tests/testinput/orca2_t_nemo.nc
+    - date: 2021-06-29T21:00:00Z
+      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      state variables: [ ice_area_fraction ]
 observations:
 - obs space:
     name: Sea Ice
     obsdatain:
-      obsfile: orca-jedi/src/tests/testinput/ostia_seaice_obs.odb
+      obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.odb
       mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
       query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
     obsdataout:
@@ -42,31 +45,103 @@ observations:
     simulated variables: [ice_area_fraction]
   get values:
     atlas-interpolator:
-      type: finite-element
+      type: bilinear-remapping
       non_linear: missing-if-all-missing
+      max_fraction_elems_to_try: 0.0
   obs operator:
     name: Composite
     components:
     - name: Identity
     - name: BackgroundErrorIdentity
   obs filters:
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: FinalReject
+      initial value: false
+    - name: ObNotDefinedReject
+      initial value: false
+    - name: BgNotDefinedReject
+      initial value: false
+    - name: ObOutOfBoundsReject
+      initial value: false
+    - name: BgOutOfBoundsReject
+      initial value: false
+    - name: BayBgCheckReject
+      initial value: false
   - filter: Perform Action
     filter variables:
     - name: ice_area_fraction
     action:
       name: assign error
-      error parameter: 0.1
+      error parameter: 0.3162277
+  - filter: RejectList
+    defer to post: true
+    where:
+    - variable:
+        name: ice_area_fraction@ObsValue
+      is_not_defined:
+    actions:
+    - name: set
+      flag: FinalReject
+    - name: set
+      flag: ObNotDefinedReject
+    - name: reject
+  - filter: RejectList
+    defer to post: true
+    where:
+    - variable:
+        name: ice_area_fraction@HofX
+      is_not_defined:
+    actions:
+    - name: set
+      flag: FinalReject
+    - name: set
+      flag: BgNotDefinedReject
+    - name: reject
+  - filter: Bounds Check
+    defer to post: true
+    filter variables:
+    - name: ice_area_fraction
+    minvalue: 0.0
+    maxvalue: 1.0
+    actions:
+    - name: set
+      flag: FinalReject
+    - name: set
+      flag: ObOutOfBoundsReject
+    - name: reject
+  - filter: Bounds Check
+    defer to post: true
+    filter variables:
+    - name: ice_area_fraction@HofX
+    minvalue: 0.0
+    maxvalue: 1.0
+    actions:
+    - name: set
+      flag: FinalReject
+    - name: set
+      flag: BgOutOfBoundsReject
+    - name: reject
   - filter: Bayesian Background Check
     filter variables:
     - name: ice_area_fraction
     prob density bad obs: 1.0
     initial prob gross error: 0.04
     PGE threshold: 0.5
+    actions:
+    - name: set
+      flag: FinalReject
+    - name: set
+      flag: BayBgCheckReject
+    - name: reject
   - filter: NEMO Feedback Writer
     filename: odb_nemo_fdbk_writer_out.nc
+    reference date: 1950-01-01T00:00:00Z
     variables:
     - name: ice_area_fraction
       nemo name: ICECONC
+      long name: ice area fraction
+      units: Fraction
       additional variables:
         - name: ice_area_fraction
           feedback suffix: Hx

@@ -1,6 +1,7 @@
 add_subdirectory(testinput)
 add_subdirectory(testoutput)
 add_subdirectory(orca-jedi)
+add_subdirectory(Data)
 
 
 ecbuild_add_test( TARGET test_orcamodel_hofx3D_ice

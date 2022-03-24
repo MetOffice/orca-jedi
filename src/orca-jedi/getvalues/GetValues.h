@@ -65,7 +65,7 @@ class GetValues : public util::Printable,
     const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const;
 
  private:
-  void print(std::ostream &) const override {};
+  void print(std::ostream &) const override;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
   Parameters_ params_;
