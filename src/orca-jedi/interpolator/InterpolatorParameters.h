@@ -26,8 +26,8 @@ class OrcaAtlasInterpolatorParameters : public oops::Parameters {
     max_fraction_elems_to_try{"max_fraction_elems_to_try", this};
 };
 
-class OrcaGetValuesParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(OrcaGetValuesParameters, oops::Parameters)
+class OrcaInterpolatorParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(OrcaInterpolatorParameters, oops::Parameters)
 
  public:
   oops::RequiredParameter<OrcaAtlasInterpolatorParameters> atlasInterpolator{

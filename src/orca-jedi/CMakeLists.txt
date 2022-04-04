@@ -13,10 +13,9 @@ errorcovariance/ErrorCovariance.h
 geometry/GeometryParameters.h
 geometry/Geometry.h
 geometry/Geometry.cc
-getvalues/GetValuesParameters.h
-getvalues/GetValues.h
-getvalues/GetValues.cc
-getvalues/LinearGetValues.h
+interpolator/InterpolatorParameters.h
+interpolator/Interpolator.h
+interpolator/Interpolator.cc
 increment/Increment.cc
 increment/Increment.h
 model/ModelBiasCovariance.h
@@ -31,9 +30,7 @@ nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 utilities/OrcaModelTraits.h
 variablechanges/VariableChangeParameters.h
-variablechanges/LinearVariableChangeParameters.h
 variablechanges/VariableChange.h
-variablechanges/LinearVariableChange.h
 )
 
 

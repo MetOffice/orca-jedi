@@ -48,14 +48,14 @@ class Geometry : public util::Printable {
  public:
   typedef OrcaGeometryParameters Parameters__;
 
-  // Geometry(const Parameters_ &, const eckit::mpi::Comm &);
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 
   std::vector<size_t> variableSizes(const oops::Variables &) const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
-
   const oops::Variables & variables() const;
+  void latlon(std::vector<double> & lats, std::vector<double> & lons,
+              const bool halo) const;
 
   const atlas::Mesh & mesh() const {return mesh_;}
   const atlas::functionspace::NodeColumns & funcSpace() const
