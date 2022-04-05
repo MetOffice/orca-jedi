@@ -25,10 +25,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
-
-#include "orca-jedi/getvalues/GetValuesParameters.h"
+#include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 
@@ -37,42 +34,40 @@ namespace eckit {
   class Configuration;
 }
 
-namespace ufo {
-  class GeoVaLs;
-  class Locations;
-}
-
 namespace orcamodel {
   class State;
   class Geometry;
+  class Increment;
 
 atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
-    const ufo::Locations & locs);
+    const std::vector<double> & locs);
 
-class GetValues : public util::Printable,
-  private util::ObjectCounter<GetValues> {
+class Interpolator : public util::Printable,
+  private util::ObjectCounter<Interpolator> {
  public:
-  static const std::string classname() {return "orcamodel::GetValues";}
+  static const std::string classname() {return "orcamodel::Interpolator";}
 
-  typedef OrcaGetValuesParameters Parameters_;
+  typedef OrcaInterpolatorParameters Parameters_;
 
-  GetValues(const Geometry & geom, const ufo::Locations & locs,
-    const eckit::Configuration & conf);
+  Interpolator(const eckit::Configuration & conf, const Geometry & geom,
+      const std::vector<double>& locs);
 
-  virtual ~GetValues() {}
+  virtual ~Interpolator() {}
 
-  void fillGeoVaLs(const State& state, const util::DateTime& dt_begin,
-    const util::DateTime& dt_end, ufo::GeoVaLs& geovals) const;
+  void apply(const oops::Variables& vars, const State& state, std::vector<double>& result) const;
+  void apply(const oops::Variables& vars, const Increment& inc, std::vector<double>& result) const {
+    throw eckit::NotImplemented("Increment interpolation not implemented", Here());
+  }
+  void applyAD(const oops::Variables& vars, const Increment& inc, const std::vector<double> &) const {
+    throw eckit::NotImplemented("Adjoint interpolation not implemented", Here());
+  }
 
  private:
   void print(std::ostream &) const override;
+  int64_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
   Parameters_ params_;
 };
 
 }  // namespace orcamodel
-
-
-
-

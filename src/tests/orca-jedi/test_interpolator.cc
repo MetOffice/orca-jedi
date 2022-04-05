@@ -14,14 +14,15 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
+#include "oops/util/missingValues.h"
 
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateParameters.h"
-#include "orca-jedi/getvalues/GetValues.h"
-#include "orca-jedi/getvalues/GetValuesParameters.h"
+#include "orca-jedi/interpolator/Interpolator.h"
+#include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -29,7 +30,7 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 
-CASE("test basic getvalues") {
+CASE("test basic interpolator") {
   eckit::LocalConfiguration config;
   config.set("grid name", "ORCA2_T");
   config.set("number levels", 2);
@@ -40,8 +41,7 @@ CASE("test basic getvalues") {
     .set("type", "surface");
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
-    .set("type", "surface");
-  nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
+    .set("type", "surface"); nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("type", "surface");
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
@@ -54,22 +54,15 @@ CASE("test basic getvalues") {
   eckit::LocalConfiguration interp_conf;
   interp_conf.set("type", "finite-element");
   interp_conf.set("non_linear", "missing-if-all-missing");
-  eckit::LocalConfiguration getvalues_conf;
-  getvalues_conf.set("atlas-interpolator", interp_conf);
+  eckit::LocalConfiguration interpolator_conf;
+  interpolator_conf.set("atlas-interpolator", interp_conf);
 
-  OrcaGetValuesParameters params;
-  params.validateAndDeserialize(getvalues_conf);
+  OrcaInterpolatorParameters params;
+  params.validateAndDeserialize(interpolator_conf);
 
-  std::vector<float> lons{0, 120, 270};
-  std::vector<float> lats{88, 0, 30};
-  std::vector<util::DateTime> times{
-    util::DateTime("2018-04-15T00:00:00Z"),
-    util::DateTime("2018-04-15T00:00:00Z"),
-    util::DateTime("2018-04-15T00:00:00Z")
-  };
-  std::shared_ptr<const ioda::Distribution> distribution;
-
-  ufo::Locations locations(lons, lats, times, distribution);
+  // lons{0, 120, 270};
+  // lats{88, 0, 30};
+  std::vector<double> locations({88, 0, 0, 120, 30, 270});
 
   // create a state from the test data
   eckit::LocalConfiguration state_config;
@@ -82,38 +75,25 @@ CASE("test basic getvalues") {
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  util::DateTime dt_begin("2018-04-14T00:00:00Z");
-  util::DateTime dt_end("2018-04-16T00:00:00Z");
-
   SECTION("test get values fails with no locations") {
-    ufo::Locations emptyLocations({}, {}, {}, distribution);
-    EXPECT_THROWS_AS(GetValues getvalues(geometry, emptyLocations,
-        getvalues_conf), eckit::BadValue);
+    EXPECT_THROWS_AS(
+      Interpolator interpolator(interpolator_conf, geometry, {}),
+      eckit::BadValue);
   }
 
-  GetValues getvalues(geometry, locations, getvalues_conf);
+  Interpolator interpolator(interpolator_conf, geometry, locations);
 
-  SECTION("test fillGeoVaLs fails missing variable") {
+  SECTION("test interpolator.apply fails missing variable") {
     oops::Variables variables({"NOTAVARIABLE"});
-    ufo::GeoVaLs geovals(locations, variables, std::vector<size_t>{1, 1});
-    EXPECT_THROWS_AS(getvalues.fillGeoVaLs(state, dt_begin, dt_end, geovals),
+    std::vector<double> vals(3);
+    EXPECT_THROWS_AS(interpolator.apply(variables, state, vals),
         eckit::BadParameter);
   }
 
-  SECTION("test fillGeoVaLs") {
-    // create geovals from the locations
-    std::vector<size_t> nlevs = {1};
-    ufo::GeoVaLs geovals(locations, state.variables(),
-        std::vector<size_t>{1, 1});
+  SECTION("test interpolator.apply") {
 
-    std::stringstream os;
-    os << geovals;
-
-    getvalues.fillGeoVaLs(state, dt_begin, dt_end, geovals);
-
-    // test fillGeoVaLs
-    std::vector<double> vals(geovals.nlocs());
-    geovals.get(vals, "sea_ice_area_fraction");
+    std::vector<double> vals(locations.size() / 2);
+    interpolator.apply(oops::Variables({"sea_ice_area_fraction"}), state, vals);
 
     double missing_value = util::missingValue(vals[0]);
     std::vector<double> testvals = {1, missing_value, 0};

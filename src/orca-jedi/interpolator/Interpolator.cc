@@ -27,13 +27,10 @@
 #include "oops/util/Printable.h"
 #include "oops/util/missingValues.h"
 
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
-
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 
-#include "orca-jedi/getvalues/GetValues.h"
+#include "orca-jedi/interpolator/Interpolator.h"
 
 namespace eckit {
   class Configuration;
@@ -41,7 +38,6 @@ namespace eckit {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
 }
 
 namespace orcamodel {
@@ -49,11 +45,11 @@ namespace orcamodel {
   class Geometry;
 
   atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
-      const ufo::Locations & locs) {
-      size_t nlocs = locs.size();
+      const std::vector<double>& locs) {
+      size_t nlocs = locs.size() / 2;
       if (nlocs == 0) {
         std::stringstream err_stream;
-        err_stream << "orcamodel::GetValues::"
+        err_stream << "orcamodel::Interpolator::"
                    << " Constructor called with no locations " << std::endl;
         err_stream << "         "
                    << "this might mean that there are no observations "
@@ -63,52 +59,49 @@ namespace orcamodel {
       }
 
       // Setup observation functionspace
-      oops::Log::trace() << "orcamodel::GetValues:: creating atlasObsFuncSpace "
+      oops::Log::trace() << "orcamodel::Interpolator:: creating atlasObsFuncSpace "
                          << "with nlocs = " << nlocs << std::endl;
-      auto lons = locs.lons();
-      auto lats = locs.lats();
       atlas::Field points("lonlat", atlas::array::make_datatype<double>(),
           atlas::array::make_shape(nlocs, 2));
       auto arrv_t = atlas::array::make_view<double, 2>(points);
-      for (atlas::idx_t i = 0; i < arrv_t.shape(0); ++i) {
-        arrv_t(i, 0) = lons[i];
-        arrv_t(i, 1) = lats[i];
+      for ( unsigned int j = 0, latIndex=0, lonIndex=1;
+        j < nlocs;
+        ++j, latIndex+=2, lonIndex+=2 ) {
+        arrv_t(j, 1) = locs[latIndex];
+        arrv_t(j, 0) = locs[lonIndex];
       }
-      oops::Log::trace() << "orcamodel::GetValues:: creating atlasObsFuncSpace "
+      oops::Log::trace() << "orcamodel::Interpolator:: creating atlasObsFuncSpace "
                          << "... done" << std::endl;
 
       return atlas::functionspace::PointCloud(std::move(points));
   }
 
-  GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs,
-            const eckit::Configuration & conf) :
+  Interpolator::Interpolator(const eckit::Configuration & conf, const Geometry & geom,
+      const std::vector<double>& locs) :
+      nlocs_(locs.size() / 2),
       atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(locs))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
     params_.validateAndDeserialize(conf);
-    oops::Log::trace() << "orcamodel::GetValues:: conf:" << conf
+    oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
-    oops::Log::debug() << "orcamodel::GetValues:: atlasObsFuncSpace_:"
+    oops::Log::debug() << "orcamodel::Interpolator:: atlasObsFuncSpace_:"
                        << atlasObsFuncSpace_ << std::endl;
   }
 
-  void GetValues::fillGeoVaLs(const State& state,
-      const util::DateTime& dt_begin, const util::DateTime& dt_end,
-      ufo::GeoVaLs& geovals) const {
-    std::size_t nlocs = geovals.nlocs();
+  void Interpolator::apply(const oops::Variables& vars, const State& state,
+      std::vector<double>& result) const {
 
-    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs starting "
+    oops::Log::trace() << "orcamodel::Interpolator::apply starting "
                        << std::endl;
 
-    std::vector<double> vals(nlocs);
-    const oops::Variables geovalsVars = geovals.getVars();
-    const size_t nvars = geovalsVars.size();
+    const size_t nvars = vars.size();
     for (size_t j=0; j < nvars; ++j) {
-      if (!state.variables().has(geovalsVars[j])) {
+      if (!state.variables().has(vars[j])) {
         std::stringstream err_stream;
-        err_stream << "orcamodel::GetValues::fillGeoVals geovals varname \" "
-                   << "\" " << geovalsVars[j]
+        err_stream << "orcamodel::Interpolator::apply varname \" "
+                   << "\" " << vars[j]
                    << " not found in the model state." << std::endl;
         err_stream << "    add the variable to the state variables and "
                    << "add a mapping from the geometry to that variable."
@@ -117,12 +110,12 @@ namespace orcamodel {
       }
     }
     const std::vector<size_t> varSizes =
-      state.geometry()->variableSizes(geovalsVars);
+      state.geometry()->variableSizes(vars);
     for (size_t j=0; j < nvars; ++j) {
-      auto gv_varname = geovalsVars[j];
+      auto gv_varname = vars[j];
       if (varSizes[j] != 1) {
         std::stringstream err_stream;
-        err_stream << "orcamodel::GetValues::fillGeoVals interpolating "
+        err_stream << "orcamodel::Interpolator::apply interpolating "
                    << "data with levels > 1 not implemented." << std::endl;
         throw eckit::NotImplemented(err_stream.str(), Here());
       }
@@ -132,29 +125,22 @@ namespace orcamodel {
       auto field_view = atlas::array::make_view<double, 1>(tgt_field);
       atlas::field::MissingValue mv(state.stateFields()[gv_varname]);
       bool has_mv = static_cast<bool>(mv);
-      for (std::size_t i=0; i < nlocs; i++) {
+      for (std::size_t i=0; i < nlocs_; i++) {
         if (has_mv && mv(field_view(i))) {
-          vals[i] = util::missingValue(field_view(i));
+          result[i] = util::missingValue(field_view(i));
         } else {
-          vals[i] = field_view(i);
+          result[i] = field_view(i);
         }
       }
-      geovals.putAtLevel(vals, gv_varname, 0);
     }
-    oops::Log::debug() << "orcamodel::GetValues::fillGeoVaLs geovals print: "
-                       << geovals << std::endl;
-    oops::Log::trace() << "orcamodel::GetValues::fillGeoVaLs done "
+    oops::Log::trace() << "orcamodel::Interpolator::apply done "
                        << std::endl;
   }
 
-  void GetValues::print(std::ostream & os) const {
-    os << "orcamodel::GetValues: " << std::endl;
+  void Interpolator::print(std::ostream & os) const {
+    os << "orcamodel::Interpolator: " << std::endl;
     os << "  Obs function space " << atlasObsFuncSpace_ << std::endl;
     os << "  Interpolator " << interpolator_ << std::endl;
   }
 
 }  // namespace orcamodel
-
-
-
-
