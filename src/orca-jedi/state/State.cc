@@ -87,6 +87,14 @@ State::State(const Geometry & geom,
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
+State::State(const Geometry & resol, const State & other)
+  : geom_(new Geometry(resol))
+    , vars_(other.vars_)
+    , time_(other.time_)
+    , stateFields_(other.stateFields_) {
+  oops::Log::trace() << "State(ORCA)::State resolution change, WARNING copied not changed." << std::endl;
+}
+
 State::State(const State & other)
   : geom_(other.geom_)
     , vars_(other.vars_)

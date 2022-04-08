@@ -41,7 +41,8 @@ CASE("test basic interpolator") {
     .set("type", "surface");
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
-    .set("type", "surface"); nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
+    .set("type", "surface");
+  nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("type", "surface");
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
@@ -66,7 +67,7 @@ CASE("test basic interpolator") {
 
   // create a state from the test data
   eckit::LocalConfiguration state_config;
-  std::vector<std::string> state_variables {"sea_ice_area_fraction"};
+  std::vector<std::string> state_variables {"sea_ice_area_fraction", "sea_surface_foundation_temperature"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2018-04-15T00:00:00Z");
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
@@ -93,14 +94,17 @@ CASE("test basic interpolator") {
   SECTION("test interpolator.apply") {
 
     std::vector<double> vals(locations.size() / 2);
-    interpolator.apply(oops::Variables({"sea_ice_area_fraction"}), state, vals);
+    interpolator.apply(oops::Variables({"sea_ice_area_fraction", "sea_surface_foundation_temperature"}), state, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {1, missing_value, 0};
+    std::vector<double> testvals = {1, missing_value, 0, 18, 18, 18};
 
     EXPECT_EQUAL(vals[0], testvals[0]);
     EXPECT_EQUAL(vals[1], testvals[1]);
     EXPECT_EQUAL(vals[2], testvals[2]);
+    //EXPECT_EQUAL(vals[3], testvals[3]);
+    //EXPECT_EQUAL(vals[4], testvals[4]);
+    //EXPECT_EQUAL(vals[5], testvals[5]);
   }
 }
 

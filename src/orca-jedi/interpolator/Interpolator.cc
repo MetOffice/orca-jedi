@@ -97,6 +97,8 @@ namespace orcamodel {
                        << std::endl;
 
     const size_t nvars = vars.size();
+    result.resize(nlocs_ * nvars);
+
     for (size_t j=0; j < nvars; ++j) {
       if (!state.variables().has(vars[j])) {
         std::stringstream err_stream;
@@ -127,9 +129,9 @@ namespace orcamodel {
       bool has_mv = static_cast<bool>(mv);
       for (std::size_t i=0; i < nlocs_; i++) {
         if (has_mv && mv(field_view(i))) {
-          result[i] = util::missingValue(field_view(i));
+          result[i+(nlocs_*j)] = util::missingValue(field_view(i));
         } else {
-          result[i] = field_view(i);
+          result[i+(nlocs_*j)] = field_view(i);
         }
       }
     }
