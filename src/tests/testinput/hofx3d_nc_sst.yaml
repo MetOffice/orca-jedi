@@ -29,7 +29,7 @@ observations:
       obsfile: Data/hofx_sst_obs.nc
       max frame size: 1000000
     obsdataout:
-      obsfile: test_out.nc
+      obsfile: testoutput/hofx3d_nc_sst_jopa.nc
       max frame size: 1000000
     simulated variables: [sea_surface_temperature]
   get values:

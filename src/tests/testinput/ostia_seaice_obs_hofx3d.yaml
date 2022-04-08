@@ -29,7 +29,7 @@ observations:
       obsfile: Data/ostia_seaice_obs.nc
       max frame size: 1000000
     obsdataout:
-      obsfile: test_out.nc
+      obsfile: testoutput/test_ostia_seaice_obs_hofx3d_jopa.nc
       max frame size: 1000000
     simulated variables: [ice_area_fraction]
   get values:

@@ -51,7 +51,7 @@ namespace orcamodel {
 State::State(const Geometry & geom,
              const oops::Variables & vars,
              const util::DateTime & time)
-  : geom_(new Geometry(geom)), vars_(vars), time_(time)
+  : geom_(new Geometry(geom)), vars_(vars), time_(time), params_()
 {
   stateFields_ = atlas::FieldSet();
 
@@ -89,14 +89,20 @@ State::State(const Geometry & geom,
 
 State::State(const Geometry & resol, const State & other)
   : geom_(new Geometry(resol))
+    , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
+  ASSERT(other.geom_->grid().uid() == resol.grid().uid());
+  std::stringstream params_stream;
+  params_stream << "orcamodel::State:: params " << params_;
+  oops::Log::debug() << params_stream.str() << std::endl;
   oops::Log::trace() << "State(ORCA)::State resolution change, WARNING copied not changed." << std::endl;
 }
 
 State::State(const State & other)
   : geom_(other.geom_)
+    , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
@@ -136,6 +142,8 @@ void State::read(const Parameters_ & params) {
 
   oops::Log::trace() << "State(ORCA)::read time: " << validTime()
                      << std::endl;
+
+  params_ = params;
 
   readFieldsFromFile(params, *geom_, validTime(), "background",
       stateFields_);
