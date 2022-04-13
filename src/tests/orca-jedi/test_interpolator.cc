@@ -6,6 +6,7 @@
  */
 
 #include<sstream>
+#include<cmath>
 
 #include "eckit/log/Bytes.h"
 #include "eckit/config/LocalConfiguration.h"
@@ -28,12 +29,16 @@
 namespace orcamodel {
 namespace test {
 
+const double ATOL = 1e-6;
+
 //-----------------------------------------------------------------------------
 
 CASE("test basic interpolator") {
+
+  int nlevs = 3;
   eckit::LocalConfiguration config;
   config.set("grid name", "ORCA2_T");
-  config.set("number levels", 2);
+  config.set("number levels", nlevs);
 
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
@@ -67,16 +72,18 @@ CASE("test basic interpolator") {
 
   // create a state from the test data
   eckit::LocalConfiguration state_config;
-  std::vector<std::string> state_variables {"sea_ice_area_fraction", "sea_surface_foundation_temperature"};
+  std::vector<std::string> state_variables {"sea_ice_area_fraction"
+                                           ,"sea_surface_foundation_temperature"
+                                           ,"sea_water_potential_temperature"};
   state_config.set("state variables", state_variables);
-  state_config.set("date", "2018-04-15T00:00:00Z");
+  state_config.set("date", "2021-06-30T00:00:00Z");
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
   state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
   OrcaStateParameters stateParams;
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  SECTION("test get values fails with no locations") {
+  SECTION("test interpolator fails with no locations") {
     EXPECT_THROWS_AS(
       Interpolator interpolator(interpolator_conf, geometry, {}),
       eckit::BadValue);
@@ -93,18 +100,35 @@ CASE("test basic interpolator") {
 
   SECTION("test interpolator.apply") {
 
-    std::vector<double> vals(locations.size() / 2);
+    // two variables at n locations
+    std::vector<double> vals(2*(locations.size() / 2));
     interpolator.apply(oops::Variables({"sea_ice_area_fraction", "sea_surface_foundation_temperature"}), state, vals);
 
     double missing_value = util::missingValue(vals[0]);
     std::vector<double> testvals = {1, missing_value, 0, 18, 18, 18};
 
-    EXPECT_EQUAL(vals[0], testvals[0]);
-    EXPECT_EQUAL(vals[1], testvals[1]);
-    EXPECT_EQUAL(vals[2], testvals[2]);
+    EXPECT(std::abs(vals[0] - testvals[0]) < ATOL);
+    EXPECT(std::abs(vals[1] - testvals[1]) < ATOL);
+    EXPECT(std::abs(vals[2] - testvals[2]) < ATOL);
     //EXPECT_EQUAL(vals[3], testvals[3]);
     //EXPECT_EQUAL(vals[4], testvals[4]);
     //EXPECT_EQUAL(vals[5], testvals[5]);
+  }
+  SECTION("test interpolator.apply multiple levels") {
+    std::vector<double> vals(nlevs*(locations.size() / 2));
+    interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
+                                       state, vals);
+
+    double missing_value = util::missingValue(vals[0]);
+    std::vector<double> testvals = {18.4888621288, 18.0012965, missing_value,
+                                    missing_value, missing_value, missing_value,
+                                    18.1592999503, 17.75000288, missing_value};
+
+    for (int i=0; i < testvals.size(); ++i) {
+      std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
+                << "testvals[" << i << "] " << testvals[i] << std::endl;
+      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
+    }
   }
 }
 

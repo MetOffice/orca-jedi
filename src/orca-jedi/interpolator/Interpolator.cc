@@ -97,7 +97,6 @@ namespace orcamodel {
                        << std::endl;
 
     const size_t nvars = vars.size();
-    result.resize(nlocs_ * nvars);
 
     for (size_t j=0; j < nvars; ++j) {
       if (!state.variables().has(vars[j])) {
@@ -111,27 +110,30 @@ namespace orcamodel {
         throw eckit::BadParameter(err_stream.str(), Here());
       }
     }
+
     const std::vector<size_t> varSizes =
       state.geometry()->variableSizes(vars);
+    size_t nvals = 0;
+    for (size_t j=0; j < nvars; ++j) nvals += nlocs_ * varSizes[j];
+    result.resize(nvals);
+
     for (size_t j=0; j < nvars; ++j) {
       auto gv_varname = vars[j];
-      if (varSizes[j] != 1) {
-        std::stringstream err_stream;
-        err_stream << "orcamodel::Interpolator::apply interpolating "
-                   << "data with levels > 1 not implemented." << std::endl;
-        throw eckit::NotImplemented(err_stream.str(), Here());
-      }
       atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
-          atlas::option::name(gv_varname));
+          atlas::option::name(gv_varname) |
+          atlas::option::levels(varSizes[j]));
       interpolator_.execute(state.stateFields()[gv_varname], tgt_field);
-      auto field_view = atlas::array::make_view<double, 1>(tgt_field);
+      auto field_view = atlas::array::make_view<double, 2>(tgt_field);
       atlas::field::MissingValue mv(state.stateFields()[gv_varname]);
       bool has_mv = static_cast<bool>(mv);
       for (std::size_t i=0; i < nlocs_; i++) {
-        if (has_mv && mv(field_view(i))) {
-          result[i+(nlocs_*j)] = util::missingValue(field_view(i));
-        } else {
-          result[i+(nlocs_*j)] = field_view(i);
+        for (std::size_t k=0; k < varSizes[j]; ++k) {
+          std::size_t out_idx = (nlocs_*j)+(i*varSizes[j])+k;
+          if (has_mv && mv(field_view(i, k))) {
+            result[out_idx] = util::missingValue(field_view(i, k));
+          } else {
+            result[out_idx] = field_view(i,k);
+          }
         }
       }
     }

@@ -1,0 +1,57 @@
+geometry :
+  nemo variables:
+    - name: depth
+      nemo field name: nav_lev
+      type: vertical
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      type: volume
+    - name: sea_water_potential_temperature_background_error
+      nemo field name: t_tot_var
+      type: volume
+  grid name: ORCA2_T
+  number levels: 3
+  variance names: [ sea_water_potential_temperature_background_error ]
+state :
+  date: 2021-06-30T00:00:00Z
+  state variables: [ sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth ]
+  nemo field file: Data/orca2_t_nemo.nc
+  variance field file: Data/orca2_t_bkg_var.nc
+window begin: 2021-06-30T00:00:00Z
+window length: P1D
+observations:
+- obs space:
+    name: Sea Temperature
+    obsdatain:
+      obsfile: Data/hofx_potm_obs.nc
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: depth
+        sort group: ObsValue
+        sort order: descending
+    obsdataout:
+      obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
+    simulated variables: [sea_water_potential_temperature]
+  get values:
+    atlas-interpolator:
+      type: unstructured-bilinear-lonlat
+      non_linear: missing-if-all-missing
+  obs operator:
+    name: VertInterp
+    variables:
+    - name: sea_water_potential_temperature
+    vertical coordinate: depth
+    observation vertical coordinate group: ObsValue
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: sea_water_potential_temperature@GrossErrorProbability
+      type: float
+      value: 0.04
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: sea_water_potential_temperature
+    Checks: ["Basic"]
+    maxlev: 1000
+test:
+  reference filename: testoutput/test_hofx3d_nc_potm.ref

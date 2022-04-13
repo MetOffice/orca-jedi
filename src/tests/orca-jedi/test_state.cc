@@ -53,7 +53,7 @@ CASE("test basic state") {
   eckit::LocalConfiguration state_config;
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
-  state_config.set("date", "2018-04-15T00:00:00Z");
+  state_config.set("date", "2021-06-30T00:00:00Z");
   OrcaStateParameters params;
 
   SECTION("test state parameters") {
@@ -72,7 +72,7 @@ CASE("test basic state") {
 
   SECTION("test constructor") {
     oops::Variables oops_vars(state_variables, channels);
-    util::DateTime datetime("2018-04-15T00:00:00Z");
+    util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
   }
 

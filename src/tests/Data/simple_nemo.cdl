@@ -2,14 +2,18 @@ netcdf simple_fdbk {
 dimensions:
 	x = 3 ;
 	y = 2 ;
+	z = 2 ;
         t = 3 ;
 variables:
         double nav_lat(y, x) ;
 	double nav_lon(y, x) ;
-        double iiceconc(t, y, x) ;
-            iiceconc:_FillValue = -32768 ;
+	double nav_lev(z) ;
         int t(t);
             t:units = "seconds since 1970-01-01 00:00:00" ;
+        double iiceconc(t, y, x) ;
+            iiceconc:_FillValue = -32768 ;
+        double votemper(t, z, y, x) ;
+            iiceconc:_FillValue = -32768 ;
 
 data:
 
@@ -30,5 +34,21 @@ data:
   151, 161, 171,
   122, 132, 142,
   152, 162, 172 ;
+
+ votemper =
+  1111, 1112, 1113,
+  1121, 1122, 1123,
+  1211, 1212, 1213,
+  1221, 1222, 1223,
+
+  2111, 2112, 2113,
+  2121, 2122, 2123,
+  2211, 2212, 2213,
+  2221, 2222, 2223,
+
+  3111, 3112, 3113,
+  3121, 3122, 3123,
+  3211, 3212, 3213,
+  3221, 3222, 3223 ;
 
 }

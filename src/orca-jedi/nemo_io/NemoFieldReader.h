@@ -41,7 +41,11 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
   std::vector<double> read_surf_var(const std::string& varname,
       const size_t t_indx);
   void read_surf_var(const std::string& varname, const size_t t_indx,
-      atlas::array::ArrayView<double, 1>& field_view);
+      atlas::array::ArrayView<double, 2>& field_view);
+  void read_volume_var(const std::string& varname, const size_t t_indx,
+      atlas::array::ArrayView<double, 2>& field_view);
+  void read_vertical_var(const std::string& varname,
+      atlas::array::ArrayView<double, 2>& field_view);
 
  private:
   NemoFieldReader() : ncFile() {}

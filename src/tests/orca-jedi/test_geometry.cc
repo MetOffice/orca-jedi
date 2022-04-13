@@ -27,7 +27,7 @@ CASE("test basic geometry") {
   EXPECT(eckit::system::Library::exists("atlas-orca"));
 
   eckit::LocalConfiguration config;
-  std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
+  std::vector<eckit::LocalConfiguration> nemo_var_mappings(5);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
     .set("nemo field name", "iiceconc")
     .set("type", "surface");
@@ -40,6 +40,9 @@ CASE("test basic geometry") {
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
     .set("nemo field name", "votemper")
     .set("type", "volume");
+  nemo_var_mappings[4].set("name", "depth")
+    .set("nemo field name", "nav_lev")
+    .set("type", "vertical");
   config.set("nemo variables", nemo_var_mappings);
   config.set("variance names",
       std::vector<std::string>{"sea_ice_area_fraction_error"});
@@ -70,6 +73,35 @@ CASE("test basic geometry") {
     EXPECT_EQUAL(varsizes[1], 10);
     oops::Variables not_vars({"NOTAVARIBLE"}, channels);
     EXPECT_THROWS_AS(geometry.variableSizes(not_vars), eckit::BadValue);
+  }
+
+  SECTION("test geometry variable NEMO types") {
+    const std::vector<int> channels{};
+    std::vector<std::string> varnames {"sea_ice_area_fraction",
+      "sea_water_potential_temperature", "depth"};
+    oops::Variables oops_vars(varnames, channels);
+    auto varsizes = geometry.variableNemoTypes(oops_vars);
+    EXPECT_EQUAL(varsizes.size(), 3);
+    EXPECT_EQUAL(varsizes[0], "surface");
+    EXPECT_EQUAL(varsizes[1], "volume");
+    EXPECT_EQUAL(varsizes[2], "vertical");
+
+    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
+    EXPECT_THROWS_AS(geometry.variableNemoTypes(not_vars), eckit::BadValue);
+
+    eckit::LocalConfiguration bad_config;
+    std::vector<eckit::LocalConfiguration> bad_mappings(1);
+    bad_mappings[0].set("name", "sea_ice_area_fraction")
+      .set("nemo field name", "iiceconc")
+      .set("type", "NONSENSICAL");
+    bad_config.set("nemo variables", bad_mappings);
+    bad_config.set("variance names",
+        std::vector<std::string>{"sea_ice_area_fraction_error"});
+    bad_config.set("grid name", "ORCA2_T");
+    bad_config.set("number levels", 10);
+    Geometry bad_geometry(bad_config, eckit::mpi::comm());
+    EXPECT_THROWS_AS(bad_geometry.variableNemoTypes(oops_vars),
+      eckit::BadValue);
   }
 }
 
