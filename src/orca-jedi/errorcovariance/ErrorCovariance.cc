@@ -36,25 +36,25 @@ ErrorCovariance::ErrorCovariance(const Geometry & resol,
     geom_(std::make_shared<const Geometry>(resol)),
     time_(conf.getString("date"))
 {
-    oops::Log::trace() << "ErrorCovariance(UM) created" << std::endl;
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) created" << std::endl;
 }
 
 
 ErrorCovariance::~ErrorCovariance() {
-    oops::Log::trace() << "ErrorCovariance(UM) destructed" << std::endl;
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) destructed" << std::endl;
 }
 
 
 void ErrorCovariance::linearize(const State &,
                                 const Geometry & resol) {
     geom_.reset(new Geometry(resol));
-    oops::Log::trace() << "ErrorCovariance(UM) linearize" << std::endl;
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) linearize" << std::endl;
 }
 
 
 void ErrorCovariance::multiply(const Increment & dxin,
                                Increment & dxout) const {
-    oops::Log::trace() << "ErrorCovariance(UM) multiply start dxin"
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) multiply start dxin"
                        <<  dxin << std::endl;
 
     dxout = dxin;
@@ -62,7 +62,7 @@ void ErrorCovariance::multiply(const Increment & dxin,
       "umjedi::ErrorCovariance::multiply option not implemented";
     throw eckit::NotImplemented(err_message, Here());
 
-    oops::Log::trace() << "ErrorCovariance(UM) multiply end dxout"
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) multiply end dxout"
                        << dxout << std::endl;
 }
 
@@ -73,12 +73,12 @@ void ErrorCovariance::inverseMultiply(const Increment & dxin,
     std::string err_message =
             "umjedi::ErrorCovariance::inverseMultiply notimplemented ";
     throw eckit::NotImplemented(err_message, Here());
-    oops::Log::trace() << "ErrorCovariance(UM) inverseMultiply" << std::endl;
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) inverseMultiply" << std::endl;
 }
 
 
 void ErrorCovariance::randomize(Increment & dx) const {
-    oops::Log::trace() << "ErrorCovariance(UM) randomize" << std::endl;
+    oops::Log::trace() << "ErrorCovariance(orca-jedi) randomize" << std::endl;
     std::string err_message =
             "umjedi::ErrorCovariance::randomise not implemented ";
     throw eckit::NotImplemented(err_message, Here());
