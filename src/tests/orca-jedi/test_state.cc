@@ -35,18 +35,18 @@ CASE("test basic state") {
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
     .set("nemo field name", "iiceconc")
-    .set("type", "surface");
+    .set("model space", "surface");
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
-    .set("type", "surface");
+    .set("model space", "surface")
+    .set("variable type", "background variance");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
-    .set("type", "surface");
+    .set("model space", "surface");
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
     .set("nemo field name", "votemper")
-    .set("type", "volume");
+    .set("model space", "volume");
   config.set("nemo variables", nemo_var_mappings);
-  config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
   const std::vector<int> channels{};
 

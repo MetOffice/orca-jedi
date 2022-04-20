@@ -2,19 +2,20 @@ geometry :
   nemo variables:
     - name: ice_area_fraction
       nemo field name: iiceconc
-      type: surface
+      model space: surface
     - name: sea_surface_temperature
       nemo field name: votemper
-      type: surface
+      model space: surface
     - name: ice_area_fraction_background_error
       nemo field name: sic_tot_var
-      type: surface
+      model space: surface
+      variable type: background variance
     - name: sea_surface_temperature_background_error
       nemo field name: t_tot_var
-      type: surface
+      model space: surface
+      variable type: background variance
   grid name: ORCA2_T
   number levels: 1
-  variance names: [ ice_area_fraction_background_error, sea_surface_temperature_background_error ]
 state :
   date: 2021-06-29T21:00:00Z
   state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]

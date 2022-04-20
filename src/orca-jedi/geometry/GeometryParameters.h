@@ -25,7 +25,8 @@ class NemoFieldParameters : public oops::Parameters {
  public:
   oops::RequiredParameter<std::string> name {"name", this};
   oops::RequiredParameter<std::string> nemoName {"nemo field name", this};
-  oops::RequiredParameter<std::string> type {"type", this};
+  oops::RequiredParameter<std::string> modelSpace {"model space", this};
+  oops::OptionalParameter<std::string> variableType {"variable type", this};
 };
 
 class OrcaGeometryParameters : public oops::Parameters {
@@ -34,8 +35,6 @@ class OrcaGeometryParameters : public oops::Parameters {
  public:
   oops::RequiredParameter<std::vector<NemoFieldParameters>> nemoFields
     {"nemo variables", this};
-  oops::RequiredParameter<oops::Variables> varianceVars
-    {"variance names", this};
   oops::RequiredParameter<std::string> gridName
     {"grid name", this};
   oops::RequiredParameter<int> nLevels {"number levels", this};

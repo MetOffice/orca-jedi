@@ -69,7 +69,6 @@ class Geometry : public util::Printable {
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
-  oops::Variables variance_vars_;
   size_t n_levels_;
   Parameters__ params_;
   atlas::Grid grid_;

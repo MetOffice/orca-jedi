@@ -46,7 +46,6 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
 Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
-                      variance_vars_(config, "variance names"),
                       grid_(config.getString("grid name")),
                       n_levels_(config.getInt("number levels"))
 {
@@ -89,7 +88,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
   for (size_t i=0; i < vars.size(); ++i) {
     for (const auto & nemoField : nemoFields) {
       if (nemoField.name.value() == vars[i]) {
-        if (nemoField.type.value() == "surface") {
+        if (nemoField.modelSpace.value() == "surface") {
           varSizes[i] = 1;
         } else {
           varSizes[i] = n_levels_;
@@ -129,12 +128,18 @@ const oops::Variables & Geometry::variables() const {
 /// \return        Boolean for membership.
 const bool Geometry::variable_in_variable_type(std::string variable_name,
   std::string variable_type) const {
-  bool is_bkg_var = variance_vars_.has(variable_name);
-  if (variable_type == "background variance") {
-    return is_bkg_var;
-  } else {
-    return !is_bkg_var;
+  auto nemoFields = params_.nemoFields.value();
+  for (const auto & nemoField : nemoFields) {
+    if (nemoField.name.value() == variable_name) {
+      return nemoField.variableType.value().value_or("background") == variable_type;
+    }
   }
+
+  std::stringstream err_stream;
+  err_stream << "orcamodel::Geometry::variable_in_variable_type variable name \" ";
+  err_stream << "\" " << variable_name << " not recognised. " << std::endl;
+  throw eckit::BadValue(err_stream.str(), Here());
+
 }
 
 void Geometry::print(std::ostream & os) const {
