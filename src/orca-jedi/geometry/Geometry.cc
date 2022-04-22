@@ -50,14 +50,19 @@ Geometry::Geometry(const eckit::Configuration & config,
                       n_levels_(config.getInt("number levels"))
 {
     params_.validateAndDeserialize(config);
-    auto meshgen_config = grid_.meshgenerator();
+    int64_t halo = params_.sourceMeshHalo.value().value_or(0);
+    auto meshgen_config = grid_.meshgenerator()
+                          | atlas::option::halo(halo);
+    if (comm.size() > 1)
+      throw eckit::BadValue("orcamodel::Geometry MPI not supported", Here());
+
     atlas::MeshGenerator meshgen(meshgen_config);
     auto partitioner_config = grid_.partitioner();
     partitioner_ = atlas::grid::Partitioner(partitioner_config);
-    mesh_ = meshgen.generate(grid_, partitioner_.partition(grid_));
+    mesh_ = meshgen.generate(grid_, partitioner_);
 
     funcSpace_ = atlas::functionspace::NodeColumns(
-        mesh_, atlas::option::halo(params_.sourceMeshHalo.value().value_or(0)));
+        mesh_, atlas::option::halo(halo));
 }
 
 // -----------------------------------------------------------------------------
