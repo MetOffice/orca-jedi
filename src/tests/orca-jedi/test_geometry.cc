@@ -74,7 +74,7 @@ CASE("test basic geometry") {
     EXPECT_THROWS_AS(geometry.variableSizes(not_vars), eckit::BadValue);
   }
 
-  SECTION("test geometry variable NEMO types") {
+  SECTION("test geometry variable NEMO model spaces") {
     const std::vector<int> channels{};
     std::vector<std::string> varnames {"sea_ice_area_fraction",
       "sea_water_potential_temperature", "depth"};
@@ -92,10 +92,8 @@ CASE("test basic geometry") {
     std::vector<eckit::LocalConfiguration> bad_mappings(1);
     bad_mappings[0].set("name", "sea_ice_area_fraction")
       .set("nemo field name", "iiceconc")
-      .set("type", "NONSENSICAL");
+      .set("model space", "NONSENSICAL");
     bad_config.set("nemo variables", bad_mappings);
-    bad_config.set("variance names",
-        std::vector<std::string>{"sea_ice_area_fraction_error"});
     bad_config.set("grid name", "ORCA2_T");
     bad_config.set("number levels", 10);
     Geometry bad_geometry(bad_config, eckit::mpi::comm());

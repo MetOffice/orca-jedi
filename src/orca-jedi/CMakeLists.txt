@@ -37,7 +37,7 @@ variablechanges/VariableChange.h
 
 ecbuild_add_library( TARGET   orcamodel
                      SOURCES  ${oops_orcamodel_src_files}
-                     PUBLIC_LIBS  oops saber ufo atlas netcdf 
+                     PUBLIC_LIBS  oops ufo atlas eckit netcdf
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

@@ -2,16 +2,16 @@ geometry :
   nemo variables:
     - name: depth
       nemo field name: nav_lev
-      type: vertical
+      model space: vertical
     - name: sea_water_potential_temperature
       nemo field name: votemper
-      type: volume
+      model space: volume
     - name: sea_water_potential_temperature_background_error
       nemo field name: t_tot_var
-      type: volume
+      model space: volume
+      variable type: background variance
   grid name: ORCA2_T
   number levels: 3
-  variance names: [ sea_water_potential_temperature_background_error ]
 state :
   date: 2021-06-30T00:00:00Z
   state variables: [ sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth ]
