@@ -52,7 +52,7 @@ class Geometry : public util::Printable {
   ~Geometry();
 
   std::vector<size_t> variableSizes(const oops::Variables &) const;
-  std::vector<std::string> variableNemoTypes(const oops::Variables & vars)
+  std::vector<std::string> variableNemoSpaces(const oops::Variables & vars)
       const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
   const oops::Variables & variables() const;

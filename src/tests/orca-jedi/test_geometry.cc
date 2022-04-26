@@ -79,14 +79,14 @@ CASE("test basic geometry") {
     std::vector<std::string> varnames {"sea_ice_area_fraction",
       "sea_water_potential_temperature", "depth"};
     oops::Variables oops_vars(varnames, channels);
-    auto varsizes = geometry.variableNemoTypes(oops_vars);
+    auto varsizes = geometry.variableNemoSpaces(oops_vars);
     EXPECT_EQUAL(varsizes.size(), 3);
     EXPECT_EQUAL(varsizes[0], "surface");
     EXPECT_EQUAL(varsizes[1], "volume");
     EXPECT_EQUAL(varsizes[2], "vertical");
 
     oops::Variables not_vars({"NOTAVARIBLE"}, channels);
-    EXPECT_THROWS_AS(geometry.variableNemoTypes(not_vars), eckit::BadValue);
+    EXPECT_THROWS_AS(geometry.variableNemoSpaces(not_vars), eckit::BadValue);
 
     eckit::LocalConfiguration bad_config;
     std::vector<eckit::LocalConfiguration> bad_mappings(1);
@@ -99,7 +99,7 @@ CASE("test basic geometry") {
     bad_config.set("grid name", "ORCA2_T");
     bad_config.set("number levels", 10);
     Geometry bad_geometry(bad_config, eckit::mpi::comm());
-    EXPECT_THROWS_AS(bad_geometry.variableNemoTypes(oops_vars),
+    EXPECT_THROWS_AS(bad_geometry.variableNemoSpaces(oops_vars),
       eckit::BadValue);
   }
 }
