@@ -122,6 +122,46 @@ void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
   }
 }
 
+// -----------------------------------------------------------------------------
+/// \brief Give the type of nemo field for each variable - surface, volume or
+///         vertical. at the moment we need this distinction to read 3D depth
+///         data from a 1D array
+/// \param[in]     vars  variables to check.
+/// \return        vector of variable Nemo types.
+std::vector<std::string> Geometry::variableNemoTypes(
+    const oops::Variables & vars) const
+{
+  std::vector<std::string> varNemoTypes(vars.size(), "");
+
+  auto nemoFields = params_.nemoFields.value();
+
+  for (size_t i=0; i < vars.size(); ++i) {
+    for (const auto & nemoField : nemoFields) {
+      if (nemoField.name.value() == vars[i]) {
+        if (nemoField.type.value() == "surface" ||
+            nemoField.type.value() == "volume" ||
+            nemoField.type.value() == "vertical" ) {
+          varNemoTypes[i] = nemoField.type.value();
+        } else {
+            std::stringstream err_stream;
+            err_stream << "orcamodel::Geometry::variableNemoTypes type \""
+                       << nemoField.type.value() << "\" not recognised for "
+                       << "field \"" << nemoField.name.value() << "\"."
+                       << std::endl;
+            throw eckit::BadValue(err_stream.str(), Here());
+        }
+      }
+    }
+    if (varNemoTypes[i] == "") {
+      std::stringstream err_stream;
+      err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
+      err_stream << "\" " << vars[i] << " not recognised. " << std::endl;
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+  }
+  return varNemoTypes;
+}
+
 const oops::Variables & Geometry::variables() const {
   return vars_;
 }

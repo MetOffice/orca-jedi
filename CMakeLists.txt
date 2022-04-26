@@ -22,11 +22,10 @@ set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
 find_package( NetCDF COMPONENTS CXX)
 ecbuild_debug( "   NetCDF_FEATURES: [${NetCDF_FEATURES}]" )
 
-ecbuild_find_package( NAME eckit VERSION 1.16 COMPONENTS LZ4 REQUIRED )
+ecbuild_find_package( NAME eckit VERSION 1.18 COMPONENTS LZ4 REQUIRED )
 ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 
-#ecbuild_find_package( NAME atlas VERSION 0.25 REQUIRED )
-ecbuild_find_package( NAME atlas )
+ecbuild_find_package( NAME atlas VERSION 0.29 REQUIRED )
 ecbuild_debug( "   atlas_FEATURES: [${atlas_FEATURES}]" )
 
 ecbuild_find_package( NAME oops )

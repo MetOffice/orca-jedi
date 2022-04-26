@@ -94,10 +94,8 @@ State::State(const Geometry & resol, const State & other)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
   ASSERT(other.geom_->grid().uid() == resol.grid().uid());
-  std::stringstream params_stream;
-  params_stream << "orcamodel::State:: params " << params_;
-  oops::Log::debug() << params_stream.str() << std::endl;
-  oops::Log::trace() << "State(ORCA)::State resolution change, WARNING copied not changed." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State resolution change,"
+                     << " WARNING copied not changed." << std::endl;
 }
 
 State::State(const State & other)
@@ -159,9 +157,11 @@ void State::analytic_init(const Geometry & geom) {
 void State::setupStateFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in stateFields
-    if (!stateFields_.has_field(vars_[i])) {
+    std::vector<size_t> varSizes = geom_->variableSizes(vars_);
+    if (!stateFields_.has(vars_[i])) {
       stateFields_.add(geom_->funcSpace().createField<double>(
-            atlas::option::name(vars_[i])));
+           atlas::option::name(vars_[i]) |
+           atlas::option::levels(varSizes[i])));
     }
   }
 }
@@ -197,9 +197,11 @@ void State::zero() {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    auto field_view = atlas::array::make_view<double, 1>(field);
+    auto field_view = atlas::array::make_view<double, 2>(field);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      field_view(j) = 0;
+      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        field_view(j, k) = 0;
+      }
     }
   }
 
@@ -210,14 +212,16 @@ double State::norm(const std::string & field_name) const {
   double norm = 0;
   int valid_points = 0;
 
-  auto field_view = atlas::array::make_view<double, 1>(
+  auto field_view = atlas::array::make_view<double, 2>(
       stateFields_[field_name]);
   atlas::field::MissingValue mv(stateFields()[field_name]);
   bool has_mv = static_cast<bool>(mv);
   for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-    if ((!has_mv) || (has_mv && !mv(field_view(j)))) {
-      norm += field_view(j)*field_view(j);
-      ++valid_points;
+    for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+      if ((!has_mv) || (has_mv && !mv(field_view(j, k)))) {
+        norm += field_view(j, k)*field_view(j, k);
+        ++valid_points;
+      }
     }
   }
   return sqrt(norm)/valid_points;
