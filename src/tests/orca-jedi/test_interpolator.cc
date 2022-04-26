@@ -34,7 +34,6 @@ const double ATOL = 1e-6;
 //-----------------------------------------------------------------------------
 
 CASE("test basic interpolator") {
-
   int nlevs = 3;
   eckit::LocalConfiguration config;
   config.set("grid name", "ORCA2_T");
@@ -72,9 +71,10 @@ CASE("test basic interpolator") {
 
   // create a state from the test data
   eckit::LocalConfiguration state_config;
-  std::vector<std::string> state_variables {"sea_ice_area_fraction"
-                                           ,"sea_surface_foundation_temperature"
-                                           ,"sea_water_potential_temperature"};
+  std::vector<std::string> state_variables {
+      "sea_ice_area_fraction",
+      "sea_surface_foundation_temperature",
+      "sea_water_potential_temperature"};
   state_config.set("state variables", state_variables);
   state_config.set("date", "2021-06-30T00:00:00Z");
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
@@ -99,10 +99,10 @@ CASE("test basic interpolator") {
   }
 
   SECTION("test interpolator.apply") {
-
     // two variables at n locations
     std::vector<double> vals(2*(locations.size() / 2));
-    interpolator.apply(oops::Variables({"sea_ice_area_fraction", "sea_surface_foundation_temperature"}), state, vals);
+    interpolator.apply(oops::Variables({"sea_ice_area_fraction",
+        "sea_surface_foundation_temperature"}), state, vals);
 
     double missing_value = util::missingValue(vals[0]);
     std::vector<double> testvals = {1, missing_value, 0, 18, 18, 18};

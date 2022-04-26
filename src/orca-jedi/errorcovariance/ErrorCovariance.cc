@@ -73,7 +73,8 @@ void ErrorCovariance::inverseMultiply(const Increment & dxin,
     std::string err_message =
             "orcamodel::ErrorCovariance::inverseMultiply notimplemented ";
     throw eckit::NotImplemented(err_message, Here());
-    oops::Log::trace() << "orcamodel::ErrorCovariance inverseMultiply" << std::endl;
+    oops::Log::trace() << "orcamodel::ErrorCovariance inverseMultiply"
+                       << std::endl;
 }
 
 

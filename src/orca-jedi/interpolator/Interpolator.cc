@@ -59,8 +59,9 @@ namespace orcamodel {
       }
 
       // Setup observation functionspace
-      oops::Log::trace() << "orcamodel::Interpolator:: creating atlasObsFuncSpace "
-                         << "with nlocs = " << nlocs << std::endl;
+      oops::Log::trace() << "orcamodel::Interpolator:: creating "
+                         << "atlasObsFuncSpace with nlocs = " << nlocs
+                         << std::endl;
       atlas::Field points("lonlat", atlas::array::make_datatype<double>(),
           atlas::array::make_shape(nlocs, 2));
       auto arrv_t = atlas::array::make_view<double, 2>(points);
@@ -70,14 +71,14 @@ namespace orcamodel {
         arrv_t(j, 1) = locs[latIndex];
         arrv_t(j, 0) = locs[lonIndex];
       }
-      oops::Log::trace() << "orcamodel::Interpolator:: creating atlasObsFuncSpace "
-                         << "... done" << std::endl;
+      oops::Log::trace() << "orcamodel::Interpolator:: creating "
+                         << "atlasObsFuncSpace ... done" << std::endl;
 
       return atlas::functionspace::PointCloud(std::move(points));
   }
 
-  Interpolator::Interpolator(const eckit::Configuration & conf, const Geometry & geom,
-      const std::vector<double>& locs) :
+  Interpolator::Interpolator(const eckit::Configuration & conf,
+      const Geometry & geom, const std::vector<double>& locs) :
       nlocs_(locs.size() / 2),
       atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(locs))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
@@ -92,7 +93,6 @@ namespace orcamodel {
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,
       std::vector<double>& result) const {
-
     oops::Log::trace() << "orcamodel::Interpolator::apply starting "
                        << std::endl;
 
@@ -132,7 +132,7 @@ namespace orcamodel {
           if (has_mv && mv(field_view(i, k))) {
             result[out_idx] = util::missingValue(field_view(i, k));
           } else {
-            result[out_idx] = field_view(i,k);
+            result[out_idx] = field_view(i, k);
           }
         }
       }

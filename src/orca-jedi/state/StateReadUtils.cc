@@ -61,7 +61,8 @@ void readFieldsFromFile(
     {
       const oops::Variables vars = geom.variables();
       const std::vector<std::string> coordTypes = geom.variableNemoTypes(vars);
-      for (int i=0; i < vars.size(); ++i) varCoordTypeMap[vars[i]] = coordTypes[i];
+      for (int i=0; i < vars.size(); ++i)
+        varCoordTypeMap[vars[i]] = coordTypes[i];
     }
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();

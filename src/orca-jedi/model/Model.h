@@ -61,10 +61,12 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   static const std::string classname() {return "orcamodel::Model";}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
-    : tstep_(conf.getString("tstep")), geom_(geom), vars_(conf, "model variables") {}
+    : tstep_(conf.getString("tstep")), geom_(geom),
+      vars_(conf, "model variables") {}
 
   Model(const Geometry & geom, const Parameters_ & params)
-    : tstep_(params.tstep.value()), geom_(geom), vars_(params.variables.value()) {}
+    : tstep_(params.tstep.value()), geom_(geom),
+      vars_(params.variables.value()) {}
 
   ~Model() {}
 

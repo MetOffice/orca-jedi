@@ -94,10 +94,8 @@ State::State(const Geometry & resol, const State & other)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
   ASSERT(other.geom_->grid().uid() == resol.grid().uid());
-  std::stringstream params_stream;
-  params_stream << "orcamodel::State:: params " << params_;
-  oops::Log::debug() << params_stream.str() << std::endl;
-  oops::Log::trace() << "State(ORCA)::State resolution change, WARNING copied not changed." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State resolution change,"
+                     << " WARNING copied not changed." << std::endl;
 }
 
 State::State(const State & other)

@@ -54,12 +54,17 @@ class Interpolator : public util::Printable,
 
   virtual ~Interpolator() {}
 
-  void apply(const oops::Variables& vars, const State& state, std::vector<double>& result) const;
-  void apply(const oops::Variables& vars, const Increment& inc, std::vector<double>& result) const {
-    throw eckit::NotImplemented("Increment interpolation not implemented", Here());
+  void apply(const oops::Variables& vars, const State& state,
+             std::vector<double>& result) const;
+  void apply(const oops::Variables& vars, const Increment& inc,
+      std::vector<double>& result) const {
+    throw eckit::NotImplemented("Increment interpolation not implemented",
+                                Here());
   }
-  void applyAD(const oops::Variables& vars, const Increment& inc, const std::vector<double> &) const {
-    throw eckit::NotImplemented("Adjoint interpolation not implemented", Here());
+  void applyAD(const oops::Variables& vars, const Increment& inc,
+      const std::vector<double> &) const {
+    throw eckit::NotImplemented("Adjoint interpolation not implemented",
+                                Here());
   }
 
  private:
