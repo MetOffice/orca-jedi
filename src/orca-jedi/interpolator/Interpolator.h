@@ -50,19 +50,22 @@ class Interpolator : public util::Printable,
   typedef OrcaInterpolatorParameters Parameters_;
 
   Interpolator(const eckit::Configuration & conf, const Geometry & geom,
-      const std::vector<double>& locs);
+      const std::vector<double>& lats, const std::vector<double>& lons);
 
   virtual ~Interpolator() {}
 
   void apply(const oops::Variables& vars, const State& state,
+             const std::vector<bool> & mask,
              std::vector<double>& result) const;
   void apply(const oops::Variables& vars, const Increment& inc,
-      std::vector<double>& result) const {
+             const std::vector<bool> & mask,
+             std::vector<double>& result) const {
     throw eckit::NotImplemented("Increment interpolation not implemented",
                                 Here());
   }
   void applyAD(const oops::Variables& vars, const Increment& inc,
-      const std::vector<double> &) const {
+               const std::vector<bool> & mask,
+               const std::vector<double> &) const {
     throw eckit::NotImplemented("Adjoint interpolation not implemented",
                                 Here());
   }

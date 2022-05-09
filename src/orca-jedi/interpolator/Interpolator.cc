@@ -45,8 +45,9 @@ namespace orcamodel {
   class Geometry;
 
   atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
-      const std::vector<double>& locs) {
-      size_t nlocs = locs.size() / 2;
+      const std::vector<double>& lats,
+      const std::vector<double>& lons) {
+      size_t nlocs = lats.size();
       if (nlocs == 0) {
         std::stringstream err_stream;
         err_stream << "orcamodel::Interpolator::"
@@ -54,7 +55,6 @@ namespace orcamodel {
         err_stream << "         "
                    << "this might mean that there are no observations "
                    << "within the time window" << std::endl;
-        err_stream << locs << std::endl;
         throw eckit::BadValue(err_stream.str(), Here());
       }
 
@@ -65,11 +65,9 @@ namespace orcamodel {
       atlas::Field points("lonlat", atlas::array::make_datatype<double>(),
           atlas::array::make_shape(nlocs, 2));
       auto arrv_t = atlas::array::make_view<double, 2>(points);
-      for ( unsigned int j = 0, latIndex=0, lonIndex=1;
-        j < nlocs;
-        ++j, latIndex+=2, lonIndex+=2 ) {
-        arrv_t(j, 1) = locs[latIndex];
-        arrv_t(j, 0) = locs[lonIndex];
+      for ( unsigned int j = 0; j < nlocs; ++j) {
+        arrv_t(j, 1) = lats[j];
+        arrv_t(j, 0) = lons[j];
       }
       oops::Log::trace() << "orcamodel::Interpolator:: creating "
                          << "atlasObsFuncSpace ... done" << std::endl;
@@ -78,9 +76,10 @@ namespace orcamodel {
   }
 
   Interpolator::Interpolator(const eckit::Configuration & conf,
-      const Geometry & geom, const std::vector<double>& locs) :
-      nlocs_(locs.size() / 2),
-      atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(locs))),
+      const Geometry & geom, const std::vector<double>& lats,
+      const std::vector<double>& lons) :
+      nlocs_(lats.size()),
+      atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(lats, lons))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
                     atlasObsFuncSpace_ ) {
@@ -92,6 +91,7 @@ namespace orcamodel {
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,
+      const std::vector<bool> & mask,
       std::vector<double>& result) const {
     oops::Log::trace() << "orcamodel::Interpolator::apply starting "
                        << std::endl;

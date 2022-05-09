@@ -65,9 +65,9 @@ CASE("test basic interpolator") {
   OrcaInterpolatorParameters params;
   params.validateAndDeserialize(interpolator_conf);
 
-  // lons{0, 120, 270};
-  // lats{88, 0, 30};
-  std::vector<double> locations({88, 0, 0, 120, 30, 270});
+  std::vector<double> lons({0, 120, 270});
+  std::vector<double> lats({88, 0, 30});
+  const int nlocs = 3;
 
   // create a state from the test data
   eckit::LocalConfiguration state_config;
@@ -85,24 +85,26 @@ CASE("test basic interpolator") {
 
   SECTION("test interpolator fails with no locations") {
     EXPECT_THROWS_AS(
-      Interpolator interpolator(interpolator_conf, geometry, {}),
+      Interpolator interpolator(interpolator_conf, geometry, {}, {}),
       eckit::BadValue);
   }
 
-  Interpolator interpolator(interpolator_conf, geometry, locations);
+  Interpolator interpolator(interpolator_conf, geometry, lats, lons);
 
   SECTION("test interpolator.apply fails missing variable") {
     oops::Variables variables({"NOTAVARIABLE"});
     std::vector<double> vals(3);
-    EXPECT_THROWS_AS(interpolator.apply(variables, state, vals),
+    std::vector<bool> mask(3);
+    EXPECT_THROWS_AS(interpolator.apply(variables, state, mask, vals),
         eckit::BadParameter);
   }
 
   SECTION("test interpolator.apply") {
     // two variables at n locations
-    std::vector<double> vals(2*(locations.size() / 2));
+    std::vector<double> vals(2*nlocs);
+    std::vector<bool> mask(2*nlocs);
     interpolator.apply(oops::Variables({"sea_ice_area_fraction",
-        "sea_surface_foundation_temperature"}), state, vals);
+        "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
     std::vector<double> testvals = {1, missing_value, 0, 18, 18, 18};
@@ -115,9 +117,10 @@ CASE("test basic interpolator") {
     //EXPECT_EQUAL(vals[5], testvals[5]);
   }
   SECTION("test interpolator.apply multiple levels") {
-    std::vector<double> vals(nlevs*(locations.size() / 2));
+    std::vector<double> vals(nlevs*nlocs);
+    std::vector<bool> mask(nlevs*nlocs);
     interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
-                                       state, vals);
+                                       state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
     std::vector<double> testvals = {18.4888621288, 18.0012965, missing_value,
