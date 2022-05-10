@@ -1,5 +1,5 @@
 Test     : State: 
-Test     :  Model state valid at time: 2021-06-29T21:00:00Z
+Test     :  Model state valid at time: 2021-06-30T00:00:00Z
 Test     :     2 variables: sea_surface_temperature, sea_surface_temperature_background_error
 Test     :     atlas field norms:
 Test     :         sea_surface_temperature: 0.136432
