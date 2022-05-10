@@ -15,6 +15,7 @@
 #include <numeric>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
@@ -181,8 +182,8 @@ void State::print(std::ostream & os) const {
   os << std::string(4, ' ') << "atlas field norms:" << std::endl;
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    os << std::string(8, ' ') << fieldName << ": " << norm(fieldName)
-       << std::endl;
+    os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+       << norm(fieldName) << std::endl;
   }
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
