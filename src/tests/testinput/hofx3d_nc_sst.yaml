@@ -24,7 +24,6 @@ state :
 window begin: 2021-06-29T12:00:00Z
 window length: P1D
 observations:
-observations:
   observers:
   - obs space:
       name: Sea Surface Temperature

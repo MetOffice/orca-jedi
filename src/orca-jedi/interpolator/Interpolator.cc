@@ -86,8 +86,6 @@ namespace orcamodel {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
-    oops::Log::debug() << "orcamodel::Interpolator:: atlasObsFuncSpace_:"
-                       << atlasObsFuncSpace_ << std::endl;
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,

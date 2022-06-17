@@ -6,6 +6,6 @@ Test     :          ice_area_fraction: 0.00323467
 Test     :          ice_area_fraction_background_error: 0.00303628
 
 Test     : H(x): 
-Test     : Sea Ice nobs= 7 Min=0, Max=0, RMS=0
+Test     : Sea Ice nobs= 4 Min=0, Max=0, RMS=0
 
 Test     : End H(x)
