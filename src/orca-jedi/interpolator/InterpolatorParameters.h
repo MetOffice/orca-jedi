@@ -32,6 +32,8 @@ class OrcaInterpolatorParameters : public oops::Parameters {
  public:
   oops::RequiredParameter<OrcaAtlasInterpolatorParameters> atlasInterpolator{
     "atlas-interpolator", this};
+  oops::OptionalParameter<std::string> time_interpolation{"time interpolation",
+    this};
 };
 
 }  //  namespace orcamodel

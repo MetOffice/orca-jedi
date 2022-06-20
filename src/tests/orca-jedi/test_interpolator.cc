@@ -107,14 +107,14 @@ CASE("test basic interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {1, missing_value, 0, 18, 18, 18};
+    std::vector<double> testvals = {1, missing_value, 0, 18.4888621288,
+                                    missing_value, 18.1592999503};
 
-    EXPECT(std::abs(vals[0] - testvals[0]) < ATOL);
-    EXPECT(std::abs(vals[1] - testvals[1]) < ATOL);
-    EXPECT(std::abs(vals[2] - testvals[2]) < ATOL);
-    //EXPECT_EQUAL(vals[3], testvals[3]);
-    //EXPECT_EQUAL(vals[4], testvals[4]);
-    //EXPECT_EQUAL(vals[5], testvals[5]);
+    for (int i=0; i < testvals.size(); ++i) {
+      std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
+                << "testvals[" << i << "] " << testvals[i] << std::endl;
+      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
+    }
   }
   SECTION("test interpolator.apply multiple levels") {
     std::vector<double> vals(nlevs*nlocs);

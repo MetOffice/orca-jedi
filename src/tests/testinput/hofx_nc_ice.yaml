@@ -22,35 +22,33 @@ initial condition :
   date: 2021-06-28T23:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   #analytic_init: zeroed state
-  nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
-  variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+  nemo field file: Data/orca2_t_nemo.nc
+  variance field file: Data/orca2_t_bkg_var.nc
 model :
   name: PseudoModel
   tstep: P1D
   state variables: [ ice_area_fraction ]
   states:
     - date: 2021-06-28T23:00:00Z
-      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      nemo field file: Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
       state variables: [ ice_area_fraction ]
     - date: 2021-06-29T23:00:00Z
-      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
-      variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      nemo field file: Data/orca2_t_nemo.nc
+      variance field file: Data/orca2_t_bkg_var.nc
       state variables: [ ice_area_fraction ]
     - date: 2021-07-01T23:00:00Z
-      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
-      variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      nemo field file: Data/orca2_t_nemo.nc
+      variance field file: Data/orca2_t_bkg_var.nc
       state variables: [ ice_area_fraction ]
 observations:
   observers:
   - obs space:
       name: Sea Ice
       obsdatain:
-        obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.odb
-        mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
-        query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
+        obsfile: Data/ostia_seaice_obs.nc
       obsdataout:
-        obsfile: test_out.nc
+        obsfile: testoutput/test_hofx_nc_ice_jopa.nc
       simulated variables: [ice_area_fraction]
     get values:
       time interpolation: linear
@@ -160,3 +158,5 @@ observations:
           - name: ice_area_fraction
             feedback suffix: Hx
             ioda group: HofX
+test:
+  reference filename: testoutput/test_hofx_nc_ice.ref

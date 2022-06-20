@@ -56,11 +56,14 @@ void readFieldsFromFile(
     // field names in the atlas fieldset are assumed to match their names in
     // the field file
     const size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: time_indx "
+                       << time_indx << std::endl;
 
     std::map<std::string, std::string> varCoordTypeMap;
     {
       const oops::Variables vars = geom.variables();
-      const std::vector<std::string> coordSpaces = geom.variableNemoSpaces(vars);
+      const std::vector<std::string> coordSpaces =
+        geom.variableNemoSpaces(vars);
       for (int i=0; i < vars.size(); ++i)
         varCoordTypeMap[vars[i]] = coordSpaces[i];
     }

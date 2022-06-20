@@ -3,6 +3,10 @@ add_subdirectory(testoutput)
 add_subdirectory(orca-jedi)
 add_subdirectory(Data)
 
+ecbuild_add_test( TARGET test_orcamodel_hofx_ice
+                  OMP 1
+                  ARGS testinput/hofx_nc_ice.yaml
+                  COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx3D_ice
                   OMP 1

@@ -144,10 +144,10 @@ std::vector<std::string> Geometry::variableNemoSpaces(
           varNemoSpaces[i] = nemoField.modelSpace.value();
         } else {
             std::stringstream err_stream;
-            err_stream << "orcamodel::Geometry::variableNemoSpaces modelSpace \""
-                       << nemoField.modelSpace.value() << "\" not recognised for "
-                       << "field \"" << nemoField.name.value() << "\"."
-                       << std::endl;
+            err_stream << "orcamodel::Geometry::variableNemoSpaces modelSpace"
+                       << " \"" << nemoField.modelSpace.value()
+                       << "\" not recognised for field \""
+                       << nemoField.name.value() << "\"." << std::endl;
             throw eckit::BadValue(err_stream.str(), Here());
         }
       }
@@ -181,10 +181,9 @@ const bool Geometry::variable_in_variable_type(std::string variable_name,
   }
 
   std::stringstream err_stream;
-  err_stream << "orcamodel::Geometry::variable_in_variable_type variable name \" ";
-  err_stream << "\" " << variable_name << " not recognised. " << std::endl;
+  err_stream << "orcamodel::Geometry::variable_in_variable_type variable name ";
+  err_stream << "\"" << variable_name << "\" not recognised. " << std::endl;
   throw eckit::BadValue(err_stream.str(), Here());
-
 }
 
 void Geometry::print(std::ostream & os) const {

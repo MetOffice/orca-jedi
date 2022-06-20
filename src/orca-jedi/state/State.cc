@@ -65,8 +65,8 @@ State::State(const Geometry & geom,
 State::State(const Geometry & geom,
              const Parameters_ & params)
   : geom_(new Geometry(geom))
-    , vars_(params.stateVariables)
-    , time_(params.date)
+    , vars_(params.stateVariables.value())
+    , time_(params.date.value())
     , stateFields_(), params_(params)
 {
   std::stringstream params_stream;
@@ -95,8 +95,8 @@ State::State(const Geometry & resol, const State & other)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
   ASSERT(other.geom_->grid().uid() == resol.grid().uid());
-  oops::Log::trace() << "State(ORCA)::State resolution change,"
-                     << " WARNING copied not changed." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State resolution change: "
+                     << " copied as there is no change" << std::endl;
 }
 
 State::State(const State & other)
@@ -137,12 +137,11 @@ State & State::operator+=(const Increment & dx) {
 // I/O and diagnostics
 
 void State::read(const Parameters_ & params) {
-  oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
-
-  oops::Log::trace() << "State(ORCA)::read time: " << validTime()
+  oops::Log::trace() << "State(ORCA)::read starting for " << params.date.value()
                      << std::endl;
 
   params_ = params;
+  time_ = params.date.value();
 
   readFieldsFromFile(params, *geom_, validTime(), "background",
       stateFields_);
