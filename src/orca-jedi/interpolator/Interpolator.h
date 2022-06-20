@@ -48,7 +48,7 @@ class Interpolator : public util::Printable,
   static const std::string classname() {return "orcamodel::Interpolator";}
 
   // Parameters will not work properly until support added to oops getvalues
-  //typedef OrcaInterpolatorParameters Parameters_;
+  // typedef OrcaInterpolatorParameters Parameters_;
 
   Interpolator(const eckit::Configuration & conf, const Geometry & geom,
       const std::vector<double>& lats, const std::vector<double>& lons);
@@ -76,7 +76,7 @@ class Interpolator : public util::Printable,
   int64_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
-  //Parameters_ params_;
+  // Parameters_ params_;
   OrcaInterpolatorParameters params_;
 };
 

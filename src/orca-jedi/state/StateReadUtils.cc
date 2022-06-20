@@ -62,7 +62,8 @@ void readFieldsFromFile(
     std::map<std::string, std::string> varCoordTypeMap;
     {
       const oops::Variables vars = geom.variables();
-      const std::vector<std::string> coordSpaces = geom.variableNemoSpaces(vars);
+      const std::vector<std::string> coordSpaces =
+        geom.variableNemoSpaces(vars);
       for (int i=0; i < vars.size(); ++i)
         varCoordTypeMap[vars[i]] = coordSpaces[i];
     }

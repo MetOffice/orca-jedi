@@ -65,7 +65,7 @@ namespace orcamodel {
       atlas::Field points("lonlat", atlas::array::make_datatype<double>(),
           atlas::array::make_shape(nlocs, 2));
       auto arrv_t = atlas::array::make_view<double, 2>(points);
-      for ( unsigned int j = 0; j < nlocs; ++j) {
+      for (unsigned int j = 0; j < nlocs; ++j) {
         arrv_t(j, 1) = lats[j];
         arrv_t(j, 0) = lons[j];
       }

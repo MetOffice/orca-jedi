@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <thread>
 
 #include "eckit/config/LibEcKit.h"
