@@ -52,6 +52,7 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
   std::unique_ptr<netCDF::NcFile> ncFile;
   std::vector<util::DateTime> datetimes_;
   std::string time_dimvar_name_;
+  std::string z_dimvar_name_;
 };
 }  // namespace orcamodel
 

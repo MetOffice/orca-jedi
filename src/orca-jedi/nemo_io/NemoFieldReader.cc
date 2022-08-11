@@ -25,6 +25,38 @@
 
 namespace orcamodel {
 
+namespace {
+std::string find_nc_var_name(const netCDF::NcFile& ncFile,
+    const bool check_dim_for_dimvar,
+    const std::vector<std::string>& possible_names) {
+  std::string dimvar_name("");
+  netCDF::NcDim nc_dim;
+  netCDF::NcVar nc_var;
+  for (const auto & c_candidate : possible_names) {
+    // Copy because ncFile methods only have non-const interface
+    std::string candidate(c_candidate);
+    nc_var = ncFile.getVar(candidate);
+    nc_dim = ncFile.getDim(candidate);
+    // check for coordinate dimension and optionally corresponding dimension
+    // variable
+    if (!nc_dim.isNull() && (!check_dim_for_dimvar || !nc_var.isNull())) {
+      dimvar_name = candidate;
+      return dimvar_name;
+    }
+  }
+
+  if (dimvar_name == "") {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::find_nc_var_name coordinate matching {";
+    for (const auto & n : possible_names) err_stream << "'" << n << "' ";
+    err_stream << "} is not present in NetCDF file" << std::endl;
+    throw eckit::BadValue(err_stream.str(), Here());
+  }
+
+  return dimvar_name;
+}
+}  // namespace
+
 NemoFieldReader::NemoFieldReader(eckit::PathName& filename)
   : ncFile(nullptr), datetimes_() {
   oops::Log::debug() << "orcamodel::NemoFieldReader::NemoFieldReader filename: "
@@ -46,23 +78,9 @@ NemoFieldReader::NemoFieldReader(eckit::PathName& filename)
     throw eckit::BadValue(err_stream.str(), Here());
   }
 
-  time_dimvar_name_ = "";
-  netCDF::NcDim nc_dim_time;
-  netCDF::NcVar nc_var_time;
-  std::vector<std::string> possible_t_dimvars({"t", "time", "time_counter"});
-  for (auto & candidate_t_dimvar : possible_t_dimvars) {
-    ncFile->getCoordVar(candidate_t_dimvar, nc_dim_time, nc_var_time);
-    if (!nc_dim_time.isNull() && !nc_var_time.isNull()) {
-      time_dimvar_name_ = candidate_t_dimvar;
-      break;
-    }
-  }
-
-  if (time_dimvar_name_ == "") {
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar time "
-               << "coordinate is not present in NetCDF file" << std::endl;
-    throw eckit::BadValue(err_stream.str(), Here());
-  }
+  time_dimvar_name_ = find_nc_var_name(*ncFile, true,
+                                       {"t", "time", "time_counter"});
+  z_dimvar_name_ = find_nc_var_name(*ncFile, false, {"z", "deptht"});
 
   read_datetimes();
 }
@@ -287,7 +305,7 @@ std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname,
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
-    size_t nz = read_dim_size("z");
+    size_t nz = read_dim_size(z_dimvar_name_);
     size_t nlevels = field_view.shape(1);
 
     if (field_view.shape(0) != nx*ny) {
@@ -320,7 +338,7 @@ std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname,
     std::string first_dim_name = nc_var.getDim(0).getName();
     if (n_dims == 4) {
       nc_var.getVar({t_indx, 0, 0, 0}, {1, nlevels, ny, nx}, buffer.data());
-    } else if (n_dims == 3 && first_dim_name == "z") {
+    } else if (n_dims == 3 && first_dim_name == z_dimvar_name_) {
       nc_var.getVar({0, 0, 0}, {nlevels, ny, nx}, buffer.data());
     } else {
       std::ostringstream err_stream;
@@ -350,7 +368,7 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
-    size_t nz = read_dim_size("z");
+    size_t nz = read_dim_size(z_dimvar_name_);
     size_t nlevels = field_view.shape(1);
 
     if (field_view.shape(0) != nx*ny) {
@@ -380,7 +398,7 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
 
     size_t n_dims = nc_var.getDimCount();
     std::string first_dim_name = nc_var.getDim(0).getName();
-    if (n_dims == 1 && first_dim_name == "z") {
+    if (n_dims == 1 && first_dim_name == z_dimvar_name_) {
       nc_var.getVar({0}, {nlevels}, buffer.data());
     } else {
       std::ostringstream err_stream;
