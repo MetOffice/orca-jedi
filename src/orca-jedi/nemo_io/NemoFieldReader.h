@@ -22,6 +22,7 @@
 #include "atlas/runtime/Exception.h"
 #include "atlas/util/Point.h"
 #include "atlas/field.h"
+#include "atlas/mesh.h"
 #include "atlas/array/ArrayView.h"
 
 namespace orcamodel {
@@ -46,6 +47,9 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
       atlas::array::ArrayView<double, 2>& field_view);
   void read_vertical_var(const std::string& varname,
       atlas::array::ArrayView<double, 2>& field_view);
+
+  void read_surf_var(const std::string varname, const atlas::Mesh& mesh,
+      const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view);
 
  private:
   NemoFieldReader() : ncFile() {}
