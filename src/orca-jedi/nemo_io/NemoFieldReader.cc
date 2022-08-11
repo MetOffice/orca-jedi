@@ -105,55 +105,64 @@ void NemoFieldReader::read_datetimes() {
   // read time indices from file
   size_t n_times = read_dim_size(time_dimvar_name_);
 
-  netCDF::NcVar nc_var_time = ncFile->getVar(time_dimvar_name_);
-  if (nc_var_time.isNull()) {
+  try {
+    netCDF::NcVar nc_var_time = ncFile->getVar(time_dimvar_name_);
+    if (nc_var_time.isNull()) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar "
+                 << time_dimvar_name_
+                 << " is not present in NetCDF file" << std::endl;
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    if (n_times < 1) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_datetimes n_times < 1 "
+                 << n_times << std::endl;
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    std::vector<int64_t> timestamps(n_times);
+    nc_var_time.getVar({0}, {n_times}, timestamps.data());
+
+    // read time units attribute from file
+    netCDF::NcVarAtt nc_att_units;
+    std::string units_string;
+    nc_att_units = nc_var_time.getAtt("units");
+    if (nc_att_units.isNull()) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar units is "
+                 << "not present in NetCDF file";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+    nc_att_units.getValues(units_string);
+
+    const std::string seconds_since = "seconds since ";
+    std::for_each(units_string.begin(), units_string.begin()+seconds_since.size(),
+        [](char & c){ c = tolower(c); });
+    if (units_string.substr(0, seconds_since.size()) != seconds_since) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_datetimes units attribute "
+                 << "badly formatted: " << units_string << std::endl;
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+    units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
+    units_string.append("Z");
+
+    auto epoch = util::DateTime(units_string.substr(seconds_since.size()));
+
+    // construct date times
+    datetimes_.resize(n_times);
+    for (size_t i=0; i < n_times; ++i) {
+      datetimes_[i] = epoch + util::Duration(timestamps[i]);
+    }
+  } catch(netCDF::exceptions::NcException& e)
+  {
     std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar "
-               << time_dimvar_name_
-               << " is not present in NetCDF file" << std::endl;
-    throw eckit::BadValue(err_stream.str(), Here());
-  }
-
-  if (n_times < 1) {
-    std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes n_times < 1 "
-               << n_times << std::endl;
-    throw eckit::BadValue(err_stream.str(), Here());
-  }
-
-  std::vector<int64_t> timestamps(n_times);
-  nc_var_time.getVar({0}, {n_times}, timestamps.data());
-
-  // read time units attribute from file
-  netCDF::NcVarAtt nc_att_units;
-  std::string units_string;
-  nc_att_units = nc_var_time.getAtt("units");
-  if (nc_att_units.isNull()) {
-    std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes ncVar units is "
-               << "not present in NetCDF file";
-    throw eckit::BadValue(err_stream.str(), Here());
-  }
-  nc_att_units.getValues(units_string);
-
-  const std::string seconds_since = "seconds since ";
-  std::for_each(units_string.begin(), units_string.begin()+seconds_since.size(),
-      [](char & c){ c = tolower(c); });
-  if (units_string.substr(0, seconds_since.size()) != seconds_since) {
-    std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes units attribute "
-               << "badly formatted: " << units_string << std::endl;
-    throw eckit::BadValue(err_stream.str(), Here());
-  }
-  units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
-  units_string.append("Z");
-
-  auto epoch = util::DateTime(units_string.substr(seconds_since.size()));
-
-  // construct date times
-  datetimes_.resize(n_times);
-  for (size_t i=0; i < n_times; ++i) {
-    datetimes_[i] = epoch + util::Duration(timestamps[i]);
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes NetCDF exception for "
+               << time_dimvar_name_ << ": " << std::endl;
+    err_stream << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
   }
 }
 
