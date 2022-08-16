@@ -105,12 +105,12 @@ CASE("test basic interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {1, missing_value, 0, 18.4888621288,
+    std::vector<double> testvals = {1, missing_value, 0, 18.488888892,
                                     missing_value, 18.1592999503};
 
     for (int i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
-                << "testvals[" << i << "] " << testvals[i] << std::endl;
+                << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
   }
@@ -121,13 +121,13 @@ CASE("test basic interpolator") {
                                        state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {18.4888621288, 18.0012965, missing_value,
+    std::vector<double> testvals = {18.488888892, 17.9419381132, missing_value,
                                     missing_value, missing_value, missing_value,
                                     18.1592999503, 17.75000288, missing_value};
 
     for (int i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
-                << "testvals[" << i << "] " << testvals[i] << std::endl;
+                << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
   }
