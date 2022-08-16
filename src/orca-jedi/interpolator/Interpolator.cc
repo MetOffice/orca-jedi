@@ -48,15 +48,6 @@ namespace orcamodel {
       const std::vector<double>& lats,
       const std::vector<double>& lons) {
       size_t nlocs = lats.size();
-      if (nlocs == 0) {
-        std::stringstream err_stream;
-        err_stream << "orcamodel::Interpolator::"
-                   << " Constructor called with no locations " << std::endl;
-        err_stream << "         "
-                   << "this might mean that there are no observations "
-                   << "within the time window" << std::endl;
-        throw eckit::BadValue(err_stream.str(), Here());
-      }
 
       // Setup observation functionspace
       oops::Log::trace() << "orcamodel::Interpolator:: creating "
@@ -88,6 +79,10 @@ namespace orcamodel {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
+    if (nlocs_ == 0) {
+      std::cout << "[" << comm_.rank() << "] nlocs is ZERO!!" << std::endl;
+    }
+
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,

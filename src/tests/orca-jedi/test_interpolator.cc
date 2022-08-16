@@ -57,7 +57,7 @@ CASE("test basic interpolator") {
   Geometry geometry(config, eckit::mpi::comm());
 
   eckit::LocalConfiguration interp_conf;
-  interp_conf.set("type", "finite-element");
+  interp_conf.set("type", "unstructured-bilinear-lonlat");
   interp_conf.set("non_linear", "missing-if-all-missing");
   eckit::LocalConfiguration interpolator_conf;
   interpolator_conf.set("atlas-interpolator", interp_conf);
@@ -83,10 +83,8 @@ CASE("test basic interpolator") {
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  SECTION("test interpolator fails with no locations") {
-    EXPECT_THROWS_AS(
-      Interpolator interpolator(interpolator_conf, geometry, {}, {}),
-      eckit::BadValue);
+  SECTION("test interpolator succeeds even with no locations") {
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
   }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
