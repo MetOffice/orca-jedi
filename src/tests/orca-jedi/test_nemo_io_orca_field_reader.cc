@@ -17,10 +17,13 @@
 #include "atlas/meshgenerator.h"
 #include "atlas/field/Field.h"
 
-#include "eckit/testing/Test.h"
+#include "atlas-orca/grid/OrcaGrid.h"
+
 #include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+
+#include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
 namespace test {
@@ -30,7 +33,7 @@ namespace test {
 CASE("test read_surf_var reads field array view") {
   eckit::PathName test_data_path("../Data/orca2_t_nemo.nc");
 
-  atlas::Grid grid("ORCA2_T");
+  atlas::OrcaGrid grid("ORCA2_T");
   auto meshgen_config = grid.meshgenerator();
 
   atlas::MeshGenerator meshgen(meshgen_config);
@@ -53,12 +56,18 @@ CASE("test read_surf_var reads field array view") {
                         atlas::option::levels(1)));
   auto field_view_2 = atlas::array::make_view<double, 2>(field_2);
 
-  field_reader.read_surf_var("iiceconc", 0, mesh, field_view_2);
+  field_reader.read_surf_var("iiceconc", mesh, 0, field_view_2);
+  auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
+  auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
   for (int i = 0; i<field_view.size(); ++i) {
+    if (ghost(i)) continue;
     if (field_view(i, 0) != field_view_2(i, 0)) {
-        std::cout << "mismatch: " << field_view(i, 0) << " "
-                  << field_view_2(i, 0) << std::endl;
+        std::cout << "mismatch: "
+                  << " ij(" << i << ", 0) " << ij(i, 0)
+                  << " ij(" << i << ", 1) " << ij(i, 1)
+                  << " 1 proc " << field_view(i, 0) << " "
+                  << " with mesh " << field_view_2(i, 0) << std::endl;
     }
     EXPECT_EQUAL(field_view(i, 0), field_view_2(i, 0));
   }
@@ -68,5 +77,5 @@ CASE("test read_surf_var reads field array view") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return eckit::testing::run_tests(argc, argv);
+    return orcamodel::test::run( argc, argv );
 }

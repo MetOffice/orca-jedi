@@ -214,11 +214,12 @@ double State::norm(const std::string & field_name) const {
 
   auto field_view = atlas::array::make_view<double, 2>(
       stateFields_[field_name]);
+  auto ghost = atlas::array::make_view<int32_t, 1>(geom_->mesh().nodes().ghost());
   atlas::field::MissingValue mv(stateFields()[field_name]);
   bool has_mv = static_cast<bool>(mv);
   for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
     for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-      if ((!has_mv) || (has_mv && !mv(field_view(j, k)))) {
+      if ((!has_mv) || (has_mv && !mv(field_view(j, k)) && !ghost(j))) {
         norm += field_view(j, k)*field_view(j, k);
         ++valid_points;
       }

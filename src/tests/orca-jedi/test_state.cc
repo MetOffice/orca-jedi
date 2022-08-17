@@ -84,7 +84,9 @@ CASE("test basic state") {
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    double iceNorm = 0.00323467;
+    double iceNorm = 0.0032018269;
+    std::cout << std::setprecision(8) << state.norm("sea_ice_area_fraction")
+              << std::setprecision(8) << iceNorm << std::endl;
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
     state.read(params);
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
