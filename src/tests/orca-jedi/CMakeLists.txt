@@ -6,6 +6,10 @@ ecbuild_add_test( TARGET  test_orcajedi_nemo_io_field_reader.x
                   SOURCES test_nemo_io_field_reader.cc
                   LIBS    orcamodel )
 
+ecbuild_add_test( TARGET  test_orcajedi_nemo_io_orca_field_reader.x
+                  SOURCES test_nemo_io_orca_field_reader.cc
+                  LIBS    orcamodel )
+
 LIST( APPEND ATLAS_TEST_ENVIRONMENT
     ATLAS_ORCA_CACHING=1
     ATLAS_CACHE_PATH=${CMAKE_BINARY_DIR}/share
