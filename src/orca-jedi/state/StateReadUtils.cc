@@ -79,11 +79,7 @@ void readFieldsFromFile(
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
         auto field_view = atlas::array::make_view<double, 2>(field);
         if (varCoordTypeMap[fieldName] == "surface") {
-          if (geom.getComm().size() > 1) {
-            nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
-          } else {
-            nemo_file.read_surf_var(nemoName, time_indx, field_view);
-          }
+          nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
         } else if (varCoordTypeMap[fieldName] == "vertical") {
           nemo_file.read_vertical_var(nemoName, field_view);
         } else {
