@@ -83,15 +83,14 @@ void readFieldsFromFile(
         } else if (varCoordTypeMap[fieldName] == "vertical") {
           nemo_file.read_vertical_var(nemoName, field_view);
         } else {
-          if (geom.getComm().size() > 1)
-            throw eckit::BadValue(
-                "orcamodel::readFieldsFromFile MPI volume variables not supported", Here());
-          nemo_file.read_volume_var(nemoName, time_indx, field_view);
+          nemo_file.read_volume_var(nemoName, geom.mesh(), time_indx, field_view);
         }
         auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
+        // Add a halo exchange following read to fill out halo points
+        geom.funcSpace().haloExchange(field);
       }
     }
 
