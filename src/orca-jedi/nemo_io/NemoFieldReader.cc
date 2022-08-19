@@ -24,6 +24,8 @@
 #include "atlas/field.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
+namespace orcamodel {
+
 namespace {
 struct IndexGlbArray {
     int32_t ix_glb_max;
@@ -55,11 +57,7 @@ struct IndexGlbArray {
         return glbarray_offset + j * glbarray_jstride + i;
     }
 };
-}   //   namespace
 
-namespace orcamodel {
-
-namespace {
 std::string find_nc_var_name(const netCDF::NcFile& ncFile,
     const bool check_dim_for_dimvar,
     const std::vector<std::string>& possible_names) {
@@ -303,8 +301,8 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
   }
 }
 
-std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname,
-    const size_t t_indx) {
+std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
+      const size_t t_indx, const size_t z_indx) {
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -321,7 +319,7 @@ std::vector<double> NemoFieldReader::read_surf_var(const std::string& varname,
 
     size_t n_dims = nc_var.getDimCount();
     if (n_dims == 4) {
-      nc_var.getVar({t_indx, 0, 0, 0}, {1, 1, ny, nx}, var_data.data());
+      nc_var.getVar({t_indx, z_indx, 0, 0}, {1, 1, ny, nx}, var_data.data());
     } else if (n_dims == 3) {
       nc_var.getVar({t_indx, 0, 0}, {1, ny, nx}, var_data.data());
     } else if (n_dims == 2) {

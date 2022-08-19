@@ -5,6 +5,7 @@ hofx_sst_obs.nc
 orca2_t_bkg_var.nc
 orca2_t_coords.nc
 orca2_t_nemo.nc
+orca1_t_nemo.nc
 ostia_seaice_obs.nc
 simple_nemo.nc
 create_orca2_t_bkg.nco
