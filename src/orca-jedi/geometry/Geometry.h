@@ -66,6 +66,7 @@ class Geometry : public util::Printable {
   const std::string nemo_var_name(const std::string std_name) const;
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;
+  bool levelsAreTopDown() const {return true;}
 
  private:
   void print(std::ostream &) const;
