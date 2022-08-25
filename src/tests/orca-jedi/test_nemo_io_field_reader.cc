@@ -84,11 +84,11 @@ CASE("test reading field _FillValue") {
   EXPECT_EQUAL(default_missing_value, std::numeric_limits<double>::lowest());
 }
 
-CASE("test read_surf_var reads vector") {
+CASE("test read_var_slice reads vector") {
   eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
-  std::vector<double> data = field_reader.read_surf_var("iiceconc", 1);
+  std::vector<double> data = field_reader.read_var_slice("iiceconc", 1, 0);
 
   EXPECT_EQUAL(data[0], 121);
   EXPECT_EQUAL(data[5], 171);

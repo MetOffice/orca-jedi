@@ -57,7 +57,7 @@ CASE("test basic interpolator") {
   Geometry geometry(config, eckit::mpi::comm());
 
   eckit::LocalConfiguration interp_conf;
-  interp_conf.set("type", "finite-element");
+  interp_conf.set("type", "unstructured-bilinear-lonlat");
   interp_conf.set("non_linear", "missing-if-all-missing");
   eckit::LocalConfiguration interpolator_conf;
   interpolator_conf.set("atlas-interpolator", interp_conf);
@@ -83,10 +83,8 @@ CASE("test basic interpolator") {
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  SECTION("test interpolator fails with no locations") {
-    EXPECT_THROWS_AS(
-      Interpolator interpolator(interpolator_conf, geometry, {}, {}),
-      eckit::BadValue);
+  SECTION("test interpolator succeeds even with no locations") {
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
   }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
@@ -107,12 +105,12 @@ CASE("test basic interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {1, missing_value, 0, 18.4888621288,
+    std::vector<double> testvals = {1, missing_value, 0, 18.488888892,
                                     missing_value, 18.1592999503};
 
     for (int i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
-                << "testvals[" << i << "] " << testvals[i] << std::endl;
+                << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
   }
@@ -123,13 +121,13 @@ CASE("test basic interpolator") {
                                        state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {18.4888621288, 18.0012965, missing_value,
+    std::vector<double> testvals = {18.488888892, 17.9419381132, missing_value,
                                     missing_value, missing_value, missing_value,
                                     18.1592999503, 17.75000288, missing_value};
 
     for (int i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
-                << "testvals[" << i << "] " << testvals[i] << std::endl;
+                << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
   }

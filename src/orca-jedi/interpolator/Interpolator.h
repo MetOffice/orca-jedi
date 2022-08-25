@@ -15,6 +15,7 @@
 
 #include "eckit/config/Configuration.h"
 #include "eckit/config/LocalConfiguration.h"
+#include "eckit/mpi/Comm.h"
 #include "eckit/exception/Exceptions.h"
 
 #include "atlas/interpolation.h"
@@ -78,6 +79,7 @@ class Interpolator : public util::Printable,
   atlas::Interpolation interpolator_;
   // Parameters_ params_;
   OrcaInterpolatorParameters params_;
+  const eckit::mpi::Comm & comm_;
 };
 
 }  // namespace orcamodel

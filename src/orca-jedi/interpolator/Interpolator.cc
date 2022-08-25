@@ -48,15 +48,6 @@ namespace orcamodel {
       const std::vector<double>& lats,
       const std::vector<double>& lons) {
       size_t nlocs = lats.size();
-      if (nlocs == 0) {
-        std::stringstream err_stream;
-        err_stream << "orcamodel::Interpolator::"
-                   << " Constructor called with no locations " << std::endl;
-        err_stream << "         "
-                   << "this might mean that there are no observations "
-                   << "within the time window" << std::endl;
-        throw eckit::BadValue(err_stream.str(), Here());
-      }
 
       // Setup observation functionspace
       oops::Log::trace() << "orcamodel::Interpolator:: creating "
@@ -68,6 +59,7 @@ namespace orcamodel {
       for (unsigned int j = 0; j < nlocs; ++j) {
         arrv_t(j, 1) = lats[j];
         arrv_t(j, 0) = lons[j];
+        std::cout << "lat " << lats[j] << " lon " << lons[j] << std::endl;
       }
       oops::Log::trace() << "orcamodel::Interpolator:: creating "
                          << "atlasObsFuncSpace ... done" << std::endl;
@@ -79,6 +71,7 @@ namespace orcamodel {
       const Geometry & geom, const std::vector<double>& lats,
       const std::vector<double>& lons) :
       nlocs_(lats.size()),
+      comm_(geom.getComm()),
       atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(lats, lons))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.funcSpace(),
@@ -86,12 +79,16 @@ namespace orcamodel {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
+    if (nlocs_ == 0) {
+      std::cout << "[" << comm_.rank() << "] nlocs is ZERO!!" << std::endl;
+    }
+
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,
       const std::vector<bool> & mask,
       std::vector<double>& result) const {
-    oops::Log::trace() << "orcamodel::Interpolator::apply starting "
+    oops::Log::trace() << "[" << comm_.rank() << "] orcamodel::Interpolator::apply starting "
                        << std::endl;
 
     const size_t nvars = vars.size();

@@ -79,16 +79,18 @@ void readFieldsFromFile(
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
         auto field_view = atlas::array::make_view<double, 2>(field);
         if (varCoordTypeMap[fieldName] == "surface") {
-          nemo_file.read_surf_var(nemoName, time_indx, field_view);
+          nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
         } else if (varCoordTypeMap[fieldName] == "vertical") {
           nemo_file.read_vertical_var(nemoName, field_view);
         } else {
-          nemo_file.read_volume_var(nemoName, time_indx, field_view);
+          nemo_file.read_volume_var(nemoName, geom.mesh(), time_indx, field_view);
         }
         auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
+        // Add a halo exchange following read to fill out halo points
+        geom.funcSpace().haloExchange(field);
       }
     }
 
