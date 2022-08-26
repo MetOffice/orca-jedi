@@ -95,6 +95,8 @@ CASE("test parallel serially distributed read_surf_var reads field array view") 
   }
 }
 
+// Disable this section until jopa-bundle uses a new version of atlas
+/*
 CASE("test parallel domain distributed read_surf_var reads field array view") {
   // NOTE: At this time, atlas-orca is only capable of domain distribution for
   //       ORCA1 and higher resolution
@@ -175,6 +177,7 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
     }
   }
 }
+*/
 
 }  // namespace test
 }  // namespace orcamodel
