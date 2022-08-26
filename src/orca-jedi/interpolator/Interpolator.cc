@@ -59,7 +59,6 @@ namespace orcamodel {
       for (unsigned int j = 0; j < nlocs; ++j) {
         arrv_t(j, 1) = lats[j];
         arrv_t(j, 0) = lons[j];
-        std::cout << "lat " << lats[j] << " lon " << lons[j] << std::endl;
       }
       oops::Log::trace() << "orcamodel::Interpolator:: creating "
                          << "atlasObsFuncSpace ... done" << std::endl;
