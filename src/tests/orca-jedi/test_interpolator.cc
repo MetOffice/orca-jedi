@@ -122,9 +122,9 @@ CASE("test basic interpolator") {
                                        state, mask, vals);
 
     double missing_value = util::missingValue(vals[0]);
-    std::vector<double> testvals = {18.488888892, 17.9419381132, missing_value,
-                                    missing_value, missing_value, missing_value,
-                                    18.1592999503, 17.75000288, missing_value};
+    std::vector<double> testvals = {18.488888892, missing_value, 18.1592999503,
+                                    17.9419381132, missing_value, 17.75000288,
+                                    missing_value, missing_value, missing_value};
 
     for (int i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]

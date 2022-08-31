@@ -7,6 +7,6 @@ Test     :         sea_water_potential_temperature_background_error: 3.54309e-04
 Test     :         depth: 2.05581e-01
 
 Test     : H(x): 
-Test     : Sea Temperature nobs= 7 Min=17.8889, Max=18.1944, RMS=18.0641
+Test     : Sea Temperature nobs= 6 Min=1.80417e+01, Max=1.81944e+01, RMS=1.81181e+01
 
 Test     : End H(x)

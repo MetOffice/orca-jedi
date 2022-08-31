@@ -108,26 +108,27 @@ namespace orcamodel {
     const std::vector<size_t> varSizes =
       state.geometry()->variableSizes(vars);
     size_t nvals = 0;
-    for (size_t j=0; j < nvars; ++j) nvals += nlocs_ * varSizes[j];
+    for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
     result.resize(nvals);
 
-    for (size_t j=0; j < nvars; ++j) {
-      auto gv_varname = vars[j];
+    std::size_t out_idx = 0;
+    for (size_t jvar=0; jvar < nvars; ++jvar) {
+      auto gv_varname = vars[jvar];
       atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
           atlas::option::name(gv_varname) |
-          atlas::option::levels(varSizes[j]));
+          atlas::option::levels(varSizes[jvar]));
       interpolator_.execute(state.stateFields()[gv_varname], tgt_field);
       auto field_view = atlas::array::make_view<double, 2>(tgt_field);
       atlas::field::MissingValue mv(state.stateFields()[gv_varname]);
       bool has_mv = static_cast<bool>(mv);
-      for (std::size_t i=0; i < nlocs_; i++) {
-        for (std::size_t k=0; k < varSizes[j]; ++k) {
-          std::size_t out_idx = (nlocs_*j)+(i*varSizes[j])+k;
-          if (has_mv && mv(field_view(i, k))) {
-            result[out_idx] = util::missingValue(field_view(i, k));
+      for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
+        for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
+          if (has_mv && mv(field_view(iloc, klev))) {
+            result[out_idx] = util::missingValue(field_view(iloc, klev));
           } else {
-            result[out_idx] = field_view(i, k);
+            result[out_idx] = field_view(iloc, klev);
           }
+          ++out_idx;
         }
       }
     }
