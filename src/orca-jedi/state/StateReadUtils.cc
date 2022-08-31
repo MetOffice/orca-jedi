@@ -81,7 +81,7 @@ void readFieldsFromFile(
         if (varCoordTypeMap[fieldName] == "surface") {
           nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
         } else if (varCoordTypeMap[fieldName] == "vertical") {
-          nemo_file.read_vertical_var(nemoName, field_view);
+          nemo_file.read_vertical_var(nemoName, geom.mesh(), field_view);
         } else {
           nemo_file.read_volume_var(nemoName, geom.mesh(), time_indx, field_view);
         }

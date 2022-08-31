@@ -303,6 +303,8 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
 
 std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_var_slice"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -343,6 +345,8 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
 
   void NemoFieldReader::read_volume_var(const std::string& varname,
     const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_volume_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -406,6 +410,8 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
 
 void NemoFieldReader::read_vertical_var(const std::string& varname,
     atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -441,9 +447,64 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
     }
 
     // Store the data in an atlas 3D field - inefficient but flexible
-    for (int n = 0; n < nx*ny; ++n) {
+    for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
       for (int k = 0; k < nlevels; ++k) {
-        field_view(n, k) = buffer[k];
+        field_view(inode, k) = buffer[k];
+      }
+    }
+  } catch(netCDF::exceptions::NcException& e)
+  {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_vertical_var varname: "
+               << varname << " NetCDF exception: " << std::endl << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
+  }
+}
+
+void NemoFieldReader::read_vertical_var(const std::string& varname,
+    const atlas::Mesh& mesh, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
+                     << std::endl;
+  try {
+    size_t nx = read_dim_size("x");
+    size_t ny = read_dim_size("y");
+    size_t nz = read_dim_size(z_dimvar_name_);
+    size_t nlevels = field_view.shape(1);
+
+    if (nlevels > nz) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var field_view "
+                 << "2nd dimension is larger than NetCDF file z dimension ";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    netCDF::NcVar nc_var = ncFile->getVar(varname);
+    if (nc_var.isNull()) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
+                 << varname << "' is not present in NetCDF file";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    std::vector<double> buffer(nlevels);
+
+    size_t n_dims = nc_var.getDimCount();
+    std::string first_dim_name = nc_var.getDim(0).getName();
+    if (n_dims == 1 && first_dim_name == z_dimvar_name_) {
+      nc_var.getVar({0}, {nlevels}, buffer.data());
+    } else {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
+                 << varname << "' has " << n_dims << " dimensions.";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
+    // Store the data in an atlas 3D field - inefficient but flexible
+    for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
+      for (int k = 0; k < nlevels; ++k) {
+        if (ghost(inode)) continue;
+        field_view(inode, k) = buffer[k];
       }
     }
   } catch(netCDF::exceptions::NcException& e)
@@ -457,6 +518,8 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
 
 void NemoFieldReader::read_surf_var(const std::string& varname,
     const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_surf_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -498,8 +561,10 @@ void NemoFieldReader::read_surf_var(const std::string& varname,
   }
 }
 
-void NemoFieldReader::read_surf_var(const std::string varname, const atlas::Mesh& mesh,
+void NemoFieldReader::read_surf_var(const std::string& varname, const atlas::Mesh& mesh,
     const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+    oops::Log::trace() << "orcamodel::NemoFieldReader::read_surf_var"
+                       << std::endl;
     try {
         size_t nx = read_dim_size("x");
         size_t ny = read_dim_size("y");
