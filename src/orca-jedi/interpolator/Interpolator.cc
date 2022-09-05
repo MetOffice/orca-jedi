@@ -79,7 +79,7 @@ namespace orcamodel {
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
     if (nlocs_ == 0) {
-      std::cout << "[" << comm_.rank() << "] nlocs is ZERO!!" << std::endl;
+      oops::Log::trace() << "orcamodel::Interpolator:: nlocs == 0" << std::endl;
     }
 
   }

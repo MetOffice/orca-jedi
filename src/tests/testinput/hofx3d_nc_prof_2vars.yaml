@@ -34,7 +34,7 @@ window length: P1D
 observations:
   observers:
   - obs space:
-      name: Sea Temperature
+      name: ARGO profiles
       obsdatain:
         obsfile: Data/hofx_prof_2var_obs.nc
         obsgrouping:
@@ -57,7 +57,12 @@ observations:
       vertical coordinate: depth
       observation vertical coordinate group: ObsValue
     obs filters:
-    - filter: GOMsaver
-      filename: test_hofx3d_prof_2var_jopa_out_geovals.nc
+      - filter: Variable Assignment
+        assignments:
+        - name: sea_water_potential_temperature@GrossErrorProbability
+          type: float
+          value: 0.04
+      #- filter: GOMsaver
+      #  filename: test_hofx3d_prof_2var_jopa_out_geovals.nc
 test:
-  reference filename: testoutput/test_hofx3d_profiles_2var.ref
+  reference filename: testoutput/test_hofx3d_nc_prof_2vars.ref
