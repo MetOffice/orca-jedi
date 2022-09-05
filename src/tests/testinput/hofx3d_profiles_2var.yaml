@@ -1,0 +1,63 @@
+geometry :
+  nemo variables:
+    - name: depth
+      nemo field name: nav_lev
+      model space: vertical
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: sea_water_potential_temperature_background_error
+      nemo field name: t_tot_var
+      model space: volume
+      variable type: background variance
+    - name: sea_water_salinity
+      nemo field name: vosaline
+      model space: volume
+    - name: sea_water_salinity_background_error
+      nemo field name: t_tot_var
+      model space: volume
+      variable type: background variance
+  grid name: ORCA2_T
+  number levels: 3
+state :
+  date: 2021-06-30T00:00:00Z
+  state variables:
+  - sea_water_potential_temperature
+  - sea_water_potential_temperature_background_error
+  - depth
+  - sea_water_salinity
+  - sea_water_salinity_background_error
+  nemo field file: Data/orca2_t_nemo.nc
+  variance field file: Data/orca2_t_bkg_var.nc
+window begin: 2021-06-29T12:00:00Z
+window length: P1D
+observations:
+  observers:
+  - obs space:
+      name: Sea Temperature
+      obsdatain:
+        obsfile: Data/hofx_prof_2var_obs.nc
+        obsgrouping:
+          group variables: [ "station_id", "dateTime"]
+          sort variable: depth
+          sort group: ObsValue
+          sort order: descending
+      obsdataout:
+        obsfile: testoutput/test_hofx3d_profiles_2var_writer_jopa_out.nc
+      simulated variables: [sea_water_potential_temperature, sea_water_salinity]
+    get values:
+      atlas-interpolator:
+        type: unstructured-bilinear-lonlat
+        non_linear: missing-if-all-missing
+    obs operator:
+      name: VertInterp
+      variables:
+      - name: sea_water_potential_temperature
+      - name: sea_water_salinity
+      vertical coordinate: depth
+      observation vertical coordinate group: ObsValue
+    obs filters:
+    - filter: GOMsaver
+      filename: test_hofx3d_prof_2var_jopa_out_geovals.nc
+test:
+  reference filename: testoutput/test_hofx3d_profiles_2var.ref
