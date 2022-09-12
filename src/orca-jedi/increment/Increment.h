@@ -14,6 +14,7 @@
 
 #include "atlas/field/FieldSet.h"
 
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
@@ -92,6 +93,11 @@ class Increment : public util::Printable,
   void print(std::ostream & os) const override {os << "Not Implemented";}
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
+
+  std::vector<double> rmsByLevel(const std::string &) const {
+    ABORT("rmsByLevel not implemented");
+    return {};
+  }
 
 /// Serialize and deserialize
   std::size_t serialSize() const override {return 0;}
