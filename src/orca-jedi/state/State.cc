@@ -193,6 +193,8 @@ void State::print(std::ostream & os) const {
 void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero starting" << std::endl;
 
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
@@ -200,7 +202,7 @@ void State::zero() {
     auto field_view = atlas::array::make_view<double, 2>(field);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        field_view(j, k) = 0;
+        if (!ghost(j)) field_view(j, k) = 0;
       }
     }
   }
@@ -214,14 +216,18 @@ double State::norm(const std::string & field_name) const {
 
   auto field_view = atlas::array::make_view<double, 2>(
       stateFields_[field_name]);
-  auto ghost = atlas::array::make_view<int32_t, 1>(geom_->mesh().nodes().ghost());
+  oops::Log::trace() << "State(ORCA)::norm" << std::endl;
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
   atlas::field::MissingValue mv(stateFields()[field_name]);
   bool has_mv = static_cast<bool>(mv);
   for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
     for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-      if ((!has_mv) || (has_mv && !mv(field_view(j, k)) && !ghost(j))) {
-        norm += field_view(j, k)*field_view(j, k);
-        ++valid_points;
+      if (!ghost(j)) {
+        if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+          norm += field_view(j, k)*field_view(j, k);
+          ++valid_points;
+        }
       }
     }
   }

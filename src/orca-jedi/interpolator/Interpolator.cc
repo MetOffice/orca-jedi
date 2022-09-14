@@ -79,15 +79,15 @@ namespace orcamodel {
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
     if (nlocs_ == 0) {
-      std::cout << "[" << comm_.rank() << "] nlocs is ZERO!!" << std::endl;
+      oops::Log::trace() << "orcamodel::Interpolator:: nlocs == 0" << std::endl;
     }
-
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,
       const std::vector<bool> & mask,
       std::vector<double>& result) const {
-    oops::Log::trace() << "[" << comm_.rank() << "] orcamodel::Interpolator::apply starting "
+    oops::Log::trace() << "[" << comm_.rank()
+                       << "] orcamodel::Interpolator::apply starting "
                        << std::endl;
 
     const size_t nvars = vars.size();

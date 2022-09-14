@@ -22,3 +22,8 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_potm
                   OMP 1
                   ARGS testinput/hofx3d_nc_potm.yaml
                   COMMAND orcamodel_hofx3D.x )
+
+ecbuild_add_test( TARGET test_orcamodel_hofx3D_prof_2var
+                  OMP 1
+                  ARGS testinput/hofx3d_nc_prof_2vars.yaml
+                  COMMAND orcamodel_hofx3D.x )
