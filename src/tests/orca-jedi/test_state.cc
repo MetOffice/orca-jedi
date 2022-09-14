@@ -35,25 +35,25 @@ CASE("test basic state") {
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
     .set("nemo field name", "iiceconc")
-    .set("type", "surface");
+    .set("model space", "surface");
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
-    .set("type", "surface");
+    .set("model space", "surface")
+    .set("variable type", "background variance");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
-    .set("type", "surface");
+    .set("model space", "surface");
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
     .set("nemo field name", "votemper")
-    .set("type", "volume");
+    .set("model space", "volume");
   config.set("nemo variables", nemo_var_mappings);
-  config.set("variance names", std::vector<std::string>{"sic_tot_var"});
   Geometry geometry(config, eckit::mpi::comm());
   const std::vector<int> channels{};
 
   eckit::LocalConfiguration state_config;
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
   state_config.set("state variables", state_variables);
-  state_config.set("date", "2018-04-15T00:00:00Z");
+  state_config.set("date", "2021-06-30T00:00:00Z");
   OrcaStateParameters params;
 
   SECTION("test state parameters") {
@@ -72,7 +72,7 @@ CASE("test basic state") {
 
   SECTION("test constructor") {
     oops::Variables oops_vars(state_variables, channels);
-    util::DateTime datetime("2018-04-15T00:00:00Z");
+    util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
   }
 
@@ -84,7 +84,9 @@ CASE("test basic state") {
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    double iceNorm = 0.00323467;
+    double iceNorm = 0.0032018269;
+    std::cout << std::setprecision(8) << state.norm("sea_ice_area_fraction")
+              << std::setprecision(8) << iceNorm << std::endl;
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
     state.read(params);
     EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);

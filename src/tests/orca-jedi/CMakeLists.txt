@@ -11,6 +11,13 @@ LIST( APPEND ATLAS_TEST_ENVIRONMENT
     ATLAS_CACHE_PATH=${CMAKE_BINARY_DIR}/share
     PLUGINS_MANIFEST_PATH=${CMAKE_BINARY_DIR}/atlas-orca/share/plugins )
 
+ecbuild_add_test( TARGET  test_orcajedi_nemo_io_orca_field_reader.x
+                  SOURCES test_nemo_io_orca_field_reader.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  MPI        2
+                  CONDITION  eckit_HAVE_MPI
+                  LIBS    orcamodel )
+
 ecbuild_add_test( TARGET  test_orcajedi_geometry.x
                   SOURCES test_geometry.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
@@ -21,8 +28,8 @@ ecbuild_add_test( TARGET  test_orcajedi_state.x
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
 
-ecbuild_add_test( TARGET  test_orcajedi_getvalues.x
-                  SOURCES test_getvalues.cc
+ecbuild_add_test( TARGET  test_orcajedi_interpolator.x
+                  SOURCES test_interpolator.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
 

@@ -13,10 +13,9 @@ errorcovariance/ErrorCovariance.h
 geometry/GeometryParameters.h
 geometry/Geometry.h
 geometry/Geometry.cc
-getvalues/GetValuesParameters.h
-getvalues/GetValues.h
-getvalues/GetValues.cc
-getvalues/LinearGetValues.h
+interpolator/InterpolatorParameters.h
+interpolator/Interpolator.h
+interpolator/Interpolator.cc
 increment/Increment.cc
 increment/Increment.h
 model/ModelBiasCovariance.h
@@ -31,16 +30,14 @@ nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 utilities/OrcaModelTraits.h
 variablechanges/VariableChangeParameters.h
-variablechanges/LinearVariableChangeParameters.h
 variablechanges/VariableChange.h
-variablechanges/LinearVariableChange.h
 )
 
 
 
 ecbuild_add_library( TARGET   orcamodel
                      SOURCES  ${oops_orcamodel_src_files}
-                     PUBLIC_LIBS  oops saber ufo atlas netcdf 
+                     PUBLIC_LIBS  oops ufo atlas atlas-orca eckit netcdf
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

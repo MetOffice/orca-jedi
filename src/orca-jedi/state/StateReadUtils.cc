@@ -56,12 +56,16 @@ void readFieldsFromFile(
     // field names in the atlas fieldset are assumed to match their names in
     // the field file
     const size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+    oops::Log::debug() << "orcamodel::readFieldsFromFile:: time_indx "
+                       << time_indx << std::endl;
 
-    std::map<std::string, size_t> varSizeMap;
+    std::map<std::string, std::string> varCoordTypeMap;
     {
       const oops::Variables vars = geom.variables();
-      const std::vector<size_t> varSizes = geom.variableSizes(vars);
-      for (int i=0; i < vars.size(); ++i) varSizeMap[vars[i]] = varSizes[i];
+      const std::vector<std::string> coordSpaces =
+        geom.variableNemoSpaces(vars);
+      for (int i=0; i < vars.size(); ++i)
+        varCoordTypeMap[vars[i]] = coordSpaces[i];
     }
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
@@ -73,18 +77,21 @@ void readFieldsFromFile(
                               variable_type)
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
-        if (varSizeMap[fieldName] != 1) {
-          std::stringstream err_stream;
-          err_stream << "orcamodel::readFieldsFromFile reading "
-                     << "data with levels > 1 not implemented." << std::endl;
-          throw eckit::NotImplemented(err_stream.str(), Here());
+        auto field_view = atlas::array::make_view<double, 2>(field);
+        if (varCoordTypeMap[fieldName] == "surface") {
+          nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
+        } else if (varCoordTypeMap[fieldName] == "vertical") {
+          nemo_file.read_vertical_var(nemoName, geom.mesh(), field_view);
+        } else {
+          nemo_file.read_volume_var(nemoName, geom.mesh(), time_indx,
+              field_view);
         }
-        auto field_view = atlas::array::make_view<double, 1>(field);
-        nemo_file.read_surf_var(nemoName, time_indx, field_view);
         auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
+        // Add a halo exchange following read to fill out halo points
+        geom.funcSpace().haloExchange(field);
       }
     }
 

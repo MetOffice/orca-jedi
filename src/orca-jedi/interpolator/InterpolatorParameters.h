@@ -21,17 +21,19 @@ class OrcaAtlasInterpolatorParameters : public oops::Parameters {
 
  public:
   oops::RequiredParameter<std::string> type{"type", this};
-  oops::RequiredParameter<std::string> non_linear{"non_linear", this};
+  oops::OptionalParameter<std::string> non_linear{"non_linear", this};
   oops::OptionalParameter<double>
     max_fraction_elems_to_try{"max_fraction_elems_to_try", this};
 };
 
-class OrcaGetValuesParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(OrcaGetValuesParameters, oops::Parameters)
+class OrcaInterpolatorParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(OrcaInterpolatorParameters, oops::Parameters)
 
  public:
   oops::RequiredParameter<OrcaAtlasInterpolatorParameters> atlasInterpolator{
     "atlas-interpolator", this};
+  oops::OptionalParameter<std::string> time_interpolation{"time interpolation",
+    this};
 };
 
 }  //  namespace orcamodel

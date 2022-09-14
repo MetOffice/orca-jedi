@@ -48,27 +48,30 @@ class Geometry : public util::Printable {
  public:
   typedef OrcaGeometryParameters Parameters__;
 
-  // Geometry(const Parameters_ &, const eckit::mpi::Comm &);
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 
   std::vector<size_t> variableSizes(const oops::Variables &) const;
+  std::vector<std::string> variableNemoSpaces(const oops::Variables & vars)
+      const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
-
   const oops::Variables & variables() const;
+  void latlon(std::vector<double> & lats, std::vector<double> & lons,
+              const bool halo) const;
 
+  const atlas::Grid & grid() const {return grid_;}
   const atlas::Mesh & mesh() const {return mesh_;}
   const atlas::functionspace::NodeColumns & funcSpace() const
     {return funcSpace_;}
   const std::string nemo_var_name(const std::string std_name) const;
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;
+  bool levelsAreTopDown() const {return true;}
 
  private:
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
-  oops::Variables variance_vars_;
   size_t n_levels_;
   Parameters__ params_;
   atlas::Grid grid_;

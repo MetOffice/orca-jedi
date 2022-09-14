@@ -15,6 +15,7 @@
 #include <numeric>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
@@ -51,7 +52,7 @@ namespace orcamodel {
 State::State(const Geometry & geom,
              const oops::Variables & vars,
              const util::DateTime & time)
-  : geom_(new Geometry(geom)), vars_(vars), time_(time)
+  : geom_(new Geometry(geom)), vars_(vars), time_(time), params_()
 {
   stateFields_ = atlas::FieldSet();
 
@@ -64,8 +65,8 @@ State::State(const Geometry & geom,
 State::State(const Geometry & geom,
              const Parameters_ & params)
   : geom_(new Geometry(geom))
-    , vars_(params.stateVariables)
-    , time_(params.date)
+    , vars_(params.stateVariables.value())
+    , time_(params.date.value())
     , stateFields_(), params_(params)
 {
   std::stringstream params_stream;
@@ -87,8 +88,20 @@ State::State(const Geometry & geom,
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
+State::State(const Geometry & resol, const State & other)
+  : geom_(new Geometry(resol))
+    , params_(other.params_)
+    , vars_(other.vars_)
+    , time_(other.time_)
+    , stateFields_(other.stateFields_) {
+  ASSERT(other.geom_->grid().uid() == resol.grid().uid());
+  oops::Log::trace() << "State(ORCA)::State resolution change: "
+                     << " copied as there is no change" << std::endl;
+}
+
 State::State(const State & other)
   : geom_(other.geom_)
+    , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
     , stateFields_(other.stateFields_) {
@@ -124,10 +137,11 @@ State & State::operator+=(const Increment & dx) {
 // I/O and diagnostics
 
 void State::read(const Parameters_ & params) {
-  oops::Log::trace() << "State(ORCA)::read starting" << std::endl;
-
-  oops::Log::trace() << "State(ORCA)::read time: " << validTime()
+  oops::Log::trace() << "State(ORCA)::read starting for " << params.date.value()
                      << std::endl;
+
+  params_ = params;
+  time_ = params.date.value();
 
   readFieldsFromFile(params, *geom_, validTime(), "background",
       stateFields_);
@@ -143,9 +157,11 @@ void State::analytic_init(const Geometry & geom) {
 void State::setupStateFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in stateFields
-    if (!stateFields_.has_field(vars_[i])) {
+    std::vector<size_t> varSizes = geom_->variableSizes(vars_);
+    if (!stateFields_.has(vars_[i])) {
       stateFields_.add(geom_->funcSpace().createField<double>(
-            atlas::option::name(vars_[i])));
+           atlas::option::name(vars_[i]) |
+           atlas::option::levels(varSizes[i])));
     }
   }
 }
@@ -165,8 +181,8 @@ void State::print(std::ostream & os) const {
   os << std::string(4, ' ') << "atlas field norms:" << std::endl;
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
-    os << std::string(8, ' ') << fieldName << ": " << norm(fieldName)
-       << std::endl;
+    os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+       << norm(fieldName) << std::endl;
   }
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
@@ -177,13 +193,17 @@ void State::print(std::ostream & os) const {
 void State::zero() {
   oops::Log::trace() << "State(ORCA)::zero starting" << std::endl;
 
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    auto field_view = atlas::array::make_view<double, 1>(field);
+    auto field_view = atlas::array::make_view<double, 2>(field);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      field_view(j) = 0;
+      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        if (!ghost(j)) field_view(j, k) = 0;
+      }
     }
   }
 
@@ -194,14 +214,21 @@ double State::norm(const std::string & field_name) const {
   double norm = 0;
   int valid_points = 0;
 
-  auto field_view = atlas::array::make_view<double, 1>(
+  auto field_view = atlas::array::make_view<double, 2>(
       stateFields_[field_name]);
+  oops::Log::trace() << "State(ORCA)::norm" << std::endl;
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
   atlas::field::MissingValue mv(stateFields()[field_name]);
   bool has_mv = static_cast<bool>(mv);
   for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-    if ((!has_mv) || (has_mv && !mv(field_view(j)))) {
-      norm += field_view(j)*field_view(j);
-      ++valid_points;
+    for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+      if (!ghost(j)) {
+        if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+          norm += field_view(j, k)*field_view(j, k);
+          ++valid_points;
+        }
+      }
     }
   }
   return sqrt(norm)/valid_points;

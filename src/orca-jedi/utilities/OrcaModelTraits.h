@@ -11,10 +11,8 @@
 
 #include "orca-jedi/errorcovariance/ErrorCovariance.h"
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/getvalues/GetValues.h"
-#include "orca-jedi/getvalues/LinearGetValues.h"
+#include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/increment/Increment.h"
-#include "orca-jedi/variablechanges/LinearVariableChange.h"
 
 #include "orca-jedi/model/ModelBias.h"
 #include "orca-jedi/model/ModelBiasIncrement.h"
@@ -32,10 +30,8 @@ struct OrcaModelTraits {
   typedef orcamodel::ErrorCovariance           Covariance;
   typedef orcamodel::Geometry                  Geometry;
 
-  typedef orcamodel::GetValues                 GetValues;
-  typedef orcamodel::LinearGetValues           LinearGetValues;
+  typedef orcamodel::Interpolator              LocalInterpolator;
   typedef orcamodel::Increment                 Increment;
-  typedef orcamodel::LinearVariableChange      LinearVariableChange;
 
   typedef orcamodel::ModelBias                 ModelAuxControl;
   typedef orcamodel::ModelBiasIncrement        ModelAuxIncrement;

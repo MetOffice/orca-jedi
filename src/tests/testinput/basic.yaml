@@ -3,7 +3,7 @@ geometry :
   nemo variables:
     - name: sea_ice_category_area_fraction
       nemo field name: iiceconc
-      type: surface
+      model space: surface
   grid name: ORCA2_T
   number levels: 10
 initial condition :
@@ -22,16 +22,17 @@ model :
 window begin: 2018-04-14T21:00:00Z
 window length: P1D
 observations:
-- obs operator:
-    name: SeaIceFraction
-  get values:
-    atlas-interpolator:
-      type: finite-element
-      non_linear: missing-if-all-missing
-  obs space:
-    name: SeaIceFraction
-    obsdatain:
-      obsfile: ufo/test/Data/ufo/testinput_tier_1/icec-2018-04-15.nc
-    obsdataout:
-      obsfile:  test_out.nc
-    simulated variables: [sea_ice_category_area_fraction]
+  observers:
+  - obs operator:
+      name: SeaIceFraction
+    get values:
+      atlas-interpolator:
+        type: finite-element
+        non_linear: missing-if-all-missing
+    obs space:
+      name: SeaIceFraction
+      obsdatain:
+        obsfile: ufo/test/Data/ufo/testinput_tier_1/icec-2018-04-15.nc
+      obsdataout:
+        obsfile:  test_out.nc
+      simulated variables: [sea_ice_category_area_fraction]

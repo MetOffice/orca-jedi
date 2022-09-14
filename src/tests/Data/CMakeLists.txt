@@ -5,6 +5,7 @@ hofx_sst_obs.nc
 orca2_t_bkg_var.nc
 orca2_t_coords.nc
 orca2_t_nemo.nc
+orca1_t_nemo.nc
 ostia_seaice_obs.nc
 simple_nemo.nc
 create_orca2_t_bkg.nco
@@ -15,6 +16,8 @@ ostia_seaice_obs.cdl
 ostia_seaice_obs.csv
 simple_nemo.cdl
 hofx_two_vars_obs.nc
+hofx_potm_obs.nc
+hofx_prof_2var_obs.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
