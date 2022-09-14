@@ -35,7 +35,7 @@ struct IndexGlbArray {
     int32_t nx_halo_WE;
     int32_t ny_halo_NS;
 
-    IndexGlbArray(const atlas::OrcaGrid& orcaGrid) {
+    explicit IndexGlbArray(const atlas::OrcaGrid& orcaGrid) {
         iy_glb_max = orcaGrid.ny() + orcaGrid.haloNorth() - 1;
         ix_glb_max = orcaGrid.nx() + orcaGrid.haloEast() - 1;
 
@@ -45,14 +45,14 @@ struct IndexGlbArray {
         // vector of local indices: necessary for remote indices of ghost nodes
         int iy_glb_min = -orcaGrid.haloSouth();
         int ix_glb_min = -orcaGrid.haloWest();
-        glbarray_offset  = -( nx_halo_WE * iy_glb_min ) - ix_glb_min;
+        glbarray_offset  = -(nx_halo_WE * iy_glb_min) - ix_glb_min;
         glbarray_jstride = nx_halo_WE;
     }
 
     int64_t operator()(int i, int j) {
-        ATLAS_ASSERT( i <= ix_glb_max,
+        ATLAS_ASSERT(i <= ix_glb_max,
             std::to_string(i) + " > " + std::to_string(ix_glb_max));
-        ATLAS_ASSERT( j <= iy_glb_max,
+        ATLAS_ASSERT(j <= iy_glb_max,
             std::to_string(j) + " > " + std::to_string(iy_glb_max));
         return glbarray_offset + j * glbarray_jstride + i;
     }
@@ -174,8 +174,8 @@ void NemoFieldReader::read_datetimes() {
         [](char & c){ c = tolower(c); });
     if (units_string.substr(0, seconds_since.size()) != seconds_since) {
       std::ostringstream err_stream;
-      err_stream << "orcamodel::NemoFieldReader::read_datetimes units attribute "
-                 << "badly formatted: " << units_string << std::endl;
+      err_stream << "orcamodel::NemoFieldReader::read_datetimes units attribute"
+                 << " badly formatted: " << units_string << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
     units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
@@ -191,7 +191,7 @@ void NemoFieldReader::read_datetimes() {
   } catch(netCDF::exceptions::NcException& e)
   {
     std::ostringstream err_stream;
-    err_stream << "orcamodel::NemoFieldReader::read_datetimes NetCDF exception for "
+    err_stream << "orcamodel::NemoFieldReader::read_datetimes NetCDF exception "
                << time_dimvar_name_ << ": " << std::endl;
     err_stream << e.what();
     throw eckit::ReadError(err_stream.str(), Here());
@@ -303,6 +303,8 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() {
 
 std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_var_slice"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -343,6 +345,8 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
 
   void NemoFieldReader::read_volume_var(const std::string& varname,
     const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_volume_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -406,6 +410,8 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
 
 void NemoFieldReader::read_vertical_var(const std::string& varname,
     atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -441,9 +447,64 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
     }
 
     // Store the data in an atlas 3D field - inefficient but flexible
-    for (int n = 0; n < nx*ny; ++n) {
+    for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
       for (int k = 0; k < nlevels; ++k) {
-        field_view(n, k) = buffer[k];
+        field_view(inode, k) = buffer[k];
+      }
+    }
+  } catch(netCDF::exceptions::NcException& e)
+  {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_vertical_var varname: "
+               << varname << " NetCDF exception: " << std::endl << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
+  }
+}
+
+void NemoFieldReader::read_vertical_var(const std::string& varname,
+    const atlas::Mesh& mesh, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
+                     << std::endl;
+  try {
+    size_t nx = read_dim_size("x");
+    size_t ny = read_dim_size("y");
+    size_t nz = read_dim_size(z_dimvar_name_);
+    size_t nlevels = field_view.shape(1);
+
+    if (nlevels > nz) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var field_view "
+                 << "2nd dimension is larger than NetCDF file z dimension ";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    netCDF::NcVar nc_var = ncFile->getVar(varname);
+    if (nc_var.isNull()) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
+                 << varname << "' is not present in NetCDF file";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    std::vector<double> buffer(nlevels);
+
+    size_t n_dims = nc_var.getDimCount();
+    std::string first_dim_name = nc_var.getDim(0).getName();
+    if (n_dims == 1 && first_dim_name == z_dimvar_name_) {
+      nc_var.getVar({0}, {nlevels}, buffer.data());
+    } else {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
+                 << varname << "' has " << n_dims << " dimensions.";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
+    // Store the data in an atlas 3D field - inefficient but flexible
+    for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
+      for (int k = 0; k < nlevels; ++k) {
+        if (ghost(inode)) continue;
+        field_view(inode, k) = buffer[k];
       }
     }
   } catch(netCDF::exceptions::NcException& e)
@@ -457,6 +518,8 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
 
 void NemoFieldReader::read_surf_var(const std::string& varname,
     const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_surf_var"
+                     << std::endl;
   try {
     size_t nx = read_dim_size("x");
     size_t ny = read_dim_size("y");
@@ -498,14 +561,17 @@ void NemoFieldReader::read_surf_var(const std::string& varname,
   }
 }
 
-void NemoFieldReader::read_surf_var(const std::string varname, const atlas::Mesh& mesh,
-    const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) {
+void NemoFieldReader::read_surf_var(const std::string& varname,
+    const atlas::Mesh& mesh, const size_t t_indx,
+    atlas::array::ArrayView<double, 2>& field_view) {
+    oops::Log::trace() << "orcamodel::NemoFieldReader::read_surf_var"
+                       << std::endl;
     try {
         size_t nx = read_dim_size("x");
         size_t ny = read_dim_size("y");
 
-        const atlas::OrcaGrid orcaGrid = atlas::OrcaGrid( mesh.grid() );
-        if (not orcaGrid) {
+        const atlas::OrcaGrid orcaGrid = atlas::OrcaGrid(mesh.grid());
+        if (!orcaGrid) {
           std::ostringstream err_stream;
           err_stream << "orcamodel::NemoFieldReader::read_surf_var"
                      << " only reads ORCA grid data. " << mesh.grid().name()
@@ -514,7 +580,8 @@ void NemoFieldReader::read_surf_var(const std::string varname, const atlas::Mesh
         }
 
         IndexGlbArray index_glbarray(orcaGrid);
-        if (index_glbarray.nx_halo_WE != nx || index_glbarray.ny_halo_NS != ny) {
+        if (index_glbarray.nx_halo_WE != nx
+            || index_glbarray.ny_halo_NS != ny) {
             std::ostringstream err_stream;
             err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar"
                 << " grid dimensions don't match file dimensions grid: ("
@@ -531,14 +598,15 @@ void NemoFieldReader::read_surf_var(const std::string varname, const atlas::Mesh
             std::ostringstream err_stream;
             err_stream << "orcamodel::NemoFieldReader::read_surf_var ncVar"
                 << " number of mesh nodes " << "larger than the netCDF file"
-                << " dimensions, " << nx * ny << " double check the grids match."
-                << std::endl;
+                << " dimensions, " << nx * ny
+                << " double check the grids match." << std::endl;
             throw eckit::BadValue(err_stream.str());
         }
 
         netCDF::NcVar nc_var = ncFile->getVar(varname);
         if (nc_var.isNull()) {
-            throw eckit::UserError("orcamodel::NemoFieldReader::read_surf_var ncVar "
+            throw eckit::UserError(
+                std::string("orcamodel::NemoFieldReader::read_surf_var ncVar ")
                 + varname + " is not present in NetCDF file", Here());
         }
 
@@ -551,11 +619,13 @@ void NemoFieldReader::read_surf_var(const std::string varname, const atlas::Mesh
         } else if (n_dims == 2) {
            nc_var.getVar({0, 0}, {ny, nx}, var_data.data());
         } else {
-            throw eckit::UserError("orcamodel::NemoFieldReader::read_surf_var ncVar "
-                + varname + " has an unreadable number of dimensions: " + std::to_string(n_dims), Here());
+            throw eckit::UserError(
+                std::string("orcamodel::NemoFieldReader::read_surf_var ")
+                + "ncVar " + varname + " has an unreadable number of "
+                + "dimensions: " + std::to_string(n_dims), Here());
         }
 
-        for (size_t inode = 0; inode<field_view.size(); ++inode) {
+        for (size_t inode = 0; inode < field_view.size(); ++inode) {
           if (ghost(inode)) continue;
           double data = var_data[index_glbarray(ij(inode, 0), ij(inode, 1))];
           field_view(inode, 0) = data;
@@ -576,8 +646,8 @@ void NemoFieldReader::read_volume_var(const std::string& varname,
     size_t nz = read_dim_size(z_dimvar_name_);
     size_t nlevels = field_view.shape(1);
 
-    const atlas::OrcaGrid orcaGrid = atlas::OrcaGrid( mesh.grid() );
-    if (not orcaGrid) {
+    const atlas::OrcaGrid orcaGrid = atlas::OrcaGrid(mesh.grid());
+    if (!orcaGrid) {
       std::ostringstream err_stream;
       err_stream << "orcamodel::NemoFieldReader::read_volume_var"
                  << " only reads ORCA grid data. " << mesh.grid().name()
@@ -643,8 +713,8 @@ void NemoFieldReader::read_volume_var(const std::string& varname,
     for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
       for (int k = 0; k < nlevels; ++k) {
         if (ghost(inode)) continue;
-        double data = buffer[k*nx*ny + index_glbarray(ij(inode, 0), ij(inode, 1))];
-        field_view(inode, k) = data;
+        field_view(inode, k) =
+          buffer[k*nx*ny + index_glbarray(ij(inode, 0), ij(inode, 1))];
       }
     }
   } catch(netCDF::exceptions::NcException& e)

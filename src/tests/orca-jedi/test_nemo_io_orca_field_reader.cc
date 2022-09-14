@@ -55,7 +55,7 @@ CASE("test parallel serially distributed read_surf_var reads field array view") 
   auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
-  for (int i = 0; i<field_view.size(); ++i) {
+  for (int i = 0; i < field_view.size(); ++i) {
     if (ghost(i)) continue;
     if (raw_data[i] != field_view(i, 0)) {
         std::cout << "mismatch: "
@@ -80,7 +80,7 @@ CASE("test parallel serially distributed read_surf_var reads field array view") 
     std::vector<double> raw_data;
     for (int k =0; k <3; k++) {
       raw_data = field_reader.read_var_slice("votemper", 0, k);
-      for (int i = 0; i<field_view.shape(0); ++i) {
+      for (int i = 0; i < field_view.shape(0); ++i) {
         if (ghost(i)) continue;
         if (raw_data[i] != field_view(i, k)) {
             std::cout << "mismatch: "
@@ -90,6 +90,32 @@ CASE("test parallel serially distributed read_surf_var reads field array view") 
                       << " with mesh " << field_view(i, k) << std::endl;
         }
         EXPECT_EQUAL(raw_data[i], field_view(i, k));
+      }
+    }
+  }
+
+  SECTION("depth field") {
+    atlas::Field field(funcSpace.createField<double>(
+                          atlas::option::name("depth") |
+                          atlas::option::levels(3)));
+    auto field_view = atlas::array::make_view<double, 2>(field);
+
+    field_reader.read_vertical_var("nav_lev", mesh, field_view);
+    auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
+
+    auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
+    std::vector<double> levels{0, 10, 100};
+    for (int k =0; k <3; k++) {
+      for (int i = 0; i < field_view.shape(0); ++i) {
+        if (ghost(i)) continue;
+        if (levels[k] != field_view(i, k)) {
+            std::cout << "mismatch: "
+                      << " ij(" << i << ", 0) " << ij(i, 0)
+                      << " ij(" << i << ", 1) " << ij(i, 1)
+                      << " 1 proc " << levels[k] << " "
+                      << " with mesh " << field_view(i, k) << std::endl;
+        }
+        EXPECT_EQUAL(levels[k], field_view(i, k));
       }
     }
   }
@@ -173,6 +199,31 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
                       << " raw " << raw_data[raw_idx] << std::endl;
         }
         EXPECT_EQUAL(field_view(i, k), raw_data[raw_idx]);
+      }
+    }
+  }
+  SECTION("depth field") {
+    atlas::Field field(funcSpace.createField<double>(
+                          atlas::option::name("depth") |
+                          atlas::option::levels(3)));
+    auto field_view = atlas::array::make_view<double, 2>(field);
+
+    field_reader.read_vertical_var("nav_lev", mesh, field_view);
+    auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
+
+    auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
+    std::vector<double> levels{0,10,100};
+    for (int k =0; k <3; k++) {
+      for (int i = 0; i<field_view.shape(0); ++i) {
+        if (ghost(i)) continue;
+        if (levels[k] != field_view(i, k)) {
+            std::cout << "mismatch: "
+                      << " ij(" << i << ", 0) " << ij(i, 0)
+                      << " ij(" << i << ", 1) " << ij(i, 1)
+                      << " 1 proc " << levels[k] << " "
+                      << " with mesh " << field_view(i, k) << std::endl;
+        }
+        EXPECT_EQUAL(levels[k], field_view(i, k));
       }
     }
   }
