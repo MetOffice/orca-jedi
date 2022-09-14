@@ -30,7 +30,6 @@ observations:
         engine:
           type: H5File
           obsfile: Data/ostia_seaice_obs.nc
-        max frame size: 1000000
       obsdataout:
         engine:
           type: H5File

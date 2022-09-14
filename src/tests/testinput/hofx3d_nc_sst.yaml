@@ -31,7 +31,6 @@ observations:
         engine:
           type: H5File
           obsfile: Data/hofx_sst_obs.nc
-        max frame size: 1000000
       obsdataout:
         engine:
           type: H5File

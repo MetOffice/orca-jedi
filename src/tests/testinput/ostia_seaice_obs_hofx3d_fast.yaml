@@ -31,12 +31,10 @@ observations:
         obsfile: /data/users/tsearle/jopa_ostia_start_data/seaice.odb
         mapping file: ioda/test/testinput/odb_default_name_map.yml
         query file: ioda/test/testinput/iodatest_odb_seaice.yml
-        max frame size: 1000000
     obsdataout:
       engine:
         type: H5File
         obsfile: test_out.nc
-        max frame size: 1000000
     simulated variables: [ice_area_fraction]
   get values:
     atlas-interpolator:

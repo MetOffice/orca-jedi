@@ -46,7 +46,6 @@ observations:
       engine:
         type: H5File
         obsfile: test_out.nc
-        max frame size: 1000000
     simulated variables: [ice_area_fraction]
   get values:
     atlas-interpolator:
