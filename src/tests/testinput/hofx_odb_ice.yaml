@@ -46,11 +46,15 @@ observations:
   - obs space:
       name: Sea Ice
       obsdatain:
-        obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.odb
-        mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
-        query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
+        engine:
+          type: ODB
+          obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.odb
+          mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
+          query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
       obsdataout:
-        obsfile: test_out.nc
+        engine:
+          type: H5File
+          obsfile: test_out.nc
       simulated variables: [ice_area_fraction]
     get values:
       time interpolation: linear

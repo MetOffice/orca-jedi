@@ -36,13 +36,16 @@ observations:
 - obs space:
     name: Sea Ice
     obsdatain:
-      obsfile: /data/users/tsearle/jopa_ostia_start_data/seaice.odb
-      mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
-      query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
-      max frame size: 1000000
+      engine:
+        type: ODB
+        obsfile: /data/users/tsearle/jopa_ostia_start_data/seaice.odb
+        mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
+        query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
+        max frame size: 1000000
     obsdataout:
-      obsfile: test_out.nc
-      max frame size: 1000000
+      engine:
+        type: H5File
+        obsfile: test_out.nc
     simulated variables: [ice_area_fraction]
   get values:
     atlas-interpolator:

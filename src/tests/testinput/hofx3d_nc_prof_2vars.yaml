@@ -36,14 +36,18 @@ observations:
   - obs space:
       name: ARGO profiles
       obsdatain:
-        obsfile: Data/hofx_prof_2var_obs.nc
+        engine:
+          type: H5File
+          obsfile: Data/hofx_prof_2var_obs.nc
         obsgrouping:
           group variables: [ "station_id", "dateTime"]
           sort variable: depth
           sort group: ObsValue
           sort order: descending
       obsdataout:
-        obsfile: testoutput/test_hofx3d_profiles_2var_writer_jopa_out.nc
+        engine:
+          type: H5File
+          obsfile: testoutput/test_hofx3d_profiles_2var_writer_jopa_out.nc
       simulated variables: [sea_water_potential_temperature, sea_water_salinity]
     get values:
       atlas-interpolator:
