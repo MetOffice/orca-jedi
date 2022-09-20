@@ -24,14 +24,18 @@ observations:
   - obs space:
       name: Sea Temperature
       obsdatain:
-        obsfile: Data/hofx_potm_obs.nc
+        engine:
+          type: H5File
+          obsfile: Data/hofx_potm_obs.nc
         obsgrouping:
           group variables: [ "station_id" ]
           sort variable: depth
           sort group: ObsValue
           sort order: descending
       obsdataout:
-        obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
+        engine:
+          type: H5File
+          obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
       simulated variables: [sea_water_potential_temperature]
     get values:
       atlas-interpolator:
