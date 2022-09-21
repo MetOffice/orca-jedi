@@ -150,17 +150,5 @@ observations:
       - name: set
         flag: BayBgCheckReject
       - name: reject
-    - filter: NEMO Feedback Writer
-      filename: odb_nemo_fdbk_writer_out.nc
-      reference date: 1950-01-01T00:00:00Z
-      variables:
-      - name: ice_area_fraction
-        nemo name: ICECONC
-        long name: ice area fraction
-        units: Fraction
-        additional variables:
-          - name: ice_area_fraction
-            feedback suffix: Hx
-            ioda group: HofX
 test:
   reference filename: testoutput/test_hofx_nc_ice.ref
