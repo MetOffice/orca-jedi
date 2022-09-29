@@ -59,7 +59,7 @@ class Geometry : public util::Printable {
   const oops::Variables & variables() const;
   void latlon(std::vector<double> & lats, std::vector<double> & lons,
               const bool halo) const;
-  const atlas::FunctionSpace & functionSpace() const {return nospace_;}
+  const atlas::FunctionSpace & functionSpace() const {return funcSpace_;}
   const atlas::FieldSet & extraFields() const {return nofields_;}
 
   const atlas::Grid & grid() const {return grid_;}
@@ -81,7 +81,6 @@ class Geometry : public util::Printable {
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
-  atlas::FunctionSpace nospace_;
   atlas::FieldSet nofields_;
 };
 // -----------------------------------------------------------------------------
