@@ -64,8 +64,6 @@ class Geometry : public util::Printable {
 
   const atlas::Grid & grid() const {return grid_;}
   const atlas::Mesh & mesh() const {return mesh_;}
-  const atlas::functionspace::NodeColumns & funcSpace() const
-    {return funcSpace_;}
   const std::string nemo_var_name(const std::string std_name) const;
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;

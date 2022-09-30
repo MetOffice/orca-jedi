@@ -91,7 +91,7 @@ void readFieldsFromFile(
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
         // Add a halo exchange following read to fill out halo points
-        geom.funcSpace().haloExchange(field);
+        geom.functionSpace().haloExchange(field);
       }
     }
 
