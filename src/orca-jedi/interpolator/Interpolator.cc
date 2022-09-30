@@ -73,7 +73,7 @@ namespace orcamodel {
       comm_(geom.getComm()),
       atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(lats, lons))),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
-                    geom.funcSpace(),
+                    geom.functionSpace(),
                     atlasObsFuncSpace_ ) {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf

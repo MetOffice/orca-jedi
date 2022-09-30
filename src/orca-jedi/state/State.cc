@@ -159,7 +159,7 @@ void State::setupStateFields() {
     // add variable if it isn't already in stateFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!stateFields_.has(vars_[i])) {
-      stateFields_.add(geom_->funcSpace().createField<double>(
+      stateFields_.add(geom_->functionSpace().createField<double>(
            atlas::option::name(vars_[i]) |
            atlas::option::levels(varSizes[i])));
     }
