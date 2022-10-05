@@ -22,19 +22,19 @@ set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
 find_package( NetCDF COMPONENTS CXX)
 ecbuild_debug( "   NetCDF_FEATURES: [${NetCDF_FEATURES}]" )
 
-ecbuild_find_package( NAME eckit VERSION 1.18 COMPONENTS LZ4 REQUIRED )
+find_package( eckit 1.18 COMPONENTS LZ4 REQUIRED )
 ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 
-ecbuild_find_package( NAME atlas VERSION 0.29 REQUIRED )
+find_package( atlas 0.29 REQUIRED )
 ecbuild_debug( "   atlas_FEATURES: [${atlas_FEATURES}]" )
 
-ecbuild_find_package( NAME oops )
+find_package( oops REQUIRED )
 ecbuild_debug( "   oops_FEATURES : [${oops_FEATURES}]" )
 
-ecbuild_find_package( NAME ufo )
+find_package( ufo REQUIRED)
 ecbuild_debug( "   ufo_FEATURES : [${ufo_FEATURES}]" )
 
-ecbuild_find_package( NAME nemo-feedback )
+find_package( nemo-feedback )
 
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
