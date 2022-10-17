@@ -27,6 +27,8 @@ class OrcaStateParameters : public oops::Parameters {
   oops::OptionalParameter<std::string> varianceFieldFile{
     "variance field file", "", this};
   oops::OptionalParameter<bool> analyticInit{"analytic initialisation", this};
+  oops::OptionalParameter<std::string> outputNemoFieldFile{
+    "output nemo field file", "", this};
   oops::RequiredParameter<util::DateTime> date{"date", this};
   oops::RequiredParameter<oops::Variables> stateVariables{"state variables",
     this};

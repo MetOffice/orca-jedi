@@ -24,5 +24,11 @@ void readFieldsFromFile(
   const util::DateTime & valid_date,
   const std::string & variable_type,
   atlas::FieldSet & fs);
+void writeFieldsToFile(
+  const OrcaStateParameters & params,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const std::string & variable_type,
+  const atlas::FieldSet & fs);
 
 }

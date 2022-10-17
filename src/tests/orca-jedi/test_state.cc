@@ -76,25 +76,6 @@ CASE("test basic state") {
     State state(geometry, oops_vars, datetime);
   }
 
-  SECTION("test constructor from state") {
-    state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
-    params.validateAndDeserialize(state_config);
-    State state(geometry, params);
-    bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
-      .has("missing_value");
-    EXPECT_EQUAL(true, has_missing);
-    double iceNorm = 0.0032018269;
-    std::cout << std::setprecision(8) << state.norm("sea_ice_area_fraction")
-              << std::setprecision(8) << iceNorm << std::endl;
-    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
-    state.read(params);
-    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
-    State stateCopy(state);
-    EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
-    EXPECT_THROWS_AS(state.write(params), eckit::NotImplemented);
-  }
-
   SECTION("test constructor from config analytic initialisation") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
@@ -102,6 +83,32 @@ CASE("test basic state") {
     State state(geometry, params);
     EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);
   }
+
+  state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
+  state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+  params.validateAndDeserialize(state_config);
+  State state(geometry, params);
+  double iceNorm = 0.0032018269;
+  SECTION("test constructor from state") {
+    bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
+      .has("missing_value");
+    EXPECT_EQUAL(true, has_missing);
+    std::cout << std::setprecision(8) << state.norm("sea_ice_area_fraction")
+              << std::setprecision(8) << iceNorm << std::endl;
+    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+  }
+  SECTION("test state read") {
+    state.read(params);
+    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+  }
+  SECTION("test stateCopy") {
+    State stateCopy(state);
+    EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+  }
+  SECTION("test state write") {
+    EXPECT_THROWS_AS(state.write(params), eckit::NotImplemented);
+  }
+
 }
 
 }  // namespace test
