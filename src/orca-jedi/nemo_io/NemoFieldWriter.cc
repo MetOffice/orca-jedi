@@ -26,8 +26,8 @@
 
 namespace orcamodel {
 
-NemoFieldWriter::NemoFieldWriter(eckit::PathName& filename, atlas::Mesh& mesh,
-    std::vector<util::DateTime> datetimes, std::vector<double> depths)
+NemoFieldWriter::NemoFieldWriter(const eckit::PathName& filename, const atlas::Mesh& mesh,
+    const std::vector<util::DateTime> datetimes, const std::vector<double> depths)
     : mesh_(mesh)
     , orcaGrid_( mesh.grid() )
     , datetimes_( datetimes )

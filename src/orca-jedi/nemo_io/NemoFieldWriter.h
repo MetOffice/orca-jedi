@@ -28,8 +28,8 @@ namespace orcamodel {
 
 class NemoFieldWriter {
 public:
-    NemoFieldWriter(eckit::PathName& filename, atlas::Mesh& mesh,
-                    std::vector<util::DateTime> datetimes, std::vector<double> depths);
+    NemoFieldWriter(const eckit::PathName& filename, const atlas::Mesh& mesh,
+                    const std::vector<util::DateTime> datetimes, const std::vector<double> depths);
     void setup_dimensions();
     void write_dimensions();
     void add_double_variable(std::string& varname);

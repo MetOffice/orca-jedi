@@ -168,9 +168,7 @@ void State::setupStateFields() {
 
 void State::write(const Parameters_ & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
-  std::string err_message =
-      "orcamodel::State::State::write not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+  writeFieldsToFile(params, *geom_, validTime(), stateFields_);
 }
 
 void State::print(std::ostream & os) const {

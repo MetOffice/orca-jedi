@@ -86,6 +86,7 @@ CASE("test basic state") {
 
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
   state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+  state_config.set("output nemo field file", "../testoutput/orca2_t_output.nc");
   params.validateAndDeserialize(state_config);
   State state(geometry, params);
   double iceNorm = 0.0032018269;
@@ -106,7 +107,7 @@ CASE("test basic state") {
     EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
   }
   SECTION("test state write") {
-    EXPECT_THROWS_AS(state.write(params), eckit::NotImplemented);
+    state.write(params);
   }
 
 }
