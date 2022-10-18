@@ -24,10 +24,12 @@ model/ModelBiasIncrement.h
 model/Model.h
 state/State.h
 state/State.cc
-state/StateReadUtils.h
-state/StateReadUtils.cc
+state/StateIOUtils.h
+state/StateIOUtils.cc
 nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
+nemo_io/NemoFieldWriter.h
+nemo_io/NemoFieldWriter.cc
 utilities/OrcaModelTraits.h
 variablechanges/VariableChangeParameters.h
 variablechanges/VariableChange.h

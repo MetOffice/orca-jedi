@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "orca-jedi/state/StateReadUtils.h"
+#include "orca-jedi/state/StateIOUtils.h"
 
 #include <sstream>
 #include <vector>
@@ -19,6 +19,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+#include "orca-jedi/nemo_io/NemoFieldWriter.h"
 
 #define NEMO_FILL_TOL 1e-6
 
@@ -34,11 +35,6 @@ void readFieldsFromFile(
                        << " " << valid_date << std::endl;
 
     // Open Nemo Feedback file
-
-    oops::Log::debug() << "orcamodel::readFieldsFromFile:: parameters "
-                       << params
-                       << std::endl;
-
     std::string nemo_file_name;
     if (variable_type == "background") {
       nemo_file_name = params.nemoFieldFile.value();
@@ -97,6 +93,67 @@ void readFieldsFromFile(
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
                        << "done" << std::endl;
+}
+void writeFieldsToFile(
+  const OrcaStateParameters & params,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const atlas::FieldSet & fs) {
+    oops::Log::trace() << "orcamodel::writeFieldsToFile:: start for valid_date"
+                       << " " << valid_date << std::endl;
+
+    std::string output_filename =
+      params.outputNemoFieldFile.value().value_or("");
+    if (output_filename == "")
+      throw eckit::BadValue(std::string("orcamodel::writeFieldsToFile:: ")
+          + "file name not specified", Here());
+
+    std::map<std::string, std::string> varCoordTypeMap;
+    {
+      const oops::Variables vars = geom.variables();
+      const std::vector<std::string> coordSpaces =
+        geom.variableNemoSpaces(vars);
+      for (int i=0; i < vars.size(); ++i)
+        varCoordTypeMap[vars[i]] = coordSpaces[i];
+    }
+
+    auto nemo_field_path = eckit::PathName(output_filename);
+    oops::Log::debug() << "orcamodel::writeFieldsToFile:: nemo_field_path "
+                       << nemo_field_path << std::endl;
+    std::vector<util::DateTime> datetimes = {valid_date};
+    std::vector<double> levels((*fs.begin()).shape(1), 0);
+    for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
+
+    auto writeRankFields = [&](){
+      NemoFieldWriter field_writer(nemo_field_path, geom.mesh(), datetimes,
+          levels);
+      for (atlas::Field field : fs) {
+        std::string fieldName = field.name();
+        std::string nemoName = geom.nemo_var_name(fieldName);
+        auto field_view = atlas::array::make_view<double, 2>(field);
+        if (varCoordTypeMap[fieldName] == "surface") {
+          field_writer.write_surf_var(nemoName, field_view, 0);
+        } else {
+          field_writer.write_vol_var(nemoName, field_view, 0);
+        }
+      }
+    };
+
+    // Write from rank 0 unless the data is distributed. If the date is
+    // distributed sequentially write the data to the output file.
+    if (geom.distributionType() == "serial") {
+        if (geom.getComm().rank() == 0) writeRankFields();
+    } else {
+      geom.getComm().barrier();
+      size_t rank = 0;
+      while (rank < geom.getComm().size()) {
+        if (rank == geom.getComm().rank()) {
+          writeRankFields();
+        }
+        rank++;
+      }
+    }
+    geom.getComm().barrier();
 }
 
 }  // namespace orcamodel

@@ -41,7 +41,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/state/StateReadUtils.h"
+#include "orca-jedi/state/StateIOUtils.h"
 #include "orca-jedi/model/ModelBias.h"
 #include "orca-jedi/model/Model.h"
 
@@ -168,9 +168,7 @@ void State::setupStateFields() {
 
 void State::write(const Parameters_ & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
-  std::string err_message =
-      "orcamodel::State::State::write not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+  writeFieldsToFile(params, *geom_, validTime(), stateFields_);
 }
 
 void State::print(std::ostream & os) const {

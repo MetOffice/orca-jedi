@@ -100,6 +100,11 @@ CASE("test basic geometry") {
     EXPECT_THROWS_AS(bad_geometry.variableNemoSpaces(oops_vars),
       eckit::BadValue);
   }
+
+  SECTION("test geometry extra methods") {
+    EXPECT(geometry.levelsAreTopDown());
+    EXPECT(geometry.distributionType() == "serial");
+  }
 }
 
 }  // namespace test

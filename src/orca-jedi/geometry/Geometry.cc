@@ -175,7 +175,8 @@ const bool Geometry::variable_in_variable_type(std::string variable_name,
   auto nemoFields = params_.nemoFields.value();
   for (const auto & nemoField : nemoFields) {
     if (nemoField.name.value() == variable_name) {
-      return nemoField.variableType.value().value_or("background") == variable_type;
+      std::string type = nemoField.variableType.value().value_or("background");
+      return type == variable_type;
     }
   }
 
