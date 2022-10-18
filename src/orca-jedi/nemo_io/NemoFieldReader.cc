@@ -40,7 +40,8 @@ struct IndexGlbArray {
         ix_glb_max = orcaGrid.nx() + orcaGrid.haloEast() - 1;
 
         nx_halo_WE = orcaGrid.nx() + orcaGrid.haloEast() + orcaGrid.haloWest();
-        ny_halo_NS = orcaGrid.ny() + orcaGrid.haloNorth() + orcaGrid.haloSouth();
+        ny_halo_NS = orcaGrid.ny() + orcaGrid.haloNorth()
+          + orcaGrid.haloSouth();
 
         // vector of local indices: necessary for remote indices of ghost nodes
         int iy_glb_min = -orcaGrid.haloSouth();
@@ -170,7 +171,8 @@ void NemoFieldReader::read_datetimes() {
     nc_att_units.getValues(units_string);
 
     const std::string seconds_since = "seconds since ";
-    std::for_each(units_string.begin(), units_string.begin()+seconds_since.size(),
+    std::for_each(units_string.begin(),
+        units_string.begin()+seconds_since.size(),
         [](char & c){ c = tolower(c); });
     if (units_string.substr(0, seconds_since.size()) != seconds_since) {
       std::ostringstream err_stream;

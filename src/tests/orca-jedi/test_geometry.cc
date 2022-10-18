@@ -101,7 +101,7 @@ CASE("test basic geometry") {
       eckit::BadValue);
   }
 
-  SECTION ("test geometry extra methods") {
+  SECTION("test geometry extra methods") {
     EXPECT(geometry.levelsAreTopDown());
     EXPECT(geometry.distributionType() == "serial");
   }

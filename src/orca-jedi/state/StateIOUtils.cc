@@ -102,9 +102,11 @@ void writeFieldsToFile(
     oops::Log::trace() << "orcamodel::writeFieldsToFile:: start for valid_date"
                        << " " << valid_date << std::endl;
 
-    std::string output_filename = params.outputNemoFieldFile.value().value_or("");
+    std::string output_filename =
+      params.outputNemoFieldFile.value().value_or("");
     if (output_filename == "")
-      throw eckit::BadValue("orcamodel::writeFieldsToFile:: file name not specified", Here());
+      throw eckit::BadValue(std::string("orcamodel::writeFieldsToFile:: ")
+          + "file name not specified", Here());
 
     std::map<std::string, std::string> varCoordTypeMap;
     {
@@ -123,7 +125,8 @@ void writeFieldsToFile(
     for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
 
     auto writeRankFields = [&](){
-      NemoFieldWriter field_writer(nemo_field_path, geom.mesh(), datetimes, levels);
+      NemoFieldWriter field_writer(nemo_field_path, geom.mesh(), datetimes,
+          levels);
       for (atlas::Field field : fs) {
         std::string fieldName = field.name();
         std::string nemoName = geom.nemo_var_name(fieldName);
@@ -148,9 +151,9 @@ void writeFieldsToFile(
           writeRankFields();
         }
         rank++;
-     }
-   }
-   geom.getComm().barrier();
+      }
+    }
+    geom.getComm().barrier();
 }
 
 }  // namespace orcamodel

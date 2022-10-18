@@ -30,4 +30,4 @@ void writeFieldsToFile(
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs);
 
-}
+}  // namespace orcamodel

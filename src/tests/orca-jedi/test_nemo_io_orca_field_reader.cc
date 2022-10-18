@@ -30,7 +30,7 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 
-CASE("test parallel serially distributed read_surf_var reads field array view") {
+CASE("test parallel serially distributed reads field array view") {
   eckit::PathName test_data_path("../Data/orca2_t_nemo.nc");
 
   atlas::OrcaGrid grid("ORCA2_T");

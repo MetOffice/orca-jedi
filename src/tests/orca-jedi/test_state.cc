@@ -109,7 +109,6 @@ CASE("test basic state") {
   SECTION("test state write") {
     state.write(params);
   }
-
 }
 
 }  // namespace test
