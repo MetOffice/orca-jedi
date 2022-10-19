@@ -69,15 +69,21 @@ CASE("test parallel serially distributed write field array views") {
   int rank = atlas::mpi::rank();
   SECTION("writes fields") {
     if (rank == 0) {
-      std::cout << "write data from rank " << rank << std::endl;
       std::vector<util::DateTime> datetimes(1);
       datetimes[0] = util::DateTime("1970-01-01T00:00:00Z");
-      NemoFieldWriter field_writer(test_data_path, mesh, datetimes, {1, 2, 3});
-      field_writer.write_surf_var("iiceconc", ice_fv, 0);
-      field_writer.write_vol_var("votemper", temp_fv, 0);
+      {
+        NemoFieldWriter field_writer(test_data_path, mesh, datetimes,
+            {1, 2, 3});
+        field_writer.write_surf_var("iiceconc", ice_fv, 0);
+        field_writer.write_vol_var("votemper", temp_fv, 0);
+      }
+      // wait up to 20 seconds for the file system...
+      for (int wait_count=0; wait_count < 10; ++wait_count) {
+        if (test_data_path.exists()) break;
+        sleep(2);
+      }
+      EXPECT(test_data_path.exists());
     }
-
-    EXPECT(test_data_path.exists());
   }
 
   SECTION("surface field matches with data in memory") {
