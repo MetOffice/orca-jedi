@@ -13,6 +13,6 @@ Test     :         ice_area_fraction: 3.16981e-03
 Test     :         ice_area_fraction_background_error: 3.06841e-03
 
 Test     : H(x): 
-Test     : Sea Ice nobs= 10 Min=-3.19582e+38, Max=5.41667e-01, RMS=1.75042e+38
+Test     : Sea Ice nobs= 7 Min=0.00000e+00, Max=5.41667e-01, RMS=2.04731e-01'
 
 Test     : End H(x)
