@@ -5,12 +5,11 @@
 cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
-include( ecbuild_system NO_POLICY_SCOPE )
 
 ################################################################################
 # Initialise project orca-jedi
 
-project( orca-jedi LANGUAGES CXX )
+project( orca-jedi LANGUAGES CXX Fortran )
 ecbuild_declare_project()
 
 set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
