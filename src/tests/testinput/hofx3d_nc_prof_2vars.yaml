@@ -6,14 +6,14 @@ geometry :
     - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: waterPotentialTemperatureBackgroundError
+    - name: waterPotentialTemperature_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
     - name: salinity
       nemo field name: vosaline
       model space: volume
-    - name: salinityBackgroundError
+    - name: salinity_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -23,10 +23,10 @@ state :
   date: 2021-06-30T00:00:00Z
   state variables:
   - waterPotentialTemperature
-  - waterPotentialTemperatureBackgroundError
+  - waterPotentialTemperature_background_error
   - depthBelowWaterSurface
   - salinity
-  - salinityBackgroundError
+  - salinity_background_error
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z

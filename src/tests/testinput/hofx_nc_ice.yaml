@@ -6,13 +6,13 @@ geometry:
     - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
-    - name: sea_surface_foundation_temperature
+    - name: seaSurfaceTemperature
       nemo field name: votemper
       model space: surface
     - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: seaIceFractionBackgroundError
+    - name: seaIceFraction_background_error
       nemo field name: sic_tot_var
       model space: surface
       variable type: background variance
@@ -20,7 +20,7 @@ geometry:
   number levels: 2
 initial condition :
   date: 2021-06-28T23:00:00Z
-  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
+  state variables: [ seaIceFraction, seaIceFraction_background_error ]
   #analytic_init: zeroed state
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
