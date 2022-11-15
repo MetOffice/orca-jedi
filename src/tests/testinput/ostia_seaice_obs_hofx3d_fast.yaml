@@ -1,15 +1,15 @@
 geometry :
   nemo variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: sea_water_potential_temperature
+    - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: ice_area_fraction_background_error
+    - name: seaIceFractionBackgroundError
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -17,7 +17,7 @@ geometry :
   number levels: 2
 state :
   date: 2021-06-29T21:00:00Z
-  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
   nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
   variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
 window begin: 2021-06-29T21:00:00Z
@@ -35,7 +35,7 @@ observations:
       engine:
         type: H5File
         obsfile: test_out.nc
-    simulated variables: [ice_area_fraction]
+    simulated variables: [seaIceFraction]
   get values:
     atlas-interpolator:
       type: finite-element
@@ -49,18 +49,18 @@ observations:
   obs filters:
   - filter: Bayesian Background Check
     filter variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
     prob density bad obs: 1.0
     initial prob gross error: 0.04
     PGE threshold: 0.5
   - filter: NEMO Feedback Writer
     filename: test_hofx_feedback_writer_out.nc
     variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo name: ICECONC
       long name: ice area fraction
       units: Fraction
       additional variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
         feedback suffix: Hx
         ioda group: HofX

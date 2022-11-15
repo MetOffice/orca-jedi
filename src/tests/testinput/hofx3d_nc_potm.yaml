@@ -1,12 +1,12 @@
 geometry :
   nemo variables:
-    - name: depth
+    - name: depthBelowWaterSurface
       nemo field name: nav_lev
       model space: vertical
-    - name: sea_water_potential_temperature
+    - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: sea_water_potential_temperature_background_error
+    - name: waterPotentialTemperatureBackgroundError
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -14,7 +14,7 @@ geometry :
   number levels: 3
 state :
   date: 2021-06-30T00:00:00Z
-  state variables: [ sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth ]
+  state variables: [ waterPotentialTemperature, waterPotentialTemperatureBackgroundError, depthBelowWaterSurface ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -28,15 +28,15 @@ observations:
           type: H5File
           obsfile: Data/hofx_potm_obs.nc
         obsgrouping:
-          group variables: [ "station_id" ]
-          sort variable: depth
+          group variables: [ "stationIdentification" ]
+          sort variable: depthBelowWaterSurface
           sort group: ObsValue
           sort order: descending
       obsdataout:
         engine:
           type: H5File
           obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
-      simulated variables: [sea_water_potential_temperature]
+      simulated variables: [waterPotentialTemperature]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
@@ -44,18 +44,18 @@ observations:
     obs operator:
       name: VertInterp
       variables:
-      - name: sea_water_potential_temperature
-      vertical coordinate: depth
+      - name: waterPotentialTemperature
+      vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: sea_water_potential_temperature@GrossErrorProbability
+      - name: GrossErrorProbability/waterPotentialTemperature
         type: float
         value: 0.04
     - filter: Conventional Profile Processing
       filter variables:
-      - name: sea_water_potential_temperature
+      - name: waterPotentialTemperature
       Checks: ["Basic"]
       maxlev: 1000
 test:

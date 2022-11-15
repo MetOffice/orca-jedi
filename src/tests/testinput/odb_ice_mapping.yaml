@@ -653,7 +653,7 @@ varno-independent columns:
     source: "scanline_status"
   - name: "MetaData/scan_position"
     source: "scanpos"
-  - name: "MetaData/sea_depth"
+  - name: "MetaData/depthBelowWaterSurface"
     source: "sea_depth"
   - name: "MetaData/selected_wind_vector_index"
     source: "sel_wnd_indx"
@@ -709,7 +709,7 @@ varno-independent columns:
     source: "start_chan_scale_9"
   - name: "MetaData/start_channel_scale10"
     source: "start_chan_scale_10"
-  - name: "MetaData/station_id"
+  - name: "MetaData/stationIdentification"
     source: "statid"
   - name: "MetaData/station_type"
     source: "station_type"
@@ -787,9 +787,9 @@ varno-dependent columns:
         varno: 3
       - name: "v_wind_component"
         varno: 4
-      - name: "sea_surface_temperature"
+      - name: "seaSurfaceTemperature"
         varno: 11
-      - name: "sea_surface_temperature"
+      - name: "seaSurfaceTemperature"
         varno: 12
       - name: "relative_humidity"
         varno: 29
@@ -861,7 +861,7 @@ varno-dependent columns:
         varno: 248
       - name: "brightness_temperature_amsu"
         varno: 249
-      - name: "ice_area_fraction"
+      - name: "seaIceFraction"
         varno: 253
       - name: "cloud_fraction_covered"
         varno: 257

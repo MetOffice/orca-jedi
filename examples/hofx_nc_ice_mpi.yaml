@@ -3,13 +3,13 @@ window begin: 2021-06-28T23:00:00Z
 window length: P2D
 geometry:
   nemo variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: ice_area_fraction_background_error
+    - name: seaIceFractionBackgroundError
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -19,26 +19,26 @@ geometry:
   partitioner: serial
 initial condition :
   date: 2021-06-28T23:00:00Z
-  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
   nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
   variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
 model :
   name: PseudoModel
   tstep: P1D
-  state variables: [ ice_area_fraction ]
+  state variables: [ seaIceFraction ]
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ ice_area_fraction ]
+      state variables: [ seaIceFraction ]
     - date: 2021-06-29T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ ice_area_fraction ]
+      state variables: [ seaIceFraction ]
     - date: 2021-07-01T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ ice_area_fraction ]
+      state variables: [ seaIceFraction ]
 observations:
   observers:
   - obs space:
@@ -49,7 +49,7 @@ observations:
         obsfile: /data/users/frsst/JOPA/example_data/ostia_seaice_obs.nc
       obsdataout:
         obsfile: test_hofx_nc_ice_jopa.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       time interpolation: linear
       atlas-interpolator:

@@ -1,16 +1,16 @@
 forecast length : P3D
 geometry :
   nemo variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: sea_water_potential_temperature
+    - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: ice_area_fraction_background_error
+    - name: seaIceFractionBackgroundError
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -18,18 +18,18 @@ geometry :
   number levels: 1
 initial condition :
   date: 2021-06-29T21:00:00Z
-  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
   nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
   variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
 model :
   name: PseudoModel
   tstep: P3D
-  state variables: [ ice_area_fraction ]
+  state variables: [ seaIceFraction ]
   states:
     - date: 2021-06-29T21:00:00Z
       nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
       variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
-      state variables: [ ice_area_fraction ]
+      state variables: [ seaIceFraction ]
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:
@@ -46,7 +46,7 @@ observations:
       engine:
         type: H5File
         obsfile: test_out.nc
-    simulated variables: [ice_area_fraction]
+    simulated variables: [seaIceFraction]
   get values:
     atlas-interpolator:
       type: unstructured-bilinear-lonlat
@@ -64,13 +64,13 @@ observations:
       initial value: false
   - filter: Variable Assignment
     assignments:
-    - name: ice_area_fraction@GrossErrorProbability
+    - name: GrossErrorProbability/seaIceFraction
       type: float
       value: 0.04
   - filter: Bayesian Background Check
     defer to post: true
     filter variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
     prob density bad obs: 1.0
     PGE threshold: 0.5
     actions:
@@ -80,11 +80,11 @@ observations:
   - filter: NEMO Feedback Writer
     filename: hofx_feedback_writer_out.nc
     variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo name: ICECONC
       long name: ice area fraction
       units: Fraction
       additional variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
         feedback suffix: Hx
         ioda group: HofX

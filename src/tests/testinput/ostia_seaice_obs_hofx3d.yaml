@@ -1,15 +1,15 @@
 geometry :
   nemo variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: sea_water_potential_temperature
+    - name: waterPotentialTemperature
       nemo field name: votemper
       model space: volume
-    - name: ice_area_fraction_background_error
+    - name: seaIceFractionBackgroundError
       nemo field name: sic_tot_var
       model space: surface
       variable type: background variance
@@ -17,7 +17,7 @@ geometry :
   number levels: 10
 state :
   date: 2021-06-30T00:00:00Z
-  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -34,7 +34,7 @@ observations:
         engine:
           type: H5File
           obsfile: testoutput/test_ostia_seaice_obs_hofx3d_jopa.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       atlas-interpolator:
         type: "finite-element"
@@ -47,12 +47,12 @@ observations:
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: ice_area_fraction@GrossErrorProbability
+      - name: GrossErrorProbability/seaIceFraction
         type: float
         value: 0.04
     - filter: Bayesian Background Check
       filter variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:

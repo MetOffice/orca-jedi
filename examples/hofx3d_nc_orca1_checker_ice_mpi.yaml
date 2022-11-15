@@ -2,7 +2,7 @@ window begin: 2021-06-28T12:00:00Z
 window length: P2D
 geometry:
   nemo variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo field name: iiceconc
       model space: surface
   grid name: ORCA1_T
@@ -10,7 +10,7 @@ geometry:
   partitioner: checkerboard
 state :
   date: 2021-06-29T12:00:00Z
-  state variables: [ ice_area_fraction ]
+  state variables: [ seaIceFraction ]
   nemo field file: /data/users/frsst/JOPA/example_data/orca1_sic.nc
   variance field file: /data/users/frsst/JOPA/example_data/orca1_sic_err.nc
 observations:
@@ -26,7 +26,7 @@ observations:
         obsfile: /data/users/frsst/JOPA/example_data/ostia_seaice_obs.nc
       obsdataout:
         obsfile: test_hofx_nc_orca1_ice_jopa.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       time interpolation: linear
       atlas-interpolator:
