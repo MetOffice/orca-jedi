@@ -9,6 +9,7 @@ list( APPEND orcajedi_test_input
   hofx3d_nc_prof_2vars.yaml
   odb_ice_query.yaml
   odb_ice_mapping.yaml
+  test_name_map.yaml
 )
 
 foreach(FILENAME ${orcajedi_test_input})

@@ -1,16 +1,16 @@
 geometry :
   nemo variables:
-    - name: seaIceFraction
+    - name: ice_area_fraction
       nemo field name: iiceconc
       model space: surface
-    - name: seaSurfaceTemperature
+    - name: sea_surface_temperature
       nemo field name: votemper
       model space: surface
-    - name: seaIceFraction_background_error
+    - name: ice_area_fraction_background_error
       nemo field name: sic_tot_var
       model space: surface
       variable type: background variance
-    - name: seaSurfaceTemperature_background_error
+    - name: sea_surface_temperature_background_error
       nemo field name: t_tot_var
       model space: surface
       variable type: background variance
@@ -18,7 +18,7 @@ geometry :
   number levels: 1
 state :
   date: 2021-06-30T00:00:00Z
-  state variables: [ seaSurfaceTemperature, seaSurfaceTemperature_background_error ]
+  state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -44,7 +44,9 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
