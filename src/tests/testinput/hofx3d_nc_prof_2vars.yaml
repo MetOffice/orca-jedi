@@ -1,6 +1,6 @@
 geometry :
   nemo variables:
-    - name: depthBelowWaterSurface
+    - name: depth
       nemo field name: nav_lev
       model space: vertical
     - name: sea_water_potential_temperature
@@ -24,7 +24,7 @@ state :
   state variables:
   - sea_water_potential_temperature
   - waterPotentialTemperature_background_error
-  - depthBelowWaterSurface
+  - depth
   - salinity
   - salinity_background_error
   nemo field file: Data/orca2_t_nemo.nc
@@ -58,7 +58,7 @@ observations:
       variables:
       - name: waterPotentialTemperature
       - name: salinity
-      vertical coordinate: depthBelowWaterSurface
+      vertical coordinate: depth
       observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
       observation alias file: testinput/test_name_map.yaml

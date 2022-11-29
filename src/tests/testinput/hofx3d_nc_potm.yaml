@@ -1,6 +1,6 @@
 geometry :
   nemo variables:
-    - name: depthBelowWaterSurface
+    - name: depth
       nemo field name: nav_lev
       model space: vertical
     - name: sea_water_potential_temperature
@@ -14,7 +14,7 @@ geometry :
   number levels: 3
 state :
   date: 2021-06-30T00:00:00Z
-  state variables: [ sea_water_potential_temperature, waterPotentialTemperature_background_error, depthBelowWaterSurface ]
+  state variables: [ sea_water_potential_temperature, waterPotentialTemperature_background_error, depth ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -45,7 +45,7 @@ observations:
       name: VertInterp
       variables:
       - name: waterPotentialTemperature
-      vertical coordinate: depthBelowWaterSurface
+      vertical coordinate: depth
       observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
       observation alias file: testinput/test_name_map.yaml

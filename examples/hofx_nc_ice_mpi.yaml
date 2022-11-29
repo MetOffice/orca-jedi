@@ -3,13 +3,13 @@ window begin: 2021-06-28T23:00:00Z
 window length: P2D
 geometry:
   nemo variables:
-    - name: seaIceFraction
+    - name: ice_area_fraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: seaIceFractionBackgroundError
+    - name: seaIceFraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -19,26 +19,26 @@ geometry:
   partitioner: serial
 initial condition :
   date: 2021-06-28T23:00:00Z
-  state variables: [ seaIceFraction, seaIceFractionBackgroundError ]
+  state variables: [ ice_area_fraction, seaIceFraction_background_error ]
   nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
   variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
 model :
   name: PseudoModel
   tstep: P1D
-  state variables: [ seaIceFraction ]
+  state variables: [ ice_area_fraction ]
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ seaIceFraction ]
+      state variables: [ ice_area_fraction ]
     - date: 2021-06-29T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ seaIceFraction ]
+      state variables: [ ice_area_fraction ]
     - date: 2021-07-01T23:00:00Z
       nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
       variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
-      state variables: [ seaIceFraction ]
+      state variables: [ ice_area_fraction ]
 observations:
   observers:
   - obs space:

@@ -1,6 +1,6 @@
 geometry :
   nemo variables:
-    - name: depthBelowWaterSurface
+    - name: depth
       nemo field name: z
       model space: vertical
     - name: waterTemperature
@@ -14,7 +14,7 @@ geometry :
   number levels: 75
 state :
   date: 2021-08-21T00:00:00Z
-  state variables: [ waterTemperature, waterTemperatureBackgroundError, depthBelowWaterSurface ]
+  state variables: [ waterTemperature, waterTemperatureBackgroundError, depth ]
   nemo field file: /data/users/tsearle/maera/test/eorca12_20210630.nc
   variance field file: /data/users/tsearle/maera/test/eorca12_err_20210630.nc
 window begin: 2021-08-20T00:00:00Z
@@ -44,7 +44,7 @@ observations:
       name: VertInterp
       variables:
       - name: waterTemperature
-      vertical coordinate: depthBelowWaterSurface
+      vertical coordinate: depth
       observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
     obs filters:
