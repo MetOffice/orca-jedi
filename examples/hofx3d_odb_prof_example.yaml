@@ -6,7 +6,7 @@ geometry :
     - name: waterTemperature
       nemo field name: votemper
       model space: volume
-    - name: waterTemperatureBackgroundError
+    - name: waterTemperature_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -14,7 +14,7 @@ geometry :
   number levels: 75
 state :
   date: 2021-08-21T00:00:00Z
-  state variables: [ waterTemperature, waterTemperatureBackgroundError, depth ]
+  state variables: [ waterTemperature, waterTemperature_background_error, depth ]
   nemo field file: /data/users/tsearle/maera/test/eorca12_20210630.nc
   variance field file: /data/users/tsearle/maera/test/eorca12_err_20210630.nc
 window begin: 2021-08-20T00:00:00Z
