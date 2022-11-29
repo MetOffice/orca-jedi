@@ -8,7 +8,7 @@ variable maps:
   - name: waterPotentialTemperature
     alias: sea_water_potential_temperature
   - name: salinity
-    alias: sea_water_salinity
+    alias: salinity
   - name: depthBelowWaterSurface
     alias: depth
 

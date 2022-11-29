@@ -1,16 +1,16 @@
 forecast length : P3D
 geometry :
   nemo variables:
-    - name: seaIceFraction
+    - name: ice_area_fraction
       nemo field name: iiceconc
       model space: surface
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: waterPotentialTemperature
+    - name: sea_water_potential_temperature
       nemo field name: votemper
       model space: volume
-    - name: ice_area_fraction_background_error
+    - name: seaIceFraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -18,18 +18,18 @@ geometry :
   number levels: 1
 initial condition :
   date: 2021-06-29T21:00:00Z
-  state variables: [ seaIceFraction, ice_area_fraction_background_error ]
+  state variables: [ ice_area_fraction, seaIceFraction_background_error ]
   nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
   variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
 model :
   name: PseudoModel
   tstep: P3D
-  state variables: [ seaIceFraction ]
+  state variables: [ ice_area_fraction ]
   states:
     - date: 2021-06-29T21:00:00Z
       nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
       variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
-      state variables: [ seaIceFraction ]
+      state variables: [ ice_area_fraction ]
 window begin: 2021-06-29T21:00:00Z
 window length: P1D
 observations:
@@ -46,7 +46,7 @@ observations:
       engine:
         type: H5File
         obsfile: test_out.nc
-    simulated variables: [seaIceFraction]
+    simulated variables: [ice_area_fraction]
   get values:
     atlas-interpolator:
       type: unstructured-bilinear-lonlat
