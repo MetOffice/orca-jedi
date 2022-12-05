@@ -61,4 +61,4 @@ observations:
       Checks: ["Basic"]
       maxlev: 1000
 test:
-  reference filename: /data/users/jwaller/JEDI/mo-bundle/orca-jedi/src/tests/testoutput/test_hofx3d_nc_potm.ref
+  reference filename: testoutput/test_hofx3d_nc_potm.ref
