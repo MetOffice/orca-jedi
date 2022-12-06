@@ -9,7 +9,7 @@ geometry:
     - name: sea_surface_foundation_temperature
       nemo field name: votemper
       model space: surface
-    - name: seaIceFraction_background_error
+    - name: ice_area_fraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -19,7 +19,7 @@ geometry:
   partitioner: serial
 initial condition :
   date: 2021-06-28T23:00:00Z
-  state variables: [ ice_area_fraction, seaIceFraction_background_error ]
+  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   nemo field file: /data/users/frsst/JOPA/example_data/eorca12_20210630.nc
   variance field file: /data/users/frsst/JOPA/example_data/eorca12_err_20210630.nc
 model :
@@ -60,7 +60,9 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Create Diagnostic Flags
       flags:

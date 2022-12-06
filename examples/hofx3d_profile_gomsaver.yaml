@@ -3,10 +3,10 @@ geometry :
     - name: depth
       nemo field name: z
       model space: vertical
-    - name: waterTemperature
+    - name: sea_water_temperature
       nemo field name: votemper
       model space: volume
-    - name: waterTemperature_background_error
+    - name: sea_water_temperature_background_error
       nemo field name: t_syn_var
       model space: volume
       variable type: background variance
@@ -14,7 +14,7 @@ geometry :
   number levels: 75
 state :
   date: 2021-08-21T00:00:00Z
-  state variables: [ waterTemperature, waterTemperature_background_error, depth]
+  state variables: [ sea_water_temperature, sea_water_temperature_background_error, depth]
   nemo field file: /data/users/tsearle/builds_xl/jopa-bundle-next/ops.bg_ocean.nc
   variance field file: /data/users/tsearle/builds_xl/jopa-bundle-next/bgerr_all_orca12ext.nc
 window begin: 2021-08-20T00:00:00Z
@@ -42,6 +42,7 @@ observations:
         non_linear: missing-if-all-missing
     obs operator:
       name: VertInterp
+      observation alias file: testinput/test_name_map.yaml
       variables:
       - name: waterTemperature
       vertical coordinate: depth
