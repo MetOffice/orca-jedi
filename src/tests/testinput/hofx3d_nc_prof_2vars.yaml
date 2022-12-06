@@ -6,7 +6,7 @@ geometry :
     - name: sea_water_potential_temperature
       nemo field name: votemper
       model space: volume
-    - name: waterPotentialTemperature_background_error
+    - name: sea_water_potential_temperature_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -23,7 +23,7 @@ state :
   date: 2021-06-30T00:00:00Z
   state variables:
   - sea_water_potential_temperature
-  - waterPotentialTemperature_background_error
+  - sea_water_potential_temperature_background_error
   - depth
   - salinity
   - salinity_background_error

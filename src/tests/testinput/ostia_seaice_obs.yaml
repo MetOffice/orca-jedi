@@ -70,6 +70,7 @@ observations:
       type: float
       value: 0.04
   - filter: Bayesian Background Check
+    observation alias file: testinput/test_name_map.yaml
     defer to post: true
     filter variables:
     - name: seaIceFraction

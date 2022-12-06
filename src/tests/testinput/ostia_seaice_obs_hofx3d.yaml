@@ -9,7 +9,7 @@ geometry :
     - name: sea_water_potential_temperature
       nemo field name: votemper
       model space: volume
-    - name: seaIceFraction_background_error
+    - name: ice_area_fraction_background_error
       nemo field name: sic_tot_var
       model space: surface
       variable type: background variance
@@ -17,7 +17,7 @@ geometry :
   number levels: 10
 state :
   date: 2021-06-30T00:00:00Z
-  state variables: [ ice_area_fraction, seaIceFraction_background_error ]
+  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -53,6 +53,7 @@ observations:
         type: float
         value: 0.04
     - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
       filter variables:
       - name: seaIceFraction
       prob density bad obs: 1.0

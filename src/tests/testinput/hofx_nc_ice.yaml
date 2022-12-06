@@ -142,6 +142,7 @@ observations:
         flag: BgOutOfBoundsReject
       - name: reject
     - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
       filter variables:
       - name: seaIceFraction
       prob density bad obs: 1.0
