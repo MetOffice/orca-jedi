@@ -10,7 +10,7 @@ geometry :
     - name: sea_water_potential_temperature
       nemo field name: votemper
       model space: volume
-    - name: seaIceFraction_background_error
+    - name: ice_area_fraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
       variable type: background variance
@@ -18,7 +18,7 @@ geometry :
   number levels: 1
 initial condition :
   date: 2021-06-29T21:00:00Z
-  state variables: [ ice_area_fraction, seaIceFraction_background_error ]
+  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
   variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
 model :
