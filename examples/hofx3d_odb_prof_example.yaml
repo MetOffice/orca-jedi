@@ -3,10 +3,10 @@ geometry :
     - name: depth
       nemo field name: z
       model space: vertical
-    - name: ocean_temperature
+    - name: sea_water_temperature
       nemo field name: votemper
       model space: volume
-    - name: ocean_temperature_background_error
+    - name: sea_water_temperature_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -14,7 +14,7 @@ geometry :
   number levels: 75
 state :
   date: 2021-08-21T00:00:00Z
-  state variables: [ ocean_temperature, ocean_temperature_background_error, depth ]
+  state variables: [ sea_water_temperature, sea_water_temperature_background_error, depth ]
   nemo field file: /data/users/tsearle/maera/test/eorca12_20210630.nc
   variance field file: /data/users/tsearle/maera/test/eorca12_err_20210630.nc
 window begin: 2021-08-20T00:00:00Z
@@ -28,37 +28,38 @@ observations:
         mapping file: ioda/test/testinput/odb_oceansound_name_map.yml
         query file: ioda/test/testinput/iodatest_odb_oceansound_truncate_profiles.yml
         obsgrouping:
-          group variables: [ "station_id" ]
-          sort variable: ocean_depth
+          group variables: [ "stationIdentification" ]
+          sort variable: depthBelowWaterSurface
           sort group: ObsValue
           sort order: ascending
       obsdataout:
         obsfile: test_hofx3d_prof_jopa_out.nc
-      simulated variables: [ocean_temperature]
-      observed variables: [ocean_temperature]
+      simulated variables: [waterTemperature]
+      observed variables: [waterTemperature]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
         non_linear: missing-if-all-missing
     obs operator:
       name: VertInterp
+      observation alias file: testinput/test_name_map.yaml
       variables:
-      - name: ocean_temperature
+      - name: waterTemperature
       vertical coordinate: depth
-      observation vertical coordinate: ocean_depth
+      observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
     obs filters:
     - filter: Variable Assignment
       where:
       - variable:
           name: MetaData/argo_identifier
-        is_defined:  # only Argo pressure must be converted to depth
+        is_defined:  # only Argo pressure must be converted to depthBelowWaterSurface
       assignments:
-      - name: DerivedObsValue/ocean_depth
+      - name: DerivedObsValue/depthBelowWaterSurface
         type: float
         function:
-          name: OceanPressureToDepth@ObsFunction
+          name: ObsFunction/OceanPressureToDepth
           options:
-            pressure variable: ObsValue/ocean_depth
+            pressure variable: ObsValue/depthBelowWaterSurface
     - filter: GOMsaver
       filename: test_hofx3d_prof_jopa_out_geovals.nc

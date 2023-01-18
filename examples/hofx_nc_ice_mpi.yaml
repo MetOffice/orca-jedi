@@ -49,7 +49,7 @@ observations:
         obsfile: /data/users/frsst/JOPA/example_data/ostia_seaice_obs.nc
       obsdataout:
         obsfile: test_hofx_nc_ice_jopa.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       time interpolation: linear
       atlas-interpolator:
@@ -60,7 +60,9 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Create Diagnostic Flags
       flags:

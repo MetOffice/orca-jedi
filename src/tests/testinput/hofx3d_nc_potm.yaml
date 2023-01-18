@@ -28,15 +28,15 @@ observations:
           type: H5File
           obsfile: Data/hofx_potm_obs.nc
         obsgrouping:
-          group variables: [ "station_id" ]
-          sort variable: depth
+          group variables: [ "stationIdentification" ]
+          sort variable: depthBelowWaterSurface
           sort group: ObsValue
           sort order: descending
       obsdataout:
         engine:
           type: H5File
           obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
-      simulated variables: [sea_water_potential_temperature]
+      simulated variables: [waterPotentialTemperature]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
@@ -44,18 +44,20 @@ observations:
     obs operator:
       name: VertInterp
       variables:
-      - name: sea_water_potential_temperature
+      - name: waterPotentialTemperature
       vertical coordinate: depth
+      observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
+      observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: sea_water_potential_temperature@GrossErrorProbability
+      - name: GrossErrorProbability/waterPotentialTemperature
         type: float
         value: 0.04
     - filter: Conventional Profile Processing
       filter variables:
-      - name: sea_water_potential_temperature
+      - name: waterPotentialTemperature
       Checks: ["Basic"]
       maxlev: 1000
 test:

@@ -1,0 +1,14 @@
+variable maps:
+  - name: seaIceFraction
+    alias: ice_area_fraction
+  - name: seaSurfaceTemperature
+    alias: sea_surface_temperature
+  - name: waterTemperature
+    alias: sea_water_temperature
+  - name: waterPotentialTemperature
+    alias: sea_water_potential_temperature
+  - name: salinity
+    alias: salinity
+  - name: depthBelowWaterSurface
+    alias: depth
+

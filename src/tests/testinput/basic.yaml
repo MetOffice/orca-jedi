@@ -1,20 +1,20 @@
 forecast length : P2D
 geometry :
   nemo variables:
-    - name: sea_ice_category_area_fraction
+    - name: ice_area_fraction
       nemo field name: iiceconc
       model space: surface
   grid name: ORCA2_T
   number levels: 10
 initial condition :
   date: 2018-04-14T21:00:00Z
-  state variables: [ sea_ice_category_area_fraction ]
+  state variables: [ ice_area_fraction ]
   analytic_init: zeroed state
   nemo field file: /scratch/tsearle/orca2_seaice_dummy.nc
 model :
   name: PseudoModel
   tstep: P2D
-  state variables: [ sea_ice_category_area_fraction ]
+  state variables: [ ice_area_fraction ]
   states:
     - date: '2018-04-15T00:00:00Z'
       fcstime: 1
@@ -39,4 +39,4 @@ observations:
         engine:
           type: H5File
           obsfile: test_out.nc
-      simulated variables: [sea_ice_category_area_fraction]
+      simulated variables: [ice_area_fraction]

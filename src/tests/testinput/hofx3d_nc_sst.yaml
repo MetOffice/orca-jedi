@@ -35,7 +35,7 @@ observations:
         engine:
           type: H5File
           obsfile: testoutput/hofx3d_nc_sst_jopa.nc
-      simulated variables: [sea_surface_temperature]
+      simulated variables: [seaSurfaceTemperature]
     get values:
       atlas-interpolator:
         type: finite-element
@@ -44,16 +44,19 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: sea_surface_temperature@GrossErrorProbability
+      - name: GrossErrorProbability/seaSurfaceTemperature
         type: float
         value: 0.04
     - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
       filter variables:
-      - name: sea_surface_temperature
+      - name: seaSurfaceTemperature
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:

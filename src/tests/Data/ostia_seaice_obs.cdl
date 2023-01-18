@@ -1,16 +1,10 @@
-netcdf ostia_seaice_obs.cdl {
+netcdf ostia_seaice_obs {
 dimensions:
-	nlocs = 11 ;
+	Location = 11 ;
 	nvars = 1 ;
-	ndatetime = 20 ;
-	nstring = 50 ;
 variables:
-	float ndatetime(ndatetime) ;
-		ndatetime:suggested_chunk_dim = 100LL ;
-	float nlocs(nlocs) ;
-		nlocs:suggested_chunk_dim = 100LL ;
-	float nstring(nstring) ;
-		nstring:suggested_chunk_dim = 100LL ;
+	float Location(Location) ;
+		Location:suggested_chunk_dim = 100LL ;
 	float nvars(nvars) ;
 		nvars:suggested_chunk_dim = 100LL ;
 
@@ -18,34 +12,36 @@ variables:
 		string :_ioda_layout = "ObsGroup" ;
 		:_ioda_layout_version = 0 ;
 		:nvars = 1 ;
-		:date_time = 2021070100 ;
+		:nco_openmp_thread_number = 1 ;
 		:odb_version = 2LL ;
+		:date_time = 2021070100 ;
+		:nlocs = 11 ;
 		:history = "Mon Aug 23 11:00:30 2021: ncks --fix_rec_dmn nlocs tmp2.nc obs_seaice_20210701T0000Z_v_reduced.nc4\nMon Aug 23 11:00:20 2021: ncrcat -d nlocs,1,,1000000 tmp.nc tmp2.nc\nSat Aug 21 17:00:19 2021: ncks --mk_rec_dmn nlocs obs_seaice_20210701T0000Z.nc4 tmp.nc" ;
 		:NCO = "netCDF Operators version 4.7.5 (Homepage = http://nco.sf.net, Code = http://github.com/nco/nco)" ;
-		:nco_openmp_thread_number = 1 ;
-		:nlocs = 11 ;
 data:
 
- ndatetime = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
-
- nlocs = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
-
- nstring = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0 ;
+ Location = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
 
  nvars = 0 ;
 
 group: MetaData {
   variables:
-  	string datetime(nlocs) ;
-  	float latitude(nlocs) ;
-  	float longitude(nlocs) ;
-  	int ops_obsgroup(nlocs) ;
-  	int ops_subtype(nlocs) ;
-  	int record_number(nlocs) ;
-  	int sequence_number(nlocs) ;
-  	float time(nlocs) ;
+  	string datetime(Location) ;
+  		string datetime:_FillValue = "" ;
+  	float latitude(Location) ;
+  		latitude:_FillValue = 9.96921e+36f ;
+  	float longitude(Location) ;
+  		longitude:_FillValue = 9.96921e+36f ;
+  	int ops_obsgroup(Location) ;
+  		ops_obsgroup:_FillValue = -2147483647 ;
+  	int ops_subtype(Location) ;
+  		ops_subtype:_FillValue = -2147483647 ;
+  	int record_number(Location) ;
+  		record_number:_FillValue = -2147483647 ;
+  	int sequence_number(Location) ;
+  		sequence_number:_FillValue = -2147483647 ;
+  	float time(Location) ;
+  		time:_FillValue = 9.96921e+36f ;
   data:
 
    datetime = "2021-06-29T12:00:00Z", "2021-06-29T12:00:00Z", 
@@ -74,32 +70,36 @@ group: MetaData {
 
 group: ObsError {
   variables:
-  	float ice_area_fraction(nlocs) ;
+  	float seaIceFraction(Location) ;
+  		seaIceFraction:_FillValue = 9.96921e+36f ;
   data:
 
-   ice_area_fraction = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ;
+   seaIceFraction = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ;
   } // group ObsError
 
 group: ObsValue {
   variables:
-  	float ice_area_fraction(nlocs) ;
+  	float seaIceFraction(Location) ;
+  		seaIceFraction:_FillValue = 9.96921e+36f ;
   data:
 
-   ice_area_fraction = 0, _, 0.9963, 0, 0, 0, 0, 0, 0, 0, 0 ;
+   seaIceFraction = 0, _, 0.9963, 0, 0, 0, 0, 0, 0, 0, 0 ;
   } // group ObsValue
 
 group: PreQC {
   variables:
-  	float ice_area_fraction(nlocs) ;
+  	float seaIceFraction(Location) ;
+  		seaIceFraction:_FillValue = 9.96921e+36f ;
   data:
 
-   ice_area_fraction = 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 
-      1e+09, 1e+09, 1e+09, 1e+09 ;
+   seaIceFraction = 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 1e+09, 
+      1e+09, 1e+09, 1e+09 ;
   } // group PreQC
 
 group: VarMetaData {
   variables:
   	string variable_names(nvars) ;
+  		string variable_names:_FillValue = "" ;
   data:
 
    variable_names = "ice_area_fraction" ;

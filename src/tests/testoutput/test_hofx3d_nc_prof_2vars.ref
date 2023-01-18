@@ -1,12 +1,12 @@
 Test     : State: 
 Test     : Model state valid at time: 2021-06-30T00:00:00Z
-Test     :     5 variables: sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth, sea_water_salinity, sea_water_salinity_background_error
+Test     :     5 variables: sea_water_potential_temperature, sea_water_potential_temperature_background_error, depthBelowWaterSurface, salinity, salinity_background_error
 Test     :     atlas field norms:
 Test     :         sea_water_potential_temperature: 9.73262e-02
 Test     :         sea_water_potential_temperature_background_error: 3.54309e-04
-Test     :         depth: 2.05581e-01
-Test     :         sea_water_salinity: 1.89413e-01
-Test     :         sea_water_salinity_background_error: 3.54309e-04
+Test     :         depthBelowWaterSurface: 2.05581e-01
+Test     :         salinity: 1.89413e-01
+Test     :         salinity_background_error: 3.54309e-04
 
 Test     : H(x): 
 Test     : ARGO profiles nobs= 12 Min=1.81028e+01, Max=3.52000e+01, RMS=2.79784e+01

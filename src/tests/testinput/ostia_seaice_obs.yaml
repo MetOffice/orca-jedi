@@ -56,7 +56,9 @@ observations:
     name: Composite
     components:
     - name: Identity
+      observation alias file: testinput/test_name_map.yaml
     - name: BackgroundErrorIdentity
+      observation alias file: testinput/test_name_map.yaml
   obs filters:
   - filter: Create Diagnostic Flags
     flags:
@@ -64,13 +66,14 @@ observations:
       initial value: false
   - filter: Variable Assignment
     assignments:
-    - name: ice_area_fraction@GrossErrorProbability
+    - name: GrossErrorProbability/seaIceFraction
       type: float
       value: 0.04
   - filter: Bayesian Background Check
+    observation alias file: testinput/test_name_map.yaml
     defer to post: true
     filter variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
     prob density bad obs: 1.0
     PGE threshold: 0.5
     actions:
@@ -80,11 +83,11 @@ observations:
   - filter: NEMO Feedback Writer
     filename: hofx_feedback_writer_out.nc
     variables:
-    - name: ice_area_fraction
+    - name: seaIceFraction
       nemo name: ICECONC
       long name: ice area fraction
       units: Fraction
       additional variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
         feedback suffix: Hx
         ioda group: HofX

@@ -10,10 +10,10 @@ geometry :
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
-    - name: sea_water_salinity
+    - name: salinity
       nemo field name: vosaline
       model space: volume
-    - name: sea_water_salinity_background_error
+    - name: salinity_background_error
       nemo field name: t_tot_var
       model space: volume
       variable type: background variance
@@ -25,8 +25,8 @@ state :
   - sea_water_potential_temperature
   - sea_water_potential_temperature_background_error
   - depth
-  - sea_water_salinity
-  - sea_water_salinity_background_error
+  - salinity
+  - salinity_background_error
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
 window begin: 2021-06-29T12:00:00Z
@@ -40,15 +40,15 @@ observations:
           type: H5File
           obsfile: Data/hofx_prof_2var_obs.nc
         obsgrouping:
-          group variables: [ "station_id", "dateTime"]
-          sort variable: depth
+          group variables: [ "stationIdentification", "dateTime"]
+          sort variable: depthBelowWaterSurface
           sort group: ObsValue
           sort order: descending
       obsdataout:
         engine:
           type: H5File
           obsfile: testoutput/test_hofx3d_profiles_2var_writer_jopa_out.nc
-      simulated variables: [sea_water_potential_temperature, sea_water_salinity]
+      simulated variables: [waterPotentialTemperature, salinity]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
@@ -56,14 +56,16 @@ observations:
     obs operator:
       name: VertInterp
       variables:
-      - name: sea_water_potential_temperature
-      - name: sea_water_salinity
+      - name: waterPotentialTemperature
+      - name: salinity
       vertical coordinate: depth
+      observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
+      observation alias file: testinput/test_name_map.yaml
     obs filters:
       - filter: Variable Assignment
         assignments:
-        - name: sea_water_potential_temperature@GrossErrorProbability
+        - name: GrossErrorProbability/waterPotentialTemperature
           type: float
           value: 0.04
       #- filter: GOMsaver

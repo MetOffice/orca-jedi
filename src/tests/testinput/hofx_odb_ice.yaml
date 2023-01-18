@@ -27,20 +27,20 @@ initial condition :
 model :
   name: PseudoModel
   tstep: P1D
-  state variables: [ ice_area_fraction ]
+  state variables: &state_variables [ ice_area_fraction ]
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-      state variables: [ ice_area_fraction ]
+      state variables: *state_variables
     - date: 2021-06-29T23:00:00Z
       nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-      state variables: [ ice_area_fraction ]
+      state variables: *state_variables
     - date: 2021-07-01T23:00:00Z
       nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-      state variables: [ ice_area_fraction ]
+      state variables: *state_variables
 observations:
   observers:
   - obs space:
@@ -55,7 +55,7 @@ observations:
         engine:
           type: H5File
           obsfile: test_out.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       time interpolation: linear
       atlas-interpolator:
@@ -66,11 +66,13 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: ice_area_fraction@GrossErrorProbability
+      - name: GrossErrorProbability/seaIceFraction
         type: float
         value: 0.04
     - filter: Create Diagnostic Flags
@@ -89,7 +91,7 @@ observations:
         initial value: false
     - filter: Perform Action
       filter variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
       action:
         name: assign error
         error parameter: 0.3162277
@@ -97,7 +99,7 @@ observations:
       defer to post: true
       where:
       - variable:
-          name: ice_area_fraction@ObsValue
+          name: ObsValue/seaIceFraction
         is_not_defined:
       actions:
       - name: set
@@ -109,7 +111,7 @@ observations:
       defer to post: true
       where:
       - variable:
-          name: ice_area_fraction@HofX
+          name: HofX/seaIceFraction
         is_not_defined:
       actions:
       - name: set
@@ -120,7 +122,7 @@ observations:
     - filter: Bounds Check
       defer to post: true
       filter variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
       minvalue: 0.0
       maxvalue: 1.0
       actions:
@@ -132,7 +134,7 @@ observations:
     - filter: Bounds Check
       defer to post: true
       filter variables:
-      - name: ice_area_fraction@HofX
+      - name: HofX/seaIceFraction
       minvalue: 0.0
       maxvalue: 1.0
       actions:
@@ -142,8 +144,9 @@ observations:
         flag: BgOutOfBoundsReject
       - name: reject
     - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
       filter variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
       prob density bad obs: 1.0
       PGE threshold: 0.5
       actions:
@@ -156,11 +159,11 @@ observations:
       filename: odb_nemo_fdbk_writer_out.nc
       reference date: 1950-01-01T00:00:00Z
       variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
         nemo name: ICECONC
         long name: ice area fraction
         units: Fraction
         additional variables:
-          - name: ice_area_fraction
+          - name: seaIceFraction
             feedback suffix: Hx
             ioda group: HofX

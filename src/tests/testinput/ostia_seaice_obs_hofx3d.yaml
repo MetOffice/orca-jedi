@@ -3,7 +3,7 @@ geometry :
     - name: ice_area_fraction
       nemo field name: iiceconc
       model space: surface
-    - name: sea_surface_foundation_temperature
+    - name: sea_surface_temperature
       nemo field name: votemper
       model space: surface
     - name: sea_water_potential_temperature
@@ -34,7 +34,7 @@ observations:
         engine:
           type: H5File
           obsfile: testoutput/test_ostia_seaice_obs_hofx3d_jopa.nc
-      simulated variables: [ice_area_fraction]
+      simulated variables: [seaIceFraction]
     get values:
       atlas-interpolator:
         type: "finite-element"
@@ -43,16 +43,19 @@ observations:
       name: Composite
       components:
       - name: Identity
+        observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: ice_area_fraction@GrossErrorProbability
+      - name: GrossErrorProbability/seaIceFraction
         type: float
         value: 0.04
     - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
       filter variables:
-      - name: ice_area_fraction
+      - name: seaIceFraction
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:
