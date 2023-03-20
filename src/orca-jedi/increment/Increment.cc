@@ -26,7 +26,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
-#include "ufo/Locations.h"
 #include "ufo/GeoVaLs.h"
 
 #include "orca-jedi/errorcovariance/ErrorCovariance.h"
