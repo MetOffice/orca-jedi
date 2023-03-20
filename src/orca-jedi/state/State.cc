@@ -36,7 +36,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
