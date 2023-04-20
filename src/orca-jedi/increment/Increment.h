@@ -33,7 +33,6 @@ namespace eckit {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
 }
 
 namespace oops {
