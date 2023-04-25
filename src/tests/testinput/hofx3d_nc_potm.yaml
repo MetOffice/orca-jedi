@@ -48,6 +48,7 @@ observations:
       vertical coordinate: depth
       observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
+      interpolation method: linear
       observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
