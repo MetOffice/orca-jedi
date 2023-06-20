@@ -1,4 +1,4 @@
-forecast length : P3D
+forecast length : P2D
 window begin: 2021-06-28T23:00:00Z
 window length: P2D
 geometry:
@@ -37,7 +37,7 @@ model :
       nemo field file: Data/orca2_t_nemo.nc
       variance field file: Data/orca2_t_bkg_var.nc
       state variables: *state_variables
-    - date: 2021-07-01T23:00:00Z
+    - date: 2021-06-30T23:00:00Z
       nemo field file: Data/orca2_t_nemo.nc
       variance field file: Data/orca2_t_bkg_var.nc
       state variables: *state_variables

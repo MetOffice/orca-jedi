@@ -1,4 +1,4 @@
-forecast length : P3D
+forecast length : P2D
 window begin: 2021-06-28T23:00:00Z
 window length: P2D
 geometry :
@@ -56,7 +56,7 @@ observations:
       simulated variables: [seaSurfaceTemperature]
     get values:
       atlas-interpolator:
-        type: finite-element
+        type: unstructured-bilinear-lonlat
         non_linear: missing-if-all-missing
     obs operator:
       name: Composite

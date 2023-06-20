@@ -9,6 +9,8 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
+#include <sstream>
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/interface/ModelBase.h"
@@ -23,6 +25,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 
 #include "orca-jedi/geometry/Geometry.h"
+#include "orca-jedi/state/StateParameters.h"
 #include "orca-jedi/utilities/OrcaModelTraits.h"
 
 // Forward declarations
@@ -43,7 +46,13 @@ class OrcaModelParameters : public oops::ModelParametersBase {
   /// Model time step
   oops::RequiredParameter<util::Duration> tstep{"tstep", this};
   /// Model variables
-  oops::RequiredParameter<oops::Variables> variables{"model variables", this};
+  oops::RequiredParameter<oops::Variables> stateVariables{"state variables",
+    "List of model variables", this};
+  oops::RequiredParameter<std::vector<OrcaStateParameters>> states{
+    "states",
+    "List of configuration options used to initialize the" +
+    " model state at each time step",
+    this};
 };
 
 
@@ -62,11 +71,18 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
     : tstep_(conf.getString("tstep")), geom_(geom),
-      vars_(conf, "model variables") {}
+    vars_(conf, "state variables") {
+    parameters_.validateAndDeserialize(conf);
+    checkTimeStep();
+  }
 
   Model(const Geometry & geom, const Parameters_ & params)
-    : tstep_(params.tstep.value()), geom_(geom),
-      vars_(params.variables.value()) {}
+    : parameters_(params), tstep_(params.tstep.value()), geom_(geom),
+      vars_(params.stateVariables.value()) {
+    oops::Log::trace() << classname() << "constructor begin" << std::endl;
+    checkTimeStep();
+    oops::Log::trace() << classname() << "constructor end" << std::endl;
+  }
 
   ~Model() {}
 
@@ -85,8 +101,25 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   const oops::Variables & variables() const {return vars_;}
 
  private:
+  void checkTimeStep() {
+    auto stateParameters = parameters_.states.value();
+    for (size_t iState = 0; iState < stateParameters.size() - 1; ++iState) {
+      const util::DateTime time = stateParameters[iState].date.value();
+      const util::DateTime timeNext = stateParameters[iState + 1].date.value();
+      std::cout << classname() << "::checkTimeStep state difference "
+                << (timeNext - time) << " tstep " << tstep_
+                << std::endl;
+      if ((timeNext - time).toSeconds() != tstep_.toSeconds()) {
+        std::ostringstream msg;
+        msg << "state difference " << (timeNext - time)
+            << " != tstep " << tstep_ << std::endl;
+        throw eckit::UserError(msg.str(), Here());
+      }
+    }
+  }
   void print(std::ostream &) const {}
   util::Duration tstep_;
+  Parameters_ parameters_;
   const Geometry geom_;
   const oops::Variables vars_;
 };
