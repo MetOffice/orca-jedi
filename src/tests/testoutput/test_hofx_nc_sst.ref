@@ -1,0 +1,18 @@
+Test     : Initial state: 
+Test     :  Model state valid at time: 2021-06-28T23:00:00Z
+Test     :     2 variables: sea_surface_temperature, sea_surface_temperature_background_error
+Test     :     atlas field norms:
+Test     :         sea_surface_temperature: 1.37673e-01
+Test     :         sea_surface_temperature_background_error: 6.13682e-04
+
+Test     : Final state: 
+Test     :  Model state valid at time: 2021-06-30T23:00:00Z
+Test     :     2 variables: sea_surface_temperature, sea_surface_temperature_background_error
+Test     :     atlas field norms:
+Test     :         sea_surface_temperature: 1.37683e-01
+Test     :         sea_surface_temperature_background_error: 6.13682e-04
+
+Test     : H(x): 
+Test     : Sea Surface Temperature nobs= 7 Min=1.76544e+01, Max=1.84489e+01, RMS=1.80823e+01
+
+Test     : End H(x)

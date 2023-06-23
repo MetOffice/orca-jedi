@@ -41,8 +41,6 @@
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
-#include "orca-jedi/model/ModelBias.h"
-#include "orca-jedi/model/Model.h"
 
 
 namespace orcamodel {
@@ -141,6 +139,13 @@ void State::read(const Parameters_ & params) {
 
   params_ = params;
   time_ = params.date.value();
+  if (time_ != params.date.value()) {
+    std::ostringstream msg;
+    msg << classname() << "valid time for this state"
+      << " does not match that in the supplied parameters " << time_
+      << " != " << params.date.value() << std::endl;
+    throw eckit::UserError(msg.str(), Here());
+  }
 
   readFieldsFromFile(params, *geom_, validTime(), "background",
       stateFields_);

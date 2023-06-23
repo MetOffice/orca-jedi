@@ -6,7 +6,7 @@ Test     :         ice_area_fraction: 0.00000e+00
 Test     :         ice_area_fraction_background_error: 3.06841e-03
 
 Test     : Final state: 
-Test     :  Model state valid at time: 2021-07-01T23:00:00Z
+Test     :  Model state valid at time: 2021-06-30T23:00:00Z
 Test     :     2 variables: ice_area_fraction, ice_area_fraction_background_error
 Test     :     atlas field norms:
 Test     :         ice_area_fraction: 3.16981e-03

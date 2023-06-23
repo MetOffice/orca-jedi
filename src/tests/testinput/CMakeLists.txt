@@ -4,6 +4,7 @@ list( APPEND orcajedi_test_input
   ostia_seaice_obs_hofx3d.yaml
   hofx_odb_ice.yaml
   hofx_nc_ice.yaml
+  hofx_nc_sst.yaml
   hofx3d_nc_sst.yaml
   hofx3d_nc_potm.yaml
   hofx3d_nc_prof_2vars.yaml

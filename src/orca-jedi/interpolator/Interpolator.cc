@@ -70,11 +70,11 @@ namespace orcamodel {
       const Geometry & geom, const std::vector<double>& lats,
       const std::vector<double>& lons) :
       nlocs_(lats.size()),
-      comm_(geom.getComm()),
-      atlasObsFuncSpace_(std::move(atlasObsFuncSpaceFactory(lats, lons))),
+      atlasObsFuncSpace_(atlasObsFuncSpaceFactory(lats, lons)),
       interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
                     geom.functionSpace(),
-                    atlasObsFuncSpace_ ) {
+                    atlasObsFuncSpace_),
+      comm_(geom.getComm()) {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
                        << std::endl;
@@ -107,9 +107,15 @@ namespace orcamodel {
 
     const std::vector<size_t> varSizes =
       state.geometry()->variableSizes(vars);
+    oops::Log::debug() << "orcamodel::Interpolator::apply nvars = " << nvars
+                       << " nlocs_ = " << nlocs_;
     size_t nvals = 0;
-    for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
+    for (size_t jvar=0; jvar < nvars; ++jvar) {
+      nvals += nlocs_ * varSizes[jvar];
+      oops::Log::debug() << " varSizes[" << jvar << "] = " << varSizes[jvar];
+    }
     result.resize(nvals);
+    oops::Log::debug() << " nvals = " << nvals << std::endl;
 
     std::size_t out_idx = 0;
     for (size_t jvar=0; jvar < nvars; ++jvar) {
