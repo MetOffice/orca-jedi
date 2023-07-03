@@ -153,8 +153,11 @@ std::vector<std::string> Geometry::variableNemoSpaces(
     }
     if (varNemoSpaces[i] == "") {
       std::stringstream err_stream;
-      err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
-      err_stream << "\" " << vars[i] << " not recognised. " << std::endl;
+      err_stream << "orcamodel::Geometry::variableSizes variable name \"";
+      err_stream << vars[i] << "\" not available in the state. ";
+      err_stream << "Either add this state variable to the model ";
+      err_stream << "configuration or remove the corresponding obs variable";
+      err_stream << " from the filters configuration." << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
   }
