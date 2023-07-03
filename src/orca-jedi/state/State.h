@@ -82,6 +82,55 @@ class State : public util::Printable,
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}
 
+/// atlas field interactions
+  void toFieldSet(atlas::FieldSet & stateFields) const
+    {
+      std::cout << classname() << ":: copy field state out-of stateFields_ before"
+                << std::endl;
+      for (atlas::Field field : stateFields_) {
+        std::string fieldName = field.name();
+        std::cout << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+                  << norm(fieldName) << std::endl;
+      }
+
+      stateFields = stateFields_;
+
+      std::cout << classname() << ":: copy field state out-of stateFields_ after"
+                << std::endl;
+      for (atlas::Field field : stateFields_) {
+        std::string fieldName = field.name();
+        std::cout << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+                  << norm(fieldName) << std::endl;
+      }
+      std::cout << classname() << ":: copy field state out-of stateFields after"
+                << std::endl;
+      for (atlas::Field field : stateFields) {
+        std::string fieldName = field.name();
+        std::cout << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+                  << norm(fieldName) << std::endl;
+      }
+    }
+  void fromFieldSet(const atlas::FieldSet & stateFields)
+    {
+      std::cout << classname() << ":: copy field state into stateFields before"
+                << std::endl;
+      for (atlas::Field field : stateFields_) {
+        std::string fieldName = field.name();
+        std::cout << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+                  << norm(fieldName) << std::endl;
+      }
+
+      stateFields_ = stateFields;
+
+      std::cout << classname() << ":: copy field state into stateFields after"
+                << std::endl;
+      for (atlas::Field field : stateFields_) {
+        std::string fieldName = field.name();
+        std::cout << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
+                  << norm(fieldName) << std::endl;
+      }
+    }
+
 /// Serialize and deserialize
   std::size_t serialSize() const override {return 0;}
   void serialize(std::vector<double> &) const override {}

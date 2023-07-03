@@ -9,9 +9,10 @@
 
 #include <string>
 
+#include "oops/generic/AtlasInterpolator.h"
+
 #include "orca-jedi/errorcovariance/ErrorCovariance.h"
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/increment/Increment.h"
 
 #include "orca-jedi/model/ModelBias.h"
@@ -30,7 +31,7 @@ struct OrcaModelTraits {
   typedef orcamodel::ErrorCovariance           Covariance;
   typedef orcamodel::Geometry                  Geometry;
 
-  typedef orcamodel::Interpolator              LocalInterpolator;
+  typedef oops::AtlasInterpolator              LocalInterpolator;
   typedef orcamodel::Increment                 Increment;
 
   typedef orcamodel::ModelBias                 ModelAuxControl;

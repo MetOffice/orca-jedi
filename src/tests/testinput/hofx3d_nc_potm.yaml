@@ -38,7 +38,7 @@ observations:
           obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
       simulated variables: [waterPotentialTemperature]
     get values:
-      atlas-interpolator:
+      interpolation method:
         type: unstructured-bilinear-lonlat
         non_linear: missing-if-all-missing
     obs operator:

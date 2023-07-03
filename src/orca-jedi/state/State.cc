@@ -55,7 +55,7 @@ State::State(const Geometry & geom,
 
   setupStateFields();
 
-  oops::Log::trace() << "State(ORCA)::State created for "<< validTime()
+  oops::Log::trace() << "State(ORCA)::State created for " << validTime()
                      << std::endl;
 }
 
@@ -101,7 +101,14 @@ State::State(const State & other)
     , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
-    , stateFields_(other.stateFields_) {
+     {
+  for (const auto& field : other.stateFields_) {
+      stateFields_.add(field);
+  }
+  std::cout << classname() << "Copy constructor" << std::endl;
+  for (const auto& variable : stateFields_.field_names()) {
+    std::cout << std::string(8, ' ') << variable;
+  }
   oops::Log::trace() << "State(ORCA)::State copied." << std::endl;
 }
 

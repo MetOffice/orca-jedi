@@ -50,7 +50,7 @@ observations:
           obsfile: testoutput/test_hofx3d_profiles_2var_writer_jopa_out.nc
       simulated variables: [waterPotentialTemperature, salinity]
     get values:
-      atlas-interpolator:
+      interpolation method:
         type: unstructured-bilinear-lonlat
         non_linear: missing-if-all-missing
     obs operator:

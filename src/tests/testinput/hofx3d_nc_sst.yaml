@@ -37,7 +37,7 @@ observations:
           obsfile: testoutput/hofx3d_nc_sst_jopa.nc
       simulated variables: [seaSurfaceTemperature]
     get values:
-      atlas-interpolator:
+      interpolation method:
         type: finite-element
         non_linear: missing-if-all-missing
     obs operator:
