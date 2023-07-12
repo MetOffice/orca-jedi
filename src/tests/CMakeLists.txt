@@ -23,6 +23,13 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_sst
                   ARGS testinput/hofx_nc_sst.yaml
                   COMMAND orcamodel_hofx.x )
 
+ecbuild_add_test( TARGET test_orcamodel_hofx_sst_parallel
+                  OMP 2
+                  MPI 2
+                  CONDITION  eckit_HAVE_MPI
+                  ARGS testinput/hofx_nc_sst_mpi.yaml
+                  COMMAND orcamodel_hofx.x )
+
 ecbuild_add_test( TARGET test_orcamodel_hofx3D_potm
                   OMP 1
                   ARGS testinput/hofx3d_nc_potm.yaml

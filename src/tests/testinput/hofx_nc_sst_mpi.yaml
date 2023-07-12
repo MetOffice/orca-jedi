@@ -1,0 +1,86 @@
+forecast length : P2D
+window begin: 2021-06-28T23:00:00Z
+window length: P2D
+geometry :
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background variance
+    - name: sea_surface_temperature_background_error
+      nemo field name: t_tot_var
+      model space: surface
+      variable type: background variance
+  grid name: ORCA2_T
+  number levels: 1
+initial condition :
+  date: 2021-06-28T23:00:00Z
+  state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]
+  nemo field file: Data/orca2_t_nemo.nc
+  variance field file: Data/orca2_t_bkg_var.nc
+model :
+  name: PseudoModel
+  tstep: P1D
+  state variables: &state_variables [ sea_surface_temperature ]
+  states:
+    - date: 2021-06-28T23:00:00Z
+      nemo field file: Data/orca2_t_nemo.nc
+      variance field file: Data/orca2_t_bkg_var.nc
+      state variables: *state_variables
+    - date: 2021-06-29T23:00:00Z
+      nemo field file: Data/orca2_t_nemo.nc
+      variance field file: Data/orca2_t_bkg_var.nc
+      state variables: *state_variables
+    - date: 2021-06-30T23:00:00Z
+      nemo field file: Data/orca2_t_nemo.nc
+      variance field file: Data/orca2_t_bkg_var.nc
+      state variables: *state_variables
+observations:
+  observers:
+  - obs space:
+      distribution:
+        name: Atlas
+        grid:
+          name: ORCA2_T
+          type: orca
+      name: Sea Surface Temperature
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/hofx_sst_obs.nc
+      obsdataout:
+        engine:
+          type: H5File
+          obsfile: testoutput/hofx_nc_sst_jopa.nc
+      simulated variables: [seaSurfaceTemperature]
+    get values:
+      interpolation method:
+        type: unstructured-bilinear-lonlat
+        non_linear: missing-if-all-missing
+    obs operator:
+      name: Composite
+      components:
+      - name: Identity
+        observation alias file: testinput/test_name_map.yaml
+      - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
+    obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: GrossErrorProbability/seaSurfaceTemperature
+        type: float
+        value: 0.04
+    - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
+      filter variables:
+      - name: seaSurfaceTemperature
+      prob density bad obs: 1.0
+      PGE threshold: 0.5
+test:
+  reference filename: testoutput/test_hofx_nc_sst.ref

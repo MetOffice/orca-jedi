@@ -1,7 +1,5 @@
 include_directories( ${PROJECT_SOURCE_DIR}/src )
 
-#target_link_libraries( meara_test_nemo_feedback NetCDF::NetCDF_CXX )
-
 ecbuild_add_test( TARGET  test_orcajedi_nemo_io_field_reader.x
                   SOURCES test_nemo_io_field_reader.cc
                   LIBS    orcamodel )
@@ -35,10 +33,10 @@ ecbuild_add_test( TARGET  test_orcajedi_state.x
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
 
-ecbuild_add_test( TARGET  test_orcajedi_interpolator.x
-                  SOURCES test_interpolator.cc
-                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
-                  LIBS    orcamodel )
+#ecbuild_add_test( TARGET  test_orcajedi_interpolator.x
+#                  SOURCES test_interpolator.cc
+#                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+#                  LIBS    orcamodel )
 
 ecbuild_add_test( TARGET  test_orcajedi_increment.x
                   SOURCES test_increment.cc

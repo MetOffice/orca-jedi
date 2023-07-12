@@ -87,10 +87,10 @@ State::State(const Geometry & geom,
 
 State::State(const Geometry & resol, const State & other)
   : geom_(new Geometry(resol))
-    , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
-    , stateFields_(other.stateFields_) {
+    , stateFields_(other.stateFields_)
+    , params_(other.params_) {
   ASSERT(other.geom_->grid().uid() == resol.grid().uid());
   oops::Log::trace() << "State(ORCA)::State resolution change: "
                      << " copied as there is no change" << std::endl;
@@ -98,9 +98,9 @@ State::State(const Geometry & resol, const State & other)
 
 State::State(const State & other)
   : geom_(other.geom_)
-    , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
+    , params_(other.params_)
      {
   for (const auto& field : other.stateFields_) {
       stateFields_.add(field);

@@ -16,14 +16,13 @@
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/missingValues.h"
+#include "oops/generic/AtlasInterpolator.h"
 
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateParameters.h"
-#include "orca-jedi/interpolator/Interpolator.h"
-#include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -60,10 +59,7 @@ CASE("test basic interpolator") {
   interp_conf.set("type", "unstructured-bilinear-lonlat");
   interp_conf.set("non_linear", "missing-if-all-missing");
   eckit::LocalConfiguration interpolator_conf;
-  interpolator_conf.set("atlas-interpolator", interp_conf);
-
-  OrcaInterpolatorParameters params;
-  params.validateAndDeserialize(interpolator_conf);
+  interpolator_conf.set("interpolation method", interp_conf);
 
   std::vector<double> lons({0, 120, 270});
   std::vector<double> lats({88, 0, 30});
@@ -84,11 +80,11 @@ CASE("test basic interpolator") {
   State state(geometry, stateParams);
 
   // Disable this section until jopa-bundle uses a new version of atlas
-  // SECTION("test interpolator succeeds even with no locations") {
-  //  Interpolator interpolator(interpolator_conf, geometry, {}, {});
-  // }
+  SECTION("test interpolator succeeds even with no locations") {
+    oops::AtlasInterpolator interpolator(interpolator_conf, geometry.generic(), {}, {});
+  }
 
-  Interpolator interpolator(interpolator_conf, geometry, lats, lons);
+  oops::AtlasInterpolator interpolator(interpolator_conf, geometry.generic(), lats, lons);
 
   SECTION("test interpolator.apply fails missing variable") {
     oops::Variables variables({"NOTAVARIABLE"});
