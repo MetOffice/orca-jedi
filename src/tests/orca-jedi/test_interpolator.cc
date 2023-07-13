@@ -17,11 +17,12 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/missingValues.h"
 #include "oops/generic/AtlasInterpolator.h"
+#include "oops/base/Geometry.h"
+#include "oops/base/State.h"
 
 #include "atlas/library/Library.h"
 
-#include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/state/State.h"
+#include "orca-jedi/utilities/OrcaModelTraits.h"
 #include "orca-jedi/state/StateParameters.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
@@ -53,7 +54,7 @@ CASE("test basic interpolator") {
     .set("nemo field name", "votemper")
     .set("model space", "volume");
   config.set("nemo variables", nemo_var_mappings);
-  Geometry geometry(config, eckit::mpi::comm());
+  oops::Geometry<OrcaModelTraits> geometry(config, eckit::mpi::comm());
 
   eckit::LocalConfiguration interp_conf;
   interp_conf.set("type", "unstructured-bilinear-lonlat");
@@ -77,7 +78,7 @@ CASE("test basic interpolator") {
   state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
   OrcaStateParameters stateParams;
   stateParams.validateAndDeserialize(state_config);
-  State state(geometry, stateParams);
+  oops::State<OrcaModelTraits> state(geometry, stateParams);
 
   // Disable this section until jopa-bundle uses a new version of atlas
   SECTION("test interpolator succeeds even with no locations") {
@@ -91,7 +92,7 @@ CASE("test basic interpolator") {
     std::vector<double> vals(3);
     std::vector<bool> mask(3);
     EXPECT_THROWS_AS(interpolator.apply(variables, state, mask, vals),
-        eckit::BadParameter);
+        eckit::Exception);
   }
 
   SECTION("test interpolator.apply") {

@@ -33,10 +33,10 @@ ecbuild_add_test( TARGET  test_orcajedi_state.x
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
 
-#ecbuild_add_test( TARGET  test_orcajedi_interpolator.x
-#                  SOURCES test_interpolator.cc
-#                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
-#                  LIBS    orcamodel )
+ecbuild_add_test( TARGET  test_orcajedi_interpolator.x
+                  SOURCES test_interpolator.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  LIBS    orcamodel )
 
 ecbuild_add_test( TARGET  test_orcajedi_increment.x
                   SOURCES test_increment.cc
