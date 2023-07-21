@@ -46,8 +46,6 @@ class OrcaModelParameters : public oops::ModelParametersBase {
   /// Model time step
   oops::RequiredParameter<util::Duration> tstep{"tstep", this};
   /// Model variables
-  oops::RequiredParameter<oops::Variables> stateVariables{"state variables",
-    "List of model variables", this};
   oops::RequiredParameter<std::vector<OrcaStateParameters>> states{
     "states",
     "List of configuration options used to initialize the" +
@@ -70,15 +68,14 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   static const std::string classname() {return "orcamodel::Model";}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
-    : tstep_(conf.getString("tstep")), geom_(geom),
-    vars_(conf, "state variables") {
+    : tstep_(conf.getString("tstep")), geom_(geom) {
     parameters_.validateAndDeserialize(conf);
     checkTimeStep();
   }
 
   Model(const Geometry & geom, const Parameters_ & params)
-    : parameters_(params), tstep_(params.tstep.value()), geom_(geom),
-      vars_(params.stateVariables.value()) {
+    : parameters_(params), tstep_(params.tstep.value()), geom_(geom)
+       {
     oops::Log::trace() << classname() << "constructor begin" << std::endl;
     checkTimeStep();
     oops::Log::trace() << classname() << "constructor end" << std::endl;
@@ -98,7 +95,6 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
 
 /// Utilities
   const util::Duration & timeResolution() const {return tstep_;}
-  const oops::Variables & variables() const {return vars_;}
 
  private:
   void checkTimeStep() {
@@ -121,7 +117,6 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   util::Duration tstep_;
   Parameters_ parameters_;
   const Geometry geom_;
-  const oops::Variables vars_;
 };
 // -----------------------------------------------------------------------------
 
