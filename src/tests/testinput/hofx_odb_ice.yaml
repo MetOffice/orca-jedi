@@ -27,12 +27,11 @@ initial condition :
 model :
   name: PseudoModel
   tstep: P1D
-  state variables: &state_variables [ ice_area_fraction ]
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
-      state variables: *state_variables
+      state variables: &state_variables [ ice_area_fraction ]
     - date: 2021-06-29T23:00:00Z
       nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
       variance field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc

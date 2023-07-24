@@ -24,7 +24,6 @@ initial condition :
 model :
   name: PseudoModel
   tstep: P3D
-  state variables: [ ice_area_fraction ]
   states:
     - date: 2021-06-29T21:00:00Z
       nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
