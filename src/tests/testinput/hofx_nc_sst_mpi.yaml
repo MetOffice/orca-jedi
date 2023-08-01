@@ -27,12 +27,11 @@ initial condition :
 model :
   name: PseudoModel
   tstep: P1D
-  state variables: &state_variables [ sea_surface_temperature ]
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: Data/orca2_t_nemo.nc
       variance field file: Data/orca2_t_bkg_var.nc
-      state variables: *state_variables
+      state variables: &state_variables [ sea_surface_temperature ]
     - date: 2021-06-29T23:00:00Z
       nemo field file: Data/orca2_t_nemo.nc
       variance field file: Data/orca2_t_bkg_var.nc
@@ -45,10 +44,12 @@ observations:
   observers:
   - obs space:
       distribution:
-        name: Atlas
-        grid:
-          name: ORCA2_T
-          type: orca
+        name: RoundRobin
+        #name: InefficientDistribution
+        #        name: Atlas
+        #        grid:
+        #          name: ORCA2_T
+        #          type: orca
       name: Sea Surface Temperature
       obsdatain:
         engine:
@@ -83,4 +84,6 @@ observations:
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:
+  float relative tolerance: 1.0e-6
+  float absolute tolerance: 1.0e-6
   reference filename: testoutput/test_hofx_nc_sst.ref
