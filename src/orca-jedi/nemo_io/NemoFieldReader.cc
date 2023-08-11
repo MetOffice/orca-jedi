@@ -714,7 +714,7 @@ void NemoFieldReader::read_volume_var(const std::string& varname,
 
     // in atlas fields the levels indices change the fastest, so we need to
     // swap the indexing order from the netCDF data.
-    size_t numNodes = field_view.shape(0);
+    const size_t numNodes = field_view.shape(0);
     atlas_omp_for(int k = 0; k < nlevels; ++k) {
       for (size_t inode = 0; inode < numNodes; ++inode) {
         if (ghost(inode)) continue;
