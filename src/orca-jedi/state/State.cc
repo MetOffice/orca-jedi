@@ -241,8 +241,11 @@ double State::norm(const std::string & field_name) const {
         valid_points += valid_points_TP;
     }
   }
-  // prevent divide by zero in case of invalid field
-  if (!valid_points) valid_points = 1;
+  // prevent divide by zero when there are no valid model points on the
+  // partition
+  if (!valid_points)
+    return 0;
+
   return sqrt(squares)/valid_points;
 }
 
