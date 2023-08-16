@@ -20,6 +20,7 @@
 #include "oops/util/Printable.h"
 #include "oops/util/DateTime.h"
 #include "oops/base/ParameterTraitsVariables.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -39,7 +40,7 @@ namespace orcamodel {
   class State;
 
 
-class OrcaModelParameters : public oops::ModelParametersBase {
+class OrcaModelParameters : public Parameters {
   OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, ModelParametersBase)
 
  public:
