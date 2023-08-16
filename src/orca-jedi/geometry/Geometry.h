@@ -60,7 +60,7 @@ class Geometry : public util::Printable {
   void latlon(std::vector<double> & lats, std::vector<double> & lons,
               const bool halo) const;
   const atlas::FunctionSpace & functionSpace() const {return funcSpace_;}
-  const atlas::FieldSet & extraFields() const {return nofields_;}
+  const atlas::FieldSet & fields() const {return nofields_;}
 
   const atlas::Grid & grid() const {return grid_;}
   const atlas::Mesh & mesh() const {return mesh_;}
