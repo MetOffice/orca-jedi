@@ -77,6 +77,7 @@ class State : public util::Printable,
   void read(const eckit::Configuration &);
   void analytic_init(const Geometry &);
   void write(const OrcaStateParameters &) const;
+  void write(const eckit::Configuration &) const;
   double norm(const std::string & field_name) const;
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}

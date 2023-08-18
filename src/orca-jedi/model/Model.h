@@ -40,10 +40,12 @@ namespace orcamodel {
   class State;
 
 
-class OrcaModelParameters : public Parameters {
-  OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, ModelParametersBase)
+class OrcaModelParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, oops::Parameters)
 
  public:
+  // TODO(JC): May need model name? See lfric-jedi
+
   /// Model time step
   oops::RequiredParameter<util::Duration> tstep{"tstep", this};
   /// Model variables
@@ -64,8 +66,6 @@ class OrcaModelParameters : public Parameters {
 class Model: public oops::interface::ModelBase<OrcaModelTraits>,
              private util::ObjectCounter<Model> {
  public:
-  typedef OrcaModelParameters Parameters_;
-
   static const std::string classname() {return "orcamodel::Model";}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
@@ -74,7 +74,7 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
     checkTimeStep();
   }
 
-  Model(const Geometry & geom, const Parameters_ & params)
+  Model(const Geometry & geom, const OrcaModelParameters & params)
     : parameters_(params), tstep_(params.tstep.value()), geom_(geom)
        {
     oops::Log::trace() << classname() << "constructor begin" << std::endl;
@@ -116,7 +116,7 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   }
   void print(std::ostream &) const {}
   util::Duration tstep_;
-  Parameters_ parameters_;
+  OrcaModelParameters parameters_;
   const Geometry geom_;
 };
 // -----------------------------------------------------------------------------

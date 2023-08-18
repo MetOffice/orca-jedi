@@ -185,7 +185,7 @@ void State::write(const OrcaStateParameters & params) const {
   writeFieldsToFile(params, *geom_, validTime(), stateFields_);
 }
 
-void State::write(const eckit::Configuration & config) {
+void State::write(const eckit::Configuration & config) const {
   write(oops::validateAndDeserialize<OrcaStateParameters>(config));
 }
 
