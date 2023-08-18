@@ -44,8 +44,6 @@ class OrcaModelParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, oops::Parameters)
 
  public:
-  // TODO(JC): May need model name? See lfric-jedi
-
   /// Model time step
   oops::RequiredParameter<util::Duration> tstep{"tstep", this};
   /// Model variables
