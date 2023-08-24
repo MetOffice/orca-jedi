@@ -1,0 +1,22 @@
+## Description
+
+Provide a detailed description of what this PR does. What problem does it fix? What new capability does it add?
+
+## Issue(s) addressed
+
+Resolves #<issue_number>
+
+## Dependencies
+
+List the other PRs that this PR is dependent on:
+- [ ] ...
+
+## Impact
+
+Expected impact on downstream repositories or workflows:
+
+## Checklist
+
+- [ ] I have updated the unit tests to cover the change
+- [ ] I have run the unit tests
+- [ ] I have run mo-bundle to check integration with the rest of JEDI and run the unit tests under all environments
