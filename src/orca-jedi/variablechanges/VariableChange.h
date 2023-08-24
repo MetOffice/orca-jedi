@@ -29,11 +29,11 @@ namespace orcamodel {
 class VariableChange: public util::Printable,
   private util::ObjectCounter<VariableChange> {
  public:
-  typedef VariableChangeParameters Parameters_;
   static const std::string classname() {
     return "orcamodel::VariableChange";
   }
-  VariableChange(const Parameters_ &, const Geometry &) {}
+  VariableChange(const VariableChangeParameters &, const Geometry &) {}
+  VariableChange(const eckit::Configuration &, const Geometry &) {}
   void changeVar(State &, const oops::Variables &) const {}
   void changeVarInverse(State &, const oops::Variables &) const {}
 

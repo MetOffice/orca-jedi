@@ -26,7 +26,7 @@
 namespace orcamodel {
 
 oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
-  Geometry::Parameters__ params;
+  OrcaGeometryParameters params;
   params.validateAndDeserialize(config);
 
   std::vector<int> channels{};

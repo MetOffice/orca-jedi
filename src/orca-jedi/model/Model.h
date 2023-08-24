@@ -20,6 +20,7 @@
 #include "oops/util/Printable.h"
 #include "oops/util/DateTime.h"
 #include "oops/base/ParameterTraitsVariables.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -39,8 +40,8 @@ namespace orcamodel {
   class State;
 
 
-class OrcaModelParameters : public oops::ModelParametersBase {
-  OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, ModelParametersBase)
+class OrcaModelParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(OrcaModelParameters, oops::Parameters)
 
  public:
   /// Model time step
@@ -63,8 +64,6 @@ class OrcaModelParameters : public oops::ModelParametersBase {
 class Model: public oops::interface::ModelBase<OrcaModelTraits>,
              private util::ObjectCounter<Model> {
  public:
-  typedef OrcaModelParameters Parameters_;
-
   static const std::string classname() {return "orcamodel::Model";}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
@@ -73,7 +72,7 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
     checkTimeStep();
   }
 
-  Model(const Geometry & geom, const Parameters_ & params)
+  Model(const Geometry & geom, const OrcaModelParameters & params)
     : parameters_(params), tstep_(params.tstep.value()), geom_(geom)
        {
     oops::Log::trace() << classname() << "constructor begin" << std::endl;
@@ -115,7 +114,7 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
   }
   void print(std::ostream &) const {}
   util::Duration tstep_;
-  Parameters_ parameters_;
+  OrcaModelParameters parameters_;
   const Geometry geom_;
 };
 // -----------------------------------------------------------------------------

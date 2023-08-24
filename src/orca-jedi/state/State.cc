@@ -61,7 +61,7 @@ State::State(const Geometry & geom,
 }
 
 State::State(const Geometry & geom,
-             const Parameters_ & params)
+             const OrcaStateParameters & params)
   : geom_(new Geometry(geom))
     , vars_(params.stateVariables.value())
     , time_(params.date.value())
@@ -85,6 +85,11 @@ State::State(const Geometry & geom,
   }
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
+
+State::State(const Geometry & geom,
+             const eckit::Configuration & config) :
+  State(geom, oops::validateAndDeserialize<OrcaStateParameters>(config))
+{}
 
 State::State(const Geometry & resol, const State & other)
   : geom_(new Geometry(resol))
@@ -134,7 +139,7 @@ State & State::operator+=(const Increment & dx) {
 
 // I/O and diagnostics
 
-void State::read(const Parameters_ & params) {
+void State::read(const OrcaStateParameters & params) {
   oops::Log::trace() << "State(ORCA)::read starting for " << params.date.value()
                      << std::endl;
 
@@ -151,6 +156,10 @@ void State::read(const Parameters_ & params) {
   readFieldsFromFile(params, *geom_, validTime(), "background",
       stateFields_);
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
+}
+
+void State::read(const eckit::Configuration & config) {
+  read(oops::validateAndDeserialize<OrcaStateParameters>(config));
 }
 
 void State::analytic_init(const Geometry & geom) {
@@ -171,9 +180,13 @@ void State::setupStateFields() {
   }
 }
 
-void State::write(const Parameters_ & params) const {
+void State::write(const OrcaStateParameters & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
   writeFieldsToFile(params, *geom_, validTime(), stateFields_);
+}
+
+void State::write(const eckit::Configuration & config) const {
+  write(oops::validateAndDeserialize<OrcaStateParameters>(config));
 }
 
 void State::print(std::ostream & os) const {

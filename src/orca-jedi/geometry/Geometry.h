@@ -47,8 +47,6 @@ namespace orcamodel {
 
 class Geometry : public util::Printable {
  public:
-  typedef OrcaGeometryParameters Parameters__;
-
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 
@@ -76,7 +74,7 @@ class Geometry : public util::Printable {
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
   size_t n_levels_;
-  Parameters__ params_;
+  OrcaGeometryParameters params_;
   atlas::Grid grid_;
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;

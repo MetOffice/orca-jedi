@@ -15,6 +15,8 @@
 
 #include "atlas/field/FieldSet.h"
 
+#include "eckit/config/Configuration.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -25,10 +27,6 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/StateParameters.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ufo {
   class GeoVaLs;
@@ -56,14 +54,14 @@ class State : public util::Printable,
  public:
   static const std::string classname() {return "orcamodel::State";}
 
-  typedef OrcaStateParameters Parameters_;
-
 /// Constructor, destructor
   State(const Geometry &,
         const oops::Variables &,
         const util::DateTime &);
   State(const Geometry &,
-        const Parameters_ &);
+        const OrcaStateParameters &);
+  State(const Geometry &,
+        const eckit::Configuration &);
   State(const Geometry &, const State &);
   State(const State &);
   virtual ~State();
@@ -75,9 +73,11 @@ class State : public util::Printable,
   State & operator+=(const Increment &);
 
 /// I/O and diagnostics
-  void read(const Parameters_ &);
+  void read(const OrcaStateParameters &);
+  void read(const eckit::Configuration &);
   void analytic_init(const Geometry &);
-  void write(const Parameters_ &) const;
+  void write(const OrcaStateParameters &) const;
+  void write(const eckit::Configuration &) const;
   double norm(const std::string & field_name) const;
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}
@@ -113,7 +113,7 @@ class State : public util::Printable,
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet stateFields_;
-  Parameters_ params_;
+  OrcaStateParameters params_;
 };
 // -----------------------------------------------------------------------------
 
