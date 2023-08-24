@@ -1,6 +1,6 @@
 ## Description
 
-Provide a detailed description of what this PR does. What problem does it fix? What new capability does it add?
+Provide a detailed description of what this PR does. What problem does it fix? What new capability does it add? This is just general guidance, feel free to delete sections you don't need below as makes the most sense to you.
 
 ## Issue(s) addressed
 
