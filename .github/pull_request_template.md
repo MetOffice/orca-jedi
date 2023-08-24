@@ -18,5 +18,7 @@ Expected impact on downstream repositories or workflows:
 ## Checklist
 
 - [ ] I have updated the unit tests to cover the change
+- [ ] New functions are documented briefly via Doxygen comments in the code
+- [ ] I have linted my code using cpplint
 - [ ] I have run the unit tests
 - [ ] I have run mo-bundle to check integration with the rest of JEDI and run the unit tests under all environments
