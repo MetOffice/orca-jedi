@@ -112,12 +112,13 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
     const bool halo) const {
   const auto lonlat = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
+  auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
   const size_t npts = funcSpace_.size();
-  lons.resize(npts);
-  lats.resize(npts);
   for (size_t jj = 0; jj < npts; ++jj) {
-    lons[jj] = lonlat(jj, 0);
-    lats[jj] = lonlat(jj, 1);
+    if (!ghost(jj)) {
+      lons.emplace_back(lonlat(jj, 0));
+      lats.emplace_back(lonlat(jj, 1));
+    }
   }
 }
 
