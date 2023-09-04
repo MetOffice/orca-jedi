@@ -124,7 +124,7 @@ void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
   };
   const size_t npts = funcSpace_.size();
   for (size_t nodeElem = 0; nodeElem < npts; ++nodeElem) {
-    if (!ghosts(nodeElem)) {
+    if (isRequired(nodeElem)) {
       lons.emplace_back(lonlat(nodeElem, 0));
       lats.emplace_back(lonlat(nodeElem, 1));
     }
