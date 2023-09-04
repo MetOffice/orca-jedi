@@ -112,19 +112,19 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
     const bool halo) const {
   const auto lonlat = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
-  auto ghosts = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
-  auto haloDistance = atlas::array::make_view<int32_t, 1>(mesh_.nodes().halo());
-  auto isRequired = [ghosts, haloDistance, halo](const size_t jj) {
+  const auto ghosts = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
+  const auto haloDistance = atlas::array::make_view<int32_t, 1>(mesh_.nodes().halo());
+  auto isRequired = [&](const size_t nodeElem) {
     if (halo) {
-      return !ghosts(jj) || (haloDistance(jj) > 0);
+      return !ghosts(nodeElem) || (haloDistance(nodeElem) > 0);
     }
-    return !ghosts(jj);
+    return !ghosts(nodeElem);
   };
   const size_t npts = funcSpace_.size();
-  for (size_t jj = 0; jj < npts; ++jj) {
-    if (isRequired(jj)) {
-      lons.emplace_back(lonlat(jj, 0));
-      lats.emplace_back(lonlat(jj, 1));
+  for (size_t nodeElem = 0; nodeElem < npts; ++nodeElem) {
+    if (!ghosts(nodeElem)) {
+      lons.emplace_back(lonlat(nodeElem, 0));
+      lats.emplace_back(lonlat(nodeElem, 1));
     }
   }
 }
