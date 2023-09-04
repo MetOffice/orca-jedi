@@ -33,5 +33,25 @@ ram_delete(var_tmp10);
 ram_delete(var_tmp01);
 ram_delete(var_tmp11);
 
+sossheig[$t, $y, $x] = 0.0;
+
+*var_ssh0 = .18 + (nav_lat(:,:)/1800.);
+*var_ssh1 = .18 + (nav_lon(:,:)/3600.);
+*var_ssh2 = .18 + (nav_lat(:,:)/1800.) - (nav_lon(:,:)/3600.);
+
+where (mask) {
+  var_ssh0 = -32768.;
+  var_ssh1 = -32768.;
+  var_ssh2 = -32768.;
+}
+sossheig(0,:,:) = var_ssh0;
+sossheig(1,:,:) = var_ssh1;
+sossheig(2,:,:) = var_ssh2;
+
+ram_delete(var_ssh0);
+ram_delete(var_ssh1);
+ram_delete(var_ssh2);
+
 iiceconc.set_miss(-32768.);
 votemper.set_miss(-32768.);
+sossheig.set_miss(-32768.);
