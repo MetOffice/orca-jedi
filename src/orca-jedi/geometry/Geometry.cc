@@ -46,8 +46,8 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
 Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
-                      grid_(config.getString("grid name")),
-                      n_levels_(config.getInt("number levels"))
+                      n_levels_(config.getInt("number levels")),
+                      grid_(config.getString("grid name"))
 {
     params_.validateAndDeserialize(config);
     int64_t halo = params_.sourceMeshHalo.value().value_or(0);
@@ -112,12 +112,22 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
     const bool halo) const {
   const auto lonlat = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
+  const auto ghosts = atlas::array::make_view<int32_t, 1>(
+      mesh_.nodes().ghost());
+  const auto haloDistance = atlas::array::make_view<int32_t, 1>(
+      mesh_.nodes().halo());
+  auto isRequired = [&](const size_t nodeElem) {
+    if (halo) {
+      return !ghosts(nodeElem) || (haloDistance(nodeElem) > 0);
+    }
+    return !ghosts(nodeElem);
+  };
   const size_t npts = funcSpace_.size();
-  lons.resize(npts);
-  lats.resize(npts);
-  for (size_t jj = 0; jj < npts; ++jj) {
-    lons[jj] = lonlat(jj, 0);
-    lats[jj] = lonlat(jj, 1);
+  for (size_t nodeElem = 0; nodeElem < npts; ++nodeElem) {
+    if (isRequired(nodeElem)) {
+      lons.emplace_back(lonlat(nodeElem, 0));
+      lats.emplace_back(lonlat(nodeElem, 1));
+    }
   }
 }
 

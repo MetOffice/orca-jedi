@@ -19,8 +19,14 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_sst
                   COMMAND orcamodel_hofx3D.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_sst
-                  OMP 1
+                  OMP 2
                   ARGS testinput/hofx_nc_sst.yaml
+                  COMMAND orcamodel_hofx.x )
+
+ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel
+                  OMP 1
+                  MPI 2
+                  ARGS testinput/hofx_nc_ssh.yaml
                   COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx3D_potm

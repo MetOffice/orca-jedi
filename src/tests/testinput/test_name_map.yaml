@@ -7,6 +7,10 @@ variable maps:
     alias: sea_water_temperature
   - name: waterPotentialTemperature
     alias: sea_water_potential_temperature
+  - name: seaSurfaceHeightAnomaly
+    alias: sea_surface_height_anomaly
+  - name: seaSurfaceHeight
+    alias: sea_surface_height
   - name: salinity
     alias: salinity
   - name: depthBelowWaterSurface

@@ -14,6 +14,7 @@
 #include "oops/base/Variables.h"
 
 #include "atlas/library/Library.h"
+#include "atlas/mesh.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
@@ -99,6 +100,42 @@ CASE("test basic geometry") {
     Geometry bad_geometry(bad_config, eckit::mpi::comm());
     EXPECT_THROWS_AS(bad_geometry.variableNemoSpaces(oops_vars),
       eckit::BadValue);
+  }
+
+  SECTION("test geometry lats and lons contain no ghost points") {
+    std::vector<double> lats;
+    std::vector<double> lons;
+    geometry.latlon(lats, lons, false);
+    const auto lonlat = atlas::array::make_view<double, 2>(
+        geometry.functionSpace().lonlat());
+    const auto ghosts = atlas::array::make_view<int32_t, 1>(
+        geometry.mesh().nodes().ghost());
+    // ghost points on orca grids appear more than once in the mesh due to the
+    // "seam" at the periodic boundaries. If these points are present in the
+    // geometry they ought to appear more than once
+    bool ghostsExist = false;
+    std::vector<size_t> appearances(ghosts.size(), 0);
+    for (size_t iElem = 0; iElem < ghosts.size(); ++iElem) {
+      for (size_t iLoc = 0; iLoc < lats.size(); ++iLoc) {
+        // skip 260, 70 as this is special case in the ORCA2_T grid where there
+        // are many points overlapping
+        if (lons[iLoc] - 260 < 1e-6 && lats[iLoc] - 70 < 1e-6)
+          continue;
+        if (lons[iLoc] == lonlat(iElem, 0) && lats[iLoc] == lonlat(iElem, 1)) {
+          appearances[iElem]++;
+          if (appearances[iElem] > 1) {
+            std::cout << "lons[" << iLoc <<"] " << std::setprecision(12)
+                      << lons[iLoc] << " lats[" << iLoc << "] "
+                      << std::setprecision(12) << lats[iLoc]
+                      << " ghosts(" << iElem << ") " << ghosts(iElem)
+                      << " appearances[" << iElem << "] "
+                      << appearances[iElem] << std::endl;
+            ghostsExist = true;
+          }
+        }
+      }
+    }
+    EXPECT(!ghostsExist);
   }
 
   SECTION("test geometry extra methods") {

@@ -18,6 +18,7 @@ simple_nemo.cdl
 hofx_two_vars_obs.nc
 hofx_potm_obs.nc
 hofx_prof_2var_obs.nc
+hofx_ssh_obs.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
