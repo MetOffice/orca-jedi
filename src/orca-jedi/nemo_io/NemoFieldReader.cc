@@ -507,7 +507,6 @@ void NemoFieldReader::read_vertical_var(const std::string& varname,
     // Store the data in an atlas 3D field - inefficient but flexible
     for (size_t inode = 0; inode < field_view.shape(0); ++inode) {
       for (int k = 0; k < nlevels; ++k) {
-        if (ghost(inode)) continue;
         field_view(inode, k) = buffer[k];
       }
     }
@@ -716,7 +715,6 @@ void NemoFieldReader::read_volume_var(const std::string& varname,
     const size_t numNodes = field_view.shape(0);
     atlas_omp_for(int k = 0; k < nlevels; ++k) {
       for (size_t inode = 0; inode < numNodes; ++inode) {
-        if (ghost(inode)) continue;
         field_view(inode, k) =
           buffer[k*nx*ny + index_glbarray(ij(inode, 0), ij(inode, 1))];
       }
