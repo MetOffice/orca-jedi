@@ -47,6 +47,7 @@ namespace orcamodel {
 
 class Geometry : public util::Printable {
  public:
+  static const std::string classname() {return "orcamodel::Geometry";}
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 

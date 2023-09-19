@@ -630,7 +630,6 @@ void NemoFieldReader::read_surf_var(const std::string& varname,
         }
 
         for (size_t inode = 0; inode < field_view.size(); ++inode) {
-          if (ghost(inode)) continue;
           double data = var_data[index_glbarray(ij(inode, 0), ij(inode, 1))];
           field_view(inode, 0) = data;
         }

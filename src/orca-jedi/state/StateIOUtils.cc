@@ -86,9 +86,12 @@ void readFieldsFromFile(
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
-        // Add a halo exchange following read to fill out halo points
-        geom.functionSpace().haloExchange(field);
       }
+      // Add a halo exchange following read to fill out halo points
+      // Note: this is currently insufficient to guarantee a true halo
+      // exchange, as there is an open issue likely with the atlas-orca mesh
+      // generator
+      fs.haloExchange();
     }
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
