@@ -49,12 +49,14 @@ jobs:
         with:
           path: ci/atlas-orca
           repository: ECMWF/atlas-orca
+          token: ${{ secrets.GH_PAT }}
 
       - name: checkout atlas-data
         uses: actions/checkout@v3
         with:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
+          token: ${{ secrets.GH_PAT }}
 
       - name: build and test
         run: |
