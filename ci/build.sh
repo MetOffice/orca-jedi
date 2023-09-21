@@ -28,6 +28,7 @@ ecbuild -S "${HERE}"
 make -j "${NPROC}"
 
 env OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+    ATLAS_TRACE=1 ATLAS_DEBUG=1 \
     ATLAS_DATA_PATH="${HERE}/atlas-data" \
     ctest -j "${NPROC}" -V --output-on-failure --test-dir "./orca-jedi"
 
