@@ -49,6 +49,7 @@ jobs:
         with:
           path: ci/atlas
           repository: ECMWF/atlas
+          ref: 'tags/0.34.0'
           token: ${{ secrets.GH_PAT }}
 
       - name: checkout atlas-orca
