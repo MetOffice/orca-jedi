@@ -50,20 +50,19 @@ jobs:
           path: ci/atlas
           repository: ECMWF/atlas
           ref: '0.34.0'
-          token: ${{ secrets.GH_PAT }}
 
       - name: checkout atlas-orca
         uses: actions/checkout@v3
         with:
           path: ci/atlas-orca
           repository: ECMWF/atlas-orca
-          token: ${{ secrets.GH_PAT }}
 
       - name: checkout atlas-data
         uses: actions/checkout@v3
         with:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
+          lfs: true
           token: ${{ secrets.GH_PAT }}
 
       - name: build and test
