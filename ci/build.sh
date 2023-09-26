@@ -27,6 +27,29 @@ ln -s '..' "${HERE}/orca-jedi"
 ecbuild -S "${HERE}"
 make -j "${NPROC}"
 
+echo ls
+ls
+
+echo ls share
+ls share
+
+echo ls atlas-orca
+ls atlas-orca
+
+echo ls atlas
+ls atlas
+
+echo ls atlas/share/plugins
+ls atlas/share/plugins
+
+echo ls atlas-orca/share/plugins
+ls atlas-orca/share/plugins
+
+echo ls share/plugins
+ls share/plugins
+
+exit 1
+
 env OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
     ATLAS_TRACE=1 ATLAS_DEBUG=1 \
     LD_LIBRARY_PATH="${HERE}/lib:${LD_LIBRARY_PATH}" \
