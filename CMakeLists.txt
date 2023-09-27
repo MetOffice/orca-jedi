@@ -35,7 +35,7 @@ ecbuild_debug( "   oops_FEATURES : [${oops_FEATURES}]" )
 find_package( ufo REQUIRED)
 ecbuild_debug( "   ufo_FEATURES : [${ufo_FEATURES}]" )
 
-# find_package( nemo-feedback )
+find_package( nemo-feedback )
 
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
