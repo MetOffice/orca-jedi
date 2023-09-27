@@ -1,3 +1,5 @@
+.. image:: https://github.com/MetOffice/orca-jedi/actions/workflows/ci.yml/badge.svg
+
 orca-jedi
 =========
 
