@@ -44,12 +44,12 @@ jobs:
           repository: JCSDA-internal/ufo
           token: ${{ secrets.GH_PAT }}
 
-      - name: checkout atlas
-        uses: actions/checkout@v3
-        with:
-          path: ci/atlas
-          repository: ECMWF/atlas
-          ref: '0.34.0'
+      # - name: checkout atlas
+      #   uses: actions/checkout@v3
+      #   with:
+      #     path: ci/atlas
+      #     repository: ECMWF/atlas
+      #     ref: '0.34.0'
 
       - name: checkout atlas-orca
         uses: actions/checkout@v3

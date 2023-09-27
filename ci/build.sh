@@ -20,35 +20,49 @@ trap finally EXIT
 
 cd "${WORKD}"
 
-source /etc/profile.d/z10_spack_environment.sh
+source /opt/spack-environment/activate.sh
+
+echo "
+-------------------------------
+gcc version $(gcc -dumpversion ||:)
+$(ecbuild --version ||:)
+atlas version $(atlas --version ||:)
+eckit version $(eckit-version ||:)
+ectrans version $(ectrans --version ||:)
+fckit version $(fckit --version ||:)
+fiat version $(fiat --version ||:)
+lz4 version $(lz4 --version ||:)
+odc version $(odc --version ||:)
+-------------------------------
+"
 
 rm -f "${HERE}/orca-jedi"
 ln -s '..' "${HERE}/orca-jedi"
 ecbuild -S "${HERE}"
 make -j "${NPROC}"
 
-echo ls
-ls
+# echo ls
+# ls
 
-echo ls share
-ls share
+# echo ls share
+# ls share
 
-echo ls atlas-orca
-ls atlas-orca
+# echo ls atlas-orca
+# ls atlas-orca
 
-echo ls atlas
-ls atlas
+# echo ls atlas
+# ls atlas
 
-echo ls atlas/share/plugins
-ls atlas/share/plugins
+# echo ls atlas/share/plugins
+# ls atlas/share/plugins
 
-echo ls atlas-orca/share/plugins
-ls atlas-orca/share/plugins
+# echo ls atlas-orca/share/plugins
+# ls atlas-orca/share/plugins
 
-echo ls share/plugins
-ls share/plugins
+# echo ls share/plugins
+# ls share/plugins
 
-exit 1
+# exit 1
 
 env OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
     ATLAS_TRACE=1 ATLAS_DEBUG=1 \
