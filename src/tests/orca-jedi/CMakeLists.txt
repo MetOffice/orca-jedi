@@ -9,7 +9,7 @@ ecbuild_add_test( TARGET  test_orcajedi_nemo_io_field_reader.x
 LIST( APPEND ATLAS_TEST_ENVIRONMENT
     ATLAS_ORCA_CACHING=1
     ATLAS_CACHE_PATH=${CMAKE_BINARY_DIR}/share
-    PLUGINS_MANIFEST_PATH=${CMAKE_BINARY_DIR}/atlas-orca/share/plugins )
+    PLUGINS_MANIFEST_PATH=${CMAKE_BINARY_DIR}/share/plugins )
 
 ecbuild_add_test( TARGET  test_orcajedi_nemo_io_field_writer.x
                   SOURCES test_nemo_io_field_writer.cc

@@ -41,14 +41,10 @@ ln -s '..' "${HERE}/orca-jedi"
 ecbuild -S "${HERE}"
 make -j "${NPROC}"
 
- echo ls share/plugins
- ls share/plugins
-
- echo ls atlas-orca/share
- ls atlas-orca
-
- echo ls atlas-orca/share/plugins
- ls atlas-orca/share/plugins
+if [[ ! -f share/plugins/atlas-orca.yml ]]; then
+ echo "ERROR atlas-orca.yml not found!" | tee >(cat >&2)
+ exit 1
+fi
 
 env OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
     ATLAS_TRACE=1 ATLAS_DEBUG=1 \

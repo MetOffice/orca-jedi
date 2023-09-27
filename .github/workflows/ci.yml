@@ -61,7 +61,7 @@ jobs:
       - name: build and test
         run: |
           docker run --rm \
-            --entrypoint=/usr/local/src/orca-jedi/ci/build.sh \
+            --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
             'jcsda/docker-gnu-openmpi-dev:latest'
