@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout current repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: checkout jedicmake
+        uses: actions/checkout@v3
+        with:
+          path: ci/jedicmake
+          repository: JCSDA-internal/jedi-cmake
+          submodules: true
+          token: ${{ secrets.GH_PAT }}
+
+      - name: checkout oops
+        uses: actions/checkout@v3
+        with:
+          path: ci/oops
+          repository: JCSDA-internal/oops
+          token: ${{ secrets.GH_PAT }}
+
+      - name: checkout ioda
+        uses: actions/checkout@v3
+        with:
+          path: ci/ioda
+          repository: JCSDA-internal/ioda
+          token: ${{ secrets.GH_PAT }}
+
+      - name: checkout ufo
+        uses: actions/checkout@v3
+        with:
+          path: ci/ufo
+          repository: JCSDA-internal/ufo
+          token: ${{ secrets.GH_PAT }}
+
+      - name: checkout atlas-orca
+        uses: actions/checkout@v3
+        with:
+          path: ci/atlas-orca
+          repository: ECMWF/atlas-orca
+
+      - name: checkout atlas-data
+        uses: actions/checkout@v3
+        with:
+          path: ci/atlas-data
+          repository: MetOffice/atlas-data
+          lfs: true
+          token: ${{ secrets.GH_PAT }}
+
+      - name: build and test
+        run: |
+          docker run --rm \
+            --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
+            --workdir=/usr/local/src/orca-jedi/ci \
+            --volume $PWD:/usr/local/src/orca-jedi \
+            'jcsda/docker-gnu-openmpi-dev:latest'
