@@ -74,3 +74,4 @@ observations:
       PGE threshold: 0.5
 test:
   reference filename: testoutput/test_hofx_nc_ssh.ref
+  float relative tolerance: 5.0e-6 # tolerance for MPI sum-order related differences
