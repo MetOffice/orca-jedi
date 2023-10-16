@@ -130,7 +130,7 @@ namespace orcamodel {
       for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
         for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
           if (has_mv && mv(field_view(iloc, klev))) {
-            result[out_idx] = util::missingValue(result[out_idx]);
+            result[out_idx] = util::missingValue<double>();
           } else {
             result[out_idx] = field_view(iloc, klev);
           }

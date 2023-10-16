@@ -105,7 +105,7 @@ CASE("test basic interpolator") {
     interpolator.apply(oops::Variables({"sea_ice_area_fraction",
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
-    double missing_value = util::missingValue(vals[0]);
+    double missing_value = util::missingValue<double>();
     std::vector<double> testvals = {1, missing_value, 0, 18.488888892,
                                     missing_value, 18.1592999503};
 
@@ -121,7 +121,7 @@ CASE("test basic interpolator") {
     interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
                                        state, mask, vals);
 
-    double missing_value = util::missingValue(vals[0]);
+    double missing_value = util::missingValue<double>();
     std::vector<double> testvals = {
       18.488888892, missing_value, 18.1592999503,
       17.9419381132, missing_value, 17.75000288,
