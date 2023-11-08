@@ -21,8 +21,9 @@ state :
   state variables: [ sea_surface_temperature, sea_surface_temperature_background_error ]
   nemo field file: Data/orca2_t_nemo.nc
   variance field file: Data/orca2_t_bkg_var.nc
-window begin: 2021-06-29T12:00:00Z
-window length: P1D
+time window:
+  begin: 2021-06-29T12:00:00Z
+  length: P1D
 observations:
   observers:
   - obs space:

@@ -29,8 +29,9 @@ model :
       nemo field file: /data/users/tsearle/jopa_ostia_start_data/ops_bg_full.nc
       variance field file: /data/users/tsearle/jopa_ostia_start_data/ops_bgerr_ostia_orca12ext.nc
       state variables: [ ice_area_fraction ]
-window begin: 2021-06-29T21:00:00Z
-window length: P1D
+time window:
+  begin: 2021-06-29T21:00:00Z
+  length: P1D
 observations:
 - obs space:
     name: Sea Ice

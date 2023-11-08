@@ -17,8 +17,9 @@ state :
   state variables: [ sea_water_temperature, sea_water_temperature_background_error, depth]
   nemo field file: /data/users/tsearle/builds_xl/jopa-bundle-next/ops.bg_ocean.nc
   variance field file: /data/users/tsearle/builds_xl/jopa-bundle-next/bgerr_all_orca12ext.nc
-window begin: 2021-08-20T00:00:00Z
-window length: P2D
+time window:
+  begin: 2021-08-20T00:00:00Z
+  length: P2D
 observations:
   observers:
   - obs space:
