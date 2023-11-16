@@ -1,5 +1,8 @@
 .. image:: https://github.com/MetOffice/orca-jedi/actions/workflows/ci.yml/badge.svg
 
+.. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
+   :target: https://opensource.org/licenses/BSD-3-Clause
+
 orca-jedi
 =========
 
