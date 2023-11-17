@@ -13,6 +13,8 @@
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
+#include "tests/orca-jedi/OrcaModelTestEnvironment.h"
+
 namespace orcamodel {
 namespace test {
 
@@ -171,5 +173,5 @@ CASE("test read_vertical_var reads field array view") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return eckit::testing::run_tests(argc, argv);
+    return orcamodel::test::run(argc, argv);
 }

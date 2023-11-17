@@ -17,6 +17,7 @@
 #include "orca-jedi/state/State.h"
 #include "oops/util/parameters/Parameter.h"
 #include "orca-jedi/state/StateParameters.h"
+
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -112,5 +113,5 @@ CASE("test basic state") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return orcamodel::test::run( argc, argv );
+    return orcamodel::test::run(argc, argv);
 }

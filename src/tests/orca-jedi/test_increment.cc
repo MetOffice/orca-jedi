@@ -13,6 +13,7 @@
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/increment/Increment.h"
+
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {

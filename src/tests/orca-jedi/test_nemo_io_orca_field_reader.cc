@@ -3,6 +3,7 @@
  */
 
 #include "eckit/log/Bytes.h"
+#include "eckit/testing/Test.h"
 
 #include "oops/util/DateTime.h"
 
@@ -52,7 +53,7 @@ CASE("test parallel serially distributed reads field array view") {
   auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
-  for (int i = 0; i < field_view.size(); ++i) {
+  for (size_t i = 0; i < field_view.size(); ++i) {
     if (ghost(i)) continue;
     if (raw_data[i] != field_view(i, 0)) {
         std::cout << "mismatch: "
@@ -155,7 +156,7 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
 
   auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
-  for (int i = 0; i<mesh.nodes().size(); ++i) {
+  for (size_t i = 0; i<mesh.nodes().size(); ++i) {
     if (ghost(i)) continue;
     int orca_i = ij(i, 0);
     int orca_j = ij(i, 1);
@@ -231,5 +232,5 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return orcamodel::test::run( argc, argv );
+    return orcamodel::test::run(argc, argv);
 }

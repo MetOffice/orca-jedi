@@ -21,6 +21,7 @@
 #include "orca-jedi/state/StateParameters.h"
 #include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/interpolator/InterpolatorParameters.h"
+
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
@@ -106,7 +107,7 @@ CASE("test basic interpolator") {
     std::vector<double> testvals = {1, missing_value, 0, 18.488888892,
                                     missing_value, 18.1592999503};
 
-    for (int i=0; i < testvals.size(); ++i) {
+    for (size_t i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
                 << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
@@ -124,7 +125,7 @@ CASE("test basic interpolator") {
       17.9419381132, missing_value, 17.75000288,
       missing_value, missing_value, missing_value};
 
-    for (int i=0; i < testvals.size(); ++i) {
+    for (size_t i=0; i < testvals.size(); ++i) {
       std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
                 << " testvals[" << i << "] " << testvals[i] << std::endl;
       EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
@@ -136,5 +137,5 @@ CASE("test basic interpolator") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return orcamodel::test::run( argc, argv );
+    return orcamodel::test::run(argc, argv);
 }
