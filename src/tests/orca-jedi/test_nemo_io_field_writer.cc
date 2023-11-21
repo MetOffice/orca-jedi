@@ -1,11 +1,9 @@
 /*
- * (C) British Crown Copyright 2020-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2023 Met Office
  */
 
 #include "eckit/log/Bytes.h"
+#include "eckit/testing/Test.h"
 #include "atlas/parallel/mpi/mpi.h"
 
 #include "oops/util/DateTime.h"
@@ -26,6 +24,7 @@
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
+
 
 namespace orcamodel {
 namespace test {
@@ -58,7 +57,7 @@ CASE("test parallel serially distributed write field array views") {
   auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
 
-  for (int i = 0; i < ice_fv.size(); ++i) {
+  for (size_t i = 0; i < ice_fv.size(); ++i) {
     if (ghost(i)) continue;
     ice_fv(i, 0) = ij(i, 0);
     temp_fv(i, 0) = ij(i, 0);
@@ -90,7 +89,7 @@ CASE("test parallel serially distributed write field array views") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
       std::vector<double> data = field_reader.read_var_slice("iiceconc", 0, 0);
-      for (int iNode = 0; iNode < ice_fv.shape(0); ++iNode) {
+      for (atlas::idx_t iNode = 0; iNode < ice_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], ice_fv(iNode, 0));
       }
@@ -106,15 +105,15 @@ CASE("test parallel serially distributed write field array views") {
       auto depth_fv = atlas::array::make_view<double, 2>(temp_field);
 
       field_reader.read_vertical_var("z", depth_fv);
-      for (int iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
+      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(depth_fv(iNode, 0), 1);
       }
-      for (int iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
+      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(depth_fv(iNode, 1), 2);
       }
-      for (int iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
+      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(depth_fv(iNode, 2), 3);
       }
@@ -126,19 +125,19 @@ CASE("test parallel serially distributed write field array views") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
       std::vector<double> data = field_reader.read_var_slice("votemper", 0, 0);
-      for (int iNode = 0; iNode < data.size(); ++iNode) {
+      for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 0));
       }
       data.clear();
       data = field_reader.read_var_slice("votemper", 0, 1);
-      for (int iNode = 0; iNode < data.size(); ++iNode) {
+      for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 1));
       }
       data.clear();
       data = field_reader.read_var_slice("votemper", 0, 2);
-      for (int iNode = 0; iNode < data.size(); ++iNode) {
+      for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 2));
       }
@@ -220,5 +219,5 @@ CASE("test parallel serially distributed write field array views") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return orcamodel::test::run( argc, argv );
+    return orcamodel::test::run(argc, argv);
 }
