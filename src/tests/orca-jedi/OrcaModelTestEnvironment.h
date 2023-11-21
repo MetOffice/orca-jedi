@@ -50,7 +50,7 @@ struct OrcaModelTestEnvironment {
         atlas::initialize();
         eckit::mpi::comm().barrier();
     }
-~OrcaModelTestEnvironment() {
+    ~OrcaModelTestEnvironment() {
         atlas::finalize();
         atlas::mpi::finalize();
     }
