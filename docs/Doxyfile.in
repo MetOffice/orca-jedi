@@ -1,0 +1,8 @@
+PROJECT_NAME           = "orca-jedi"
+
+PROJECT_BRIEF          = JEDI model interface for ORCA-gridded models
+
+OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/doc_doxygen/
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../src/orca-jedi
+RECURSIVE              = YES
+
