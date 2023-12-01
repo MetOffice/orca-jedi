@@ -29,6 +29,9 @@ ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 find_package( atlas 0.29 REQUIRED )
 ecbuild_debug( "   atlas_FEATURES: [${atlas_FEATURES}]" )
 
+find_package( atlas-orca REQUIRED )
+ecbuild_debug( "   atlas_orca_FEATURES: [${atlas_orca_FEATURES}]" )
+
 find_package( oops REQUIRED )
 ecbuild_debug( "   oops_FEATURES : [${oops_FEATURES}]" )
 
