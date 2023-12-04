@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2020-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2023 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -15,6 +12,8 @@
 #include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+
+#include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
 namespace test {
@@ -174,5 +173,5 @@ CASE("test read_vertical_var reads field array view") {
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return eckit::testing::run_tests(argc, argv);
+    return orcamodel::test::run(argc, argv);
 }
