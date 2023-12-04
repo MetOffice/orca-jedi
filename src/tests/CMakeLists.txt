@@ -6,7 +6,7 @@ add_subdirectory(Data)
 ecbuild_add_test( TARGET test_orcajedi_coding_norms
                   TYPE SCRIPT
                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/cpplint.py
-                  ARGS --recursive ${CMAKE_CURRENT_SOURCE_DIR}/../../ )
+                  ARGS --recursive ${CMAKE_CURRENT_SOURCE_DIR}/../ )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ice
                   OMP 1
