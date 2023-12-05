@@ -120,7 +120,6 @@ CASE("test parallel serially distributed reads field array view") {
 }
 
 // Disable this section until jopa-bundle uses a new version of atlas
-/*
 CASE("test parallel domain distributed read_surf_var reads field array view") {
   // NOTE: At this time, atlas-orca is only capable of domain distribution for
   //       ORCA1 and higher resolution
@@ -206,7 +205,7 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
                           atlas::option::levels(3)));
     auto field_view = atlas::array::make_view<double, 2>(field);
 
-    field_reader.read_vertical_var("nav_lev", mesh, field_view);
+    field_reader.read_vertical_var("z", mesh, field_view);
     auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
     auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
@@ -226,7 +225,6 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
     }
   }
 }
-*/
 
 }  // namespace test
 }  // namespace orcamodel

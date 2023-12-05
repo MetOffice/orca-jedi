@@ -2,7 +2,7 @@ Test     : Initial state:
 Test     :  Model state valid at time: 2021-06-28T23:00:00Z
 Test     :     2 variables: sea_surface_height_anomaly, sea_surface_height_anomaly_background_error
 Test     :     atlas field norms:
-Test     :         sea_surface_height_above_anomaly: 1.36263e-03
+Test     :         sea_surface_height_anomaly: 1.36263e-03
 Test     :         sea_surface_height_anomaly_background_error: 6.13705e-04
 
 Test     : Final state:

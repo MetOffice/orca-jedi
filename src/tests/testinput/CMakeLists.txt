@@ -6,6 +6,7 @@ list( APPEND orcajedi_test_input
   hofx_nc_ice.yaml
   hofx_nc_sst.yaml
   hofx_nc_ssh.yaml
+  hofx_nc_ssh_checkerboard.yaml
   hofx3d_nc_sst.yaml
   hofx3d_nc_potm.yaml
   hofx3d_nc_prof_2vars.yaml
