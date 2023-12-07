@@ -18,8 +18,9 @@ model :
     - date: '2018-04-15T00:00:00Z'
       fcstime: 1
       nemo field file: /scratch/tsearle/orca2_seaice_dummy.nc
-window begin: 2018-04-14T21:00:00Z
-window length: P1D
+time window:
+  begin: 2018-04-14T21:00:00Z
+  length: P1D
 observations:
   observers:
   - obs operator:

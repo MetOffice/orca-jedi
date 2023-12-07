@@ -17,8 +17,9 @@ state :
   state variables: [ sea_water_temperature, sea_water_temperature_background_error, depth ]
   nemo field file: /data/users/tsearle/maera/test/eorca12_20210630.nc
   variance field file: /data/users/tsearle/maera/test/eorca12_err_20210630.nc
-window begin: 2021-08-20T00:00:00Z
-window length: P2D
+time window:
+  begin: 2021-08-20T00:00:00Z
+  length: P2D
 observations:
   observers:
   - obs space:
