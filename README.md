@@ -20,7 +20,7 @@ _orca-jedi_ includes executables to calculate model values at observation locati
   * [ecmwf/ecbuild](https://github.com/ecmwf/ecbuild)
   * [ecmwf/eckit](https://github.com/ecmwf/eckit)
   * [JCSDA/oops](https://github.com/JCSDA/oops)
-  * [JCSDA/ufo](https://github.com/JCSDA/oops)
+  * [JCSDA/ufo](https://github.com/JCSDA/ufo)
   * [ecmwf/atlas](https://github.com/ecmwf/atlas)
   * [ecmwf/atlas-orca](https://github.com/ecmwf/atlas-orca)
 
