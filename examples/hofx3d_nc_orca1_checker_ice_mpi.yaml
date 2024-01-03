@@ -1,5 +1,6 @@
-window begin: 2021-06-28T12:00:00Z
-window length: P2D
+time window:
+  begin: 2021-06-28T12:00:00Z
+  length: P2D
 geometry:
   nemo variables:
     - name: ice_area_fraction

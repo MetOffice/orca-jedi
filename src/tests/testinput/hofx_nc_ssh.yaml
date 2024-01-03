@@ -1,6 +1,7 @@
 forecast length : P2D
-window begin: 2021-06-28T23:00:00Z
-window length: P2D
+time window:
+  begin: 2021-06-28T23:00:00Z
+  length: P2D
 geometry :
   nemo variables:
     - name: sea_surface_height_anomaly
