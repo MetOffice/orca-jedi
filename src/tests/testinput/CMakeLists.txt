@@ -1,3 +1,4 @@
+# (C) British Crown Copyright 2023 Met Office
 
 list( APPEND orcajedi_test_input
   basic.yaml

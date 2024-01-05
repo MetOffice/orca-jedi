@@ -1,3 +1,5 @@
+# (C) British Crown Copyright 2023 Met Office
+
 geometry :
   nemo variables:
     - name: ice_area_fraction
