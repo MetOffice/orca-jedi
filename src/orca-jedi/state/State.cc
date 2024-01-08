@@ -235,9 +235,11 @@ double State::norm(const std::string & field_name) const {
     bool has_mv = static_cast<bool>(mv);
     double squares_TP = 0;
     size_t valid_points_TP = 0;
-    atlas_omp_for(atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+    atlas::idx_t num_h_locs = field_view.shape(0);
+    atlas::idx_t num_levels = field_view.shape(1);
+    atlas_omp_for(atlas::idx_t j = 0; j < num_h_locs; ++j) {
       if (!ghost(j)) {
-        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        for (atlas::idx_t k = 0; k < num_levels; ++k) {
           double pointValue = field_view(j, k);
           if (!has_mv || (has_mv && !mv(pointValue))) {
             squares_TP += pointValue*pointValue;
