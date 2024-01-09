@@ -1,3 +1,4 @@
+# (C) British Crown Copyright 2024 Met Office
 
 ############################################################################################
 # orca-jedi
@@ -43,6 +44,12 @@ find_package( nemo-feedback )
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
 
+# check if Doxygen is installed
+find_package(Doxygen)
+ecbuild_add_option( FEATURE ORCA_JEDI_DOCS
+                    DESCRIPTION "orca-jedi documentation"
+                    DEFAULT OFF
+                    REQUIRED_PACKAGES "Doxygen" )
 
 ################################################################################
 # sources
@@ -54,6 +61,8 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/src
                     )
 
 add_subdirectory( src )
+
+add_subdirectory ( docs )
 
 ################################################################################
 # Export and summarize

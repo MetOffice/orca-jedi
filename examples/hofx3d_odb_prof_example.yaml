@@ -1,3 +1,5 @@
+# (C) British Crown Copyright 2024 Met Office
+
 geometry :
   nemo variables:
     - name: depth
@@ -15,8 +17,8 @@ geometry :
 state :
   date: 2021-08-21T00:00:00Z
   state variables: [ sea_water_temperature, sea_water_temperature_background_error, depth ]
-  nemo field file: /data/users/tsearle/maera/test/eorca12_20210630.nc
-  variance field file: /data/users/tsearle/maera/test/eorca12_err_20210630.nc
+  nemo field file: your_example_data/eorca12_20210630.nc
+  variance field file: your_example_data/eorca12_err_20210630.nc
 time window:
   begin: 2021-08-20T00:00:00Z
   length: P2D
@@ -25,7 +27,7 @@ observations:
   - obs space:
       name: Sea Temperature
       obsdatain:
-        obsfile: orca-jedi/src/test/Data/oceansound.odb
+        obsfile: your_example_data/oceansound.odb
         mapping file: ioda/test/testinput/odb_oceansound_name_map.yml
         query file: ioda/test/testinput/iodatest_odb_oceansound_truncate_profiles.yml
         obsgrouping:
@@ -55,7 +57,7 @@ observations:
       where:
       - variable:
           name: MetaData/argo_identifier
-        is_defined:  # only Argo pressure must be converted to depthBelowWaterSurface
+        is_defined:
       assignments:
       - name: DerivedObsValue/depthBelowWaterSurface
         type: float

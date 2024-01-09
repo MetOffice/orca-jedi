@@ -1,3 +1,5 @@
+# (C) British Crown Copyright 2024 Met Office
+
 time window:
   begin: 2021-06-28T12:00:00Z
   length: P2D
@@ -12,8 +14,8 @@ geometry:
 state :
   date: 2021-06-29T12:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: /data/users/frsst/JOPA/example_data/orca1_sic.nc
-  variance field file: /data/users/frsst/JOPA/example_data/orca1_sic_err.nc
+  nemo field file: your_example_data/orca1_sic.nc
+  variance field file: your_example_data/orca1_sic_err.nc
 observations:
   observers:
   - obs space:
@@ -24,7 +26,7 @@ observations:
           type: orca
       name: Sea Ice
       obsdatain:
-        obsfile: /data/users/frsst/JOPA/example_data/ostia_seaice_obs.nc
+        obsfile: your_example_data/ostia_seaice_obs.nc
       obsdataout:
         obsfile: test_hofx_nc_orca1_ice_jopa.nc
       simulated variables: [seaIceFraction]
