@@ -68,44 +68,26 @@ CASE("test serial interpolator") {
 
   int nlocs = 0;
   std::vector<double> lons, lats;
-  //if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-    //lons = std::vector<double>({396.53, 396.53, 396.53});
-    //lons = std::vector<double>({394.53, 396.53, 398.53});
-    //lats = std::vector<double>({30.5114, 31.5114, 32.5114});
-    // just off baja, stick a bunch of points as these look bad in orca12 decomp
-    int nlats = 10;
-    int nlons = 10;
-    // -114 to -94
-    double lonStart = -114;
-    double lonEnd = -94;
-    // 10 to 15
-    double latStart = 10;
-    double latEnd = 15;
-    nlocs = nlats*nlons;
-    lons = std::vector<double>();
-    lats = std::vector<double>();
-    for (int iLon = 0; iLon < nlons; ++iLon) {
-      double lon = lonStart + std::floor<int>((lonEnd - lonStart)*iLon/nlons);
-      for (int iLat = 0; iLat < nlats; ++iLat) {
-        double lat = latStart + std::floor<int>((latEnd - latStart)*iLat/nlats);
-        lons.emplace_back(lon);
-        lats.emplace_back(lat);
-      }
+  // just off baja, stick a bunch of points as these look bad in orca12 decomp
+  int nlats = 10;
+  int nlons = 10;
+  // -114 to -94
+  double lonStart = -114;
+  double lonEnd = -94;
+  // 10 to 15
+  double latStart = 10;
+  double latEnd = 15;
+  nlocs = nlats*nlons;
+  lons = std::vector<double>();
+  lats = std::vector<double>();
+  for (int iLon = 0; iLon < nlons; ++iLon) {
+    double lon = lonStart + std::floor<int>((lonEnd - lonStart)*iLon/nlons);
+    for (int iLat = 0; iLat < nlats; ++iLat) {
+      double lat = latStart + std::floor<int>((latEnd - latStart)*iLat/nlats);
+      lons.emplace_back(lon);
+      lats.emplace_back(lat);
     }
-    //std::generate(lons.begin(), lons.end(), [n =   0]() mutable { return n++; });
-    //std::generate(lats.begin(), lats.end(), [n = -90]() mutable { return n++; });
-  //}
-
-  //std::vector<double> lonstmp, latstmp;
-  //geometry.latlon(latstmp, lonstmp, false);
-  //nlocs = latstmp.size()/10;
-  //if (lonstmp.size() > nlocs) {
-  //  lons.resize(nlocs);
-  //  lons.assign(&lonstmp[lonstmp.size() - nlocs], &lonstmp[lonstmp.size()]);
-  //  lats.resize(nlocs);
-  //  //lats.assign(&latstmp[0], &latstmp[nlocs]);
-  //  lats.assign(&latstmp[lonstmp.size() - nlocs], &latstmp[lonstmp.size()]);
-  //}
+  }
 
   auto rollup_plus = [](const double lon, const double lat) {
     return 1 + atlas::util::function::vortex_rollup(lon, lat, 0.0);
@@ -127,7 +109,7 @@ CASE("test serial interpolator") {
   State state(geometry, stateParams);
 
   SECTION("test interpolator succeeds even with no locations") {
-   Interpolator interpolator(interpolator_conf, geometry, {}, {});
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
   }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
@@ -148,15 +130,11 @@ CASE("test serial interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue<double>();
-    std::vector<double> testvals(2*nlocs,0);
-    //if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-      //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
-      //                                0.69885330268, 0.00010463659, 1.38328833133});
+    std::vector<double> testvals(2*nlocs, 0);
     for (int i = 0; i < nlocs; ++i) {
       testvals[i] = rollup_plus(lons[i], lats[i]);
       testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
     }
-    //}
 
     int errCount = 0;
     for (size_t i=0; i < testvals.size(); ++i) {
@@ -167,37 +145,38 @@ CASE("test serial interpolator") {
                 << " testvals[" << i << "] " << testvals[i] << std::endl;
       ++errCount;
       }
-      //EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
+      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
-    std::cout << "[" << eckit::mpi::comm().rank() << "] errCount: " << errCount << "/" << 2*nlocs << std::endl;
+    std::cout << "[" << eckit::mpi::comm().rank() << "] errCount: "
+              << errCount << "/" << 2*nlocs << std::endl;
   }
-  //SECTION("test interpolator.apply multiple levels") {
-  //  std::vector<double> vals(nlevs*nlocs);
-  //  std::vector<bool> mask(nlevs*nlocs);
-  //  interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
-  //                                     state, mask, vals);
+  //  SECTION("test interpolator.apply multiple levels") {
+  //    std::vector<double> vals(nlevs*nlocs);
+  //    std::vector<bool> mask(nlevs*nlocs);
+  //    interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
+  //                                       state, mask, vals);
 
-  //  double missing_value = util::missingValue<double>();
-  //  std::vector<double> testvals(3*nlocs,0);
-  //  if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-  //    //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
-  //    //                                0.69885330268, 0.00010463659, 1.38328833133,
-  //    //                                0.69885330268, 0.00010463659, 1.38328833133});
-  //    for (int i = 0; i < nlocs; ++i) {
-  //      testvals[i] = rollup_plus(lons[i], lats[i]);
-  //      testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
-  //      testvals[i+2*nlocs] = rollup_plus(lons[i], lats[i]);
+  //    double missing_value = util::missingValue<double>();
+  //    std::vector<double> testvals(3*nlocs,0);
+  //    if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
+  //      //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
+  //      //                                0.69885330268, 0.00010463659, 1.38328833133,
+  //      //                                0.69885330268, 0.00010463659, 1.38328833133});
+  //      for (int i = 0; i < nlocs; ++i) {
+  //        testvals[i] = rollup_plus(lons[i], lats[i]);
+  //        testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
+  //        testvals[i+2*nlocs] = rollup_plus(lons[i], lats[i]);
+  //      }
+  //    }
+
+  //    for (size_t i=0; i < testvals.size(); ++i) {
+  //      //std::cout << "[" << eckit::mpi::comm().rank() << "] lons [" << i << "] " << lons[i]
+  //      //          << " lats[" << i << "] " << lats[i]
+  //      //          << " vals[" << i << "] " << std::setprecision(12) << vals[i]
+  //      //          << " testvals[" << i << "] " << testvals[i] << std::endl;
+  //      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
   //    }
   //  }
-
-  //  for (size_t i=0; i < testvals.size(); ++i) {
-  //    //std::cout << "[" << eckit::mpi::comm().rank() << "] lons [" << i << "] " << lons[i]
-  //    //          << " lats[" << i << "] " << lats[i]
-  //    //          << " vals[" << i << "] " << std::setprecision(12) << vals[i]
-  //    //          << " testvals[" << i << "] " << testvals[i] << std::endl;
-  //    EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
-  //  }
-  //}
 }
 
 CASE("test checkerboard interpolator") {
@@ -236,44 +215,25 @@ CASE("test checkerboard interpolator") {
 
   int nlocs = 0;
   std::vector<double> lons, lats;
-  //if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-    //lons = std::vector<double>({396.53, 396.53, 396.53});
-    //lons = std::vector<double>({394.53, 396.53, 398.53});
-    //lats = std::vector<double>({30.5114, 31.5114, 32.5114});
-    // just off baja, stick a bunch of points as these look bad in orca12 decomp
-    int nlats = 10;
-    int nlons = 10;
-    // -114 to -94
-    double lonStart = -114;
-    double lonEnd = -94;
-    // 10 to 15
-    double latStart = 10;
-    double latEnd = 15;
-    nlocs = nlats*nlons;
-    lons = std::vector<double>();
-    lats = std::vector<double>();
-    for (int iLon = 0; iLon < nlons; ++iLon) {
-      double lon = lonStart + std::floor<int>((lonEnd - lonStart)*iLon/nlons);
-      for (int iLat = 0; iLat < nlats; ++iLat) {
-        double lat = latStart + std::floor<int>((latEnd - latStart)*iLat/nlats);
-        lons.emplace_back(lon);
-        lats.emplace_back(lat);
-      }
+  int nlats = 10;
+  int nlons = 10;
+  // -114 to -94
+  double lonStart = -114;
+  double lonEnd = -94;
+  // 10 to 15
+  double latStart = 10;
+  double latEnd = 15;
+  nlocs = nlats*nlons;
+  lons = std::vector<double>();
+  lats = std::vector<double>();
+  for (int iLon = 0; iLon < nlons; ++iLon) {
+    double lon = lonStart + std::floor<int>((lonEnd - lonStart)*iLon/nlons);
+    for (int iLat = 0; iLat < nlats; ++iLat) {
+      double lat = latStart + std::floor<int>((latEnd - latStart)*iLat/nlats);
+      lons.emplace_back(lon);
+      lats.emplace_back(lat);
     }
-    //std::generate(lons.begin(), lons.end(), [n =   0]() mutable { return n++; });
-    //std::generate(lats.begin(), lats.end(), [n = -90]() mutable { return n++; });
-  //}
-
-  //std::vector<double> lonstmp, latstmp;
-  //geometry.latlon(latstmp, lonstmp, false);
-  //nlocs = latstmp.size()/10;
-  //if (lonstmp.size() > nlocs) {
-  //  lons.resize(nlocs);
-  //  lons.assign(&lonstmp[lonstmp.size() - nlocs], &lonstmp[lonstmp.size()]);
-  //  lats.resize(nlocs);
-  //  //lats.assign(&latstmp[0], &latstmp[nlocs]);
-  //  lats.assign(&latstmp[lonstmp.size() - nlocs], &latstmp[lonstmp.size()]);
-  //}
+  }
 
   auto rollup_plus = [](const double lon, const double lat) {
     return 1 + atlas::util::function::vortex_rollup(lon, lat, 0.0);
@@ -295,7 +255,7 @@ CASE("test checkerboard interpolator") {
   State state(geometry, stateParams);
 
   SECTION("test interpolator succeeds even with no locations") {
-   Interpolator interpolator(interpolator_conf, geometry, {}, {});
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
   }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
@@ -316,15 +276,11 @@ CASE("test checkerboard interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue<double>();
-    std::vector<double> testvals(2*nlocs,0);
-    //if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-      //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
-      //                                0.69885330268, 0.00010463659, 1.38328833133});
+    std::vector<double> testvals(2*nlocs, 0);
     for (int i = 0; i < nlocs; ++i) {
       testvals[i] = rollup_plus(lons[i], lats[i]);
       testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
     }
-    //}
 
     int errCount = 0;
     for (size_t i=0; i < testvals.size(); ++i) {
@@ -335,37 +291,38 @@ CASE("test checkerboard interpolator") {
                 << " testvals[" << i << "] " << testvals[i] << std::endl;
       ++errCount;
       }
-      //EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
+      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
     }
-    std::cout << "[" << eckit::mpi::comm().rank() << "] errCount: " << errCount << "/" << 2*nlocs << std::endl;
+    std::cout << "[" << eckit::mpi::comm().rank() << "] errCount: "
+              << errCount << "/" << 2*nlocs << std::endl;
   }
-  //SECTION("test interpolator.apply multiple levels") {
-  //  std::vector<double> vals(nlevs*nlocs);
-  //  std::vector<bool> mask(nlevs*nlocs);
-  //  interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
-  //                                     state, mask, vals);
+  //  SECTION("test interpolator.apply multiple levels") {
+  //    std::vector<double> vals(nlevs*nlocs);
+  //    std::vector<bool> mask(nlevs*nlocs);
+  //    interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
+  //                                       state, mask, vals);
 
-  //  double missing_value = util::missingValue<double>();
-  //  std::vector<double> testvals(3*nlocs,0);
-  //  if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
-  //    //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
-  //    //                                0.69885330268, 0.00010463659, 1.38328833133,
-  //    //                                0.69885330268, 0.00010463659, 1.38328833133});
-  //    for (int i = 0; i < nlocs; ++i) {
-  //      testvals[i] = rollup_plus(lons[i], lats[i]);
-  //      testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
-  //      testvals[i+2*nlocs] = rollup_plus(lons[i], lats[i]);
+  //    double missing_value = util::missingValue<double>();
+  //    std::vector<double> testvals(3*nlocs,0);
+  //    if (eckit::mpi::comm().rank() == CHECKERBOARD_MED_RANK) {
+  //      //testvals = std::vector<double>({0.69885330268, 0.00010463659, 1.38328833133,
+  //      //                                0.69885330268, 0.00010463659, 1.38328833133,
+  //      //                                0.69885330268, 0.00010463659, 1.38328833133});
+  //      for (int i = 0; i < nlocs; ++i) {
+  //        testvals[i] = rollup_plus(lons[i], lats[i]);
+  //        testvals[i+nlocs] = rollup_plus(lons[i], lats[i]);
+  //        testvals[i+2*nlocs] = rollup_plus(lons[i], lats[i]);
+  //      }
+  //    }
+
+  //    for (size_t i=0; i < testvals.size(); ++i) {
+  //      //std::cout << "[" << eckit::mpi::comm().rank() << "] lons [" << i << "] " << lons[i]
+  //      //          << " lats[" << i << "] " << lats[i]
+  //      //          << " vals[" << i << "] " << std::setprecision(12) << vals[i]
+  //      //          << " testvals[" << i << "] " << testvals[i] << std::endl;
+  //      EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
   //    }
   //  }
-
-  //  for (size_t i=0; i < testvals.size(); ++i) {
-  //    //std::cout << "[" << eckit::mpi::comm().rank() << "] lons [" << i << "] " << lons[i]
-  //    //          << " lats[" << i << "] " << lats[i]
-  //    //          << " vals[" << i << "] " << std::setprecision(12) << vals[i]
-  //    //          << " testvals[" << i << "] " << testvals[i] << std::endl;
-  //    EXPECT(std::abs(vals[i] - testvals[i]) < ATOL);
-  //  }
-  //}
 }
 
 }  // namespace test

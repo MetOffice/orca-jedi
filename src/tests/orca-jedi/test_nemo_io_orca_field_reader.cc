@@ -150,12 +150,12 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
 
   int iy_glb_min = -grid.haloSouth();
   int ix_glb_min = -grid.haloWest();
-  int glbarray_offset  = -( nx_halo_WE * iy_glb_min ) - ix_glb_min;
+  int glbarray_offset  = -(nx_halo_WE * iy_glb_min) - ix_glb_min;
   int glbarray_jstride = nx_halo_WE;
 
   auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
-  for (size_t i = 0; i<mesh.nodes().size(); ++i) {
+  for (size_t i = 0; i < mesh.nodes().size(); ++i) {
     if (ghost(i)) continue;
     int orca_i = ij(i, 0);
     int orca_j = ij(i, 1);
@@ -183,7 +183,7 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
     std::vector<double> raw_data;
     for (int k =0; k <3; k++) {
       raw_data = field_reader.read_var_slice("votemper", 0, k);
-      for (int i = 0; i<field_view.shape(0); ++i) {
+      for (int i = 0; i < field_view.shape(0); ++i) {
         if (ghost(i)) continue;
         int orca_i = ij(i, 0);
         int orca_j = ij(i, 1);
@@ -209,9 +209,9 @@ CASE("test parallel domain distributed read_surf_var reads field array view") {
     auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
     auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
-    std::vector<double> levels{0,10,100};
+    std::vector<double> levels{0, 10, 100};
     for (int k =0; k <3; k++) {
-      for (int i = 0; i<field_view.shape(0); ++i) {
+      for (int i = 0; i < field_view.shape(0); ++i) {
         if (ghost(i)) continue;
         if (levels[k] != field_view(i, k)) {
             std::cout << "mismatch: "
