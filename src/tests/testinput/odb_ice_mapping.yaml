@@ -1,3 +1,5 @@
+# (C) British Crown Copyright 2024 Met Office
+
 varno-independent columns:
   - name: "MetaData/aapp_bennartz_index"
     source: "aapp_bennartz_index"
