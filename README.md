@@ -71,7 +71,10 @@ OOPS_TRACE=true
 ## Authors
 
 The current lead maintainer is [@twsearle](https://github.com/twsearle) along with a large amount of help from Met Office contributors (see the "Contributors" page on github).
+## Contributing
+
+By contributing you agree to the Contributors License Agreement (CLA) contained in the root directory of the project. Please review this, and if you are able to make a contribution make an issue or pull request for your proposed change. All pull requests should conform to the working practises and be linked to an issue, unless a minor bug fix.
 
 ## Working practices
 
-Please see the [JEDI working principles](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/working-practices/index.html) for current working practises. There are also templates for issues and PRs should you wish to contribute.
+Please see the [JEDI working principles](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/working-practices/index.html) for current working practises.
