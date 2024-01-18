@@ -7,6 +7,7 @@
 
 #include "oops/util/DateTime.h"
 
+#include "atlas/parallel/mpi/mpi.h"
 #include "atlas/array.h"
 #include "atlas/util/Config.h"
 #include "atlas/functionspace/NodeColumns.h"
@@ -20,11 +21,13 @@
 #include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+#include "orca-jedi/nemo_io/OrcaIndex.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
 namespace test {
+
 
 //-----------------------------------------------------------------------------
 

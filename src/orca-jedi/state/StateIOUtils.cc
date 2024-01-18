@@ -15,7 +15,7 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/nemo_io/NemoFieldReader.h"
+#include "orca-jedi/nemo_io/ReadServer.h"
 #include "orca-jedi/nemo_io/NemoFieldWriter.h"
 
 #define NEMO_FILL_TOL 1e-6
@@ -43,12 +43,12 @@ void readFieldsFromFile(
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
-    NemoFieldReader nemo_file(nemo_field_path);
+    ReadServer nemo_reader(nemo_field_path, geom.mesh());
 
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
     // the field file
-    const size_t time_indx = nemo_file.get_nearest_datetime_index(valid_date);
+    const size_t time_indx = nemo_reader.get_nearest_datetime_index(valid_date);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: time_indx "
                        << time_indx << std::endl;
 
@@ -71,15 +71,12 @@ void readFieldsFromFile(
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
         auto field_view = atlas::array::make_view<double, 2>(field);
-        if (varCoordTypeMap[fieldName] == "surface") {
-          nemo_file.read_surf_var(nemoName, geom.mesh(), time_indx, field_view);
-        } else if (varCoordTypeMap[fieldName] == "vertical") {
-          nemo_file.read_vertical_var(nemoName, geom.mesh(), field_view);
+        if (varCoordTypeMap[fieldName] == "vertical") {
+          nemo_reader.read_vertical_var(nemoName, field_view);
         } else {
-          nemo_file.read_volume_var(nemoName, geom.mesh(), time_indx,
-              field_view);
+          nemo_reader.read_var(nemoName, time_indx, field_view);
         }
-        auto missing_value = nemo_file.read_fillvalue<double>(nemoName);
+        auto missing_value = nemo_reader.read_fillvalue<double>(nemoName);
         field.metadata().set("missing_value", missing_value);
         field.metadata().set("missing_value_type", "approximately-equals");
         field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
