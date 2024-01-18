@@ -184,7 +184,7 @@ CASE("test checkerboard interpolator") {
   eckit::LocalConfiguration config;
   config.set("grid name", "eORCA12_T");
   config.set("number levels", nlevs);
-  config.set("source mesh halo", 1);
+  config.set("source mesh halo", 0);
   config.set("partitioner", "checkerboard");
 
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);

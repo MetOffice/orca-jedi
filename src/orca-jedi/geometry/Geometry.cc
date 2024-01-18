@@ -47,7 +47,7 @@ Geometry::Geometry(const eckit::Configuration & config,
                       grid_(config.getString("grid name"))
 {
     params_.validateAndDeserialize(config);
-    int64_t halo = params_.sourceMeshHalo.value().value_or(0);
+    int64_t halo = params_.sourceMeshHalo.value();
     auto meshgen_config = grid_.meshgenerator()
                           | atlas::option::halo(halo);
 

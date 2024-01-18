@@ -36,13 +36,17 @@ class OrcaGeometryParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> gridName
     {"grid name", this};
   oops::RequiredParameter<int> nLevels {"number levels", this};
-  oops::OptionalParameter<int> sourceMeshHalo {"source mesh halo", this};
+  oops::Parameter<int> sourceMeshHalo {"source mesh halo",
+    "Size of the MPI halo when using a domain-distributed geometry."
+      " The default is 0 (no MPI halo)",
+    0,
+    this};
   oops::Parameter<std::string> partitioner {
-     "partitioner",
-     "Name of the atlas partitioner to use to MPI distribute the model data"
-     " The default will not distribute the data ('serial').",
-     "serial",
-     this};
+    "partitioner",
+      "Name of the atlas partitioner to use to MPI distribute the model data"
+        " The default will not distribute the data ('serial').",
+      "serial",
+      this};
 };
 
 }  //  namespace orcamodel
