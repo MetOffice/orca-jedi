@@ -1,5 +1,3 @@
-# (C) British Crown Copyright 2024 Met Office
-
 forecast length : P2D
 time window:
   begin: 2021-06-28T23:00:00Z
@@ -15,7 +13,7 @@ geometry :
       variable type: background variance
   grid name: ORCA2_T
   number levels: 1
-  partitioner: serial
+  partitioner: checkerboard
 initial condition :
   date: 2021-06-28T23:00:00Z
   state variables:
@@ -50,7 +48,7 @@ observations:
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/hofx_nc_ssh_jopa.nc
+          obsfile: testoutput/hofx_nc_ssh_checkerboard_jopa.nc
       simulated variables: [seaSurfaceHeightAnomaly]
     get values:
       atlas-interpolator:

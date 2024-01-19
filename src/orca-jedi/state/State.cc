@@ -235,9 +235,11 @@ double State::norm(const std::string & field_name) const {
     bool has_mv = static_cast<bool>(mv);
     double squares_TP = 0;
     size_t valid_points_TP = 0;
-    atlas_omp_for(atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+    atlas::idx_t num_h_locs = field_view.shape(0);
+    atlas::idx_t num_levels = field_view.shape(1);
+    atlas_omp_for(atlas::idx_t j = 0; j < num_h_locs; ++j) {
       if (!ghost(j)) {
-        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        for (atlas::idx_t k = 0; k < num_levels; ++k) {
           double pointValue = field_view(j, k);
           if (!has_mv || (has_mv && !mv(pointValue))) {
             squares_TP += pointValue*pointValue;
@@ -251,12 +253,28 @@ double State::norm(const std::string & field_name) const {
         valid_points += valid_points_TP;
     }
   }
-  // prevent divide by zero when there are no valid model points on the
-  // partition
-  if (!valid_points)
-    return 0;
 
-  return sqrt(squares)/valid_points;
+  // serial distributions have the entire model grid on each MPI rank
+  if (geom_->distributionType() == "serial") {
+    double local_norm = 0;
+    // prevent divide by zero when there are no valid model points on this
+    // MPI rank
+    if (valid_points) {
+      local_norm = sqrt(squares)/valid_points;
+    }
+    return local_norm;
+  }
+
+
+  // Accumulate values across MPI ranks.
+  geom_->getComm().allReduceInPlace(squares, eckit::mpi::sum());
+  geom_->getComm().allReduceInPlace(valid_points, eckit::mpi::sum());
+
+  if (valid_points) {
+    return sqrt(squares)/valid_points;
+  }
+
+  return 0;
 }
 
 }  // namespace orcamodel

@@ -47,14 +47,14 @@ Geometry::Geometry(const eckit::Configuration & config,
                       grid_(config.getString("grid name"))
 {
     params_.validateAndDeserialize(config);
-    int64_t halo = params_.sourceMeshHalo.value().value_or(0);
+    int64_t halo = params_.sourceMeshHalo.value();
     auto meshgen_config = grid_.meshgenerator()
                           | atlas::option::halo(halo);
 
     atlas::MeshGenerator meshgen(meshgen_config);
     auto partitioner_config = grid_.partitioner();
     partitioner_config.set("type",
-        params_.partitioner.value().value_or("serial"));
+        params_.partitioner.value());
     partitioner_ = atlas::grid::Partitioner(partitioner_config);
     mesh_ = meshgen.generate(grid_, partitioner_);
     funcSpace_ = atlas::functionspace::NodeColumns(

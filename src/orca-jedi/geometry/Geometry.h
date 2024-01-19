@@ -64,7 +64,7 @@ class Geometry : public util::Printable {
     std::string variable_type) const;
   bool levelsAreTopDown() const {return true;}
   std::string distributionType() const {
-      return params_.partitioner.value().value_or("serial");}
+      return params_.partitioner.value();}
 
  private:
   void print(std::ostream &) const;
