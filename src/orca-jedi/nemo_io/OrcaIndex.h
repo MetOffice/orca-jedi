@@ -2,6 +2,8 @@
  * (C) British Crown Copyright 2024 Met Office
  */
 
+#pragma once
+
 #include <algorithm>
 #include <sstream>
 #include <limits>

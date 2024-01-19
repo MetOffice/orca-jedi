@@ -129,14 +129,12 @@ CASE("test parallel serially distributed reads field array view") {
     }
   }
   SECTION("get nearest datetime index") {
-
     util::DateTime test_datetime{"1970-01-01T00:00:00Z"};
     size_t index = read_server.get_nearest_datetime_index(test_datetime);
     EXPECT_EQUAL(index, 0);
   }
 
   SECTION("get field _FillValue") {
-
     auto missing_value = read_server.read_fillvalue<double>("iiceconc");
     EXPECT_EQUAL(missing_value, -32768.);
 

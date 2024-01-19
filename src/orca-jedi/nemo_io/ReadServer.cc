@@ -5,6 +5,9 @@
 
 
 #include "orca-jedi/nemo_io/ReadServer.h"
+#include <string>
+#include <vector>
+#include <memory>
 
 #include "eckit/exception/Exceptions.h"
 
@@ -21,8 +24,7 @@ ReadServer::ReadServer(const eckit::PathName& file_path, const atlas::Mesh& mesh
 void ReadServer::read_var_on_root(const std::string& var_name,
               const size_t t_index,
               const size_t z_index,
-              std::vector<double>& buffer
-    ) const {
+              std::vector<double>& buffer) const {
   size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
   if (myrank == mpiroot) {
     buffer = reader_->read_var_slice(var_name, t_index, z_index);
@@ -33,8 +35,7 @@ void ReadServer::read_var_on_root(const std::string& var_name,
 
 void ReadServer::read_vertical_var_on_root(const std::string& var_name,
               const size_t n_levels,
-              std::vector<double>& buffer
-    ) const {
+              std::vector<double>& buffer) const {
   size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
   if (myrank == mpiroot) {
     buffer = reader_->read_vertical_var(var_name, n_levels);
@@ -46,7 +47,6 @@ void ReadServer::read_vertical_var_on_root(const std::string& var_name,
 void ReadServer::fill_field(const std::vector<double>& buffer,
               const size_t z_index,
       atlas::array::ArrayView<double, 2>& field_view) const {
-
     auto ghost = atlas::array::make_view<int32_t, 1>(this->mesh_.nodes().ghost());
     auto ij = atlas::array::make_view<int32_t, 2>(this->mesh_.nodes().field("ij"));
     const size_t numNodes = field_view.shape(0);
@@ -61,7 +61,6 @@ void ReadServer::fill_field(const std::vector<double>& buffer,
 
 void ReadServer::fill_vertical_field(const std::vector<double>& buffer,
       atlas::array::ArrayView<double, 2>& field_view) const {
-
     auto ghost = atlas::array::make_view<int32_t, 1>(this->mesh_.nodes().ghost());
     const size_t num_nodes = field_view.shape(0);
     const size_t num_levels = field_view.shape(1);
@@ -92,7 +91,7 @@ void ReadServer::read_var(const std::string& var_name,
     // mpi distribute that data out to all processors
     atlas::mpi::comm().broadcast(&buffer.front(), size, mpiroot);
 
-    // each processor fills out its field_view from the buffer 
+    // each processor fills out its field_view from the buffer
     this->fill_field(buffer, iLev, field_view);
   }
 }
@@ -110,11 +109,10 @@ void ReadServer::read_vertical_var(const std::string& var_name,
   // mpi distribute that data out to all processors
   atlas::mpi::comm().broadcast(&buffer.front(), size, mpiroot);
 
-  // each processor fills out its field_view from the buffer 
+  // each processor fills out its field_view from the buffer
   this->fill_vertical_field(buffer, field_view);
 }
 size_t ReadServer::get_nearest_datetime_index(const util::DateTime& datetime) const {
-
   size_t t_index;
 
   if (myrank == mpiroot) {
@@ -141,4 +139,4 @@ template<class T> T ReadServer::read_fillvalue(const std::string& name) const {
 template int ReadServer::read_fillvalue<int>(const std::string& name) const;
 template float ReadServer::read_fillvalue<float>(const std::string& name) const;
 template double ReadServer::read_fillvalue<double>(const std::string& name) const;
-}
+}  // namespace orcamodel

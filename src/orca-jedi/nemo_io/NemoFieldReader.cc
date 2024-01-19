@@ -3,12 +3,11 @@
  */
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
-#include "orca-jedi/nemo_io/OrcaIndex.h"
 
 #include <netcdf>
 // Using Lynton Appel's netcdf-cxx4 from
 // https://github.com/Unidata/netcdf-cxx4
-
+//
 #include <algorithm>
 #include <sstream>
 #include <limits>
@@ -23,6 +22,7 @@
 
 #include "atlas/field.h"
 #include "atlas-orca/grid/OrcaGrid.h"
+#include "orca-jedi/nemo_io/OrcaIndex.h"
 
 namespace orcamodel {
 

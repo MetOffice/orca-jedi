@@ -2,6 +2,11 @@
  * (C) British Crown Copyright 2024 Met Office
  */
 
+#pragma once
+
+#include <string>
+#include <vector>
+#include <memory>
 
 #include "oops/util/DateTime.h"
 #include "atlas/parallel/mpi/mpi.h"
@@ -17,7 +22,7 @@
 
 namespace orcamodel {
 class ReadServer {
-public:
+ public:
   explicit ReadServer(const eckit::PathName& file_path,
       const atlas::Mesh& mesh);
   ReadServer(ReadServer &&) = default;
@@ -32,20 +37,17 @@ public:
   size_t get_nearest_datetime_index(const util::DateTime& datetime) const;
   template<class T> T read_fillvalue(const std::string& nemo_var_name) const;
 
-private:
+ private:
   void read_var_on_root(const std::string& var_name,
       const size_t t_index,
       const size_t z_index,
-      std::vector<double>& buffer
-      ) const;
+      std::vector<double>& buffer) const;
   void read_vertical_var_on_root(const std::string& var_name,
       const size_t n_levels,
-      std::vector<double>& buffer
-      ) const;
+      std::vector<double>& buffer) const;
   void fill_field(const std::vector<double>& buffer,
       const size_t z_index,
-      atlas::array::ArrayView<double, 2>& field_view
-      ) const;
+      atlas::array::ArrayView<double, 2>& field_view) const;
   void fill_vertical_field(const std::vector<double>& buffer,
       atlas::array::ArrayView<double, 2>& field_view) const;
   const size_t mpiroot = 0;
