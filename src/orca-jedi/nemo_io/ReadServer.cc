@@ -21,6 +21,11 @@ ReadServer::ReadServer(const eckit::PathName& file_path, const atlas::Mesh& mesh
   }
 }
 
+/// \brief Read in a 2D horizontal slice of variable data on the root processor only
+/// \param var_name
+/// \param t_index Index of the time slice.
+/// \param z_index Index of the vertical slice.
+/// \param buffer Vector to store the data.
 void ReadServer::read_var_on_root(const std::string& var_name,
               const size_t t_index,
               const size_t z_index,
@@ -33,6 +38,10 @@ void ReadServer::read_var_on_root(const std::string& var_name,
   }
 }
 
+/// \brief Read 1D vertical variable data on the root processor only
+/// \param var_name NetCDF name of the vertical variable.
+/// \param n_levels Number of levels to read from the file
+/// \param buffer Vector to store the data.
 void ReadServer::read_vertical_var_on_root(const std::string& var_name,
               const size_t n_levels,
               std::vector<double>& buffer) const {
@@ -44,6 +53,10 @@ void ReadServer::read_vertical_var_on_root(const std::string& var_name,
   }
 }
 
+/// \brief Move data from a buffer into an atlas arrayView.
+/// \param buffer Vector of data to read
+/// \param z_index Index of the vertical slice.
+/// \param field_view View into the atlas field to store the data.
 void ReadServer::fill_field(const std::vector<double>& buffer,
               const size_t z_index,
       atlas::array::ArrayView<double, 2>& field_view) const {
@@ -59,6 +72,9 @@ void ReadServer::fill_field(const std::vector<double>& buffer,
     }
 }
 
+/// \brief Move vertical data from a buffer into an atlas arrayView.
+/// \param buffer Vector of data to read
+/// \param field_view View into the atlas field to store the data.
 void ReadServer::fill_vertical_field(const std::vector<double>& buffer,
       atlas::array::ArrayView<double, 2>& field_view) const {
     auto ghost = atlas::array::make_view<int32_t, 1>(this->mesh_.nodes().ghost());
@@ -76,6 +92,10 @@ void ReadServer::fill_vertical_field(const std::vector<double>& buffer,
     }
 }
 
+/// \brief Read a NetCDF variable into an atlas field.
+/// \param var_name The netCDF name of the variable to read.
+/// \param t_index The time index for the data to read.
+/// \param field_view View into the atlas field to store the data.
 void ReadServer::read_var(const std::string& var_name,
     const size_t t_index,
     atlas::array::ArrayView<double, 2>& field_view) {
@@ -96,6 +116,10 @@ void ReadServer::read_var(const std::string& var_name,
     this->fill_field(buffer, iLev, field_view);
   }
 }
+
+/// \brief Read a vertical variable into an atlas field.
+/// \param var_name The netCDF name of the variable to read.
+/// \param field_view View into the atlas field to store the data.
 void ReadServer::read_vertical_var(const std::string& var_name,
     atlas::array::ArrayView<double, 2>& field_view) {
 
@@ -113,6 +137,10 @@ void ReadServer::read_vertical_var(const std::string& var_name,
   // each processor fills out its field_view from the buffer
   this->fill_vertical_field(buffer, field_view);
 }
+
+/// \brief Find the nearest datetime index to a datetime on the MPI root only.
+/// \param datetime Search for the index of the time slice in the file nearest this datetime.
+/// \return The index of the nearest time slice in the file.
 size_t ReadServer::get_nearest_datetime_index(const util::DateTime& datetime) const {
   size_t t_index;
 
@@ -125,6 +153,11 @@ size_t ReadServer::get_nearest_datetime_index(const util::DateTime& datetime) co
 
   return t_index;
 }
+
+/// \brief Read the _FillValue for a variable, defaulting to the minimum value
+/// for the datatype. Read on the MPI root process only.
+/// \param name Name of the netCDF variable containing the _FillValue attribute to retrieve.
+/// \return The fill value for this netCDF variable.
 template<class T> T ReadServer::read_fillvalue(const std::string& name) const {
   T fillvalue;
 

@@ -17,6 +17,7 @@
 
 namespace orcamodel {
 
+/// \brief Indexer into a 1D array of an ORCA model field, match each point to the corresponding point in the atlas-orca ij space.
 struct OrcaIndex {
     int32_t ix_glb_max;
     int32_t iy_glb_max;
@@ -40,6 +41,10 @@ struct OrcaIndex {
         glbarray_jstride = nx_halo_WE;
     }
 
+    /// \brief Index of a 1D array corresponding to point i, j 
+    /// \param i
+    /// \param j
+    /// \return index of a matching 1D array
     int64_t operator()(const int i, const int j) const {
         ATLAS_ASSERT(i <= ix_glb_max,
             std::to_string(i) + " > " + std::to_string(ix_glb_max));

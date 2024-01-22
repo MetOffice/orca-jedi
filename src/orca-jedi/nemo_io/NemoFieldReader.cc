@@ -27,6 +27,11 @@ namespace orcamodel {
 
 namespace {
 
+/// \brief Search the netCDF file for a dimension matching a name from a list of possible names.
+/// \param ncFile The netCDF file.
+/// \param check_dim_for_dimvar Set to true to ensure the dimension has a corresponding dimension variable.
+/// \param possible_names A vector of all possible names for the variable.
+/// \return The dimension name.
 std::string find_nc_var_name(const netCDF::NcFile& ncFile,
     const bool check_dim_for_dimvar,
     const std::vector<std::string>& possible_names) {
@@ -86,6 +91,9 @@ NemoFieldReader::NemoFieldReader(const eckit::PathName& filename)
   read_datetimes();
 }
 
+/// \brief Read the dimension size for a given netCDF dimension specified by name
+/// \param name The name of the netCDF dimension
+/// \return size The size
 size_t NemoFieldReader::read_dim_size(const std::string& name) const {
   auto dim = ncFile->getDim(name);
   if (dim.isNull()) {
@@ -101,7 +109,7 @@ size_t NemoFieldReader::read_dim_size(const std::string& name) const {
   return dim.getSize();
 }
 
-/// \brief retrieve the datetime for each time index in file.
+/// \brief Update the datetimes_ in the object to contain times for each time index in file.
 void NemoFieldReader::read_datetimes() {
   // read time indices from file
   size_t n_times = read_dim_size(time_dimvar_name_);
@@ -170,6 +178,8 @@ void NemoFieldReader::read_datetimes() {
 
 /// \brief Read the _FillValue for a variable, defaulting to the minimum value
 /// for the datatype.
+/// \param name Name of the netCDF variable containing the _FillValue attribute to retrieve.
+/// \return The fill value for this netCDF variable
 template<typename T> T NemoFieldReader::read_fillvalue(const std::string& name) const {
   netCDF::NcVar nc_var = ncFile->getVar(name);
   if (nc_var.isNull()) {
@@ -206,6 +216,8 @@ template double NemoFieldReader::read_fillvalue<double>(
 
 /// \brief get the time dimension index corresponding to the nearest datetime
 /// to a target datetime.
+/// \param tgt_datetime Search for the index of the time slice in the file nearest this datetime
+/// \return The index of the nearest time slice in the file
 size_t NemoFieldReader::get_nearest_datetime_index(
     const util::DateTime& tgt_datetime) const {
   int64_t time_diff = INT64_MAX;
@@ -223,6 +235,8 @@ size_t NemoFieldReader::get_nearest_datetime_index(
   return indx;
 }
 
+/// \brief Read the latitude longitude locations of all points in a NEMO field file
+/// \return A vector of XY points of all nodes in the field.
 std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
   try {
     size_t nx = read_dim_size("x");
@@ -271,6 +285,11 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
   }
 }
 
+/// \brief Read all data for a given variable at a level and time.
+/// \param varname The name of the variable.
+/// \param t_indx The time index of the slice.
+/// \param z_indx The vertical index of the slice.
+/// \return a vector of the variable data.
 std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) const {
   oops::Log::trace() << "orcamodel::NemoFieldReader::read_var_slice"
@@ -313,6 +332,10 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
   }
 }
 
+/// \brief Read a 1D variable containing level depth information.
+/// \param varname The name of the variable.
+/// \param n_levels The number of levels to read (beginning from the surface).
+/// \return a vector of the depth values.
 std::vector<double> NemoFieldReader::read_vertical_var(
     const std::string& varname,
     const size_t nlevels) const {
