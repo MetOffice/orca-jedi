@@ -18,8 +18,6 @@
 
 #include "atlas/runtime/Exception.h"
 #include "atlas/util/Point.h"
-#include "atlas/field.h"
-#include "atlas/mesh.h"
 
 namespace orcamodel {
 

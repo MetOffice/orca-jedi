@@ -29,7 +29,8 @@ namespace {
 
 /// \brief Search the netCDF file for a dimension matching a name from a list of possible names.
 /// \param ncFile The netCDF file.
-/// \param check_dim_for_dimvar Set to true to ensure the dimension has a corresponding dimension variable.
+/// \param check_dim_for_dimvar Set to true to ensure the dimension has
+///        a corresponding dimension variable.
 /// \param possible_names A vector of all possible names for the variable.
 /// \return The dimension name.
 std::string find_nc_var_name(const netCDF::NcFile& ncFile,
