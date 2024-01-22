@@ -20,7 +20,6 @@
 #include "atlas/util/Point.h"
 #include "atlas/field.h"
 #include "atlas/mesh.h"
-#include "atlas/array/ArrayView.h"
 
 namespace orcamodel {
 
@@ -40,20 +39,6 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
       const size_t t_indx, const size_t z_indx) const;
   std::vector<double> read_vertical_var(const std::string& varname,
       const size_t nlevels) const;
-  void read_surf_var(const std::string& varname, const size_t t_indx,
-      atlas::array::ArrayView<double, 2>& field_view) const;
-  void read_volume_var(const std::string& varname, const size_t t_indx,
-      atlas::array::ArrayView<double, 2>& field_view) const;
-  void read_vertical_var(const std::string& varname,
-      atlas::array::ArrayView<double, 2>& field_view) const;
-  void read_vertical_var(const std::string& varname, const atlas::Mesh& mesh,
-      atlas::array::ArrayView<double, 2>& field_view) const;
-
-  void read_surf_var(const std::string& varname, const atlas::Mesh& mesh,
-      const size_t t_indx, atlas::array::ArrayView<double, 2>& field_view) const;
-  void read_volume_var(const std::string& varname,
-     const atlas::Mesh& mesh, const size_t t_indx,
-     atlas::array::ArrayView<double, 2>& field_view) const;
 
  private:
   NemoFieldReader() : ncFile() {}

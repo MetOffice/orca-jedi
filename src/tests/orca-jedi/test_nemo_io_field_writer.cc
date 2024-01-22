@@ -99,24 +99,11 @@ CASE("test parallel serially distributed write field array views") {
   SECTION("depth field matches with data in memory") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
-      atlas::Field depth_field(funcSpace.createField<double>(
-                            atlas::option::name("depth") |
-                            atlas::option::levels(3)));
-      auto depth_fv = atlas::array::make_view<double, 2>(temp_field);
+      auto vert_levels = field_reader.read_vertical_var("z", 3);
 
-      field_reader.read_vertical_var("z", depth_fv);
-      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
-        if (ghost(iNode)) continue;
-        EXPECT_EQUAL(depth_fv(iNode, 0), 1);
-      }
-      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
-        if (ghost(iNode)) continue;
-        EXPECT_EQUAL(depth_fv(iNode, 1), 2);
-      }
-      for (atlas::idx_t iNode = 0; iNode < temp_fv.shape(0); ++iNode) {
-        if (ghost(iNode)) continue;
-        EXPECT_EQUAL(depth_fv(iNode, 2), 3);
-      }
+      EXPECT_EQUAL(vert_levels[0], 1);
+      EXPECT_EQUAL(vert_levels[1], 2);
+      EXPECT_EQUAL(vert_levels[2], 3);
     }
   }
 

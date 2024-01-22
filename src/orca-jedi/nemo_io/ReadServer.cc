@@ -51,7 +51,7 @@ void ReadServer::fill_field(const std::vector<double>& buffer,
     auto ij = atlas::array::make_view<int32_t, 2>(this->mesh_.nodes().field("ij"));
     const size_t numNodes = field_view.shape(0);
     // "ReadServer buffer size does not equal the number of horizontal nodes in the field_view"
-    assert(numNodes == buffer.size());
+    assert(numNodes <= buffer.size());
     for (size_t inode = 0; inode < numNodes; ++inode) {
       if (ghost(inode)) continue;
       const int64_t ibuf = index_glbarray_(ij(inode, 0), ij(inode, 1));
@@ -66,7 +66,8 @@ void ReadServer::fill_vertical_field(const std::vector<double>& buffer,
     const size_t num_levels = field_view.shape(1);
     // "ReadServer buffer size does not equal the number of levels in the field_view"
     assert(num_levels <= buffer.size());
-    // Store the data in an atlas 3D field - inefficient but flexible
+
+    // even for 1D depths, store the data in an atlas 3D field - inefficient but flexible
     for (size_t inode = 0; inode < num_nodes; ++inode) {
       for (size_t k = 0; k < num_levels; ++k) {
         if (ghost(inode)) continue;
