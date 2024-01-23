@@ -100,7 +100,7 @@ observations:
       where:
       - variable:
           name: ObsValue/seaIceFraction
-        is_not_defined:
+        value: is_not_valid
       actions:
       - name: set
         flag: FinalReject
@@ -112,7 +112,7 @@ observations:
       where:
       - variable:
           name: HofX/seaIceFraction
-        is_not_defined:
+        value: is_not_valid
       actions:
       - name: set
         flag: FinalReject
