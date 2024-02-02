@@ -103,9 +103,9 @@ State::State(const Geometry & resol, const State & other)
 State::State(const oops::Variables & variables, const State & other)
   : State(other) {
   eckit::LocalConfiguration change_config;
-  VariableChange change(change_config, geom_);
+  VariableChange change(change_config, *geom_);
   change.changeVar(*this, variables);
-  Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
+  oops::Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
 }
 
 State::State(const State & other)
@@ -123,18 +123,20 @@ State::~State() {
 
 void State::subsetFieldSet(const oops::Variables & variables) {
   atlas::FieldSet subset;
-  for (auto & variable : variables) {
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
     if (!stateFields_.has(variable)) {
       throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
-          + variable.name() + "' does not appear in superset.");
+          + variable + "' does not appear in superset.");
     }
-    subset.add(stateFields_[variable.name()]);
+    subset.add(stateFields_[variable]);
   }
 
   stateFields_.clear();
 
-  for (auto & variable : variables) {
-    stateFields_.add(subset[variable.name()]);
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
+    stateFields_.add(subset[variable]);
   }
   vars_ = variables;
 }

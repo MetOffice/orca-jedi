@@ -80,9 +80,10 @@ CASE("test basic state") {
     util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
 
-    State state_copy(state, {{"sea_ice_area_fraction"}, channels)});
+    State state_copy(oops::Variables({"sea_ice_area_fraction"}, channels), state);
 
-    EXPECT_THROWS_AS(State(state, {{"sea_ice_area_fraction"}, channels)}, eckit::BadValue);
+    EXPECT_THROWS_AS(State(oops::Variables({"NOT_IN_SRC_STATE"}, channels), state),
+        eckit::BadValue);
   }
 
   SECTION("test constructor from config analytic initialisation") {
