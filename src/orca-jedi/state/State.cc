@@ -102,11 +102,10 @@ State::State(const Geometry & resol, const State & other)
 
 State::State(const oops::Variables & variables, const State & other)
   : State(other) {
-    eckit::LocalConfiguration change_config;
-    VariableChange change(change_config, geom_);
-    change.changeVar(*this, variables);
-    Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
-  }
+  eckit::LocalConfiguration change_config;
+  VariableChange change(change_config, geom_);
+  change.changeVar(*this, variables);
+  Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
 }
 
 State::State(const State & other)
@@ -305,5 +304,4 @@ double State::norm(const std::string & field_name) const {
 
   return 0;
 }
-
 }  // namespace orcamodel
