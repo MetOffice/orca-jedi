@@ -61,6 +61,7 @@ class State : public util::Printable,
         const eckit::Configuration &);
   State(const Geometry &, const State &);
   State(const State &);
+  State(const oops::Variables &, const State &);
   virtual ~State();
 
   State & operator=(const State &);
@@ -99,6 +100,7 @@ class State : public util::Printable,
 
   const atlas::FieldSet & stateFields() const {return stateFields_;}
   atlas::FieldSet & stateFields() {return stateFields_;}
+  void subsetFieldSet(const oops::Variables & variables);
 
   const oops::Variables & variables() const {return vars_;}
   oops::Variables & variables() {return vars_;}

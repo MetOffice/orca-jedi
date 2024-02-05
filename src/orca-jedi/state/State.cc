@@ -36,6 +36,7 @@
 #include "ufo/GeoVaLs.h"
 
 #include "orca-jedi/geometry/Geometry.h"
+#include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
@@ -99,6 +100,14 @@ State::State(const Geometry & resol, const State & other)
                      << " copied as there is no change" << std::endl;
 }
 
+State::State(const oops::Variables & variables, const State & other)
+  : State(other) {
+  eckit::LocalConfiguration change_config;
+  VariableChange change(change_config, *geom_);
+  change.changeVar(*this, variables);
+  oops::Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
+}
+
 State::State(const State & other)
   : geom_(other.geom_)
     , params_(other.params_)
@@ -111,6 +120,27 @@ State::State(const State & other)
 State::~State() {
   oops::Log::trace() << "State(ORCA)::State destructed." << std::endl;
 }
+
+void State::subsetFieldSet(const oops::Variables & variables) {
+  atlas::FieldSet subset;
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
+    if (!stateFields_.has(variable)) {
+      throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
+          + variable + "' does not appear in superset.");
+    }
+    subset.add(stateFields_[variable]);
+  }
+
+  stateFields_.clear();
+
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
+    stateFields_.add(subset[variable]);
+  }
+  vars_ = variables;
+}
+
 
 // Basic operators
 
@@ -276,5 +306,4 @@ double State::norm(const std::string & field_name) const {
 
   return 0;
 }
-
 }  // namespace orcamodel
