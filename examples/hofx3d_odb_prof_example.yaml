@@ -42,7 +42,7 @@ observations:
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
-        non_linear: missing-if-all-missing
+        non_linear: missing-if-all-missing-real32
     obs operator:
       name: VertInterp
       observation alias file: testinput/test_name_map.yaml

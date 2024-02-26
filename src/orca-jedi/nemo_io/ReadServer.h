@@ -19,25 +19,33 @@
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
 #include "eckit/exception/Exceptions.h"
+#include "eckit/log/Timer.h"
+#include "eckit/system/ResourceUsage.h"
 
 namespace orcamodel {
 class ReadServer {
  public:
-  explicit ReadServer(const eckit::PathName& file_path,
+  explicit ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
+      const eckit::PathName& file_path,
       const atlas::Mesh& mesh);
   ReadServer(ReadServer &&) = default;
   ReadServer(const ReadServer &) = default;
   ReadServer &operator=(ReadServer &&) = default;
   ReadServer &operator=(const ReadServer &) = default;
-  void read_var(const std::string& var_name,
+  template<class T> void read_var(const std::string& var_name,
       const size_t t_index,
-      atlas::array::ArrayView<double, 2>& field_view);
-  void read_vertical_var(const std::string& var_name,
-      atlas::array::ArrayView<double, 2>& field_view);
+      atlas::array::ArrayView<T, 2>& field_view);
+  template<class T> void read_vertical_var(const std::string& var_name,
+      atlas::array::ArrayView<T, 2>& field_view);
   size_t get_nearest_datetime_index(const util::DateTime& datetime) const;
   template<class T> T read_fillvalue(const std::string& nemo_var_name) const;
 
  private:
+void log_status() const {
+  oops::Log::trace() << "orcamodel::log_status " << eckit_timer_->elapsed() << " "
+      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
+      << " Gb" << std::endl;
+}
   void read_var_on_root(const std::string& var_name,
       const size_t t_index,
       const size_t z_index,
@@ -45,15 +53,16 @@ class ReadServer {
   void read_vertical_var_on_root(const std::string& var_name,
       const size_t n_levels,
       std::vector<double>& buffer) const;
-  void fill_field(const std::vector<double>& buffer,
+  template<class T> void fill_field(const std::vector<double>& buffer,
       const size_t z_index,
-      atlas::array::ArrayView<double, 2>& field_view) const;
-  void fill_vertical_field(const std::vector<double>& buffer,
-      atlas::array::ArrayView<double, 2>& field_view) const;
+      atlas::array::ArrayView<T, 2>& field_view) const;
+  template<class T> void fill_vertical_field(const std::vector<double>& buffer,
+      atlas::array::ArrayView<T, 2>& field_view) const;
   const size_t mpiroot = 0;
   const size_t myrank = atlas::mpi::rank();
   const atlas::Mesh& mesh_;
   const OrcaIndex index_glbarray_;
   std::unique_ptr<NemoFieldReader> reader_;
+  std::shared_ptr<eckit::Timer> eckit_timer_;
 };
 }  // namespace orcamodel

@@ -15,7 +15,6 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/nemo_io/ReadServer.h"
 #include "orca-jedi/nemo_io/NemoFieldWriter.h"
 
 #define NEMO_FILL_TOL 1e-6
@@ -43,7 +42,7 @@ void readFieldsFromFile(
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
-    ReadServer nemo_reader(nemo_field_path, geom.mesh());
+    ReadServer nemo_reader(geom.timer(), nemo_field_path, geom.mesh());
 
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
@@ -70,24 +69,65 @@ void readFieldsFromFile(
                               variable_type)
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
-        auto field_view = atlas::array::make_view<double, 2>(field);
-        if (varCoordTypeMap[fieldName] == "vertical") {
-          nemo_reader.read_vertical_var(nemoName, field_view);
-        } else {
-          nemo_reader.read_var(nemoName, time_indx, field_view);
+        switch (geom.fieldPrecision(fieldName)) {
+          case FieldDType::Double:
+            populateField<double>(nemoName, varCoordTypeMap[fieldName],
+                                  time_indx, nemo_reader, field);
+            break;
+          case FieldDType::Float:
+            populateField<float>(nemoName, varCoordTypeMap[fieldName],
+                                 time_indx, nemo_reader, field);
+            break;
+          default:
+            throw eckit::BadParameter("State(ORCA)::readFieldsFromFile '"
+                + nemoName + "' This line should never run!");
         }
-        auto missing_value = nemo_reader.read_fillvalue<double>(nemoName);
-        field.metadata().set("missing_value", missing_value);
-        field.metadata().set("missing_value_type", "approximately-equals");
-        field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
         // Add a halo exchange following read to fill out halo points
         geom.functionSpace().haloExchange(field);
+        geom.log_status();
       }
     }
 
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
                        << "done" << std::endl;
 }
+
+/// \brief Populate a single atlas field using the read server.
+/// \param nemo_name The netCDF name of the variable to read.
+/// \param coord_type The type of coordinate (e.g "vertical" for 1D data).
+/// \param time_indx The time index in the file.
+/// \param nemo_reader The read server managing IO with the file.
+template<class T> void populateField(
+  const std::string & nemo_name,
+  const std::string & coord_type,
+  size_t time_indx,
+  ReadServer & nemo_reader,
+  atlas::Field & field) {
+    atlas::array::ArrayView<T, 2> field_view =
+        atlas::array::make_view<T, 2>(field);
+    if (coord_type == "vertical") {
+      nemo_reader.read_vertical_var<T>(nemo_name, field_view);
+    } else {
+      nemo_reader.read_var<T>(nemo_name, time_indx, field_view);
+    }
+    T missing_value = nemo_reader.read_fillvalue<T>(nemo_name);
+    field.metadata().set("missing_value", missing_value);
+    field.metadata().set("missing_value_type", "approximately-equals");
+    field.metadata().set("missing_value_epsilon", NEMO_FILL_TOL);
+}
+template void populateField<double>(
+  const std::string & nemo_name,
+  const std::string & coord_type,
+  size_t time_indx,
+  ReadServer & nemo_reader,
+  atlas::Field & field);
+template void populateField<float>(
+  const std::string & nemo_name,
+  const std::string & coord_type,
+  size_t time_indx,
+  ReadServer & nemo_reader,
+  atlas::Field & field);
+
 void writeFieldsToFile(
   const OrcaStateParameters & params,
   const Geometry & geom,

@@ -40,6 +40,7 @@
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
+#include "orca-jedi/utilities/Types.h"
 
 
 namespace orcamodel {
@@ -70,8 +71,9 @@ State::State(const Geometry & geom,
   oops::Log::debug() << params_stream.str() << std::endl;
   oops::Log::trace() << "State(ORCA)::State:: time: " << validTime()
                      << std::endl;
-
+  geom_->log_status();
   setupStateFields();
+  geom_->log_status();
 
   if (params_.analyticInit.value().value_or(false)) {
     this->analytic_init(*geom_);
@@ -81,6 +83,7 @@ State::State(const Geometry & geom,
     readFieldsFromFile(params_, *geom_, validTime(), "background variance",
        stateFields_);
   }
+  geom_->log_status();
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
@@ -200,9 +203,28 @@ void State::setupStateFields() {
     // add variable if it isn't already in stateFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!stateFields_.has(vars_[i])) {
-      stateFields_.add(geom_->functionSpace().createField<double>(
-           atlas::option::name(vars_[i]) |
-           atlas::option::levels(varSizes[i])));
+      switch (geom_->fieldPrecision(vars_[i])) {
+        case FieldDType::Double:
+          stateFields_.add(geom_->functionSpace().createField<double>(
+               atlas::option::name(vars_[i]) |
+               atlas::option::levels(varSizes[i])));
+          oops::Log::trace() << "State(ORCA)::setupStateFields double: "
+                             << vars_[i] << "has dtype: "
+                             << (*(stateFields_.end()-1)).datatype().str() << std::endl;
+          break;
+        case FieldDType::Float:
+          stateFields_.add(geom_->functionSpace().createField<float>(
+               atlas::option::name(vars_[i]) |
+               atlas::option::levels(varSizes[i])));
+          oops::Log::trace() << "State(ORCA)::setupStateFields float: "
+                             << vars_[i] << "has dtype: "
+                             << (*(stateFields_.end()-1)).datatype().str() << std::endl;
+          break;
+        default:
+          throw eckit::BadParameter("State(ORCA)::setupStateFields '"
+              + vars_[i] + "' This line should never run!");
+      }
+      geom_->log_status();
     }
   }
 }
@@ -224,8 +246,22 @@ void State::print(std::ostream & os) const {
   os << std::string(4, ' ') << "atlas field norms:" << std::endl;
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
+    double norm_val = 0;
+    oops::Log::trace() << "State(ORCA)::print '" << fieldName << "' type "
+                       << field.datatype().str() << std::endl;
+    switch (geom_->fieldPrecision(fieldName)) {
+      case FieldDType::Double:
+        norm_val = norm<double>(fieldName);
+        break;
+      case FieldDType::Float:
+        norm_val = norm<float>(fieldName);
+        break;
+      default:
+        throw eckit::BadParameter("State(ORCA)::print '"
+              + fieldName + "' bad field type. This line should never run!");
+    }
     os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
-       << norm(fieldName) << std::endl;
+       << norm_val << std::endl;
   }
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
@@ -242,26 +278,43 @@ void State::zero() {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    auto field_view = atlas::array::make_view<double, 2>(field);
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) = 0;
+    switch (geom_->fieldPrecision(fieldName)) {
+      case FieldDType::Double: {
+        auto field_view = atlas::array::make_view<double, 2>(field);
+        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+            if (!ghost(j)) field_view(j, k) = 0;
+          }
+        }
+        break;
       }
+      case FieldDType::Float: {
+        auto field_view = atlas::array::make_view<float, 2>(field);
+        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+            if (!ghost(j)) field_view(j, k) = 0;
+          }
+        }
+        break;
+      }
+      default:
+        throw eckit::BadParameter("State(ORCA)::zero '"
+              + fieldName + "' bad field type. This line should never run!");
     }
   }
 
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
 }
 
-double State::norm(const std::string & field_name) const {
-  auto field_view = atlas::array::make_view<double, 2>(
+template<class T> double State::norm(const std::string & field_name) const {
+  auto field_view = atlas::array::make_view<T, 2>(
       stateFields_[field_name]);
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   double squares = 0;
   double valid_points = 0;
   atlas_omp_parallel {
-    atlas::field::MissingValue mv(stateFields()[field_name]);
+    atlas::field::MissingValue mv(stateFields_[field_name]);
     bool has_mv = static_cast<bool>(mv);
     double squares_TP = 0;
     size_t valid_points_TP = 0;
@@ -270,7 +323,7 @@ double State::norm(const std::string & field_name) const {
     atlas_omp_for(atlas::idx_t j = 0; j < num_h_locs; ++j) {
       if (!ghost(j)) {
         for (atlas::idx_t k = 0; k < num_levels; ++k) {
-          double pointValue = field_view(j, k);
+          T pointValue = field_view(j, k);
           if (!has_mv || (has_mv && !mv(pointValue))) {
             squares_TP += pointValue*pointValue;
             ++valid_points_TP;
@@ -306,4 +359,8 @@ double State::norm(const std::string & field_name) const {
 
   return 0;
 }
+
+template double State::norm<double>(const std::string & field_name) const;
+template double State::norm<float>(const std::string & field_name) const;
+
 }  // namespace orcamodel

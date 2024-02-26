@@ -59,7 +59,10 @@ CASE("test MPI distributed reads field array view") {
           atlas::option::levels(1)));
     auto field_view = atlas::array::make_view<double, 2>(field);
 
-    ReadServer read_server(test_data_path, mesh);
+    auto eckit_timer = std::make_shared<eckit::Timer>(
+      "Geometry(ORCA): ", oops::Log::trace());
+    eckit_timer->start();
+    ReadServer read_server(eckit_timer, test_data_path, mesh);
     read_server.read_var("iiceconc", 0, field_view);
 
     auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
