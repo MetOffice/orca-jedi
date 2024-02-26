@@ -9,7 +9,7 @@ JEDI model interface interface for the NEMO ocean model configurations on ORCA g
 
 ## Description
 
-_orca-jedi_ includes executables to calculate model values at observation locations and to perform quality control. _orca-jedi_ is a JEDI "psuedomodel", meaning that rather than interfacing directly with NEMO or NEMOVAR, the model state is derived from input files. Further applications may be developed based on _orca-jedi_ in the future. (These would be implementations of JEDI OOPS apps, such as for observation generation applications, and various DA applications).
+_orca-jedi_ includes executables to calculate model values at observation locations and to perform quality control. _orca-jedi_ is a JEDI "pseudo-model", meaning that rather than interfacing directly with NEMO or NEMOVAR, the model state is derived from input files. Further applications may be developed based on _orca-jedi_ in the future. (These would be implementations of JEDI OOPS apps, such as for observation generation applications, and various DA applications).
 
 ## Getting Started
 
