@@ -16,7 +16,6 @@
 #include "atlas/parallel/omp/omp.h"
 
 #include "eckit/exception/Exceptions.h"
-#include "eckit/system/ResourceUsage.h"
 
 #include "oops/util/Logger.h"
 #include "oops/util/Duration.h"
@@ -354,10 +353,6 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
     }
 
     size_t n_dims = nc_var.getDimCount();
-  oops::Log::trace() << "orcamodel:: read var slice " << varname << " "
-      << z_indx << " before memory: "
-      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+6
-      << " Mb" << std::endl;
     std::vector<size_t> starts;
     std::vector<size_t> counts;
     if (n_dims == 4) {
@@ -394,11 +389,6 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
                    << nc_type_name << " not supported.";
         throw eckit::BadValue(err_stream.str(), Here());
     }
-
-    oops::Log::trace() << "orcamodel:: read var slice " << varname << " "
-        << z_indx << " after vec mem " << var_data.capacity()*sizeof(double) / 1.0e+6 << " memory: "
-        << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+6
-        << " Mb" << std::endl;
 
     return var_data;
   } catch(netCDF::exceptions::NcException& e)

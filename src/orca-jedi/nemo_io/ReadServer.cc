@@ -73,15 +73,11 @@ template<class T> void ReadServer::fill_field(const std::vector<double>& buffer,
     const size_t num_nodes = field_view.shape(0);
     // "ReadServer buffer size does not equal the number of horizontal nodes in the field_view"
     assert(num_nodes <= buffer.size());
-    log_status();
-    oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::fill_field filling..."
-                       << std::endl;
     atlas_omp_parallel_for(size_t inode = 0; inode < num_nodes; ++inode) {
       if (ghost(inode)) continue;
       const int64_t ibuf = index_glbarray_(ij(inode, 0), ij(inode, 1));
       field_view(inode, z_index) = static_cast<T>(buffer[ibuf]);
     }
-    log_status();
 }
 
 template void ReadServer::fill_field<int>(
@@ -109,9 +105,6 @@ template<class T> void ReadServer::fill_vertical_field(const std::vector<double>
     // "ReadServer buffer size does not equal the number of levels in the field_view"
     assert(num_levels <= buffer.size());
 
-    log_status();
-    oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::fill_vertical_field filling..."
-                       << std::endl;
     // even for 1D depths, store the data in an atlas 3D field - inefficient but flexible
     // NOTE: Use thread-private levels data to reduce OMP cache misses
     atlas_omp_parallel {
@@ -123,7 +116,6 @@ template<class T> void ReadServer::fill_vertical_field(const std::vector<double>
         }
       }
     }
-    log_status();
 }
 
 template void ReadServer::fill_vertical_field<int>(
@@ -152,18 +144,16 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
   std::vector<double> buffer;
   // For each level
   for (size_t iLev = 0; iLev < n_levels; iLev++) {
-    log_status();
     // read the data for that level onto the root processor
     this->read_var_on_root(var_name, t_index, iLev, buffer);
 
     assert(buffer.size() == size);
-    log_status();
     // mpi distribute that data out to all processors
     atlas::mpi::comm().broadcast(&buffer.front(), size, mpiroot);
 
-    log_status();
     // each processor fills out its field_view from the buffer
     this->fill_field(buffer, iLev, field_view);
+    log_status();
   }
 }
 
@@ -200,6 +190,7 @@ template<class T> void ReadServer::read_vertical_var(const std::string& var_name
 
   // each processor fills out its field_view from the buffer
   this->fill_vertical_field(buffer, field_view);
+  log_status();
 }
 
 template void ReadServer::read_vertical_var<int>(
