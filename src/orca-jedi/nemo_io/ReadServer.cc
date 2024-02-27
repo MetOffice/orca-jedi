@@ -31,40 +31,54 @@ ReadServer::ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
 /// \param t_index Index of the time slice.
 /// \param z_index Index of the vertical slice.
 /// \param buffer Vector to store the data.
-void ReadServer::read_var_on_root(const std::string& var_name,
+template<class T> void ReadServer::read_var_on_root(const std::string& var_name,
               const size_t t_index,
               const size_t z_index,
-              std::vector<double>& buffer) const {
+              std::vector<T>& buffer) const {
   oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::read_var_on_root "
     << var_name << std::endl;
   size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
   if (myrank == mpiroot) {
-    buffer = reader_->read_var_slice(var_name, t_index, z_index);
+    buffer = reader_->read_var_slice<T>(var_name, t_index, z_index);
   } else {
     buffer.resize(size);
   }
 }
+template void ReadServer::read_var_on_root<double>(const std::string& var_name,
+              const size_t t_index,
+              const size_t z_index,
+              std::vector<double>& buffer) const;
+template void ReadServer::read_var_on_root<float>(const std::string& var_name,
+              const size_t t_index,
+              const size_t z_index,
+              std::vector<float>& buffer) const;
 
 /// \brief Read 1D vertical variable data on the root processor only
 /// \param var_name NetCDF name of the vertical variable.
 /// \param n_levels Number of levels to read from the file
 /// \param buffer Vector to store the data.
-void ReadServer::read_vertical_var_on_root(const std::string& var_name,
+template<class T> void ReadServer::read_vertical_var_on_root(const std::string& var_name,
               const size_t n_levels,
-              std::vector<double>& buffer) const {
+              std::vector<T>& buffer) const {
   size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
   if (myrank == mpiroot) {
-    buffer = reader_->read_vertical_var(var_name, n_levels);
+    buffer = reader_->read_vertical_var<T>(var_name, n_levels);
   } else {
     buffer.resize(size);
   }
 }
+template void ReadServer::read_vertical_var_on_root<double>(const std::string& var_name,
+              const size_t n_levels,
+              std::vector<double>& buffer) const;
+template void ReadServer::read_vertical_var_on_root<float>(const std::string& var_name,
+              const size_t n_levels,
+              std::vector<float>& buffer) const;
 
 /// \brief Move data from a buffer into an atlas arrayView.
 /// \param buffer Vector of data to read
 /// \param z_index Index of the vertical slice.
 /// \param field_view View into the atlas field to store the data.
-template<class T> void ReadServer::fill_field(const std::vector<double>& buffer,
+template<class T> void ReadServer::fill_field(const std::vector<T>& buffer,
               const size_t z_index,
       atlas::array::ArrayView<T, 2>& field_view) const {
     oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::fill_field" << std::endl;
@@ -76,27 +90,23 @@ template<class T> void ReadServer::fill_field(const std::vector<double>& buffer,
     atlas_omp_parallel_for(size_t inode = 0; inode < num_nodes; ++inode) {
       if (ghost(inode)) continue;
       const int64_t ibuf = index_glbarray_(ij(inode, 0), ij(inode, 1));
-      field_view(inode, z_index) = static_cast<T>(buffer[ibuf]);
+      field_view(inode, z_index) = buffer[ibuf];
     }
 }
 
-template void ReadServer::fill_field<int>(
-      const std::vector<double>& buffer,
-      const size_t z_index,
-      atlas::array::ArrayView<int, 2>& field_view) const;
-template void ReadServer::fill_field<float>(
-      const std::vector<double>& buffer,
-      const size_t z_index,
-      atlas::array::ArrayView<float, 2>& field_view) const;
 template void ReadServer::fill_field<double>(
       const std::vector<double>& buffer,
       const size_t z_index,
       atlas::array::ArrayView<double, 2>& field_view) const;
+template void ReadServer::fill_field<float>(
+      const std::vector<float>& buffer,
+      const size_t z_index,
+      atlas::array::ArrayView<float, 2>& field_view) const;
 
 /// \brief Move vertical data from a buffer into an atlas arrayView.
 /// \param buffer Vector of data to read
 /// \param field_view View into the atlas field to store the data.
-template<class T> void ReadServer::fill_vertical_field(const std::vector<double>& buffer,
+template<class T> void ReadServer::fill_vertical_field(const std::vector<T>& buffer,
       atlas::array::ArrayView<T, 2>& field_view) const {
     oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::fill_vertical_field "<< std::endl;
     auto ghost = atlas::array::make_view<int32_t, 1>(this->mesh_.nodes().ghost());
@@ -108,25 +118,22 @@ template<class T> void ReadServer::fill_vertical_field(const std::vector<double>
     // even for 1D depths, store the data in an atlas 3D field - inefficient but flexible
     // NOTE: Use thread-private levels data to reduce OMP cache misses
     atlas_omp_parallel {
-      const std::vector<double> buffer_TP = buffer;
+      const std::vector<T> buffer_TP = buffer;
       atlas_omp_for(size_t inode = 0; inode < num_nodes; ++inode) {
         for (size_t k = 0; k < num_levels; ++k) {
           if (ghost(inode)) continue;
-          field_view(inode, k) = static_cast<T>(buffer_TP[k]);
+          field_view(inode, k) = buffer_TP[k];
         }
       }
     }
 }
 
-template void ReadServer::fill_vertical_field<int>(
-      const std::vector<double>& buffer,
-      atlas::array::ArrayView<int, 2>& field_view) const;
-template void ReadServer::fill_vertical_field<float>(
-      const std::vector<double>& buffer,
-      atlas::array::ArrayView<float, 2>& field_view) const;
 template void ReadServer::fill_vertical_field<double>(
       const std::vector<double>& buffer,
       atlas::array::ArrayView<double, 2>& field_view) const;
+template void ReadServer::fill_vertical_field<float>(
+      const std::vector<float>& buffer,
+      atlas::array::ArrayView<float, 2>& field_view) const;
 
 /// \brief Read a NetCDF variable into an atlas field.
 /// \param var_name The netCDF name of the variable to read.
@@ -141,26 +148,22 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
   size_t n_levels = field_view.shape(1);
   size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
 
-  std::vector<double> buffer;
+  std::vector<T> buffer;
   // For each level
   for (size_t iLev = 0; iLev < n_levels; iLev++) {
     // read the data for that level onto the root processor
-    this->read_var_on_root(var_name, t_index, iLev, buffer);
+    this->read_var_on_root<T>(var_name, t_index, iLev, buffer);
 
     assert(buffer.size() == size);
     // mpi distribute that data out to all processors
     atlas::mpi::comm().broadcast(&buffer.front(), size, mpiroot);
 
     // each processor fills out its field_view from the buffer
-    this->fill_field(buffer, iLev, field_view);
+    this->fill_field<T>(buffer, iLev, field_view);
     log_status();
   }
 }
 
-template void ReadServer::read_var<int>(
-    const std::string& var_name,
-    const size_t t_index,
-    atlas::array::ArrayView<int, 2>& field_view);
 template void ReadServer::read_var<double>(
     const std::string& var_name,
     const size_t t_index,
@@ -180,22 +183,19 @@ template<class T> void ReadServer::read_vertical_var(const std::string& var_name
 
   size_t n_levels = field_view.shape(1);
 
-  std::vector<double> buffer;
+  std::vector<T> buffer;
 
   // read the data onto the root processor
-  this->read_vertical_var_on_root(var_name, n_levels, buffer);
+  this->read_vertical_var_on_root<T>(var_name, n_levels, buffer);
 
   // mpi distribute that data out to all processors
   atlas::mpi::comm().broadcast(&buffer.front(), n_levels, mpiroot);
 
   // each processor fills out its field_view from the buffer
-  this->fill_vertical_field(buffer, field_view);
+  this->fill_vertical_field<T>(buffer, field_view);
   log_status();
 }
 
-template void ReadServer::read_vertical_var<int>(
-    const std::string& var_name,
-    atlas::array::ArrayView<int, 2>& field_view);
 template void ReadServer::read_vertical_var<double>(
     const std::string& var_name,
     atlas::array::ArrayView<double, 2>& field_view);

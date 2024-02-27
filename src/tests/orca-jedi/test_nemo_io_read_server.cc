@@ -51,7 +51,7 @@ CASE("test MPI distributed reads field array view") {
     std::vector<double> raw_data;
     {
       NemoFieldReader field_reader(test_data_path);
-      raw_data = field_reader.read_var_slice("iiceconc", 0, 0);
+      raw_data = field_reader.read_var_slice<double>("iiceconc", 0, 0);
     }
 
     atlas::Field field(funcSpace.createField<double>(
@@ -63,7 +63,7 @@ CASE("test MPI distributed reads field array view") {
       "Geometry(ORCA): ", oops::Log::trace());
     eckit_timer->start();
     ReadServer read_server(eckit_timer, test_data_path, mesh);
-    read_server.read_var("iiceconc", 0, field_view);
+    read_server.read_var<double>("iiceconc", 0, field_view);
 
     auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
@@ -88,14 +88,14 @@ CASE("test MPI distributed reads field array view") {
       auto field_view = atlas::array::make_view<double, 2>(field);
 
       NemoFieldReader field_reader(test_data_path);
-      read_server.read_var("votemper", 0, field_view);
+      read_server.read_var<double>("votemper", 0, field_view);
 
       auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 
       auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
       std::vector<double> raw_data;
       for (int k =0; k <3; k++) {
-        raw_data = field_reader.read_var_slice("votemper", 0, k);
+        raw_data = field_reader.read_var_slice<double>("votemper", 0, k);
         for (int i = 0; i < field_view.shape(0); ++i) {
           double raw_value = raw_data[orca_index(ij(i, 0), ij(i, 1))];
           if (ghost(i)) continue;
@@ -117,7 +117,7 @@ CASE("test MPI distributed reads field array view") {
             atlas::option::levels(3)));
       auto field_view = atlas::array::make_view<double, 2>(field);
 
-      read_server.read_vertical_var("nav_lev", field_view);
+      read_server.read_vertical_var<double>("nav_lev", field_view);
 
       auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
 

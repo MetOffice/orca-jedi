@@ -46,17 +46,17 @@ void log_status() const {
       << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
       << " Gb" << std::endl;
 }
-  void read_var_on_root(const std::string& var_name,
+  template<class T> void read_var_on_root(const std::string& var_name,
       const size_t t_index,
       const size_t z_index,
-      std::vector<double>& buffer) const;
-  void read_vertical_var_on_root(const std::string& var_name,
+      std::vector<T>& buffer) const;
+  template<class T> void read_vertical_var_on_root(const std::string& var_name,
       const size_t n_levels,
-      std::vector<double>& buffer) const;
-  template<class T> void fill_field(const std::vector<double>& buffer,
+      std::vector<T>& buffer) const;
+  template<class T> void fill_field(const std::vector<T>& buffer,
       const size_t z_index,
       atlas::array::ArrayView<T, 2>& field_view) const;
-  template<class T> void fill_vertical_field(const std::vector<double>& buffer,
+  template<class T> void fill_vertical_field(const std::vector<T>& buffer,
       atlas::array::ArrayView<T, 2>& field_view) const;
   const size_t mpiroot = 0;
   const size_t myrank = atlas::mpi::rank();

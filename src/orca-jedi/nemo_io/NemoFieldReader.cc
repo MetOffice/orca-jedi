@@ -62,32 +62,50 @@ std::string find_nc_var_name(const netCDF::NcFile& ncFile,
 
   return dimvar_name;
 }
-template<typename T> void fill_from_ncvar_as_double(
+template<typename InType, typename OutType> void fill_from_ncvar_as_type(
     const netCDF::NcVar nc_var,
     const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
-    std::vector<double>& result) {
-  std::vector<T> buffer(result.size());
+    std::vector<OutType>& result) {
+  std::vector<InType> buffer(result.size());
   nc_var.getVar(sizes, counts, buffer.data());
   std::transform(buffer.begin(), buffer.end(), result.begin(),
-     [](const T in) -> double { return static_cast<double>(in); });
+     [](const InType in) -> OutType { return static_cast<OutType>(in); });
 }
-template void fill_from_ncvar_as_double<float>(
+template void fill_from_ncvar_as_type<float, double>(
     const netCDF::NcVar nc_var,
     const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
     std::vector<double>& result);
-template void fill_from_ncvar_as_double<int>(
+template void fill_from_ncvar_as_type<double, float>(
+    const netCDF::NcVar nc_var,
+    const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
+    std::vector<float>& result);
+template void fill_from_ncvar_as_type<int, double>(
     const netCDF::NcVar nc_var,
     const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
     std::vector<double>& result);
-template void fill_from_ncvar_as_double<int64_t>(
+template void fill_from_ncvar_as_type<int, float>(
+    const netCDF::NcVar nc_var,
+    const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
+    std::vector<float>& result);
+template void fill_from_ncvar_as_type<int64_t, double>(
     const netCDF::NcVar nc_var,
     const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
     std::vector<double>& result);
+template void fill_from_ncvar_as_type<int64_t, float>(
+    const netCDF::NcVar nc_var,
+    const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
+    std::vector<float>& result);
 
-template<> void fill_from_ncvar_as_double<double>(
+template<> void fill_from_ncvar_as_type<double, double>(
     const netCDF::NcVar nc_var,
     const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
     std::vector<double>& result) {
+  nc_var.getVar(sizes, counts, result.data());
+}
+template<> void fill_from_ncvar_as_type<float, float>(
+    const netCDF::NcVar nc_var,
+    const std::vector<size_t>& sizes, const std::vector<size_t>& counts,
+    std::vector<float>& result) {
   nc_var.getVar(sizes, counts, result.data());
 }
 }  // namespace
@@ -279,9 +297,9 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
     std::vector<double> lats(nx*ny);
     std::string lat_type_name = nc_var_lat.getType().getName();
     if (lat_type_name == "double") {
-      fill_from_ncvar_as_double<double>(nc_var_lat, {0, 0}, {ny, nx}, lats);
+      fill_from_ncvar_as_type<double, double>(nc_var_lat, {0, 0}, {ny, nx}, lats);
     } else if (lat_type_name == "float") {
-      fill_from_ncvar_as_double<float>(nc_var_lat, {0, 0}, {ny, nx}, lats);
+      fill_from_ncvar_as_type<float, double>(nc_var_lat, {0, 0}, {ny, nx}, lats);
     } else {
       std::ostringstream err_stream;
       err_stream << "orcamodel::NemoFieldReader::read_locs ncVar '"
@@ -302,9 +320,9 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
     std::vector<double> lons(nx*ny);
     std::string lon_type_name = nc_var_lat.getType().getName();
     if (lon_type_name == "double") {
-      fill_from_ncvar_as_double<double>(nc_var_lon, {0, 0}, {ny, nx}, lons);
+      fill_from_ncvar_as_type<double, double>(nc_var_lon, {0, 0}, {ny, nx}, lons);
     } else if (lon_type_name == "float") {
-      fill_from_ncvar_as_double<float>(nc_var_lon, {0, 0}, {ny, nx}, lons);
+      fill_from_ncvar_as_type<float, double>(nc_var_lon, {0, 0}, {ny, nx}, lons);
     } else {
       std::ostringstream err_stream;
       err_stream << "orcamodel::NemoFieldReader::read_locs ncVar '"
@@ -335,7 +353,7 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
 /// \param t_indx The time index of the slice.
 /// \param z_indx The vertical index of the slice.
 /// \return a vector of the variable data.
-std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
+template<typename T> std::vector<T> NemoFieldReader::read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) const {
   oops::Log::trace() << "orcamodel::NemoFieldReader::read_var_slice("
                      << varname << ", " << t_indx << ", " << z_indx
@@ -371,17 +389,17 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
       throw eckit::BadValue(err_stream.str(), Here());
     }
 
-    std::vector<double> var_data(nx*ny);
+    std::vector<T> var_data(nx*ny);
 
     std::string nc_type_name = nc_var.getType().getName();
     if (nc_type_name == "double") {
-        fill_from_ncvar_as_double<double>(nc_var, starts, counts, var_data);
+        fill_from_ncvar_as_type<double, T>(nc_var, starts, counts, var_data);
     } else if (nc_type_name == "float") {
-        fill_from_ncvar_as_double<float>(nc_var, starts, counts, var_data);
+        fill_from_ncvar_as_type<float, T>(nc_var, starts, counts, var_data);
     } else if (nc_type_name == "int") {
-        fill_from_ncvar_as_double<int>(nc_var, starts, counts, var_data);
+        fill_from_ncvar_as_type<int, T>(nc_var, starts, counts, var_data);
     } else if (nc_type_name == "int64") {
-        fill_from_ncvar_as_double<int64_t>(nc_var, starts, counts, var_data);
+        fill_from_ncvar_as_type<int64_t, T>(nc_var, starts, counts, var_data);
     } else {
         std::ostringstream err_stream;
         err_stream << "orcamodel::NemoFieldReader::read_var_slice ncVar '"
@@ -399,12 +417,16 @@ std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
     throw eckit::ReadError(err_stream.str(), Here());
   }
 }
+template std::vector<double> NemoFieldReader::read_var_slice(const std::string& varname,
+      const size_t t_indx, const size_t z_indx) const;
+template std::vector<float> NemoFieldReader::read_var_slice(const std::string& varname,
+      const size_t t_indx, const size_t z_indx) const;
 
 /// \brief Read a 1D variable containing level depth information.
 /// \param varname The name of the variable.
 /// \param n_levels The number of levels to read (beginning from the surface).
 /// \return a vector of the depth values.
-std::vector<double> NemoFieldReader::read_vertical_var(
+template<typename T> std::vector<T> NemoFieldReader::read_vertical_var(
     const std::string& varname,
     const size_t nlevels) const {
   oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
@@ -438,18 +460,18 @@ std::vector<double> NemoFieldReader::read_vertical_var(
       throw eckit::BadValue(err_stream.str(), Here());
     }
 
-    std::vector<double> buffer(nlevels);
+    std::vector<T> buffer(nlevels);
     std::vector<size_t> starts = {0, };
     std::vector<size_t> counts = {nlevels, };
     std::string nc_type_name = nc_var.getType().getName();
     if (nc_type_name == "double") {
-        fill_from_ncvar_as_double<double>(nc_var, starts, counts, buffer);
+        fill_from_ncvar_as_type<double, T>(nc_var, starts, counts, buffer);
     } else if (nc_type_name == "float") {
-        fill_from_ncvar_as_double<float>(nc_var, starts, counts, buffer);
+        fill_from_ncvar_as_type<float, T>(nc_var, starts, counts, buffer);
     } else if (nc_type_name == "int") {
-        fill_from_ncvar_as_double<int>(nc_var, starts, counts, buffer);
+        fill_from_ncvar_as_type<int, T>(nc_var, starts, counts, buffer);
     } else if (nc_type_name == "int64") {
-        fill_from_ncvar_as_double<int64_t>(nc_var, starts, counts, buffer);
+        fill_from_ncvar_as_type<int64_t, T>(nc_var, starts, counts, buffer);
     } else {
         std::ostringstream err_stream;
         err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
@@ -467,5 +489,11 @@ std::vector<double> NemoFieldReader::read_vertical_var(
     throw eckit::ReadError(err_stream.str(), Here());
   }
 }
+template std::vector<double> NemoFieldReader::read_vertical_var(
+    const std::string& varname,
+    const size_t nlevels) const;
+template std::vector<float> NemoFieldReader::read_vertical_var(
+    const std::string& varname,
+    const size_t nlevels) const;
 
 }  // namespace orcamodel
