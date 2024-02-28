@@ -12,6 +12,8 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateParameters.h"
+#include "orca-jedi/utilities/Types.h"
+#include "orca-jedi/nemo_io/ReadServer.h"
 
 namespace orcamodel {
 
@@ -26,5 +28,11 @@ void writeFieldsToFile(
   const Geometry & geom,
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs);
+template<class T> void populateField(
+  const std::string & nemo_name,
+  const std::string & coord_type,
+  size_t time_indx,
+  ReadServer & nemo_reader,
+  atlas::Field & field);
 
 }  // namespace orcamodel
