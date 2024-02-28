@@ -202,27 +202,19 @@ void State::setupStateFields() {
     // add variable if it isn't already in stateFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!stateFields_.has(vars_[i])) {
-      switch (geom_->fieldPrecision(vars_[i])) {
-        case FieldDType::Double:
-          stateFields_.add(geom_->functionSpace().createField<double>(
-               atlas::option::name(vars_[i]) |
-               atlas::option::levels(varSizes[i])));
-          oops::Log::trace() << "State(ORCA)::setupStateFields double: "
-                             << vars_[i] << "has dtype: "
-                             << (*(stateFields_.end()-1)).datatype().str() << std::endl;
-          break;
-        case FieldDType::Float:
-          stateFields_.add(geom_->functionSpace().createField<float>(
-               atlas::option::name(vars_[i]) |
-               atlas::option::levels(varSizes[i])));
-          oops::Log::trace() << "State(ORCA)::setupStateFields float: "
-                             << vars_[i] << "has dtype: "
-                             << (*(stateFields_.end()-1)).datatype().str() << std::endl;
-          break;
-        default:
-          throw eckit::BadParameter("State(ORCA)::setupStateFields '"
-              + vars_[i] + "' This line should never run!");
-      }
+      const auto addField = [&](auto typeVal) {
+        using T = decltype(typeVal);
+        stateFields_.add(geom_->functionSpace().createField<T>(
+             atlas::option::name(vars_[i]) |
+             atlas::option::levels(varSizes[i])));
+        oops::Log::trace() << "State(ORCA)::setupStateFields : "
+                           << vars_[i] << "has dtype: "
+                           << (*(stateFields_.end()-1)).datatype().str() << std::endl;
+      };
+      ApplyForFieldType(addField,
+                        geom_->fieldPrecision(vars_[i]),
+                        eckit::BadParameter("State(ORCA)::setupStateFields "
+                          + vars_[i] + "' field type not recognised"));
       geom_->log_status();
     }
   }
@@ -249,17 +241,17 @@ void State::print(std::ostream & os) const {
     double norm_val = 0;
     oops::Log::trace() << "State(ORCA)::print '" << fieldName << "' type "
                        << field.datatype().str() << std::endl;
-    switch (geom_->fieldPrecision(fieldName)) {
-      case FieldDType::Double:
-        norm_val = norm<double>(fieldName);
-        break;
-      case FieldDType::Float:
-        norm_val = norm<float>(fieldName);
-        break;
-      default:
-        throw eckit::BadParameter("State(ORCA)::print '"
-              + fieldName + "' bad field type. This line should never run!");
-    }
+
+    const auto addField = [&](auto typeVal) {
+      using T = decltype(typeVal);
+      norm_val = norm<T>(fieldName);
+    };
+
+    ApplyForFieldType(addField,
+                      geom_->fieldPrecision(fieldName),
+                      eckit::BadParameter("State(ORCA)::print '"
+                        + fieldName + "' field type not recognised"));
+
     os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
        << norm_val << std::endl;
   }
@@ -278,29 +270,21 @@ void State::zero() {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    switch (geom_->fieldPrecision(fieldName)) {
-      case FieldDType::Double: {
-        auto field_view = atlas::array::make_view<double, 2>(field);
-        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-            if (!ghost(j)) field_view(j, k) = 0;
-          }
+
+    const auto zeroField = [&](auto typeVal) {
+      using T = decltype(typeVal);
+      auto field_view = atlas::array::make_view<T, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          if (!ghost(j)) field_view(j, k) = 0;
         }
-        break;
       }
-      case FieldDType::Float: {
-        auto field_view = atlas::array::make_view<float, 2>(field);
-        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-            if (!ghost(j)) field_view(j, k) = 0;
-          }
-        }
-        break;
-      }
-      default:
-        throw eckit::BadParameter("State(ORCA)::zero '"
-              + fieldName + "' bad field type. This line should never run!");
-    }
+    };
+
+    ApplyForFieldType(zeroField,
+                      geom_->fieldPrecision(fieldName),
+                      eckit::BadParameter("State(ORCA)::zero '"
+                        + fieldName + "' field type not recognised"));
   }
 
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
