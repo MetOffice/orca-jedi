@@ -73,7 +73,6 @@ State::State(const Geometry & geom,
                      << std::endl;
   geom_->log_status();
   setupStateFields();
-  geom_->log_status();
 
   if (params_.analyticInit.value().value_or(false)) {
     this->analytic_init(*geom_);
@@ -240,6 +239,7 @@ void State::write(const eckit::Configuration & config) const {
 
 void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
+  geom_->log_status();
 
   os << std::endl << " Model state valid at time: " << validTime() << std::endl;
   os << std::string(4, ' ') << vars_ <<  std::endl;

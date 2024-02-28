@@ -128,7 +128,6 @@ namespace orcamodel {
           throw eckit::BadParameter("orcamodel::Interpolator::apply '"
               + vars[jvar] + "' field type not recognised This line should never run!");
       }
-      state.geometry()->log_status();
     }
     assert(result.size() == nvals);
     oops::Log::trace() << "orcamodel::Interpolator::apply done "
