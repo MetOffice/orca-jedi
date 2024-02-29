@@ -117,17 +117,15 @@ namespace orcamodel {
 
     auto res_iter = result.begin();
     for (size_t jvar=0; jvar < nvars; ++jvar) {
-      switch (state.geometry()->fieldPrecision(vars[jvar])) {
-        case FieldDType::Double:
-          executeInterpolation<double>(vars[jvar], varSizes[jvar], state, res_iter);
-          break;
-        case FieldDType::Float:
-          executeInterpolation<float>(vars[jvar], varSizes[jvar], state, res_iter);
-          break;
-        default:
-          throw eckit::BadParameter("orcamodel::Interpolator::apply '"
-              + vars[jvar] + "' field type not recognised This line should never run!");
-      }
+      const auto execute = [&](auto typeVal) {
+        using T = decltype(typeVal);
+        executeInterpolation<T>(vars[jvar], varSizes[jvar], state, res_iter);
+      };
+
+      ApplyForFieldType(execute,
+                        state.geometry()->fieldPrecision(vars[jvar]),
+                        eckit::BadParameter("orcamodel::Interpolator::apply '"
+                          + vars[jvar] + "' field type not recognised"));
     }
     assert(result.size() == nvals);
     oops::Log::trace() << "orcamodel::Interpolator::apply done "

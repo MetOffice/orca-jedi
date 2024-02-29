@@ -69,19 +69,15 @@ void readFieldsFromFile(
                               variable_type)
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
-        switch (geom.fieldPrecision(fieldName)) {
-          case FieldDType::Double:
-            populateField<double>(nemoName, varCoordTypeMap[fieldName],
-                                  time_indx, nemo_reader, field);
-            break;
-          case FieldDType::Float:
-            populateField<float>(nemoName, varCoordTypeMap[fieldName],
-                                 time_indx, nemo_reader, field);
-            break;
-          default:
-            throw eckit::BadParameter("State(ORCA)::readFieldsFromFile '"
-                + nemoName + "' This line should never run!");
-        }
+        const auto populate = [&](auto typeVal) {
+          using T = decltype(typeVal);
+          populateField<T>(nemoName, varCoordTypeMap[fieldName],
+                                time_indx, nemo_reader, field);
+        };
+        ApplyForFieldType(populate,
+                          geom.fieldPrecision(fieldName),
+                          eckit::BadParameter("State(ORCA)::readFieldsFromFile '"
+                            + nemoName + "' field type not recognised"));
         // Add a halo exchange following read to fill out halo points
         geom.functionSpace().haloExchange(field);
         geom.log_status();
