@@ -31,7 +31,10 @@ class VariableChange: public util::Printable,
   }
   VariableChange(const VariableChangeParameters &, const Geometry &) {}
   VariableChange(const eckit::Configuration &, const Geometry &) {}
-  void changeVar(State &, const oops::Variables &) const {}
+  void changeVar(State & state, const oops::Variables & variables) const {
+    state.subsetFieldSet(variables);
+  }
+
   void changeVarInverse(State &, const oops::Variables &) const {}
 
  private:

@@ -56,7 +56,7 @@ CASE("test basic interpolator") {
 
   eckit::LocalConfiguration interp_conf;
   interp_conf.set("type", "unstructured-bilinear-lonlat");
-  interp_conf.set("non_linear", "missing-if-all-missing");
+  interp_conf.set("non_linear", "missing-if-all-missing-real32");
   eckit::LocalConfiguration interpolator_conf;
   interpolator_conf.set("atlas-interpolator", interp_conf);
 
@@ -104,7 +104,7 @@ CASE("test basic interpolator") {
         "sea_surface_foundation_temperature"}), state, mask, vals);
 
     double missing_value = util::missingValue<double>();
-    std::vector<double> testvals = {1, missing_value, 0, 18.488888892,
+    std::vector<double> testvals = {1, missing_value, 0, 18.4888916016,
                                     missing_value, 18.1592999503};
 
     for (size_t i=0; i < testvals.size(); ++i) {
@@ -121,8 +121,8 @@ CASE("test basic interpolator") {
 
     double missing_value = util::missingValue<double>();
     std::vector<double> testvals = {
-      18.488888892, missing_value, 18.1592999503,
-      17.9419381132, missing_value, 17.75000288,
+      18.4888916016, missing_value, 18.1592999503,
+      17.9419364929, missing_value, 17.75000288,
       missing_value, missing_value, missing_value};
 
     for (size_t i=0; i < testvals.size(); ++i) {

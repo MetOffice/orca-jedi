@@ -14,6 +14,7 @@
 #include "eckit/mpi/Comm.h"
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/system/ResourceUsage.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
@@ -44,21 +45,28 @@ Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
                       n_levels_(config.getInt("number levels")),
-                      grid_(config.getString("grid name"))
+                      grid_(config.getString("grid name")),
+                      eckit_timer_(new eckit::Timer("Geometry(ORCA): ", oops::Log::trace()))
 {
+    eckit_timer_->start();
+    log_status();
     params_.validateAndDeserialize(config);
     int64_t halo = params_.sourceMeshHalo.value();
     auto meshgen_config = grid_.meshgenerator()
                           | atlas::option::halo(halo);
 
     atlas::MeshGenerator meshgen(meshgen_config);
+    log_status();
     auto partitioner_config = grid_.partitioner();
     partitioner_config.set("type",
         params_.partitioner.value());
     partitioner_ = atlas::grid::Partitioner(partitioner_config);
+    log_status();
     mesh_ = meshgen.generate(grid_, partitioner_);
+    log_status();
     funcSpace_ = atlas::functionspace::NodeColumns(
         mesh_, atlas::option::halo(halo));
+    log_status();
 }
 
 // -----------------------------------------------------------------------------
@@ -185,7 +193,7 @@ const bool Geometry::variable_in_variable_type(std::string variable_name,
   auto nemoFields = params_.nemoFields.value();
   for (const auto & nemoField : nemoFields) {
     if (nemoField.name.value() == variable_name) {
-      std::string type = nemoField.variableType.value().value_or("background");
+      std::string type = nemoField.variableType.value();
       return type == variable_type;
     }
   }
@@ -196,9 +204,31 @@ const bool Geometry::variable_in_variable_type(std::string variable_name,
   throw eckit::BadValue(err_stream.str(), Here());
 }
 
+/// \brief Data type of the atlas field holding the named variable data.
+/// \param[in]     variable_name  Name of variable.
+/// \return        orcamodel::FieldDType enum.
+FieldDType Geometry::fieldPrecision(std::string variable_name) const {
+  auto nemoFields = params_.nemoFields.value();
+  for (const auto & nemoField : nemoFields) {
+    if (nemoField.name.value() == variable_name) {
+       return nemoField.fieldPrecision.value();
+    }
+  }
+
+  std::stringstream err_stream;
+  err_stream << "orcamodel::Geometry::fieldPrecision variable name ";
+  err_stream << "\"" << variable_name << "\" not recognised. " << std::endl;
+  throw eckit::BadValue(err_stream.str(), Here());
+}
+
 void Geometry::print(std::ostream & os) const {
   os << "Not Implemented";
 }
 
+void Geometry::log_status() const {
+  oops::Log::trace() << "orcamodel::log_status " << eckit_timer_->elapsed() << " "
+      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
+      << " Gb" << std::endl;
+}
 
 }  // namespace orcamodel

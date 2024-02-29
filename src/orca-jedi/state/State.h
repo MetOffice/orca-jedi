@@ -61,6 +61,7 @@ class State : public util::Printable,
         const eckit::Configuration &);
   State(const Geometry &, const State &);
   State(const State &);
+  State(const oops::Variables &, const State &);
   virtual ~State();
 
   State & operator=(const State &);
@@ -75,7 +76,7 @@ class State : public util::Printable,
   void analytic_init(const Geometry &);
   void write(const OrcaStateParameters &) const;
   void write(const eckit::Configuration &) const;
-  double norm(const std::string & field_name) const;
+  template<class T> double norm(const std::string & field_name) const;
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}
 
@@ -99,6 +100,7 @@ class State : public util::Printable,
 
   const atlas::FieldSet & stateFields() const {return stateFields_;}
   atlas::FieldSet & stateFields() {return stateFields_;}
+  void subsetFieldSet(const oops::Variables & variables);
 
   const oops::Variables & variables() const {return vars_;}
   oops::Variables & variables() {return vars_;}

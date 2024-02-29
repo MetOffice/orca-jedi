@@ -32,16 +32,20 @@ CASE("test basic state") {
 
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
+    .set("field precision", "double")
     .set("nemo field name", "iiceconc")
     .set("model space", "surface");
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
+    .set("field precision", "double")
     .set("nemo field name", "sic_tot_var")
     .set("model space", "surface")
     .set("variable type", "background variance");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
+    .set("field precision", "double")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
   nemo_var_mappings[3].set("name", "sea_water_potential_temperature")
+    .set("field precision", "double")
     .set("nemo field name", "votemper")
     .set("model space", "volume");
   config.set("nemo variables", nemo_var_mappings);
@@ -74,12 +78,24 @@ CASE("test basic state") {
     State state(geometry, oops_vars, datetime);
   }
 
+  SECTION("test subset copy constructor") {
+    oops::Variables oops_vars({"sea_ice_area_fraction", "sea_surface_foundation_temperature"},
+        channels);
+    util::DateTime datetime("2021-06-30T00:00:00Z");
+    State state(geometry, oops_vars, datetime);
+
+    State state_copy(oops::Variables({"sea_ice_area_fraction"}, channels), state);
+
+    EXPECT_THROWS_AS(State(oops::Variables({"NOT_IN_SRC_STATE"}, channels), state),
+        eckit::BadValue);
+  }
+
   SECTION("test constructor from config analytic initialisation") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     state_config.set("analytic initialisation", true);
     params.validateAndDeserialize(state_config);
     State state(geometry, params);
-    EXPECT_EQUAL(state.norm("sea_ice_area_fraction"), 0);
+    EXPECT_EQUAL(state.norm<double>("sea_ice_area_fraction"), 0);
   }
 
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
@@ -92,17 +108,17 @@ CASE("test basic state") {
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    std::cout << std::setprecision(8) << state.norm("sea_ice_area_fraction")
+    std::cout << std::setprecision(8) << state.norm<double>("sea_ice_area_fraction")
               << std::setprecision(8) << iceNorm << std::endl;
-    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    EXPECT(std::abs(state.norm<double>("sea_ice_area_fraction") - iceNorm) < 1e-6);
   }
   SECTION("test state read") {
     state.read(params);
-    EXPECT(std::abs(state.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    EXPECT(std::abs(state.norm<double>("sea_ice_area_fraction") - iceNorm) < 1e-6);
   }
   SECTION("test stateCopy") {
     State stateCopy(state);
-    EXPECT(std::abs(stateCopy.norm("sea_ice_area_fraction") - iceNorm) < 1e-6);
+    EXPECT(std::abs(stateCopy.norm<double>("sea_ice_area_fraction") - iceNorm) < 1e-6);
   }
   SECTION("test state write") {
     state.write(params);

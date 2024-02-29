@@ -36,9 +36,11 @@
 #include "ufo/GeoVaLs.h"
 
 #include "orca-jedi/geometry/Geometry.h"
+#include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
+#include "orca-jedi/utilities/Types.h"
 
 
 namespace orcamodel {
@@ -69,7 +71,7 @@ State::State(const Geometry & geom,
   oops::Log::debug() << params_stream.str() << std::endl;
   oops::Log::trace() << "State(ORCA)::State:: time: " << validTime()
                      << std::endl;
-
+  geom_->log_status();
   setupStateFields();
 
   if (params_.analyticInit.value().value_or(false)) {
@@ -80,6 +82,7 @@ State::State(const Geometry & geom,
     readFieldsFromFile(params_, *geom_, validTime(), "background variance",
        stateFields_);
   }
+  geom_->log_status();
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
 }
 
@@ -99,6 +102,14 @@ State::State(const Geometry & resol, const State & other)
                      << " copied as there is no change" << std::endl;
 }
 
+State::State(const oops::Variables & variables, const State & other)
+  : State(other) {
+  eckit::LocalConfiguration change_config;
+  VariableChange change(change_config, *geom_);
+  change.changeVar(*this, variables);
+  oops::Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
+}
+
 State::State(const State & other)
   : geom_(other.geom_)
     , params_(other.params_)
@@ -111,6 +122,27 @@ State::State(const State & other)
 State::~State() {
   oops::Log::trace() << "State(ORCA)::State destructed." << std::endl;
 }
+
+void State::subsetFieldSet(const oops::Variables & variables) {
+  atlas::FieldSet subset;
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
+    if (!stateFields_.has(variable)) {
+      throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
+          + variable + "' does not appear in superset.");
+    }
+    subset.add(stateFields_[variable]);
+  }
+
+  stateFields_.clear();
+
+  for (int iVar = 0; iVar < variables.size(); iVar++) {
+    auto variable = variables[iVar];
+    stateFields_.add(subset[variable]);
+  }
+  vars_ = variables;
+}
+
 
 // Basic operators
 
@@ -170,9 +202,20 @@ void State::setupStateFields() {
     // add variable if it isn't already in stateFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!stateFields_.has(vars_[i])) {
-      stateFields_.add(geom_->functionSpace().createField<double>(
-           atlas::option::name(vars_[i]) |
-           atlas::option::levels(varSizes[i])));
+      const auto addField = [&](auto typeVal) {
+        using T = decltype(typeVal);
+        stateFields_.add(geom_->functionSpace().createField<T>(
+             atlas::option::name(vars_[i]) |
+             atlas::option::levels(varSizes[i])));
+        oops::Log::trace() << "State(ORCA)::setupStateFields : "
+                           << vars_[i] << "has dtype: "
+                           << (*(stateFields_.end()-1)).datatype().str() << std::endl;
+      };
+      ApplyForFieldType(addField,
+                        geom_->fieldPrecision(vars_[i]),
+                        eckit::BadParameter("State(ORCA)::setupStateFields "
+                          + vars_[i] + "' field type not recognised"));
+      geom_->log_status();
     }
   }
 }
@@ -188,14 +231,29 @@ void State::write(const eckit::Configuration & config) const {
 
 void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
+  geom_->log_status();
 
   os << std::endl << " Model state valid at time: " << validTime() << std::endl;
   os << std::string(4, ' ') << vars_ <<  std::endl;
   os << std::string(4, ' ') << "atlas field norms:" << std::endl;
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
+    double norm_val = 0;
+    oops::Log::trace() << "State(ORCA)::print '" << fieldName << "' type "
+                       << field.datatype().str() << std::endl;
+
+    const auto addField = [&](auto typeVal) {
+      using T = decltype(typeVal);
+      norm_val = norm<T>(fieldName);
+    };
+
+    ApplyForFieldType(addField,
+                      geom_->fieldPrecision(fieldName),
+                      eckit::BadParameter("State(ORCA)::print '"
+                        + fieldName + "' field type not recognised"));
+
     os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
-       << norm(fieldName) << std::endl;
+       << norm_val << std::endl;
   }
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
@@ -212,26 +270,35 @@ void State::zero() {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName
                        << std::endl;
-    auto field_view = atlas::array::make_view<double, 2>(field);
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) = 0;
+
+    const auto zeroField = [&](auto typeVal) {
+      using T = decltype(typeVal);
+      auto field_view = atlas::array::make_view<T, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          if (!ghost(j)) field_view(j, k) = 0;
+        }
       }
-    }
+    };
+
+    ApplyForFieldType(zeroField,
+                      geom_->fieldPrecision(fieldName),
+                      eckit::BadParameter("State(ORCA)::zero '"
+                        + fieldName + "' field type not recognised"));
   }
 
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
 }
 
-double State::norm(const std::string & field_name) const {
-  auto field_view = atlas::array::make_view<double, 2>(
+template<class T> double State::norm(const std::string & field_name) const {
+  auto field_view = atlas::array::make_view<T, 2>(
       stateFields_[field_name]);
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   double squares = 0;
   double valid_points = 0;
   atlas_omp_parallel {
-    atlas::field::MissingValue mv(stateFields()[field_name]);
+    atlas::field::MissingValue mv(stateFields_[field_name]);
     bool has_mv = static_cast<bool>(mv);
     double squares_TP = 0;
     size_t valid_points_TP = 0;
@@ -240,7 +307,7 @@ double State::norm(const std::string & field_name) const {
     atlas_omp_for(atlas::idx_t j = 0; j < num_h_locs; ++j) {
       if (!ghost(j)) {
         for (atlas::idx_t k = 0; k < num_levels; ++k) {
-          double pointValue = field_view(j, k);
+          T pointValue = field_view(j, k);
           if (!has_mv || (has_mv && !mv(pointValue))) {
             squares_TP += pointValue*pointValue;
             ++valid_points_TP;
@@ -276,5 +343,8 @@ double State::norm(const std::string & field_name) const {
 
   return 0;
 }
+
+template double State::norm<double>(const std::string & field_name) const;
+template double State::norm<float>(const std::string & field_name) const;
 
 }  // namespace orcamodel

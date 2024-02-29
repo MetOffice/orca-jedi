@@ -70,6 +70,11 @@ class Interpolator : public util::Printable,
   }
 
  private:
+  template<class T> void executeInterpolation(
+      const std::string& gv_varname,
+      size_t var_size,
+      const State& state,
+      std::vector<double>::iterator& result) const;
   void print(std::ostream &) const override;
   int64_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;

@@ -88,7 +88,7 @@ CASE("test parallel serially distributed write field array views") {
   SECTION("surface field matches with data in memory") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
-      std::vector<double> data = field_reader.read_var_slice("iiceconc", 0, 0);
+      std::vector<double> data = field_reader.read_var_slice<double>("iiceconc", 0, 0);
       for (atlas::idx_t iNode = 0; iNode < ice_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], ice_fv(iNode, 0));
@@ -99,7 +99,7 @@ CASE("test parallel serially distributed write field array views") {
   SECTION("depth field matches with data in memory") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
-      auto vert_levels = field_reader.read_vertical_var("z", 3);
+      auto vert_levels = field_reader.read_vertical_var<double>("z", 3);
 
       EXPECT_EQUAL(vert_levels[0], 1);
       EXPECT_EQUAL(vert_levels[1], 2);
@@ -111,19 +111,19 @@ CASE("test parallel serially distributed write field array views") {
   SECTION("volume field matches with data in memory") {
     if (rank == 0) {
       NemoFieldReader field_reader(test_data_path);
-      std::vector<double> data = field_reader.read_var_slice("votemper", 0, 0);
+      std::vector<double> data = field_reader.read_var_slice<double>("votemper", 0, 0);
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 0));
       }
       data.clear();
-      data = field_reader.read_var_slice("votemper", 0, 1);
+      data = field_reader.read_var_slice<double>("votemper", 0, 1);
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 1));
       }
       data.clear();
-      data = field_reader.read_var_slice("votemper", 0, 2);
+      data = field_reader.read_var_slice<double>("votemper", 0, 2);
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 2));
