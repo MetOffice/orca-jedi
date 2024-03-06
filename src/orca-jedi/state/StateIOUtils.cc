@@ -76,8 +76,8 @@ void readFieldsFromFile(
         };
         ApplyForFieldType(populate,
                           geom.fieldPrecision(fieldName),
-                          eckit::BadParameter("State(ORCA)::readFieldsFromFile '"
-                            + nemoName + "' field type not recognised"));
+                          std::string("State(ORCA)::readFieldsFromFile '")
+                            + nemoName + "' field type not recognised");
         // Add a halo exchange following read to fill out halo points
         geom.functionSpace().haloExchange(field);
         geom.log_status();

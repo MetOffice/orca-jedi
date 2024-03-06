@@ -213,8 +213,8 @@ void State::setupStateFields() {
       };
       ApplyForFieldType(addField,
                         geom_->fieldPrecision(vars_[i]),
-                        eckit::BadParameter("State(ORCA)::setupStateFields "
-                          + vars_[i] + "' field type not recognised"));
+                        std::string("State(ORCA)::setupStateFields ")
+                        + vars_[i] + "' field type not recognised");
       geom_->log_status();
     }
   }
@@ -249,8 +249,8 @@ void State::print(std::ostream & os) const {
 
     ApplyForFieldType(addField,
                       geom_->fieldPrecision(fieldName),
-                      eckit::BadParameter("State(ORCA)::print '"
-                        + fieldName + "' field type not recognised"));
+                      std::string("State(ORCA)::print '")
+                      + fieldName + "' field type not recognised");
 
     os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
        << norm_val << std::endl;
@@ -283,8 +283,8 @@ void State::zero() {
 
     ApplyForFieldType(zeroField,
                       geom_->fieldPrecision(fieldName),
-                      eckit::BadParameter("State(ORCA)::zero '"
-                        + fieldName + "' field type not recognised"));
+                      std::string("State(ORCA)::zero '")
+                      + fieldName + "' field type not recognised");
   }
 
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;

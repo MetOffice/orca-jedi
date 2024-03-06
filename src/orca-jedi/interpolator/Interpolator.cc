@@ -124,8 +124,8 @@ namespace orcamodel {
 
       ApplyForFieldType(execute,
                         state.geometry()->fieldPrecision(vars[jvar]),
-                        eckit::BadParameter("orcamodel::Interpolator::apply '"
-                          + vars[jvar] + "' field type not recognised"));
+                        std::string("orcamodel::Interpolator::apply '")
+                          + vars[jvar] + "' field type not recognised");
     }
     assert(result.size() == nvals);
     oops::Log::trace() << "orcamodel::Interpolator::apply done "
