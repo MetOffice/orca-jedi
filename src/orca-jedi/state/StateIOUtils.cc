@@ -12,10 +12,11 @@
 #include "oops/util/Logger.h"
 #include "oops/util/DateTime.h"
 #include "atlas/field.h"
+#include "atlas/field/MissingValue.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/nemo_io/NemoFieldWriter.h"
+#include "orca-jedi/nemo_io/WriteServer.h"
 
 #define NEMO_FILL_TOL 1e-6
 
@@ -56,7 +57,7 @@ void readFieldsFromFile(
       const oops::Variables vars = geom.variables();
       const std::vector<std::string> coordSpaces =
         geom.variableNemoSpaces(vars);
-      for (int i=0; i < vars.size(); ++i)
+      for (size_t i = 0; i < vars.size(); ++i)
         varCoordTypeMap[vars[i]] = coordSpaces[i];
     }
     for (atlas::Field field : fs) {
@@ -143,7 +144,7 @@ void writeFieldsToFile(
       const oops::Variables vars = geom.variables();
       const std::vector<std::string> coordSpaces =
         geom.variableNemoSpaces(vars);
-      for (int i=0; i < vars.size(); ++i)
+      for (size_t i=0; i < vars.size(); ++i)
         varCoordTypeMap[vars[i]] = coordSpaces[i];
     }
 
@@ -154,36 +155,26 @@ void writeFieldsToFile(
     std::vector<double> levels((*fs.begin()).shape(1), 0);
     for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
 
-    auto writeRankFields = [&](){
-      NemoFieldWriter field_writer(nemo_field_path, geom.mesh(), datetimes,
-          levels);
-      for (atlas::Field field : fs) {
-        std::string fieldName = field.name();
-        std::string nemoName = geom.nemo_var_name(fieldName);
-        auto field_view = atlas::array::make_view<double, 2>(field);
+    WriteServer writer(geom.timer(), nemo_field_path, geom.mesh(), datetimes, levels,
+                       geom.distributionType() == "serial");
+    for (atlas::Field field : fs) {
+      std::string fieldName = field.name();
+      std::string nemoName = geom.nemo_var_name(fieldName);
+      const auto write = [&](auto typeVal) {
+          using T = decltype(typeVal);
+        auto field_view = atlas::array::make_view<T, 2>(field);
+        atlas::field::MissingValue field_mv(field);
         if (varCoordTypeMap[fieldName] == "surface") {
-          field_writer.write_surf_var(nemoName, field_view, 0);
+          writer.write_surf_var<T>(nemoName, 0, field_mv, field_view);
         } else {
-          field_writer.write_vol_var(nemoName, field_view, 0);
+          writer.write_vol_var<T>(nemoName, 0, field_mv, field_view);
         }
-      }
-    };
-
-    // Write from rank 0 unless the data is distributed. If the date is
-    // distributed sequentially write the data to the output file.
-    if (geom.distributionType() == "serial") {
-        if (geom.getComm().rank() == 0) writeRankFields();
-    } else {
-      geom.getComm().barrier();
-      size_t rank = 0;
-      while (rank < geom.getComm().size()) {
-        if (rank == geom.getComm().rank()) {
-          writeRankFields();
-        }
-        rank++;
-      }
+      };
+      ApplyForFieldType(write,
+                        geom.fieldPrecision(fieldName),
+                        eckit::BadParameter("orcamodel::writeFieldsToFile '"
+                          + nemoName + "' field type not recognised"));
     }
-    geom.getComm().barrier();
 }
 
 }  // namespace orcamodel

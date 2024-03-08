@@ -127,7 +127,7 @@ namespace orcamodel {
                         std::string("orcamodel::Interpolator::apply '")
                           + vars[jvar] + "' field type not recognised");
     }
-    assert(result.size() == nvals);
+    ASSERT(result.size() == nvals);
     oops::Log::trace() << "orcamodel::Interpolator::apply done "
                        << std::endl;
   }
