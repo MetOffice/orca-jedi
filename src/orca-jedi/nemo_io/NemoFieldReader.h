@@ -33,6 +33,8 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
   size_t read_dim_size(const std::string& name) const;
   size_t get_nearest_datetime_index(const util::DateTime& datetime) const;
   template<typename T> T read_fillvalue(const std::string& name) const;
+  template<typename T> std::vector<T> read_volume_var(
+      const std::string& varname, const size_t t_indx, const size_t nlevels) const;
   template<typename T> std::vector<T> read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) const;
   template<typename T> std::vector<T> read_vertical_var(const std::string& varname,

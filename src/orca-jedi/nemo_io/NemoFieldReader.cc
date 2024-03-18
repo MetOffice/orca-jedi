@@ -422,9 +422,91 @@ template std::vector<double> NemoFieldReader::read_var_slice(const std::string& 
 template std::vector<float> NemoFieldReader::read_var_slice(const std::string& varname,
       const size_t t_indx, const size_t z_indx) const;
 
+/// \brief Read a 3D variable containing a x,y,z field defined at a given time.
+/// \param varname   The name of the variable.
+/// \param t_indx    The time index of the data to read.
+/// \param nlevels  The number of levels of data to read.
+/// \return a vector buffer of the 3D field values.
+template<typename T> std::vector<T> NemoFieldReader::read_volume_var(
+    const std::string& varname, const size_t t_indx, const size_t nlevels) const {
+  oops::Log::trace() << "orcamodel::NemoFieldReader::read_volume_var"
+                     << std::endl;
+  try {
+    size_t nx = read_dim_size("x");
+    size_t ny = read_dim_size("y");
+    size_t nz = read_dim_size(z_dimvar_name_);
+
+    if (nlevels > nz) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_volume_var number of levels"
+                 << nlevels << " is larger than NetCDF file  z dimension "
+                 << nz << " for varname " << varname;
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    netCDF::NcVar nc_var = ncFile->getVar(varname);
+    if (nc_var.isNull()) {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_volume_var ncVar '"
+                 << varname << "' is not present in NetCDF file";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    std::vector<T> buffer(nx*ny*nlevels);
+
+    size_t n_dims = nc_var.getDimCount();
+    std::string first_dim_name = nc_var.getDim(0).getName();
+    std::vector<size_t> starts;
+    std::vector<size_t> counts;
+    if (n_dims == 4) {
+      starts = {t_indx, 0, 0, 0};
+      counts = {1, nlevels, ny, nx};
+    } else if (n_dims == 3) {
+      starts = {t_indx, 0, 0};
+      counts = {nlevels, ny, nx};
+    } else {
+      std::ostringstream err_stream;
+      err_stream << "orcamodel::NemoFieldReader::read_volume_var ncVar '"
+                 << varname << "' has " << n_dims << " dimensions.";
+      throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    std::string nc_type_name = nc_var.getType().getName();
+    if (nc_type_name == "double") {
+        fill_from_ncvar_as_type<double, T>(nc_var, starts, counts, buffer);
+    } else if (nc_type_name == "float") {
+        fill_from_ncvar_as_type<float, T>(nc_var, starts, counts, buffer);
+    } else if (nc_type_name == "int") {
+        fill_from_ncvar_as_type<int, T>(nc_var, starts, counts, buffer);
+    } else if (nc_type_name == "int64") {
+        fill_from_ncvar_as_type<int64_t, T>(nc_var, starts, counts, buffer);
+    } else {
+        std::ostringstream err_stream;
+        err_stream << "orcamodel::NemoFieldReader::read_volume_var ncVar '"
+                   << varname << "' reading type "
+                   << nc_var.getType().getName() << " not supported.";
+        throw eckit::BadValue(err_stream.str(), Here());
+    }
+
+    // NOTE: buffer maps to field view such that:
+    //       field_view(n, k) = buffer[k*nx*ny + n];
+    return buffer;
+  } catch(netCDF::exceptions::NcException& e)
+  {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_volume_var varname: "
+      << varname << " NetCDF exception: " << std::endl << e.what();
+    throw eckit::ReadError(err_stream.str(), Here());
+  }
+}
+template std::vector<double> NemoFieldReader::read_volume_var(
+    const std::string& varname, const size_t t_indx, const size_t nlevels) const;
+template std::vector<float> NemoFieldReader::read_volume_var(
+    const std::string& varname, const size_t t_indx, const size_t nlevels) const;
+
 /// \brief Read a 1D variable containing level depth information.
 /// \param varname The name of the variable.
-/// \param n_levels The number of levels to read (beginning from the surface).
+/// \param nlevels The number of levels to read (beginning from the surface).
 /// \return a vector of the depth values.
 template<typename T> std::vector<T> NemoFieldReader::read_vertical_var(
     const std::string& varname,

@@ -93,6 +93,28 @@ CASE("test read_var_slice reads vector") {
   EXPECT_EQUAL(data[5], 171);
 }
 
+CASE("test read_volume_var reads vector") {
+  eckit::PathName test_data_path("../Data/simple_nemo.nc");
+
+  int nx = 3; int ny = 2; int nz = 2; int nt = 3;
+
+  NemoFieldReader field_reader(test_data_path);
+  std::vector<double> data = field_reader.read_volume_var<double>("votemper", 1, nz);
+
+  for (int i = 0; i < nx; ++i) {
+    for (int j = 0; j < ny; ++j) {
+      for (int k = 0; k < nz; ++k) {
+        double test_val = 2000 + (k + 1)*100 + (j + 1)*10 + i + 1;
+        std::cout << "data[" << k << "*" << nx << "*" << ny << "+"
+                             << j << "*" << nx << "+"
+                             << i << "] ";
+        std::cout << data[k*nx*ny+j*nx+i] << " ~ " << test_val << std::endl;
+        EXPECT_EQUAL(data[k*nx*ny+j*nx+i], test_val);
+      }
+    }
+  }
+}
+
 }  // namespace test
 }  // namespace orcamodel
 

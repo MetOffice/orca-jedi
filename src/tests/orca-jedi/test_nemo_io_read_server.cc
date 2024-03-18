@@ -94,7 +94,7 @@ CASE("test MPI distributed reads field array view") {
 
       auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
       std::vector<double> raw_data;
-      for (int k =0; k <3; k++) {
+      for (int k = 0; k < 3; k++) {
         raw_data = field_reader.read_var_slice<double>("votemper", 0, k);
         for (int i = 0; i < field_view.shape(0); ++i) {
           double raw_value = raw_data[orca_index(ij(i, 0), ij(i, 1))];
