@@ -30,11 +30,11 @@ NemoFieldWriter::NemoFieldWriter(const eckit::PathName& filename,
     size_t nx, size_t ny,
     const std::vector<double>& depths) :
       datetimes_(datetimes)
+    , depths_(depths)
+    , nLevels_(depths.size())
     , nTimes_(datetimes.size())
     , nx_(nx)
     , ny_(ny)
-    , depths_(depths)
-    , nLevels_(depths.size())
     , dimension_variables_present_(false) {
     bool new_file;
     if (!filename.exists() || atlas::mpi::rank() == 0) {

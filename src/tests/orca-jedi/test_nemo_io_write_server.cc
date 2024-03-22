@@ -56,6 +56,7 @@ void applyMPISerialised(const Functor& functor, const std::string& partitioner_n
 
 CASE("test MPI distributed field array view write to disk") {
   auto partitioner_names = std::vector<std::string>{"serial", "checkerboard"};
+  std::string grid_name("ORCA2_T");
   size_t nparts = atlas::mpi::size();
   if (nparts == 1)
     partitioner_names = std::vector<std::string>{"serial"};
@@ -63,7 +64,7 @@ CASE("test MPI distributed field array view write to disk") {
     // setup atlas data before write
     eckit::PathName test_data_path(std::string("../testoutput/write_orca2_t_")
         + partitioner_name + "_" + std::to_string(nparts) + ".nc");
-    atlas::OrcaGrid grid("ORCA2_T");
+    atlas::OrcaGrid grid(grid_name);
 
     auto meshgen_config = grid.meshgenerator();
     atlas::MeshGenerator meshgen(meshgen_config);
@@ -75,20 +76,10 @@ CASE("test MPI distributed field array view write to disk") {
     auto funcSpace = atlas::functionspace::NodeColumns(mesh);
     auto orca2buffer = OrcaIndexToBufferIndex(mesh);
 
-    SECTION(partitioner_name + "_" + std::to_string(nparts) + " test ORCA indexing") {
-      auto ij = atlas::array::make_view<int32_t, 2>(mesh.nodes().field("ij"));
-      EXPECT(orca2buffer.nx() == 182);
-      EXPECT(orca2buffer.ny() == 149);
-      for (int32_t inode = 0; inode < ij.shape(0); ++inode) {
-        if (orca2buffer(ij(inode, 0), ij(inode, 1)) != orca2buffer(inode)) {
-          std::cout << "mismatch in orca indexers: inode: i, j "
-                    << "orca2buffer(" << ij(inode, 0) << "," << ij(inode, 1)
-                    << ") != orca2buffer(" << inode << "): "
-                    << orca2buffer(ij(inode, 0), ij(inode, 1))
-                    << " != " << orca2buffer(inode)
-                    << std::endl;
-        }
-        EXPECT(orca2buffer(ij(inode, 0), ij(inode, 1)) == orca2buffer(inode));
+    if (grid_name == "ORCA2_T") {
+      SECTION(partitioner_name + "_" + std::to_string(nparts) + " test ORCA indexing") {
+        EXPECT(orca2buffer.nx() == 182);
+        EXPECT(orca2buffer.ny() == 149);
       }
     }
 

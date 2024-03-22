@@ -26,7 +26,6 @@ namespace orcamodel {
 struct OrcaIndexToBufferIndex {
  private:
   atlas::OrcaGrid orcaGrid_;
-  atlas::Mesh mesh_;
   int32_t ix_glb_max;
   int32_t iy_glb_max;
   int32_t glbarray_offset;
@@ -38,7 +37,7 @@ struct OrcaIndexToBufferIndex {
   size_t nx() const {return nx_;}
   size_t ny() const {return ny_;}
 
-  explicit OrcaIndexToBufferIndex(const atlas::Mesh& mesh) : orcaGrid_(mesh.grid()), mesh_(mesh) {
+  explicit OrcaIndexToBufferIndex(const atlas::Mesh& mesh) : orcaGrid_(mesh.grid()) {
     iy_glb_max = orcaGrid_.ny() + orcaGrid_.haloNorth() - 1;
     ix_glb_max = orcaGrid_.nx() + orcaGrid_.haloEast() - 1;
 
@@ -62,16 +61,6 @@ struct OrcaIndexToBufferIndex {
       ATLAS_ASSERT(j <= iy_glb_max,
           std::to_string(j) + " > " + std::to_string(iy_glb_max));
       return glbarray_offset + j * glbarray_jstride + i;
-  }
-
-  /// \brief buffer Index of buffer index corresponding to mesh inode
-  /// \param inode
-  /// \return index of a matching 1D array
-  int64_t operator()(const size_t inode) const {
-    auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
-    const size_t i = ij(inode, 0) + orcaGrid_.haloWest();
-    const size_t j = ij(inode, 1) + orcaGrid_.haloSouth();
-    return j*nx_ + i;
   }
 };
 

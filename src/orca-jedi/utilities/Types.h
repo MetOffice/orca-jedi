@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <string>
-#include "eckit/exception/Exceptions.h"
 #include <netcdf>
-#include <exception>
+
+#include <string>
+
+#include "eckit/exception/Exceptions.h"
 
 namespace orcamodel {
 

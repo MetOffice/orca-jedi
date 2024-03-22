@@ -172,8 +172,8 @@ void writeFieldsToFile(
       };
       ApplyForFieldType(write,
                         geom.fieldPrecision(fieldName),
-                        eckit::BadParameter("orcamodel::writeFieldsToFile '"
-                          + nemoName + "' field type not recognised"));
+                        std::string("State(ORCA)::writeFieldsToFile '")
+                          + nemoName + "' field type not recognised.");
     }
 }
 
