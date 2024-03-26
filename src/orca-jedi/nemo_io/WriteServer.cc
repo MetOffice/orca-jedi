@@ -68,10 +68,10 @@ template std::vector<float> WriteServer::sort_buffer<float>(
     const std::vector<float> & buffer) const;
 
 /// \brief Gather field_view data from all processes to a buffer on the server root process
-/// \param field_view Field data to write to the file.
-/// \param i_level    level index for the data.
-/// \param start      start index for the destination buffer.
-/// \return buffer    vector of data to write.
+/// \param field_view     Field data to write to the file.
+/// \param i_level        level index for the data.
+/// \param missingValue   missing value object for matching masked data.
+/// \return buffer        vector of data to write.
 template<class T> std::vector<T> WriteServer::gather_field_on_root(
   const atlas::array::ArrayView<T, 2>& field_view, const size_t i_level,
   const atlas::field::MissingValue& missingValue) const {

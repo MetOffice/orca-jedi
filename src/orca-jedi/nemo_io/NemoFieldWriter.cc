@@ -21,7 +21,6 @@
 #include "atlas/runtime/Log.h"
 #include "atlas/field.h"
 #include "atlas/array.h"
-#include "atlas/parallel/mpi/mpi.h"
 
 namespace orcamodel {
 
@@ -37,7 +36,7 @@ NemoFieldWriter::NemoFieldWriter(const eckit::PathName& filename,
     , ny_(ny)
     , dimension_variables_present_(false) {
     bool new_file;
-    if (!filename.exists() || atlas::mpi::rank() == 0) {
+    if (!filename.exists()) {
       ncFile = std::make_unique<netCDF::NcFile>(filename.fullName().asString(),
           netCDF::NcFile::replace);
       new_file = true;
@@ -109,10 +108,13 @@ void NemoFieldWriter::write_dimensions(const std::vector<double>& lats,
         timeVar.putVar({iTime}, seconds_since_epoch);
     }
 
-    auto levVar = ncFile->addVar("z", netCDF::ncDouble, {nzDim});
-    for (size_t iLevel = 0; iLevel < nLevels_; ++iLevel) {
-        levVar.putVar({iLevel}, depths_[iLevel]);
+    {
+      auto levVar = ncFile->addVar("z", netCDF::ncDouble, {nzDim});
+      std::vector<size_t> starts = {0};
+      std::vector<size_t> counts = {nLevels_};
+      levVar.putVar(starts, counts, depths_.data());
     }
+
     dimension_variables_present_ = true;
 }
 template <typename T> void NemoFieldWriter::write_surf_var(std::string varname,
