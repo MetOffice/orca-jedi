@@ -54,14 +54,20 @@ NemoFieldWriter::NemoFieldWriter(const eckit::PathName& filename,
       setup_dimensions();
     }
 
-    auto navLatVar = ncFile->getVar("nav_lat");
-    auto navLonVar = ncFile->getVar("nav_lon");
-    auto tVar = ncFile->getVar("t");
-    auto zVar = ncFile->getVar("z");
-    if (navLatVar.isNull() || navLonVar.isNull() || tVar.isNull() || zVar.isNull()) {
-      dimension_variables_present_ = false;
-    } else {
-      dimension_variables_present_ = true;
+    try {
+      auto navLatVar = ncFile->getVar("nav_lat");
+      auto navLonVar = ncFile->getVar("nav_lon");
+      auto tVar = ncFile->getVar("t");
+      auto zVar = ncFile->getVar("z");
+      if (navLatVar.isNull() || navLonVar.isNull() || tVar.isNull() || zVar.isNull()) {
+        dimension_variables_present_ = false;
+      } else {
+        dimension_variables_present_ = true;
+      }
+    }
+    catch (netCDF::exceptions::NcException& e) {
+        throw eckit::FailedLibraryCall("NetCDF",
+            "orcamodel::NemoFieldWriter::NemoFieldWriter", e.what(), Here());
     }
 }
 
@@ -77,45 +83,55 @@ void NemoFieldWriter::setup_dimensions() {
 void NemoFieldWriter::write_dimensions(const std::vector<double>& lats,
                                        const std::vector<double>& lons) {
     oops::Log::trace() << "orcamodel::NemoFieldWriter::write_dimensions" << std::endl;
+    try {
+      auto nxDim = ncFile->getDim("x");
+      auto nyDim = ncFile->getDim("y");
+      auto nzDim = ncFile->getDim("z");
+      auto ntDim = ncFile->getDim("t");
 
-    auto nxDim = ncFile->getDim("x");
-    auto nyDim = ncFile->getDim("y");
-    auto nzDim = ncFile->getDim("z");
-    auto ntDim = ncFile->getDim("t");
-
-    auto navLatVar = ncFile->addVar("nav_lat", netCDF::ncDouble, {nyDim, nxDim});
-    auto navLonVar = ncFile->addVar("nav_lon", netCDF::ncDouble, {nyDim, nxDim});
-    if ((lons.size() != nx_*ny_) || (lats.size() != nx_*ny_)) {
+      if ((lons.size() != nx_*ny_) || (lats.size() != nx_*ny_)) {
         throw eckit::BadValue(
             std::string("orcamodel::NemoFieldWriter::write_dimensions")
             + " dimensions sizes do not match lat/lon buffer sizes",
           Here());
-    }
-    navLonVar.putVar({0, 0}, {ny_, nx_}, lons.data());
-    navLatVar.putVar({0, 0}, {ny_, nx_}, lats.data());
+      }
+      if (dimension_variables_present_) {
+         oops::Log::trace() << "orcamodel::NemoFieldWriter::write_dimensions "
+                            << "dimensions already present" << std::endl;
+         return;
+      }
+      auto navLatVar = ncFile->addVar("nav_lat", netCDF::ncDouble, {nyDim, nxDim});
+      auto navLonVar = ncFile->addVar("nav_lon", netCDF::ncDouble, {nyDim, nxDim});
+      navLonVar.putVar({0, 0}, {ny_, nx_}, lons.data());
+      navLatVar.putVar({0, 0}, {ny_, nx_}, lats.data());
 
-    auto timeVar = ncFile->addVar("t", netCDF::ncInt, {ntDim});
-    const std::string seconds_since = "seconds since ";
-    std::string units_string = "seconds since 1970-01-01 00:00:00";
-    timeVar.putAtt("units", units_string);
+      auto timeVar = ncFile->addVar("t", netCDF::ncInt, {ntDim});
+      const std::string seconds_since = "seconds since ";
+      std::string units_string = "seconds since 1970-01-01 00:00:00";
+      timeVar.putAtt("units", units_string);
 
-    units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
-    units_string.append("Z");
-    util::DateTime epoch = util::DateTime(
-        units_string.substr(seconds_since.size()));
-    for (size_t iTime = 0; iTime < nTimes_; ++iTime) {
+      units_string.replace(seconds_since.size() + 10, 1, 1, 'T');
+      units_string.append("Z");
+      util::DateTime epoch = util::DateTime(
+          units_string.substr(seconds_since.size()));
+      for (size_t iTime = 0; iTime < nTimes_; ++iTime) {
         int seconds_since_epoch = (datetimes_[iTime] - epoch).toSeconds();
         timeVar.putVar({iTime}, seconds_since_epoch);
-    }
+      }
 
-    {
-      auto levVar = ncFile->addVar("z", netCDF::ncDouble, {nzDim});
-      std::vector<size_t> starts = {0};
-      std::vector<size_t> counts = {nLevels_};
-      levVar.putVar(starts, counts, depths_.data());
-    }
+      {
+        auto levVar = ncFile->addVar("z", netCDF::ncDouble, {nzDim});
+        std::vector<size_t> starts = {0};
+        std::vector<size_t> counts = {nLevels_};
+        levVar.putVar(starts, counts, depths_.data());
+      }
 
-    dimension_variables_present_ = true;
+      dimension_variables_present_ = true;
+    }
+    catch (netCDF::exceptions::NcException& e) {
+        throw eckit::FailedLibraryCall("NetCDF",
+            "orcamodel::NemoFieldWriter::write_dimensions", e.what(), Here());
+    }
 }
 template <typename T> void NemoFieldWriter::write_surf_var(std::string varname,
     const std::vector<T>& var_data, size_t iTime) {
