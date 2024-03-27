@@ -20,6 +20,18 @@ ecbuild_add_test( TARGET  test_orcajedi_nemo_io_read_server.x
                   CONDITION  eckit_HAVE_MPI
                   LIBS    orcamodel )
 
+ecbuild_add_test( TARGET  test_orcajedi_nemo_io_write_server_MPI2.x
+                  SOURCES test_nemo_io_write_server.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  MPI        2
+                  CONDITION  eckit_HAVE_MPI
+                  LIBS    orcamodel )
+
+ecbuild_add_test( TARGET  test_orcajedi_nemo_io_write_server.x
+                  SOURCES test_nemo_io_write_server.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  LIBS    orcamodel )
+
 ecbuild_add_test( TARGET  test_orcajedi_geometry.x
                   SOURCES test_geometry.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}

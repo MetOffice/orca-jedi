@@ -19,7 +19,7 @@ namespace orcamodel {
 ReadServer::ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
   const eckit::PathName& file_path, const atlas::Mesh& mesh) :
   mesh_(mesh),
-  index_glbarray_(atlas::OrcaGrid(mesh.grid())),
+  orca_buffer_indices_(mesh),
   eckit_timer_(eckit_timer) {
   if (myrank == mpiroot) {
     reader_ = std::make_unique<NemoFieldReader>(file_path);
@@ -37,7 +37,7 @@ template<class T> void ReadServer::read_var_on_root(const std::string& var_name,
               std::vector<T>& buffer) const {
   oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::read_var_on_root "
     << var_name << std::endl;
-  size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
+  size_t size = orca_buffer_indices_.nx() * orca_buffer_indices_.ny();
   if (myrank == mpiroot) {
     buffer = reader_->read_var_slice<T>(var_name, t_index, z_index);
   } else {
@@ -60,7 +60,7 @@ template void ReadServer::read_var_on_root<float>(const std::string& var_name,
 template<class T> void ReadServer::read_vertical_var_on_root(const std::string& var_name,
               const size_t n_levels,
               std::vector<T>& buffer) const {
-  size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
+  size_t size = orca_buffer_indices_.nx() * orca_buffer_indices_.ny();
   if (myrank == mpiroot) {
     buffer = reader_->read_vertical_var<T>(var_name, n_levels);
   } else {
@@ -86,10 +86,10 @@ template<class T> void ReadServer::fill_field(const std::vector<T>& buffer,
     auto ij = atlas::array::make_view<int32_t, 2>(this->mesh_.nodes().field("ij"));
     const size_t num_nodes = field_view.shape(0);
     // "ReadServer buffer size does not equal the number of horizontal nodes in the field_view"
-    assert(num_nodes <= buffer.size());
+    ASSERT(num_nodes <= buffer.size());
     atlas_omp_parallel_for(size_t inode = 0; inode < num_nodes; ++inode) {
       if (ghost(inode)) continue;
-      const int64_t ibuf = index_glbarray_(ij(inode, 0), ij(inode, 1));
+      const int64_t ibuf = orca_buffer_indices_(ij(inode, 0), ij(inode, 1));
       field_view(inode, z_index) = buffer[ibuf];
     }
 }
@@ -113,7 +113,7 @@ template<class T> void ReadServer::fill_vertical_field(const std::vector<T>& buf
     const size_t num_nodes = field_view.shape(0);
     const size_t num_levels = field_view.shape(1);
     // "ReadServer buffer size does not equal the number of levels in the field_view"
-    assert(num_levels <= buffer.size());
+    ASSERT(num_levels <= buffer.size());
 
     // even for 1D depths, store the data in an atlas 3D field - inefficient but flexible
     // NOTE: Use thread-private levels data to reduce OMP cache misses
@@ -146,7 +146,7 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
     << var_name << std::endl;
 
   size_t n_levels = field_view.shape(1);
-  size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
+  size_t size = orca_buffer_indices_.nx() * orca_buffer_indices_.ny();
 
   std::vector<T> buffer;
   // For each level
@@ -154,7 +154,7 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
     // read the data for that level onto the root processor
     this->read_var_on_root<T>(var_name, t_index, iLev, buffer);
 
-    assert(buffer.size() == size);
+    ASSERT(buffer.size() == size);
     // mpi distribute that data out to all processors
     atlas::mpi::comm().broadcast(&buffer.front(), size, mpiroot);
 
