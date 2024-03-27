@@ -68,10 +68,10 @@ template std::vector<float> WriteServer::sort_buffer<float>(
     const std::vector<float> & buffer) const;
 
 /// \brief Gather field_view data from all processes to a buffer on the server root process
-/// \param field_view     Field data to write to the file.
-/// \param i_level        level index for the data.
-/// \param missingValue   missing value object for matching masked data.
-/// \return buffer        vector of data to write.
+/// \param field_view   Field data to write to the file.
+/// \param i_level      level index for the data.
+/// \param missingValue missing value object for matching masked data.
+/// \return buffer      vector of data to write.
 template<class T> std::vector<T> WriteServer::gather_field_on_root(
   const atlas::array::ArrayView<T, 2>& field_view, const size_t i_level,
   const atlas::field::MissingValue& missingValue) const {
@@ -125,9 +125,10 @@ template std::vector<float> WriteServer::gather_field_on_root<float>(
   const atlas::field::MissingValue& missingValue) const;
 
 /// \brief  Write a 3D field at a given time index to a file.
-/// \param var_name   Name of the variable in the file.
-/// \param t_index    Time index in the file to write.
-/// \param field_view Field data to write to the file.
+/// \param var_name     Name of the variable in the file.
+/// \param t_index      Time index in the file to write.
+/// \param missingValue missing value object for matching masked data.
+/// \param field_view   Field data to write to the file.
 template<class T> void WriteServer::write_vol_var(const std::string& var_name,
     const size_t t_index,
     const atlas::field::MissingValue& missingValue,
@@ -167,9 +168,10 @@ template void WriteServer::write_vol_var<float>(const std::string& var_name,
     const atlas::array::ArrayView<float, 2>& field_view);
 
 /// \brief  Write a 2D field at a given time index to a file.
-/// \param var_name   Name of the variable in the file.
-/// \param t_index    Time index in the file to write.
-/// \param field_view Field data to write to the file.
+/// \param var_name     Name of the variable in the file.
+/// \param t_index      Time index in the file to write.
+/// \param missingValue missing value object for matching masked data.
+/// \param field_view   Field data to write to the file.
 template<class T> void WriteServer::write_surf_var(const std::string& var_name,
     const size_t t_index, const atlas::field::MissingValue& missingValue,
     const atlas::array::ArrayView<T, 2>& field_view) {
