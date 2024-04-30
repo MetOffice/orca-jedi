@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <tuple>
 
 #include "atlas/field/FieldSet.h"
 
@@ -40,7 +41,6 @@ namespace oops {
 namespace orcamodel {
   class Geometry;
   class ModelBiasIncrement;
-  class ErrorCovariance;
   class State;
 
 /// orcaModel Increment Class: Difference between two states
@@ -68,25 +68,31 @@ class Increment : public util::Printable,
   Increment(const Increment &);
 
 /// Basic operators
-  void diff(const State &, const State &) {}
-  void zero() {}
-  void zero(const util::DateTime &) {}
-  void ones() {}
-  // Increment & operator =(const Increment &);
-  // Increment & operator+=(const Increment &);
-  // Increment & operator-=(const Increment &);
-  // Increment & operator*=(const double &);
-  void axpy(const double &, const Increment &, const bool check = true) {}
-  double dot_product_with(const Increment &) const {return 0.0; }
-  void schur_product_with(const Increment &) {}
-  void random() {}
-  void dirac(const eckit::Configuration &) {}
+  void diff(const State &, const State &);
+  void zero();
+  void zero(const util::DateTime &);
+  void ones();
+  Increment & operator =(const Increment &);
+  Increment & operator+=(const Increment &);
+  Increment & operator-=(const Increment &);
+  Increment & operator*=(const double &);
+  void axpy(const double &, const Increment &, const bool check = true);
+  double dot_product_with(const Increment &) const;
+  void schur_product_with(const Increment &);
+  void random();
+  void dirac(const eckit::Configuration &);
 
+/// ATLAS
+  void toFieldSet(atlas::FieldSet &) const;
+  void toFieldSetAD(const atlas::FieldSet &);
+  void fromFieldSet(const atlas::FieldSet &);
+ 
 /// I/O and diagnostics
-  void read(const eckit::Configuration &) {}
-  void write(const eckit::Configuration &) const {}
-  double norm() const {return 0.0; }
-  void print(std::ostream & os) const override {os << "Not Implemented";}
+  void read(const eckit::Configuration &);
+  void write(const eckit::Configuration &) const;
+  void print(std::ostream & os) const override;
+  std::tuple<double, double, double> stats(const std::string & field_name) const;
+  double norm() const;
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
 
@@ -103,7 +109,6 @@ class Increment : public util::Printable,
 /// Other
   void accumul(const double &, const State &) {}
 
-
 /// Utilities
   std::shared_ptr<const Geometry> geometry() const {return geom_;}
 
@@ -114,17 +119,18 @@ class Increment : public util::Printable,
 
   const atlas::FieldSet & incrementFields() const {return incrementFields_;}
   atlas::FieldSet & incrementFields() {return incrementFields_;}
-
   const oops::Variables & variables() const {return vars_;}
-
 
 /// Data
  private:
-  // void print(std::ostream &) const override;
+  void setupIncrementFields();
+  void setval(const double &);
   std::shared_ptr<const Geometry> geom_;
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet incrementFields_;
+  int seed_ = 7;
+
 };
 // -----------------------------------------------------------------------------
 
