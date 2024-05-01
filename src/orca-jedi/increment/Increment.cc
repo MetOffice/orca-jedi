@@ -30,7 +30,6 @@
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
 #include "orca-jedi/increment/Increment.h"
-#include "orca-jedi/state/StateIOUtils.h"
 
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
@@ -49,12 +48,11 @@ Increment::Increment(const Geometry & geom,
   incrementFields_ = atlas::FieldSet();
 
   setupIncrementFields();
-  
+
   this->zero();   // may not be needed
 
   oops::Log::debug() << "Increment(ORCA)::Increment created for "<< validTime()
                      << std::endl;
-
 }
 
 Increment::Increment(const Geometry & geom,
@@ -70,7 +68,7 @@ Increment::Increment(const Geometry & geom,
 Increment::Increment(const Increment & other, const bool copy)
   : geom_(other.geom_), vars_(other.vars_), time_(other.time_),
     incrementFields_()
-{  
+{
   oops::Log::debug() << "Increment(ORCA)::Increment copy " << copy << std::endl;
 
   incrementFields_ = atlas::FieldSet();
@@ -78,25 +76,20 @@ Increment::Increment(const Increment & other, const bool copy)
   setupIncrementFields();
 
   if (copy) {
-
-  for (size_t i=0; i < vars_.size(); ++i) {
-
-    // copy variable from _Fields to new field set
-    atlas::Field field = other.incrementFields_[i];
-    oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
-    incrementFields_->add(field);
-
+    for (size_t i=0; i < vars_.size(); ++i) {
+      // copy variable from _Fields to new field set
+      atlas::Field field = other.incrementFields_[i];
+      oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
+      incrementFields_->add(field);
+    }
   }
-  
-  }
-  
+
   oops::Log::debug() << "Increment(ORCA)::Increment copied." << std::endl;
 
   oops::Log::debug() << "increment copy self print";
   print(oops::Log::debug());
   oops::Log::debug() << "increment copy other print";
-  other.print(oops::Log::debug());  
-
+  other.print(oops::Log::debug());
 }
 
 Increment::Increment(const Increment & other)
@@ -126,11 +119,11 @@ Increment & Increment::operator+=(const Increment & dx) {
   oops::Log::debug() << "increment add self print";
   print(oops::Log::debug());
   oops::Log::debug() << "increment add dx print";
-  dx.print(oops::Log::debug());  
+  dx.print(oops::Log::debug());
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
     atlas::Field field1 = dx.incrementFields_[i];
@@ -152,7 +145,7 @@ Increment & Increment::operator+=(const Increment & dx) {
   oops::Log::debug() << "increment add self print";
   print(oops::Log::debug());
   oops::Log::debug() << "increment add dx print";
-  dx.print(oops::Log::debug());  
+  dx.print(oops::Log::debug());
 
   oops::Log::debug() << "Increment(ORCA)::+ add ended" << std::endl;
   return *this;
@@ -163,7 +156,7 @@ Increment & Increment::operator-=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
     atlas::Field field1 = dx.incrementFields_[i];
@@ -186,14 +179,13 @@ Increment & Increment::operator-=(const Increment & dx) {
 }
 
 Increment & Increment::operator*=(const double & zz) {
-
   oops::Log::debug() << "orcamodel::Increment:multiply start" << std::endl;
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::Increment::multiply:: field name = " << fieldName 
+    oops::Log::debug() << "orcamodel::Increment::multiply:: field name = " << fieldName
                        << " zz " << zz
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
@@ -214,7 +206,7 @@ void Increment::diff(const State & x1, const State & x2) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field1 = x1.getField(i);
     atlas::Field field2 = x2.getField(i);
@@ -225,19 +217,18 @@ void Increment::diff(const State & x1, const State & x2) {
     std::string fieldNamei = fieldi.name();
     oops::Log::debug() << "orcamodel::Increment::diff:: field name 1 = " << fieldName1
                        << " field name 2 = " << fieldName2
-                       << " field name inc = " << fieldNamei                       
+                       << " field name inc = " << fieldNamei
                        << std::endl;
     auto field_view1 = atlas::array::make_view<double, 2>(field1);
     auto field_view2 = atlas::array::make_view<double, 2>(field2);
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_viewi.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_viewi.shape(1); ++k) {
-        if (!ghost(j)) { field_viewi(j, k) = field_view1(j, k) - field_view2(j, k); }
-        else { field_viewi(j,k) = 0; }
+        if (!ghost(j)) { field_viewi(j, k) = field_view1(j, k) - field_view2(j, k);
+        } else { field_viewi(j, k) = 0; }
       }
     }
   }
-
 }
 
 void Increment::setval(const double & val) {
@@ -287,7 +278,7 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
     atlas::Field field1 = dx.incrementFields_[i];
@@ -304,16 +295,14 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
       }
     }
   }
-
 }
 
 double Increment::dot_product_with(const Increment & dx) const {
-
   double zz = 0;
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   // How should this deal with multiple fields only want to do this with one field??? DJL
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
     atlas::Field field1 = dx.incrementFields_[i];
@@ -337,10 +326,9 @@ double Increment::dot_product_with(const Increment & dx) const {
 }
 
 void Increment::schur_product_with(const Increment & dx) {
-
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size();i++)
+  for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
     atlas::Field field1 = dx.incrementFields_[i];
@@ -357,11 +345,9 @@ void Increment::schur_product_with(const Increment & dx) {
       }
     }
   }
-
 }
 
 void Increment::random() {
-
   oops::Log::debug() << "orcamodel::Increment::random start" << std::endl;
   oops::Log::debug() << "orcamodel::Increment::random seed_ " << seed_ << std::endl;
 
@@ -374,7 +360,7 @@ void Increment::random() {
     auto field_view = atlas::array::make_view<double, 2>(field);
     // Seed currently hardwired in increment.h DJL - find out how this is dealt with generally
     util::NormalDistribution<double> xx(field_view.shape(0)*field_view.shape(1), 0.0, 1.0, seed_);
-    int idx=0;
+    int idx = 0;
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) field_view(j, k) = xx[idx];
@@ -382,7 +368,6 @@ void Increment::random() {
       }
     }
   }
-
 }
 
 void Increment::dirac(const eckit::Configuration & conf) {
@@ -394,11 +379,11 @@ void Increment::dirac(const eckit::Configuration & conf) {
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   oops::Log::debug() << "orcamodel::Increment::dirac:: nx " << nx << std::endl;
-   
-  int jpt = iydir[0]*nx + ixdir[0];
-  int kpt = izdir[0]; 
 
-  oops::Log::debug() << "orcamodel::Increment::dirac:: delta function at jpt = " << jpt 
+  int jpt = iydir[0]*nx + ixdir[0];
+  int kpt = izdir[0];
+
+  oops::Log::debug() << "orcamodel::Increment::dirac:: delta function at jpt = " << jpt
                        << " kpt " << kpt << std::endl;
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
@@ -413,19 +398,15 @@ void Increment::dirac(const eckit::Configuration & conf) {
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
-          if (j == jpt && k == kpt) { 
+          if (j == jpt && k == kpt) {
             field_view(j, k) = 1;
-          }
-          else
-          {
+          } else {
             field_view(j, k) = 0;
           }
         }
       }
     }
-    
   }
-
 }
 
 void Increment::toFieldSet(atlas::FieldSet & fset) const {
@@ -457,11 +438,12 @@ void Increment::toFieldSetAD(const atlas::FieldSet & fset) {
 void Increment::fromFieldSet(const atlas::FieldSet & fset) {
   oops::Log::debug() << "Increment fromFieldSet start" << std::endl;
 
-  for (int i = 0; i< fset.size();i++) {
+  for (int i = 0; i< fset.size(); i++) {
     atlas::Field field = fset[i];
     atlas::Field fieldinc = incrementFields_[i];
     oops::Log::debug() << "Increment fromFieldSet field " << i << " " << field.name() << std::endl;
-    oops::Log::debug() << "Increment fromFieldSet fieldinc " << i << " " << fieldinc.name() << std::endl;
+    oops::Log::debug() << "Increment fromFieldSet fieldinc " << i
+                       << " " << fieldinc.name() << std::endl;
 
 // copy from field to incrementfields
 
@@ -472,9 +454,7 @@ void Increment::fromFieldSet(const atlas::FieldSet & fset) {
         field_view_to(j, k) = field_view_from(j, k);
       }
     }
-
   }
-
   oops::Log::debug() << "Increment fromFieldSet done" << std::endl;
 }
 
@@ -499,18 +479,15 @@ void Increment::read(const eckit::Configuration & conf) {
   std::string err_message =
       "orcamodel::Increment::read not implemented";
   throw eckit::NotImplemented(err_message, Here());
-  
 }
 
 void Increment::write(const eckit::Configuration & conf) const {
   std::string err_message =
       "orcamodel::Increment::write not implemented";
   throw eckit::NotImplemented(err_message, Here());
-
 }
 
 void Increment::print(std::ostream & os) const {
-
   double norm;
   double min;
   double max;
@@ -527,15 +504,14 @@ void Increment::print(std::ostream & os) const {
        << norm;
     os << " min: " << min << " max: " << max << std::endl;
   }
-
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
 }
 
 std::tuple<double, double, double> Increment::stats(const std::string & fieldName) const {
   double norm = 0;
   int valid_points = 0;
-  double min=1e30;
-  double max=-1e30;
+  double min = 1e30;
+  double max = -1e30;
 
   auto field_view = atlas::array::make_view<double, 2>(
       incrementFields_[fieldName]);
@@ -548,15 +524,14 @@ std::tuple<double, double, double> Increment::stats(const std::string & fieldNam
     for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
       if (!ghost(j)) {
         if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-          if (field_view(j,k) > max) { max=field_view(j,k); }
-          if (field_view(j,k) < min) { min=field_view(j,k); }
+          if (field_view(j, k) > max) { max=field_view(j, k); }
+          if (field_view(j, k) < min) { min=field_view(j, k); }
           norm += field_view(j, k)*field_view(j, k);
           ++valid_points;
         }
       }
     }
   }
-  
   return std::make_tuple(sqrt(norm)/valid_points, min, max);
 }
 

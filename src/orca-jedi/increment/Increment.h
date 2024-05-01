@@ -86,7 +86,7 @@ class Increment : public util::Printable,
   void toFieldSet(atlas::FieldSet &) const;
   void toFieldSetAD(const atlas::FieldSet &);
   void fromFieldSet(const atlas::FieldSet &);
- 
+
 /// I/O and diagnostics
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
@@ -130,7 +130,6 @@ class Increment : public util::Printable,
   util::DateTime time_;
   atlas::FieldSet incrementFields_;
   int seed_ = 7;
-
 };
 // -----------------------------------------------------------------------------
 
