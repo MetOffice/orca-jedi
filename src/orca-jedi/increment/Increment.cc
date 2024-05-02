@@ -92,16 +92,7 @@ Increment::Increment(const Increment & other, const bool copy)
   other.print(oops::Log::debug());
 }
 
-Increment::Increment(const Increment & other)
-  : geom_(other.geom_), vars_(other.vars_), time_(other.time_),
-    incrementFields_(other.incrementFields_)
-{
-  std::string err_message =
-      "orcamodel::Increment::copy constructor (without bool copy keyword) not implemented";
-  throw eckit::NotImplemented(err_message, Here());
-}
-
-/// Basic operators
+// Basic operators
 Increment & Increment::operator=(const Increment & rhs) {
   time_ = rhs.time_;
   incrementFields_ = rhs.incrementFields_;
@@ -242,11 +233,17 @@ void Increment::setval(const double & val) {
                        << "value " << val
                        << std::endl;
 
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     auto field_view = atlas::array::make_view<double, 2>(field);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-//          if (!ghost(j)) field_view(j, k) = 0;
-        field_view(j, k) = val;
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) = val;
+          }
+        }
       }
     }
   }
@@ -371,23 +368,30 @@ void Increment::random() {
 }
 
 void Increment::dirac(const eckit::Configuration & conf) {
-// Add a delta function at point ixdir, iydir, izdir
+// Add a delta function at points specified by ixdir, iydir, izdir
   const std::vector<int> & ixdir = conf.getIntVector("ixdir");
   const std::vector<int> & iydir = conf.getIntVector("iydir");
-  const std::vector<int> & izdir =  conf.getIntVector("izdir");
+  const std::vector<int> & izdir = conf.getIntVector("izdir");
+
+  ASSERT(ixdir.size() == iydir.size() & ixdir.size() == izdir.size());
+  int ndir = ixdir.size();
 
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   oops::Log::debug() << "orcamodel::Increment::dirac:: nx " << nx << std::endl;
 
-  int jpt = iydir[0]*nx + ixdir[0];
-  int kpt = izdir[0];
-
-  oops::Log::debug() << "orcamodel::Increment::dirac:: delta function at jpt = " << jpt
-                       << " kpt " << kpt << std::endl;
+  std::vector<int> jpt;
+  for(int i = 0; i < ndir; i++) {
+    jpt.push_back(iydir[i]*nx + ixdir[i]);
+    oops::Log::debug() << "orcamodel::Increment::dirac:: delta function " << i
+                       << " at jpt = " << jpt[i]
+                       << " kpt = " << izdir[i] << std::endl;
+  }
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
+
+  this->zero();
 
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
@@ -398,10 +402,10 @@ void Increment::dirac(const eckit::Configuration & conf) {
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
-          if (j == jpt && k == kpt) {
-            field_view(j, k) = 1;
-          } else {
-            field_view(j, k) = 0;
+          for (int i = 0; i < ndir; i++) {
+            if (j == jpt[i] && k == izdir[i]) {
+              field_view(j, k) = 1;
+            }
           }
         }
       }
@@ -488,9 +492,11 @@ void Increment::write(const eckit::Configuration & conf) const {
 }
 
 void Increment::print(std::ostream & os) const {
-  double norm;
+  double sumx2;
+  double sumx;
   double min;
   double max;
+  int valid_points;
 
   oops::Log::trace() << "Increment(ORCA)::print starting" << std::endl;
 
@@ -499,23 +505,26 @@ void Increment::print(std::ostream & os) const {
   os << std::string(4, ' ') << "atlas field:" << std::endl;
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    std::tie(norm, min, max) = stats(fieldName);
-    os << std::string(8, ' ') << fieldName << " norm: " << std::setprecision(5)
-       << norm;
-    os << " min: " << min << " max: " << max << std::endl;
+    std::tie(valid_points, sumx2, sumx, min, max) = stats(fieldName);
+    os << std::string(8, ' ') << fieldName <<
+          " num: " << valid_points <<
+          " mean: " << std::setprecision(5) << sumx/valid_points <<
+          " rms: " << sqrt(sumx2/valid_points)  <<
+          " min: " << min << " max: " << max << std::endl;
   }
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
 }
 
-std::tuple<double, double, double> Increment::stats(const std::string & fieldName) const {
-  double norm = 0;
+std::tuple<int, double, double, double, double> Increment::stats(const std::string & fieldName) const {
   int valid_points = 0;
+  double sumx = 0;
+  double sumx2 = 0;
   double min = 1e30;
   double max = -1e30;
 
   auto field_view = atlas::array::make_view<double, 2>(
       incrementFields_[fieldName]);
-  oops::Log::trace() << "Increment(ORCA)::norm" << std::endl;
+  oops::Log::trace() << "Increment(ORCA):stats" << std::endl;
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   atlas::field::MissingValue mv(incrementFields()[fieldName]);
@@ -526,26 +535,34 @@ std::tuple<double, double, double> Increment::stats(const std::string & fieldNam
         if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
           if (field_view(j, k) > max) { max=field_view(j, k); }
           if (field_view(j, k) < min) { min=field_view(j, k); }
-          norm += field_view(j, k)*field_view(j, k);
+          sumx += field_view(j, k);
+          sumx2 += field_view(j, k)*field_view(j, k);
           ++valid_points;
         }
       }
     }
   }
-  return std::make_tuple(sqrt(norm)/valid_points, min, max);
+  std::cout << "DJL stats " << valid_points << " " << sumx2 << " " << sumx << " " << min << " " << max << std::endl;
+  return std::make_tuple(valid_points, sumx2, sumx, min, max);
 }
 
 double Increment::norm() const {
-  double norm = 0;
-  double dnorm = 0;
-  double min = 0;
-  double max = 0;
+  int valid_points;
+  int valid_points_all = 0;
+  double sumx2all = 0;
+  double sumx2;
+  double sumx;
+  double min;
+  double max;
+
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    std::tie(dnorm, min, max) = stats(fieldName);
-    norm += dnorm;
+    std::tie(valid_points, sumx2, sumx, min, max) = stats(fieldName);
+    sumx2all += sumx2;
+    valid_points_all += valid_points;
   }
-  return norm;
+  // return RMS
+  return sqrt(sumx2all/valid_points_all);
 }
 
 }  // namespace orcamodel

@@ -64,8 +64,7 @@ class Increment : public util::Printable,
             const oops::Variables &,
             const util::DateTime &);
   Increment(const Geometry &, const Increment &);
-  Increment(const Increment &, const bool);
-  Increment(const Increment &);
+  Increment(const Increment &, const bool copy = true);
 
 /// Basic operators
   void diff(const State &, const State &);
@@ -91,7 +90,7 @@ class Increment : public util::Printable,
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
   void print(std::ostream & os) const override;
-  std::tuple<double, double, double> stats(const std::string & field_name) const;
+  std::tuple<int, double, double, double, double> stats(const std::string & field_name) const;
   double norm() const;
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
