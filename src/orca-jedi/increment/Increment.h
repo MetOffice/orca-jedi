@@ -87,10 +87,19 @@ class Increment : public util::Printable,
   void fromFieldSet(const atlas::FieldSet &);
 
 /// I/O and diagnostics
+
+  struct stats {
+      int valid_points;
+      double sumx;
+      double sumx2;
+      double min;
+      double max;
+  };
+
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
   void print(std::ostream & os) const override;
-  std::tuple<int, double, double, double, double> stats(const std::string & field_name) const;
+  struct stats stats(const std::string & field_name) const;
   double norm() const;
 
   void updateTime(const util::Duration & dt) {time_ += dt;}

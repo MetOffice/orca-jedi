@@ -12,6 +12,7 @@
 
 #include "oops/base/Variables.h"
 
+#include "atlas/field/FieldSet.h"
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/increment/Increment.h"
@@ -98,7 +99,7 @@ CASE("test increment") {
   }
 
   SECTION("test mathematical operators") {
-    std::cout << "--------------------------" << std::endl;
+    std::cout << "---------------------------" << std::endl;
     Increment increment1(geometry, oops_vars, datetime);
     Increment increment2(geometry, oops_vars, datetime);
     increment1.ones();
@@ -129,8 +130,22 @@ CASE("test increment") {
     EXPECT_EQUAL(increment1.norm(), 210);
   }
 
+  SECTION("test increments to fieldset and back to increments") {
+    std::cout << "--------------------------------------------------" << std::endl;
+    Increment increment1(geometry, oops_vars, datetime);
+    increment1.ones();
+    Increment increment2(geometry, oops_vars, datetime);
+    increment2.zero();
+    atlas::FieldSet incfset = atlas::FieldSet();
+    increment1.Increment::toFieldSet(incfset);
+    increment2.Increment::fromFieldSet(incfset);
+    increment1.print(std::cout);
+    increment2.print(std::cout);
+    EXPECT_EQUAL(increment1.norm(), increment2.norm());
+  }
+
   SECTION("test increment diff with state inputs") {
-    std::cout << "------------------------------------" << std::endl;
+    std::cout << "-------------------------------------" << std::endl;
     // Using the same variables and double type as the increments
     // Code to deal with differing variables in state and increment not currently implemented
     orcamodel::State state1(geometry, oops_vars, datetime);

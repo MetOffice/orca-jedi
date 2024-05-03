@@ -65,6 +65,9 @@ Increment::Increment(const Geometry & geom,
   throw eckit::NotImplemented(err_message, Here());
 }
 
+/// \brief Copy constructor.
+/// \param other Increment to copy structure from.
+/// \param copy Boolean flag copy contents if true.
 Increment::Increment(const Increment & other, const bool copy)
   : geom_(other.geom_), vars_(other.vars_), time_(other.time_),
     incrementFields_()
@@ -190,6 +193,9 @@ Increment & Increment::operator*=(const double & zz) {
   return *this;
 }
 
+/// \brief Create increment from the different of two state objects.
+/// \param x1 State object.
+/// \param x2 State object subtracted.
 void Increment::diff(const State & x1, const State & x2) {
   ASSERT(this->validTime() == x1.validTime());
   ASSERT(this->validTime() == x2.validTime());
@@ -221,6 +227,8 @@ void Increment::diff(const State & x1, const State & x2) {
   }
 }
 
+/// \brief Set increment fields to a uniform value.
+/// \param val Value to use.
 void Increment::setval(const double & val) {
   oops::Log::trace() << "Increment(ORCA)::setval starting" << std::endl;
 
@@ -269,6 +277,10 @@ void Increment::zero(const util::DateTime & vt) {
   this->zero();
 }
 
+/// \brief multiply input increment object (x) by a scalar (a) and add onto self increment object (y).
+/// \param zz Scalar value (a).
+/// \param dx Other increment object (x).
+/// \param bool check Check (if true) the validity time of the increments fields matches.
 void Increment::axpy(const double & zz, const Increment & dx, const bool check) {
   ASSERT(!check || this->validTime() == dx.validTime());
 
@@ -293,6 +305,8 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
   }
 }
 
+/// \brief Dot product self increment object with another increment object
+/// \param dx Other increment object.
 double Increment::dot_product_with(const Increment & dx) const {
   double zz = 0;
   auto ghost = atlas::array::make_view<int32_t, 1>(
@@ -321,6 +335,8 @@ double Increment::dot_product_with(const Increment & dx) const {
   return zz;
 }
 
+/// \brief Schur product self increment object with another increment object
+/// \param dx Other increment object.
 void Increment::schur_product_with(const Increment & dx) {
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
@@ -343,6 +359,7 @@ void Increment::schur_product_with(const Increment & dx) {
   }
 }
 
+/// \brief Initialise the increment object with a normally distributed random field with a mean of 0 and standard deviation of 1.
 void Increment::random() {
   oops::Log::debug() << "orcamodel::Increment::random start" << std::endl;
   oops::Log::debug() << "orcamodel::Increment::random seed_ " << seed_ << std::endl;
@@ -366,6 +383,7 @@ void Increment::random() {
   }
 }
 
+/// \brief Apply Dirac delta functions to configuration specified points. 
 void Increment::dirac(const eckit::Configuration & conf) {
 // Adding a delta function at points specified by ixdir, iydir, izdir
   const std::vector<int> & ixdir = conf.getIntVector("ixdir");
@@ -403,6 +421,8 @@ void Increment::dirac(const eckit::Configuration & conf) {
   }
 }
 
+/// \brief Output increment fieldset as an atlas fieldset.
+/// \param fset Atlas fieldset to output to.
 void Increment::toFieldSet(atlas::FieldSet & fset) const {
   oops::Log::debug() << "Increment toFieldSet starting" << std::endl;
 
@@ -429,6 +449,8 @@ void Increment::toFieldSetAD(const atlas::FieldSet & fset) {
   oops::Log::debug() << "Increment toFieldSetAD done" << std::endl;
 }
 
+/// \brief Apply atlas fieldset to an increment fieldset.
+/// \param fset Atlas fieldset to apply.
 void Increment::fromFieldSet(const atlas::FieldSet & fset) {
   oops::Log::debug() << "Increment fromFieldSet start" << std::endl;
 
@@ -452,6 +474,7 @@ void Increment::fromFieldSet(const atlas::FieldSet & fset) {
   oops::Log::debug() << "Increment fromFieldSet done" << std::endl;
 }
 
+/// \brief Setup variables and geometry for increment fields.
 void Increment::setupIncrementFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in incrementFields
@@ -481,13 +504,8 @@ void Increment::write(const eckit::Configuration & conf) const {
   throw eckit::NotImplemented(err_message, Here());
 }
 
+/// \brief Print some basic information about the self increment object.
 void Increment::print(std::ostream & os) const {
-  double sumx2;
-  double sumx;
-  double min;
-  double max;
-  int valid_points;
-
   oops::Log::trace() << "Increment(ORCA)::print starting" << std::endl;
 
   os << "Increment valid at time: " << validTime() << std::endl;
@@ -495,23 +513,25 @@ void Increment::print(std::ostream & os) const {
   os << std::string(4, ' ') << "atlas field:" << std::endl;
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    std::tie(valid_points, sumx2, sumx, min, max) = stats(fieldName);
+    struct Increment::stats s = Increment::stats(fieldName);
     os << std::string(8, ' ') << fieldName <<
-          " num: " << valid_points <<
-          " mean: " << std::setprecision(5) << sumx/valid_points <<
-          " rms: " << sqrt(sumx2/valid_points)  <<
-          " min: " << min << " max: " << max << std::endl;
+          " num: " << s.valid_points <<
+          " mean: " << std::setprecision(5) << s.sumx/s.valid_points <<
+          " rms: " << sqrt(s.sumx2/s.valid_points)  <<
+          " min: " << s.min << " max: " << s.max << std::endl;
   }
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
 }
 
-std::tuple<int, double, double, double, double>
-      Increment::stats(const std::string & fieldName) const {
-  int valid_points = 0;
-  double sumx = 0;
-  double sumx2 = 0;
-  double min = 1e30;
-  double max = -1e30;
+/// \brief Calculate some basic statistics of a field in the increment object.
+/// \param fieldName Name of the field to use. 
+struct Increment::stats Increment::stats(const std::string & fieldName) const {
+  struct Increment::stats s;
+  s.valid_points = 0;
+  s.sumx = 0;
+  s.sumx2 = 0;
+  s.min = 1e30;
+  s.max = -1e30;
 
   auto field_view = atlas::array::make_view<double, 2>(
       incrementFields_[fieldName]);
@@ -524,32 +544,28 @@ std::tuple<int, double, double, double, double>
     for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
       if (!ghost(j)) {
         if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-          if (field_view(j, k) > max) { max=field_view(j, k); }
-          if (field_view(j, k) < min) { min=field_view(j, k); }
-          sumx += field_view(j, k);
-          sumx2 += field_view(j, k)*field_view(j, k);
-          ++valid_points;
+          if (field_view(j, k) > s.max) { s.max=field_view(j, k); }
+          if (field_view(j, k) < s.min) { s.min=field_view(j, k); }
+          s.sumx += field_view(j, k);
+          s.sumx2 += field_view(j, k)*field_view(j, k);
+          ++s.valid_points;
         }
       }
     }
   }
-  return std::make_tuple(valid_points, sumx2, sumx, min, max);
+  return s;
 }
 
+/// \brief Output norm (RMS) of the self increment fields.
 double Increment::norm() const {
-  int valid_points;
   int valid_points_all = 0;
   double sumx2all = 0;
-  double sumx2;
-  double sumx;
-  double min;
-  double max;
 
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    std::tie(valid_points, sumx2, sumx, min, max) = stats(fieldName);
-    sumx2all += sumx2;
-    valid_points_all += valid_points;
+    struct Increment::stats s = Increment::stats(fieldName);
+    sumx2all += s.sumx2;
+    valid_points_all += s.valid_points;
   }
   // return RMS
   return sqrt(sumx2all/valid_points_all);
