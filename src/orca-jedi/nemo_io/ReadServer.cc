@@ -19,7 +19,7 @@ namespace orcamodel {
 ReadServer::ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
   const eckit::PathName& file_path, const atlas::Mesh& mesh) :
   mesh_(mesh),
-  index_glbarray_(atlas::OrcaGrid(mesh.grid())),
+  orca_buffer_indices_(mesh),
   eckit_timer_(eckit_timer) {
   if (myrank == mpiroot) {
     reader_ = std::make_unique<NemoFieldReader>(file_path);
@@ -37,7 +37,7 @@ template<class T> void ReadServer::read_var_slice_on_root(const std::string& var
               std::vector<T>& buffer) const {
   oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::read_var_slice_on_root "
     << var_name << std::endl;
-  size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
+  size_t size = orca_buffer_indices_.nx() * orca_buffer_indices_.ny();
   if (myrank == mpiroot) {
     buffer = reader_->read_var_slice<T>(var_name, t_index, z_index);
   } else {
@@ -87,7 +87,7 @@ template void ReadServer::read_volume_var_on_root<float>(const std::string& var_
 template<class T> void ReadServer::read_vertical_var_on_root(const std::string& var_name,
               const size_t n_levels,
               std::vector<T>& buffer) const {
-  size_t size = index_glbarray_.nx_halo_WE * index_glbarray_.ny_halo_NS;
+  size_t size = orca_buffer_indices_.nx() * orca_buffer_indices_.ny();
   if (myrank == mpiroot) {
     buffer = reader_->read_vertical_var<T>(var_name, n_levels);
   } else {

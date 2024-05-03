@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <netcdf>
+
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
@@ -29,4 +31,9 @@ void ApplyForFieldType(const Functor& functor, FieldDType field_type,
   }
 }
 
+// create a mapping between C++ types and NetCDF type objects
+template <typename T>
+struct NetCDFTypeMap {
+  static const netCDF::NcType ncType;
+};
 }  // namespace orcamodel

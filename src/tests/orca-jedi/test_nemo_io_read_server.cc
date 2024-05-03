@@ -46,7 +46,7 @@ CASE("test MPI distributed reads field array view") {
     auto partitioner = atlas::grid::Partitioner(partitioner_config);
     auto mesh = meshgen.generate(grid, partitioner);
     auto funcSpace = atlas::functionspace::NodeColumns(mesh);
-    auto orca_index = OrcaIndex(mesh.grid());
+    auto orca_index = OrcaIndexToBufferIndex(mesh.grid());
 
     std::vector<double> raw_data;
     {
