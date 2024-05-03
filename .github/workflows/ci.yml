@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [develop]
-  pull_request:
+    branches: [develop, master]
+  pull_request_target:
     branches: [develop]
 
 jobs:
