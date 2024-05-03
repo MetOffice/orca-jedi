@@ -277,7 +277,7 @@ void Increment::zero(const util::DateTime & vt) {
   this->zero();
 }
 
-/// \brief multiply input increment object (x) by a scalar (a) and add onto self increment object (y).
+/// \brief multiply input increment object (x) by a scalar (a) and add onto self (y).
 /// \param zz Scalar value (a).
 /// \param dx Other increment object (x).
 /// \param bool check Check (if true) the validity time of the increments fields matches.
@@ -359,7 +359,7 @@ void Increment::schur_product_with(const Increment & dx) {
   }
 }
 
-/// \brief Initialise the increment object with a normally distributed random field with a mean of 0 and standard deviation of 1.
+/// \brief Initialise with a normally distributed random field with a mean of 0 and s.d. of 1.
 void Increment::random() {
   oops::Log::debug() << "orcamodel::Increment::random start" << std::endl;
   oops::Log::debug() << "orcamodel::Increment::random seed_ " << seed_ << std::endl;
@@ -383,7 +383,7 @@ void Increment::random() {
   }
 }
 
-/// \brief Apply Dirac delta functions to configuration specified points. 
+/// \brief Apply Dirac delta functions to configuration specified points.
 void Increment::dirac(const eckit::Configuration & conf) {
 // Adding a delta function at points specified by ixdir, iydir, izdir
   const std::vector<int> & ixdir = conf.getIntVector("ixdir");
@@ -524,7 +524,7 @@ void Increment::print(std::ostream & os) const {
 }
 
 /// \brief Calculate some basic statistics of a field in the increment object.
-/// \param fieldName Name of the field to use. 
+/// \param fieldName Name of the field to use.
 struct Increment::stats Increment::stats(const std::string & fieldName) const {
   struct Increment::stats s;
   s.valid_points = 0;
