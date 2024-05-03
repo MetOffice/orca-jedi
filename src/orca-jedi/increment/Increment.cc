@@ -117,18 +117,17 @@ Increment & Increment::operator+=(const Increment & dx) {
   for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
-    atlas::Field field1 = dx.incrementFields_[i];
-//  for (atlas::Field field : incrementFields_) {
+    atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
-    std::string fieldName1 = field1.name();
+    std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::add:: field name = " << fieldName
-                       << " field name 1 = " << fieldName1
+                       << " field name dx = " << fieldName_dx
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    auto field_view1 = atlas::array::make_view<double, 2>(field1);
+    auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += field_view1(j, k);
+        if (!ghost(j)) field_view(j, k) += field_view_dx(j, k);
       }
     }
   }
@@ -150,17 +149,17 @@ Increment & Increment::operator-=(const Increment & dx) {
   for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
-    atlas::Field field1 = dx.incrementFields_[i];
+    atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
-    std::string fieldName1 = field1.name();
+    std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::subtract:: field name = " << fieldName
-                       << " field name 1 = " << fieldName1
+                       << " field name dx = " << fieldName_dx
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    auto field_view1 = atlas::array::make_view<double, 2>(field1);
+    auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) -= field_view1(j, k);
+        if (!ghost(j)) field_view(j, k) -= field_view_dx(j, k);
       }
     }
   }
@@ -278,17 +277,17 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
   for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
-    atlas::Field field1 = dx.incrementFields_[i];
+    atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
-    std::string fieldName1 = field1.name();
-    oops::Log::debug() << "orcamodel::Increment::subtract:: field name = " << fieldName
-                       << " field name 1 = " << fieldName1
+    std::string fieldName_dx = field_dx.name();
+    oops::Log::debug() << "orcamodel::Increment::axpy:: field name = " << fieldName
+                       << " field name dx = " << fieldName_dx
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    auto field_view1 = atlas::array::make_view<double, 2>(field1);
+    auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += zz * field_view1(j, k);
+        if (!ghost(j)) field_view(j, k) += zz * field_view_dx(j, k);
       }
     }
   }
@@ -298,21 +297,21 @@ double Increment::dot_product_with(const Increment & dx) const {
   double zz = 0;
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  // How should this deal with multiple fields only want to do this with one field??? DJL
+  // Deals with multiple fields
   for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
-    atlas::Field field1 = dx.incrementFields_[i];
+    atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
-    std::string fieldName1 = field1.name();
+    std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::dot_product_with:: field name = " << fieldName
-                       << " field name 1 = " << fieldName1
+                       << " field name dx = " << fieldName_dx
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    auto field_view1 = atlas::array::make_view<double, 2>(field1);
+    auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) zz += field_view(j, k) * field_view1(j, k);
+        if (!ghost(j)) zz += field_view(j, k) * field_view_dx(j, k);
       }
     }
   }
@@ -328,17 +327,17 @@ void Increment::schur_product_with(const Increment & dx) {
   for (int i = 0; i< incrementFields_.size(); i++)
   {
     atlas::Field field = incrementFields_[i];
-    atlas::Field field1 = dx.incrementFields_[i];
+    atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
-    std::string fieldName1 = field1.name();
+    std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::schur_product_with:: field name = " << fieldName
-                       << " field name 1 = " << fieldName1
+                       << " field name dx = " << fieldName_dx
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    auto field_view1 = atlas::array::make_view<double, 2>(field1);
+    auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) *= field_view1(j, k);
+        if (!ghost(j)) field_view(j, k) *= field_view_dx(j, k);
       }
     }
   }
@@ -355,7 +354,7 @@ void Increment::random() {
     oops::Log::debug() << "orcamodel::Increment::random:: field name = " << fieldName
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
-    // Seed currently hardwired in increment.h DJL - find out how this is dealt with generally
+    // Seed currently hardwired in increment.h
     util::NormalDistribution<double> xx(field_view.shape(0)*field_view.shape(1), 0.0, 1.0, seed_);
     int idx = 0;
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
@@ -368,20 +367,17 @@ void Increment::random() {
 }
 
 void Increment::dirac(const eckit::Configuration & conf) {
-// Add a delta function at points specified by ixdir, iydir, izdir
+// Adding a delta function at points specified by ixdir, iydir, izdir
   const std::vector<int> & ixdir = conf.getIntVector("ixdir");
   const std::vector<int> & iydir = conf.getIntVector("iydir");
   const std::vector<int> & izdir = conf.getIntVector("izdir");
 
-  ASSERT(ixdir.size() == iydir.size() & ixdir.size() == izdir.size());
+  ASSERT(ixdir.size() == iydir.size() && ixdir.size() == izdir.size());
   int ndir = ixdir.size();
-
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-  oops::Log::debug() << "orcamodel::Increment::dirac:: nx " << nx << std::endl;
-
   std::vector<int> jpt;
-  for(int i = 0; i < ndir; i++) {
+  for (int i = 0; i < ndir; i++) {
     jpt.push_back(iydir[i]*nx + ixdir[i]);
     oops::Log::debug() << "orcamodel::Increment::dirac:: delta function " << i
                        << " at jpt = " << jpt[i]
@@ -395,19 +391,13 @@ void Increment::dirac(const eckit::Configuration & conf) {
 
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::Increment::dirac:: field name = " << fieldName
+    std::cout << "orcamodel::Increment::dirac:: field name = " << fieldName
                        << std::endl;
 
     auto field_view = atlas::array::make_view<double, 2>(field);
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) {
-          for (int i = 0; i < ndir; i++) {
-            if (j == jpt[i] && k == izdir[i]) {
-              field_view(j, k) = 1;
-            }
-          }
-        }
+    for (int i = 0; i < ndir; i++) {
+      if (!ghost(jpt[i])) {
+        field_view(jpt[i], izdir[i]) = 1;
       }
     }
   }
@@ -500,7 +490,7 @@ void Increment::print(std::ostream & os) const {
 
   oops::Log::trace() << "Increment(ORCA)::print starting" << std::endl;
 
-  os << std::endl << " Increment valid at time: " << validTime() << std::endl;
+  os << "Increment valid at time: " << validTime() << std::endl;
   os << std::string(4, ' ') << vars_ <<  std::endl;
   os << std::string(4, ' ') << "atlas field:" << std::endl;
   for (atlas::Field field : incrementFields_) {
@@ -515,7 +505,8 @@ void Increment::print(std::ostream & os) const {
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
 }
 
-std::tuple<int, double, double, double, double> Increment::stats(const std::string & fieldName) const {
+std::tuple<int, double, double, double, double>
+      Increment::stats(const std::string & fieldName) const {
   int valid_points = 0;
   double sumx = 0;
   double sumx2 = 0;
@@ -542,7 +533,6 @@ std::tuple<int, double, double, double, double> Increment::stats(const std::stri
       }
     }
   }
-  std::cout << "DJL stats " << valid_points << " " << sumx2 << " " << sumx << " " << min << " " << max << std::endl;
   return std::make_tuple(valid_points, sumx2, sumx, min, max);
 }
 

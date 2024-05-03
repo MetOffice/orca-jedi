@@ -349,6 +349,6 @@ template double State::norm<float>(const std::string & field_name) const;
 
 atlas::Field State::getField(int i) const {
   return stateFields_[i];
-  }
+}
 
 }  // namespace orcamodel
