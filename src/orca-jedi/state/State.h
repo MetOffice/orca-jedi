@@ -105,6 +105,8 @@ class State : public util::Printable,
   const oops::Variables & variables() const {return vars_;}
   oops::Variables & variables() {return vars_;}
 
+  atlas::Field getField(int) const;
+
  private:
   void setupStateFields();
   void print(std::ostream &) const override;

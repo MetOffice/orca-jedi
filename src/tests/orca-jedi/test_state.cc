@@ -123,6 +123,12 @@ CASE("test basic state") {
   SECTION("test state write") {
     state.write(params);
   }
+
+  SECTION("test state getField") {
+    atlas::Field field = state.getField(0);
+    std::cout << field.name() << std::endl;
+    EXPECT(field.name() == "sea_ice_area_fraction");
+  }
 }
 
 }  // namespace test
