@@ -8,7 +8,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <tuple>
 
 #include "atlas/field/FieldSet.h"
 
