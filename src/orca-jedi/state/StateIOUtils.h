@@ -23,11 +23,22 @@ void readFieldsFromFile(
   const util::DateTime & valid_date,
   const std::string & variable_type,
   atlas::FieldSet & fs);
-void writeFieldsToFile(
+void writeStateFieldsToFile(
   const OrcaStateParameters & params,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs);
+void writeIncrementFieldsToFile(
+  const eckit::Configuration & params,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const atlas::FieldSet & fs);
+void writeFieldsToFile(
+  const std::string nemo_field_path,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const atlas::FieldSet & fs,
+  const FieldDType & fielddtype = FieldDType::unset);
 template<class T> void populateField(
   const std::string & nemo_name,
   const std::string & coord_type,

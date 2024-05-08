@@ -504,9 +504,21 @@ void Increment::read(const eckit::Configuration & conf) {
 }
 
 void Increment::write(const eckit::Configuration & conf) const {
-  std::string err_message =
-      "orcamodel::Increment::write not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+  oops::Log::debug() << "orcamodel::increment::write" << std::endl;
+
+  // OrcaStateParameters params
+
+  writeIncrementFieldsToFile(conf, *geom_, validTime(), incrementFields_);
+
+  // DJL debug
+  for (atlas::Field field : incrementFields_) {
+    std::string fieldName = field.name();
+    oops::Log::debug() << "orcamodel::Increment::write:: field name = " << fieldName
+                       << std::endl;
+
+    oops::Log::debug() << std::endl;
+  }
+  // DJL debug end
 }
 
 /// \brief Print some basic information about the self increment object.

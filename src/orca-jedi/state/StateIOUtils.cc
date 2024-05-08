@@ -31,7 +31,7 @@ void readFieldsFromFile(
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date"
                        << " " << valid_date << std::endl;
 
-    // Open Nemo Feedback file
+    // Open Nemo field file
     std::string nemo_file_name;
     if (variable_type == "background") {
       nemo_file_name = params.nemoFieldFile.value();
@@ -125,12 +125,12 @@ template void populateField<float>(
   ReadServer & nemo_reader,
   atlas::Field & field);
 
-void writeFieldsToFile(
+void writeStateFieldsToFile(
   const OrcaStateParameters & params,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs) {
-    oops::Log::trace() << "orcamodel::writeFieldsToFile:: start for valid_date"
+    oops::Log::trace() << "orcamodel::writeStateFieldsToFile:: start for valid_date"
                        << " " << valid_date << std::endl;
 
     std::string output_filename =
@@ -138,6 +138,47 @@ void writeFieldsToFile(
     if (output_filename == "")
       throw eckit::BadValue(std::string("orcamodel::writeFieldsToFile:: ")
           + "file name not specified", Here());
+
+    auto nemo_field_path = eckit::PathName(output_filename);
+    oops::Log::debug() << "orcamodel::writeStateFieldsToFile:: "
+                       << nemo_field_path << std::endl;
+
+    writeFieldsToFile(nemo_field_path, geom, valid_date, fs);
+}
+
+void writeIncrementFieldsToFile(
+  const eckit::Configuration & conf,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const atlas::FieldSet & fs) {
+    oops::Log::trace() << "orcamodel::writeIncrementFieldsToFile:: start for valid_date"
+                       << " " << valid_date << std::endl;
+
+    // Filepath
+    std::string filepath = conf.getString("filepath");
+    if (conf.has("member")) {
+      std::ostringstream out;
+      out << std::setfill('0') << std::setw(6) << conf.getInt("member");
+      filepath.append("_");
+      filepath.append(out.str());
+    }
+
+    oops::Log::debug() << "filepath " << filepath << std::endl;
+    std::string nemo_field_path = filepath;
+    nemo_field_path.append(".nc");
+      oops::Log::info() << "Writing file: " << nemo_field_path << std::endl;
+
+    writeFieldsToFile(nemo_field_path, geom, valid_date, fs, FieldDType::Double);
+}
+
+void writeFieldsToFile(
+  const std::string nemo_field_path,
+  const Geometry & geom,
+  const util::DateTime & valid_date,
+  const atlas::FieldSet & fs,
+  const FieldDType & fielddtype) {
+    oops::Log::trace() << "orcamodel::writeFieldsToFile:: start for valid_date"
+                       << " " << valid_date << std::endl;
 
     std::map<std::string, std::string> varCoordTypeMap;
     {
@@ -148,7 +189,6 @@ void writeFieldsToFile(
         varCoordTypeMap[vars[i]] = coordSpaces[i];
     }
 
-    auto nemo_field_path = eckit::PathName(output_filename);
     oops::Log::debug() << "orcamodel::writeFieldsToFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
     std::vector<util::DateTime> datetimes = {valid_date};
@@ -170,8 +210,11 @@ void writeFieldsToFile(
           writer.write_vol_var<T>(nemoName, 0, field_mv, field_view);
         }
       };
+      auto fieldPrecision = geom.fieldPrecision(fieldName);
+      // Optional override field type
+      if (fielddtype != FieldDType::unset) {fieldPrecision = fielddtype;}
       ApplyForFieldType(write,
-                        geom.fieldPrecision(fieldName),
+                        fieldPrecision,
                         std::string("State(ORCA)::writeFieldsToFile '")
                           + nemoName + "' field type not recognised.");
     }

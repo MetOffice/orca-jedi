@@ -15,7 +15,8 @@ namespace orcamodel {
 //// \brief Enum type for obs variable data types
 enum class FieldDType {
     Float,
-    Double
+    Double,
+    unset
 };
 
 /// \brief Apply a function for a given FieldDType

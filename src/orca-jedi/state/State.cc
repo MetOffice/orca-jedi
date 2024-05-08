@@ -222,7 +222,7 @@ void State::setupStateFields() {
 
 void State::write(const OrcaStateParameters & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
-  writeFieldsToFile(params, *geom_, validTime(), stateFields_);
+  writeStateFieldsToFile(params, *geom_, validTime(), stateFields_);
 }
 
 void State::write(const eckit::Configuration & config) const {
