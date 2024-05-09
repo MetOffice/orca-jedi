@@ -37,8 +37,7 @@ void writeFieldsToFile(
   const std::string nemo_field_path,
   const Geometry & geom,
   const util::DateTime & valid_date,
-  const atlas::FieldSet & fs,
-  const FieldDType & fielddtype = FieldDType::unset);
+  const atlas::FieldSet & fs);
 template<class T> void populateField(
   const std::string & nemo_name,
   const std::string & coord_type,
