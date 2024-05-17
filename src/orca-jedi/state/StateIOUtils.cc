@@ -70,6 +70,19 @@ void readFieldsFromFile(
                               variable_type)
                          << std::endl;
       if (geom.variable_in_variable_type(fieldName, variable_type)) {
+        const auto populate = [&](auto typeVal) {
+          using T = decltype(typeVal);
+          populateField<T>(nemoName, varCoordTypeMap[fieldName],
+                                time_indx, nemo_reader, field);
+        };
+        ApplyForFieldType(populate,
+                          geom.fieldPrecision(fieldName),
+                          std::string("State(ORCA)::readFieldsFromFile '")
+                            + nemoName + "' field type not recognised");
+        // Add a halo exchange following read to fill out halo points
+        geom.functionSpace().haloExchange(field);
+        geom.log_status();
+
         auto field_view = atlas::array::make_view<double, 2>(field);
         if (varCoordTypeMap[fieldName] == "surface") {
           if (field_view.size() > 1054102) {

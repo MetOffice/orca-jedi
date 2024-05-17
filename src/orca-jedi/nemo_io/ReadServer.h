@@ -25,6 +25,7 @@
 namespace orcamodel {
 class ReadServer {
  public:
+  static const std::string classname() {return "orcamodel::ReadServer";}
   explicit ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
       const eckit::PathName& file_path,
       const atlas::Mesh& mesh);

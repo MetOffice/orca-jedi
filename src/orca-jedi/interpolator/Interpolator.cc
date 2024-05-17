@@ -68,8 +68,10 @@ namespace orcamodel {
       const Geometry & geom, const std::vector<double>& lats,
       const std::vector<double>& lons) :
       nlocs_(lats.size()),
-      atlasObsFuncSpace_(nullptr),
-      interpolator_(nullptr),
+     atlasObsFuncSpace_(atlasObsFuncSpaceFactory(lats, lons)),
+     interpolator_(eckit::LocalConfiguration(conf, "atlas-interpolator"),
+                   geom.functionSpace(),
+                   atlasObsFuncSpace_),
       comm_(geom.getComm()) {
     params_.validateAndDeserialize(conf);
     oops::Log::trace() << "orcamodel::Interpolator:: conf:" << conf
@@ -77,12 +79,6 @@ namespace orcamodel {
     if (nlocs_ == 0) {
       oops::Log::trace() << "orcamodel::Interpolator:: nlocs == 0" << std::endl;
     }
-    atlasObsFuncSpace_ = std::make_unique<atlas::functionspace::PointCloud>(
-                          atlasObsFuncSpaceFactory(lats, lons));
-    interpolator_ = std::make_unique<atlas::Interpolation>(
-                      eckit::LocalConfiguration(conf, "atlas-interpolator"),
-                      geom.functionSpace(),
-                      (*atlasObsFuncSpace_));
   }
 
   void Interpolator::apply(const oops::Variables& vars, const State& state,
