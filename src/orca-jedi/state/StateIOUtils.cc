@@ -83,13 +83,18 @@ void readFieldsFromFile(
         geom.functionSpace().haloExchange(field);
         geom.log_status();
 
-        auto field_view = atlas::array::make_view<double, 2>(field);
-        if (varCoordTypeMap[fieldName] == "surface") {
-          if (field_view.size() > 1054102) {
-            std::cout << "state IO after read " << nemoName << " time index " << time_indx << std::endl;
-            std::cout << "field_view(1054102, 0) " << field_view(1054102, 0) << std::endl;
+        const auto print_val = [&](auto typeVal) {
+          using T = decltype(typeVal);
+          auto field_view = atlas::array::make_view<T, 2>(field);
+          if ((varCoordTypeMap[fieldName] == "surface") && (field_view.size() > 1054102)) {
+              std::cout << "state IO after read " << nemoName << " time index " << time_indx << std::endl;
+              std::cout << "field_view(1054102, 0) " << field_view(1054102, 0) << std::endl;
           }
-        }
+        };
+        ApplyForFieldType(print_val,
+                          geom.fieldPrecision(fieldName),
+                          std::string("State(ORCA)::readFieldsFromFile '")
+                            + nemoName + "' can't print element 1054102");
       }
       // Add a halo exchange following read to fill out halo points
       fs.haloExchange();
