@@ -76,7 +76,7 @@ class Interpolator : public util::Printable,
       const State& state,
       std::vector<double>::iterator& result) const;
   void print(std::ostream &) const override;
-  int64_t nlocs_;
+  size_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
   atlas::Interpolation interpolator_;
   // Parameters_ params_;

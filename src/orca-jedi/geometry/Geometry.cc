@@ -119,13 +119,8 @@ void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
   const auto lonlat = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
   const auto ghosts = atlas::array::make_view<int32_t, 1>(
       mesh_.nodes().ghost());
-  const auto haloDistance = atlas::array::make_view<int32_t, 1>(
-      mesh_.nodes().halo());
   auto isRequired = [&](const size_t nodeElem) {
-    if (halo) {
-      return !ghosts(nodeElem) || (haloDistance(nodeElem) > 0);
-    }
-    return !ghosts(nodeElem);
+    return halo || !ghosts(nodeElem);
   };
   const size_t npts = funcSpace_.size();
   for (size_t nodeElem = 0; nodeElem < npts; ++nodeElem) {
@@ -135,6 +130,25 @@ void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
     }
   }
 }
+
+//// -----------------------------------------------------------------------------
+///// \brief  Give the index of the MPI task closest to a provided latitude
+/////         longitude.
+///// \param[in]     lat  latitude of test point.
+///// \param[in]     lon  longitude of test point.
+///// \return        task integer index of the closest MPI task.
+//int Geometry::closestTask(const double lat, const double lon) const {
+//  oops::Log::debug() << classname() << " task is " << comm_.rank() << std::endl;
+//  if (distributionType() != "serial") {
+//    std::stringstream err_stream;
+//    err_stream << classname() << " partitioner " << distributionType()
+//               << " != 'serial', but only 'serial' partitioner is implemented";
+//    throw eckit::NotImplemented(err_stream.str(), Here());
+//    return -1;
+//  }
+//
+//  return comm_.rank();
+//}
 
 // -----------------------------------------------------------------------------
 /// \brief Give the space of nemo field for each variable - surface, volume or

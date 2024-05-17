@@ -162,6 +162,10 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
     this->fill_field<T>(buffer, iLev, field_view);
     log_status();
   }
+  if (field_view.size() > 1054102) {
+    auto inode = 1054102;
+    std::cout << this->classname() << "field_view(" << inode << ", 0) " << field_view(inode, 0) << std::endl;
+  }
 }
 
 template void ReadServer::read_var<double>(
