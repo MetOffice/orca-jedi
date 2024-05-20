@@ -27,7 +27,6 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
   OrcaGeometryParameters params;
   params.validateAndDeserialize(config);
 
-  std::vector<int> channels{};
   std::vector<std::string> names{};
   for (const NemoFieldParameters& nemoVariable :
         params.nemoFields.value()) {
@@ -37,7 +36,7 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
     }
   }
 
-  return oops::Variables(names, channels);
+  return oops::Variables(names);
 }
 
 // -----------------------------------------------------------------------------

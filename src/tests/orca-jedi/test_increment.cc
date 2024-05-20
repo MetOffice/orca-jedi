@@ -49,13 +49,12 @@ CASE("test increment") {
   config.set("number levels", 10);
   Geometry geometry(config, eckit::mpi::comm());
 
-  const std::vector<int> channels{};
   std::vector<std::string> varnames2 {"sea_ice_area_fraction",
     "sea_water_potential_temperature"};
-  oops::Variables oops_vars2(varnames2, channels);
+  oops::Variables oops_vars2(varnames2);
 
   std::vector<std::string> varnames {"sea_ice_area_fraction"};
-  oops::Variables oops_vars(varnames, channels);
+  oops::Variables oops_vars(varnames);
 
   util::DateTime datetime("2021-06-30T00:00:00Z");
 
