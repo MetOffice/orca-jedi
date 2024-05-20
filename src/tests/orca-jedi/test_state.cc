@@ -50,7 +50,6 @@ CASE("test basic state") {
     .set("model space", "volume");
   config.set("nemo variables", nemo_var_mappings);
   Geometry geometry(config, eckit::mpi::comm());
-  const std::vector<int> channels{};
 
   eckit::LocalConfiguration state_config;
   std::vector<std::string> state_variables {"sea_ice_area_fraction"};
@@ -73,20 +72,19 @@ CASE("test basic state") {
   }
 
   SECTION("test constructor") {
-    oops::Variables oops_vars(state_variables, channels);
+    oops::Variables oops_vars(state_variables);
     util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
   }
 
   SECTION("test subset copy constructor") {
-    oops::Variables oops_vars({"sea_ice_area_fraction", "sea_surface_foundation_temperature"},
-        channels);
+    oops::Variables oops_vars({"sea_ice_area_fraction", "sea_surface_foundation_temperature"});
     util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
 
-    State state_copy(oops::Variables({"sea_ice_area_fraction"}, channels), state);
+    State state_copy(oops::Variables({"sea_ice_area_fraction"}), state);
 
-    EXPECT_THROWS_AS(State(oops::Variables({"NOT_IN_SRC_STATE"}, channels), state),
+    EXPECT_THROWS_AS(State(oops::Variables({"NOT_IN_SRC_STATE"}), state),
         eckit::BadValue);
   }
 
