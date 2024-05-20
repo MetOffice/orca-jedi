@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <ostream>
+#include <sstream>
 
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
@@ -400,6 +401,19 @@ void Increment::dirac(const eckit::Configuration & conf) {
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   std::vector<int> jpt;
+  // check validity of the configuration
+  for (atlas::Field field : incrementFields_) {
+    for (int i = 0; i < ndir; i++) {
+      if ( (iydir[i]*nx + ixdir[i] >= field.shape(0)) || (izdir[i] >= field.shape(1)) ) {
+        std::ostringstream err_stream;
+        err_stream << orcamodel::Increment::classname()
+                   << " field shape and delta function location configuration mismatch,"
+                   << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", " << izdir[i]
+                   << ") for field with shape " << field.shape() ;
+        throw eckit::BadValue(err_stream.str(), Here());
+      }
+    }
+  }
   for (int i = 0; i < ndir; i++) {
     jpt.push_back(iydir[i]*nx + ixdir[i]);
     oops::Log::debug() << "orcamodel::Increment::dirac:: delta function " << i
@@ -489,8 +503,10 @@ void Increment::setupIncrementFields() {
            atlas::option::name(vars_[i]) |
            atlas::option::levels(varSizes[i])));
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
-                         << vars_[i] << "has dtype: "
-                         << (*(incrementFields_.end()-1)).datatype().str() << std::endl;
+                         << vars_[i]
+                         << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
+                         << ", " << (*(incrementFields_.end()-1)).shape(1) << ")"
+                         << std::endl;
       geom_->log_status();
     }
   }

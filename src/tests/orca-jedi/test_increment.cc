@@ -59,14 +59,12 @@ CASE("test increment") {
   util::DateTime datetime("2021-06-30T00:00:00Z");
 
   SECTION("test constructor") {
-    std::cout << "----------------" << std::endl;
     Increment increment(geometry, oops_vars2, datetime);
     // copy
     Increment increment2 = increment;
   }
 
   SECTION("test setting increment value") {
-    std::cout << "----------------------------" << std::endl;
     Increment increment(geometry, oops_vars, datetime);
     std::cout << std::endl << "Increment ones: " << std::endl;
     increment.ones();
@@ -82,7 +80,6 @@ CASE("test increment") {
   }
 
   SECTION("test dirac") {
-    std::cout << "----------------" << std::endl;
     eckit::LocalConfiguration dirac_config;
     std::vector<int> ix = {20, 30};
     std::vector<int> iy = {10, 40};
@@ -92,13 +89,15 @@ CASE("test increment") {
     dirac_config.set("izdir", iz);
 
     Increment increment(geometry, oops_vars, datetime);
+    EXPECT_THROWS_AS(increment.dirac(dirac_config), eckit::BadValue);
+
+    dirac_config.set("izdir", std::vector<int>{0, 0});
     increment.dirac(dirac_config);
     increment.print(std::cout);
     EXPECT(std::abs(increment.norm() - 0.0086788) < 1e-6);
   }
 
   SECTION("test mathematical operators") {
-    std::cout << "---------------------------" << std::endl;
     Increment increment1(geometry, oops_vars, datetime);
     Increment increment2(geometry, oops_vars, datetime);
     increment1.ones();
@@ -130,7 +129,6 @@ CASE("test increment") {
   }
 
   SECTION("test increments to fieldset and back to increments") {
-    std::cout << "--------------------------------------------------" << std::endl;
     Increment increment1(geometry, oops_vars, datetime);
     increment1.ones();
     Increment increment2(geometry, oops_vars, datetime);
@@ -144,7 +142,6 @@ CASE("test increment") {
   }
 
   SECTION("test increment diff with state inputs") {
-    std::cout << "-------------------------------------" << std::endl;
     // Using the same variables and double type as the increments
     // Code to deal with differing variables in state and increment not currently implemented
     orcamodel::State state1(geometry, oops_vars, datetime);
