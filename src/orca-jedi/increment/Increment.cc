@@ -408,8 +408,8 @@ void Increment::dirac(const eckit::Configuration & conf) {
         std::ostringstream err_stream;
         err_stream << orcamodel::Increment::classname()
                    << " field shape and delta function location configuration mismatch,"
-                   << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", " << izdir[i]
-                   << ") for field with shape " << field.shape() ;
+                   << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", "
+                   << izdir[i] << ") for field with shape " << field.shape();
         throw eckit::BadValue(err_stream.str(), Here());
       }
     }
