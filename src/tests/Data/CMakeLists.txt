@@ -2,6 +2,7 @@
 list( APPEND orcajedi_test_data
 ostia_seaice_obs.odb
 hofx_sst_obs.nc
+eorca025_t_bkg.nc
 orca2_t_bkg_var.nc
 orca2_t_coords.nc
 orca2_t_nemo.nc
