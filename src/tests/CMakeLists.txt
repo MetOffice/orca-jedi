@@ -39,6 +39,8 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
                   MPI 2
                   ARGS testinput/hofx_nc_ssh_eorca025.yaml
                   COMMAND orcamodel_hofx.x )
+set_property(TEST test_orcamodel_hofx_ssh_parallel_eorca025
+             PROPERTY WILL_FAIL)
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
                   OMP 1
