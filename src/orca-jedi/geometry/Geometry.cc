@@ -51,6 +51,13 @@ Geometry::Geometry(const eckit::Configuration & config,
     log_status();
     params_.validateAndDeserialize(config);
     int64_t halo = params_.sourceMeshHalo.value();
+    if ( ( (params_.partitioner.value() == "serial") || (comm.size() == 1) )
+         && (halo > 0) ) {
+      halo = 0;
+      params_.sourceMeshHalo.set(0);
+      oops::Log::info() << "Warning: forcing halo = 0"
+                        << " as settings imply all processors have all data" << std::endl;
+    }
     auto meshgen_config = grid_.meshgenerator()
                           | atlas::option::halo(halo);
 
