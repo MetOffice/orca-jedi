@@ -9,6 +9,10 @@ geometry :
     - name: sea_surface_height_anomaly
       nemo field name: sossheig
       model space: surface
+    - name: sea_surface_height_anomaly_background_error
+      nemo field name: sossheig
+      model space: surface
+      variable type: background variance
   grid name: eORCA025_T
   number levels: 1
   partitioner: checkerboard
@@ -16,6 +20,7 @@ initial condition :
   date: 2021-06-28T23:00:00Z
   state variables:
     - sea_surface_height_anomaly
+    - sea_surface_height_anomaly_background_error
   nemo field file: Data/eorca025_t_nemo.nc
   variance field file: Data/eorca025_t_nemo.nc
 model :
