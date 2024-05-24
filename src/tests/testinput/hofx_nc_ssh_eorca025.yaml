@@ -11,7 +11,7 @@ geometry :
       model space: surface
   grid name: eORCA025_T
   number levels: 1
-  partitioner: serial
+  partitioner: checkerboard
 initial condition :
   date: 2021-06-28T23:00:00Z
   state variables:

@@ -40,6 +40,12 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
                   ARGS testinput/hofx_nc_ssh_eorca025.yaml
                   COMMAND orcamodel_hofx.x )
 
+ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
+                  OMP 1
+                  MPI 1
+                  ARGS testinput/hofx_nc_ssh_eorca025.yaml
+                  COMMAND orcamodel_hofx.x )
+
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_serial
                   OMP 1
                   MPI 2
