@@ -54,7 +54,6 @@ Geometry::Geometry(const eckit::Configuration & config,
     if ( ( (params_.partitioner.value() == "serial") || (comm.size() == 1) )
          && (halo > 0) ) {
       halo = 0;
-      params_.sourceMeshHalo.set(0);
       oops::Log::info() << "Warning: forcing halo = 0"
                         << " as settings imply all processors have all data" << std::endl;
     }
