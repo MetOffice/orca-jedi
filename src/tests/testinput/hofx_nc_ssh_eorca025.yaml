@@ -1,0 +1,77 @@
+# (C) British Crown Copyright 2024 Met Office
+
+forecast length : P2D
+time window:
+  begin: 2021-06-28T23:00:00Z
+  length: P2D
+geometry :
+  nemo variables:
+    - name: sea_surface_height_anomaly
+      nemo field name: sossheig
+      model space: surface
+    - name: sea_surface_height_anomaly_background_error
+      nemo field name: sossheig
+      model space: surface
+      variable type: background variance
+  grid name: eORCA025_T
+  number levels: 1
+  partitioner: checkerboard
+  source mesh halo: 1
+initial condition :
+  date: 2021-06-28T23:00:00Z
+  state variables:
+    - sea_surface_height_anomaly
+    - sea_surface_height_anomaly_background_error
+  nemo field file: Data/eorca025_t_nemo.nc
+  variance field file: Data/eorca025_t_nemo.nc
+model :
+  name: PseudoModel
+  tstep: P1D
+  states:
+    - date: 2021-06-29T23:00:00Z
+      nemo field file: Data/eorca025_t_nemo.nc
+      variance field file: Data/eorca025_t_bkg_var.nc
+      state variables: &state_variables [ sea_surface_height_anomaly ]
+    - date: 2021-06-30T23:00:00Z
+      nemo field file: Data/eorca025_t_nemo.nc
+      variance field file: Data/eorca025_t_nemo.nc
+      state variables: *state_variables
+observations:
+  observers:
+  - obs space:
+      name: Sea Surface Height
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/hofx_ssh_obs.nc
+      obsdataout:
+        engine:
+          type: H5File
+          obsfile: testoutput/hofx_nc_ssh_jopa.nc
+      simulated variables: [seaSurfaceHeightAnomaly]
+    get values:
+      atlas-interpolator:
+        type: unstructured-bilinear-lonlat
+        non_linear: missing-if-all-missing-real32
+    obs operator:
+      name: Composite
+      components:
+      - name: Identity
+        observation alias file: testinput/test_name_map.yaml
+      - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
+    obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: GrossErrorProbability/seaSurfaceHeightAnomaly
+        type: float
+        value: 0.04
+    - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
+      filter variables:
+      - name: seaSurfaceHeightAnomaly
+      prob density bad obs: 1.0
+      PGE threshold: 0.5
+test:
+  reference filename: testoutput/test_hofx_nc_ssh_eorca025.ref
+  float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
