@@ -498,12 +498,12 @@ void Increment::setupIncrementFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in incrementFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
-    if (!incrementFields_.has(vars_[i])) {
+    if (!incrementFields_.has(vars_[i].name())) {
       incrementFields_.add(geom_->functionSpace().createField<double>(
-           atlas::option::name(vars_[i]) |
+           atlas::option::name(vars_[i].name()) |
            atlas::option::levels(varSizes[i])));
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
-                         << vars_[i]
+                         << vars_[i].name()
                          << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
                          << ", " << (*(incrementFields_.end()-1)).shape(1) << ")"
                          << std::endl;

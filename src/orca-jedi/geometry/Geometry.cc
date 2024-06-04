@@ -27,16 +27,24 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
   OrcaGeometryParameters params;
   params.validateAndDeserialize(config);
 
+  oops::Variables variables{};
   std::vector<std::string> names{};
   for (const NemoFieldParameters& nemoVariable :
         params.nemoFields.value()) {
     std::string  name = nemoVariable.name.value();
     if (std::find(names.begin(), names.end(), name) == names.end()) {
-      names.push_back(name);
+      names.emplace_back(name);
+      size_t local_nlevels{params.nLevels.value()};
+      if (nemoVariable.modelSpace.value() == "surface") {
+        local_nlevels = 1;
+      }
+      eckit::LocalConfiguration conf;
+      conf.set("levels", local_nlevels);
+      variables.push_back(oops::Variable(name, conf));
     }
   }
 
-  return oops::Variables(names);
+  return variables;
 }
 
 // -----------------------------------------------------------------------------
@@ -101,7 +109,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 
   for (size_t i=0; i < vars.size(); ++i) {
     for (const auto & nemoField : nemoFields) {
-      if (nemoField.name.value() == vars[i]) {
+      if (nemoField.name.value() == vars[i].name()) {
         if (nemoField.modelSpace.value() == "surface") {
           varSizes[i] = 1;
         } else {
@@ -112,7 +120,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
     if (varSizes[i] == 0) {
       std::stringstream err_stream;
       err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
-      err_stream << "\" " << vars[i] << " not recognised. " << std::endl;
+      err_stream << "\" " << vars[i].name() << " not recognised. " << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
   }
@@ -156,7 +164,7 @@ std::vector<std::string> Geometry::variableNemoSpaces(
 
   for (size_t i=0; i < vars.size(); ++i) {
     for (const auto & nemoField : nemoFields) {
-      if (nemoField.name.value() == vars[i]) {
+      if (nemoField.name.value() == vars[i].name()) {
         if (nemoField.modelSpace.value() == "surface" ||
             nemoField.modelSpace.value() == "volume" ||
             nemoField.modelSpace.value() == "vertical" ) {

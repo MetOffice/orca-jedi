@@ -49,12 +49,10 @@ CASE("test increment") {
   config.set("number levels", 10);
   Geometry geometry(config, eckit::mpi::comm());
 
-  std::vector<std::string> varnames2 {"sea_ice_area_fraction",
-    "sea_water_potential_temperature"};
-  oops::Variables oops_vars2(varnames2);
+  oops::Variables oops_vars2{{oops::Variable{"sea_ice_area_fraction"},
+    oops::Variable{"sea_water_potential_temperature"}}};
 
-  std::vector<std::string> varnames {"sea_ice_area_fraction"};
-  oops::Variables oops_vars(varnames);
+  oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"}}};
 
   util::DateTime datetime("2021-06-30T00:00:00Z");
 
@@ -148,10 +146,10 @@ CASE("test increment") {
     orcamodel::State state2(geometry, oops_vars, datetime);
     state1.zero();
     state2.zero();
-    std::cout << "state1 norm:" << varnames[0];
-    std::cout << state1.norm<double>(varnames[0]) << std::endl;
-    std::cout << "state2 norm:" << varnames[0];
-    std::cout << state2.norm<double>(varnames[0]) << std::endl;
+    std::cout << "state1 norm:" << oops_vars[0].name();
+    std::cout << state1.norm<double>(oops_vars[0].name()) << std::endl;
+    std::cout << "state2 norm:" << oops_vars[0].name();
+    std::cout << state2.norm<double>(oops_vars[0].name()) << std::endl;
     Increment increment(geometry, oops_vars, datetime);
     increment.diff(state1, state2);
     std::cout << "increment (diff state1 state2):" << std::endl;
