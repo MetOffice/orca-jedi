@@ -31,16 +31,10 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
   std::vector<std::string> names{};
   for (const NemoFieldParameters& nemoVariable :
         params.nemoFields.value()) {
-    std::string  name = nemoVariable.name.value();
+    std::string name = nemoVariable.name.value();
     if (std::find(names.begin(), names.end(), name) == names.end()) {
       names.emplace_back(name);
-      size_t local_nlevels{params.nLevels.value()};
-      if (nemoVariable.modelSpace.value() == "surface") {
-        local_nlevels = 1;
-      }
-      eckit::LocalConfiguration conf;
-      conf.set("levels", local_nlevels);
-      variables.push_back(oops::Variable(name, conf));
+      variables.push_back(oops::Variable(name));
     }
   }
 
