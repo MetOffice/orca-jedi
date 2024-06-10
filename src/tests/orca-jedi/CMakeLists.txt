@@ -1,7 +1,5 @@
 include_directories( ${PROJECT_SOURCE_DIR}/src )
 
-#target_link_libraries( meara_test_nemo_feedback NetCDF::NetCDF_CXX )
-
 ecbuild_add_test( TARGET  test_orcajedi_nemo_io_field_reader.x
                   SOURCES test_nemo_io_field_reader.cc
                   LIBS    orcamodel )
