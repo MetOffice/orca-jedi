@@ -91,10 +91,10 @@ namespace orcamodel {
     const size_t nvars = vars.size();
 
     for (size_t j=0; j < nvars; ++j) {
-      if (!state.variables().has(vars[j])) {
+      if (!state.variables().has(vars[j].name())) {
         std::stringstream err_stream;
         err_stream << "orcamodel::Interpolator::apply varname \" "
-                   << "\" " << vars[j]
+                   << "\" " << vars[j].name()
                    << " not found in the model state." << std::endl;
         err_stream << "    add the variable to the state variables and "
                    << "add a mapping from the geometry to that variable."
@@ -119,13 +119,13 @@ namespace orcamodel {
     for (size_t jvar=0; jvar < nvars; ++jvar) {
       const auto execute = [&](auto typeVal) {
         using T = decltype(typeVal);
-        executeInterpolation<T>(vars[jvar], varSizes[jvar], state, res_iter);
+        executeInterpolation<T>(vars[jvar].name(), varSizes[jvar], state, res_iter);
       };
 
       ApplyForFieldType(execute,
-                        state.geometry()->fieldPrecision(vars[jvar]),
+                        state.geometry()->fieldPrecision(vars[jvar].name()),
                         std::string("orcamodel::Interpolator::apply '")
-                          + vars[jvar] + "' field type not recognised");
+                          + vars[jvar].name() + "' field type not recognised");
     }
     ASSERT(result.size() == nvals);
     oops::Log::trace() << "orcamodel::Interpolator::apply done "

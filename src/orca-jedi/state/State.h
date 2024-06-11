@@ -111,10 +111,10 @@ class State : public util::Printable,
   void setupStateFields();
   void print(std::ostream &) const override;
   std::shared_ptr<const Geometry> geom_;
+  OrcaStateParameters params_;
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet stateFields_;
-  OrcaStateParameters params_;
 };
 // -----------------------------------------------------------------------------
 

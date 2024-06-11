@@ -49,7 +49,7 @@ namespace orcamodel {
 State::State(const Geometry & geom,
              const oops::Variables & vars,
              const util::DateTime & time)
-  : geom_(new Geometry(geom)), vars_(vars), time_(time), params_()
+  : geom_(new Geometry(geom)), params_(), vars_(vars), time_(time)
 {
   stateFields_ = atlas::FieldSet();
 
@@ -62,9 +62,10 @@ State::State(const Geometry & geom,
 State::State(const Geometry & geom,
              const OrcaStateParameters & params)
   : geom_(new Geometry(geom))
+    , params_(params)
     , vars_(params.stateVariables.value())
     , time_(params.date.value())
-    , stateFields_(), params_(params)
+    , stateFields_()
 {
   std::stringstream params_stream;
   params_stream << "orcamodel::State:: params " << params_;
@@ -126,7 +127,7 @@ State::~State() {
 void State::subsetFieldSet(const oops::Variables & variables) {
   atlas::FieldSet subset;
   for (int iVar = 0; iVar < variables.size(); iVar++) {
-    auto variable = variables[iVar];
+    auto variable = variables[iVar].name();
     if (!stateFields_.has(variable)) {
       throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
           + variable + "' does not appear in superset.");
@@ -137,7 +138,7 @@ void State::subsetFieldSet(const oops::Variables & variables) {
   stateFields_.clear();
 
   for (int iVar = 0; iVar < variables.size(); iVar++) {
-    auto variable = variables[iVar];
+    auto variable = variables[iVar].name();
     stateFields_.add(subset[variable]);
   }
   vars_ = variables;
@@ -201,20 +202,20 @@ void State::setupStateFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in stateFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
-    if (!stateFields_.has(vars_[i])) {
+    if (!stateFields_.has(vars_[i].name())) {
       const auto addField = [&](auto typeVal) {
         using T = decltype(typeVal);
         stateFields_.add(geom_->functionSpace().createField<T>(
-             atlas::option::name(vars_[i]) |
+             atlas::option::name(vars_[i].name()) |
              atlas::option::levels(varSizes[i])));
         oops::Log::trace() << "State(ORCA)::setupStateFields : "
-                           << vars_[i] << "has dtype: "
+                           << vars_[i].name() << "has dtype: "
                            << (*(stateFields_.end()-1)).datatype().str() << std::endl;
       };
       ApplyForFieldType(addField,
-                        geom_->fieldPrecision(vars_[i]),
+                        geom_->fieldPrecision(vars_[i].name()),
                         std::string("State(ORCA)::setupStateFields ")
-                        + vars_[i] + "' field type not recognised");
+                        + vars_[i].name() + "' field type not recognised");
       geom_->log_status();
     }
   }
