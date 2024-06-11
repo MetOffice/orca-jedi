@@ -56,6 +56,8 @@ CASE("test basic state") {
   state_config.set("state variables", state_variables);
   state_config.set("date", "2021-06-30T00:00:00Z");
   OrcaStateParameters params;
+  eckit::LocalConfiguration surf_var_conf;
+  surf_var_conf.set("levels", 1);
 
   SECTION("test state parameters") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
@@ -68,23 +70,29 @@ CASE("test basic state") {
     EXPECT(params.analyticInit.value().value_or(true));
     auto datetime = static_cast<util::DateTime>(state_config.getString("date"));
     EXPECT(params.date.value() == datetime);
-    EXPECT(params.stateVariables.value()[0] == state_variables[0]);
+    EXPECT(params.stateVariables.value()[0].name() == state_variables[0]);
   }
 
   SECTION("test constructor") {
-    oops::Variables oops_vars(state_variables);
+    oops::Variables oops_vars;
+    for (auto && name : state_variables) {
+      oops_vars.push_back(oops::Variable(name, surf_var_conf));
+    }
     util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
   }
 
   SECTION("test subset copy constructor") {
-    oops::Variables oops_vars({"sea_ice_area_fraction", "sea_surface_foundation_temperature"});
+    oops::Variables oops_vars({oops::Variable("sea_ice_area_fraction", surf_var_conf),
+        oops::Variable("sea_surface_foundation_temperature", surf_var_conf)});
     util::DateTime datetime("2021-06-30T00:00:00Z");
     State state(geometry, oops_vars, datetime);
 
-    State state_copy(oops::Variables({"sea_ice_area_fraction"}), state);
+    State state_copy(oops::Variables({oops::Variable("sea_ice_area_fraction", surf_var_conf)}),
+                     state);
 
-    EXPECT_THROWS_AS(State(oops::Variables({"NOT_IN_SRC_STATE"}), state),
+    EXPECT_THROWS_AS(
+        State(oops::Variables({oops::Variable("NOT_IN_SRC_STATE", surf_var_conf)}), state),
         eckit::BadValue);
   }
 
