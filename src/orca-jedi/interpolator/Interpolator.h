@@ -74,6 +74,7 @@ class Interpolator : public util::Printable,
       const std::string& gv_varname,
       size_t var_size,
       const State& state,
+      const std::vector<bool> & mask,
       std::vector<double>::iterator& result) const;
   void print(std::ostream &) const override;
   int64_t nlocs_;

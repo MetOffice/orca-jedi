@@ -119,7 +119,7 @@ namespace orcamodel {
     for (size_t jvar=0; jvar < nvars; ++jvar) {
       const auto execute = [&](auto typeVal) {
         using T = decltype(typeVal);
-        executeInterpolation<T>(vars[jvar].name(), varSizes[jvar], state, res_iter);
+        executeInterpolation<T>(vars[jvar].name(), varSizes[jvar], state, mask, res_iter);
       };
 
       ApplyForFieldType(execute,
@@ -141,6 +141,7 @@ namespace orcamodel {
       const std::string& gv_varname,
       size_t var_size,
       const State& state,
+      const std::vector<bool> & mask,
       std::vector<double>::iterator& iter) const {
     atlas::Field tgt_field = atlasObsFuncSpace_.createField<T>(
         atlas::option::name(gv_varname) |
@@ -151,10 +152,12 @@ namespace orcamodel {
     bool has_mv = static_cast<bool>(mv);
     for (std::size_t klev=0; klev < var_size; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
-        if (has_mv && mv(field_view(iloc, klev))) {
-          *iter = util::missingValue<double>();
-        } else {
-          *iter = static_cast<double>(field_view(iloc, klev));
+        if ( mask[iloc] ) {
+          if (has_mv && mv(field_view(iloc, klev))) {
+            *iter = util::missingValue<double>();
+          } else {
+            *iter = static_cast<double>(field_view(iloc, klev));
+          }
         }
         ++iter;
       }
@@ -165,11 +168,13 @@ namespace orcamodel {
       const std::string& gv_varname,
       size_t var_size,
       const State& state,
+      const std::vector<bool> & mask,
       std::vector<double>::iterator& iter) const;
   template void Interpolator::executeInterpolation<float>(
       const std::string& gv_varname,
       size_t var_size,
       const State& state,
+      const std::vector<bool> & mask,
       std::vector<double>::iterator& iter) const;
 
   void Interpolator::print(std::ostream & os) const {
