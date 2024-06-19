@@ -55,7 +55,7 @@ Geometry::Geometry(const eckit::Configuration & config,
     int64_t halo = params_.sourceMeshHalo.value();
     std::string partitioner_name = params_.partitioner.value();
     if ( ( (partitioner_name == "serial") || (comm.size() == 1) )
-         && ( (halo > 0) ) {
+         && (halo > 0) ) {
       halo = 0;
       partitioner_name = "serial";
       oops::Log::info() << "Warning: forcing halo = 0 and serial partitioner"
