@@ -85,8 +85,6 @@ Increment::Increment(const Increment & other, const bool copy)
 
   setupIncrementFields();
 
-  auto ghost = atlas::array::make_view<int32_t, 1>(
-      geom_->mesh().nodes().ghost());
   if (copy) {
     for (size_t i=0; i < vars_.size(); ++i) {
       // copy variable from _Fields to new field set
@@ -96,7 +94,7 @@ Increment::Increment(const Increment & other, const bool copy)
       auto field_view_other = atlas::array::make_view<double, 2>(field);
       for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
         for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-          if (!ghost(j)) field_view(j, k) = field_view_other(j, k);
+          field_view(j, k) = field_view_other(j, k);
         }
       }
     }
