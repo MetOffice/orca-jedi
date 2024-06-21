@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ostream>
 #include <sstream>
+#include <limits>
 
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
@@ -84,20 +85,28 @@ Increment::Increment(const Increment & other, const bool copy)
 
   setupIncrementFields();
 
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
   if (copy) {
     for (size_t i=0; i < vars_.size(); ++i) {
       // copy variable from _Fields to new field set
       atlas::Field field = other.incrementFields_[i];
       oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
-      incrementFields_->add(field);
+      auto field_view = atlas::array::make_view<double, 2>(incrementFields_[i]);
+      auto field_view_other = atlas::array::make_view<double, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          if (!ghost(j)) field_view(j, k) = field_view_other(j, k);
+        }
+      }
     }
   }
 
   oops::Log::debug() << "Increment(ORCA)::Increment copied." << std::endl;
 
-  oops::Log::debug() << "increment copy self print";
+  oops::Log::debug() << "increment copy self print" << std::endl;
   print(oops::Log::debug());
-  oops::Log::debug() << "increment copy other print";
+  oops::Log::debug() << "increment copy other print" << std::endl;
   other.print(oops::Log::debug());
 }
 
@@ -551,8 +560,8 @@ struct Increment::stats Increment::stats(const std::string & fieldName) const {
   s.valid_points = 0;
   s.sumx = 0;
   s.sumx2 = 0;
-  s.min = 1e30;
-  s.max = -1e30;
+  s.min = std::numeric_limits<double>::max();
+  s.max = std::numeric_limits<double>::lowest();
 
   auto field_view = atlas::array::make_view<double, 2>(
       incrementFields_[fieldName]);

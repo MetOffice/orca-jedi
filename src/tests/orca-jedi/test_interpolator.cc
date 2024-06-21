@@ -82,7 +82,7 @@ CASE("test basic interpolator") {
   State state(geometry, stateParams);
 
   SECTION("test interpolator succeeds even with no locations") {
-   Interpolator interpolator(interpolator_conf, geometry, {}, {});
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
   }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
