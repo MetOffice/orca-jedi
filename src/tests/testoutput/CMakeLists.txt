@@ -5,6 +5,7 @@ list( APPEND orcajedi_test_output
   test_hofx_nc_sst.ref
   test_hofx_nc_ssh.ref
   test_hofx_nc_ssh_eorca025.ref
+  test_hofx_nc_ssh_amm1.ref
   test_hofx3d_nc_sst.ref
   test_hofx3d_nc_potm.ref
   test_hofx3d_nc_prof_2vars.ref

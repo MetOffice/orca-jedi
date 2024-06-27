@@ -27,7 +27,7 @@ nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 nemo_io/NemoFieldWriter.h
 nemo_io/NemoFieldWriter.cc
-nemo_io/OrcaIndex.h
+nemo_io/AtlasIndex.h
 nemo_io/ReadServer.h
 nemo_io/ReadServer.cc
 nemo_io/WriteServer.h
