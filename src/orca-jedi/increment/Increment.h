@@ -25,22 +25,22 @@
 #include "eckit/exception/Exceptions.h"
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace ufo {
-  class GeoVaLs;
+class GeoVaLs;
 }
 
 namespace oops {
-  class Variables;
-  class UnstructuredGrid;
+class Variables;
+class UnstructuredGrid;
 }
 
 namespace orcamodel {
-  class Geometry;
-  class ModelBiasIncrement;
-  class State;
+class Geometry;
+class ModelBiasIncrement;
+class State;
 
 /// orcaModel Increment Class: Difference between two states
 /*!

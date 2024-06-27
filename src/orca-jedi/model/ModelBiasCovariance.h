@@ -14,9 +14,9 @@
 #include "oops/util/Printable.h"
 
 namespace orcamodel {
-  class ModelBias;
-  class ModelBiasIncrement;
-  class Geometry;
+class ModelBias;
+class ModelBiasIncrement;
+class Geometry;
 
 // -----------------------------------------------------------------------------
 

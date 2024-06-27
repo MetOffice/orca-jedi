@@ -11,13 +11,13 @@
 #include "oops/util/Serializable.h"
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace orcamodel {
-  class ModelBias;
-  class ModelBiasCovariance;
-  class Geometry;
+class ModelBias;
+class ModelBiasCovariance;
+class Geometry;
 
 // -----------------------------------------------------------------------------
 
