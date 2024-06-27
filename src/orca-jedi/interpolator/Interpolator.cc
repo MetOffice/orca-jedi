@@ -136,6 +136,7 @@ namespace orcamodel {
   /// \param gv_varname The GeoVaLs variable name of the source field.
   /// \param var_size The number of observation locations in the interpolant.
   /// \param state The state object containing the model state.
+  /// \param mask The locations where the interpolant should be set.
   /// \param iter Reference to the interator into the output vector.
   template<class T> void Interpolator::executeInterpolation(
       const std::string& gv_varname,
