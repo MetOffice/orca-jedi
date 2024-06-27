@@ -29,13 +29,13 @@
 
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace orcamodel {
-  class State;
-  class Geometry;
-  class Increment;
+class State;
+class Geometry;
+class Increment;
 
 atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
     const std::vector<double> & locs);
