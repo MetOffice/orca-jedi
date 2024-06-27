@@ -81,10 +81,9 @@ CASE("test basic interpolator") {
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  // Disable this section until jopa-bundle uses a new version of atlas
-  // SECTION("test interpolator succeeds even with no locations") {
-  //  Interpolator interpolator(interpolator_conf, geometry, {}, {});
-  // }
+  SECTION("test interpolator succeeds even with no locations") {
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
+  }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
 
