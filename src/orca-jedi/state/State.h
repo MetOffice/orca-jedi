@@ -26,17 +26,17 @@
 #include "orca-jedi/state/StateParameters.h"
 
 namespace ufo {
-  class GeoVaLs;
+class GeoVaLs;
 }
 
 namespace oops {
-  class Variables;
+class Variables;
 }
 
 namespace orcamodel {
-  class Geometry;
-  class GetValuesTraj;
-  class Increment;
+class Geometry;
+class GetValuesTraj;
+class Increment;
 
 /// orcaModel model state
 /*!

@@ -32,9 +32,9 @@
 #include "orca-jedi/utilities/Types.h"
 
 namespace atlas {
-  class Field;
-  class FieldSet;
-  class Mesh;
+class Field;
+class FieldSet;
+class Mesh;
 }
 
 namespace orcamodel {
