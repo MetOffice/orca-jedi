@@ -13,12 +13,12 @@
 #include "oops/util/Printable.h"
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace orcamodel {
-  class Geometry;
-  class ModelBiasIncrement;
+class Geometry;
+class ModelBiasIncrement;
 
 /// Model error for the OrcaModel model.
 /*!
