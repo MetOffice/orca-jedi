@@ -20,7 +20,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/Duration.h"
 
-#include "atlas-orca/grid/OrcaGrid.h"
 #include "orca-jedi/nemo_io/AtlasIndex.h"
 
 namespace orcamodel {
