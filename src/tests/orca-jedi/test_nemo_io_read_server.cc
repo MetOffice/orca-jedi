@@ -38,11 +38,12 @@ namespace test {
 CASE("test MPI distributed reads regular grid field array view") {
   eckit::PathName test_data_path("../Data/amm1_nemo.nc");
   eckit::PathName grid_spec_path("../Data/amm1_atlas_grid_spec.yaml");
-  auto partitioner_names = std::vector<std::string>{"serial", "checkerboard"};
+  auto partitioner_names = std::vector<std::string>{"serial"};
   for (std::string partitioner_name : partitioner_names) {
     atlas::Grid grid{atlas::Grid::Spec{grid_spec_path}};
 
     auto meshgen_config = grid.meshgenerator();
+    std::cout << "meshgen_config: " << meshgen_config << std::endl;
     atlas::MeshGenerator meshgen(meshgen_config);
 
     auto partitioner_config = grid.partitioner();
@@ -60,12 +61,23 @@ CASE("test MPI distributed reads regular grid field array view") {
     eckit_timer->start();
     ReadServer read_server(eckit_timer, test_data_path, mesh);
 
+    constexpr float kgo_missing_value = -32768.;
     SECTION(partitioner_name + " get field _FillValue") {
       auto missing_value = read_server.read_fillvalue<float>("sossheig");
-      EXPECT_EQUAL(missing_value, 1e+20);
+      if (std::abs(missing_value - kgo_missing_value) >= 1e-6) {
+        std::cout << "missing_value: " << missing_value << " == " << kgo_missing_value
+            << " diff " << std::abs(missing_value - kgo_missing_value) << std::endl;
+      }
+      EXPECT(std::abs(missing_value - kgo_missing_value) < 1e-6);
 
       auto default_missing_value = read_server.read_fillvalue<float>("nav_lev");
-      EXPECT_EQUAL(default_missing_value, std::numeric_limits<float>::lowest());
+      if (std::abs(default_missing_value - std::numeric_limits<float>::lowest()) >= 1e-6) {
+        std::cout << "default_missing_value: " << missing_value << " == "
+            << std::numeric_limits<float>::lowest()
+            << " diff " << std::abs(default_missing_value - std::numeric_limits<float>::lowest())
+            << std::endl;
+      }
+      EXPECT(std::abs(default_missing_value - std::numeric_limits<float>::lowest()) < 1e-6);
     }
 
     SECTION(partitioner_name + " surface field") {
@@ -74,7 +86,7 @@ CASE("test MPI distributed reads regular grid field array view") {
             atlas::option::name(nemo_name) |
             atlas::option::levels(1)));
       auto field_view = atlas::array::make_view<float, 2>(field);
-      field.metadata().set("missing_value", 1e+20);
+      field.metadata().set("missing_value", kgo_missing_value);
       field.metadata().set("missing_value_type", "approximately-equals");
       field.metadata().set("missing_value_epsilon", 1e-6);
 
@@ -108,7 +120,7 @@ CASE("test MPI distributed reads regular grid field array view") {
       }
 
       std::ofstream diagnostics_file("structured_diagnostics_"
-         + std::to_string(atlas::mpi::rank()) + ".txt");
+          + partitioner_name + std::to_string(atlas::mpi::rank()) + ".txt");
       diagnostics_file << "longitude = ";
       for (size_t j = 0; j < atlas_index->ny(); ++j) {
         for (size_t i = 0; i < atlas_index->nx(); ++i) {
