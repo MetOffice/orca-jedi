@@ -9,6 +9,7 @@ list( APPEND orcajedi_test_output
   test_hofx3d_nc_sst.ref
   test_hofx3d_nc_potm.ref
   test_hofx3d_nc_prof_2vars.ref
+  test_hofx3d_nc_ssh_amm1.ref
 )
 
 foreach(FILENAME ${orcajedi_test_output})
