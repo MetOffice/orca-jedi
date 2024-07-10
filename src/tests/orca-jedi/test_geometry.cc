@@ -60,30 +60,26 @@ CASE("test basic geometry") {
   }
 
   SECTION("test geometry variable sizes") {
-    const std::vector<int> channels{};
-    std::vector<std::string> varnames {"sea_ice_area_fraction",
-      "sea_water_potential_temperature"};
-    oops::Variables oops_vars(varnames, channels);
+    oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"},
+                               oops::Variable{"sea_water_potential_temperature"}}};
     auto varsizes = geometry.variableSizes(oops_vars);
     EXPECT_EQUAL(varsizes.size(), 2);
     EXPECT_EQUAL(varsizes[0], 1);
     EXPECT_EQUAL(varsizes[1], 10);
-    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
+    oops::Variables not_vars{{oops::Variable{"NOTAVARIBLE"}}};
     EXPECT_THROWS_AS(geometry.variableSizes(not_vars), eckit::BadValue);
   }
 
   SECTION("test geometry variable NEMO model spaces") {
-    const std::vector<int> channels{};
-    std::vector<std::string> varnames {"sea_ice_area_fraction",
-      "sea_water_potential_temperature", "depth"};
-    oops::Variables oops_vars(varnames, channels);
+    oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"},
+      oops::Variable{"sea_water_potential_temperature"}, oops::Variable{"depth"}}};
     auto varsizes = geometry.variableNemoSpaces(oops_vars);
     EXPECT_EQUAL(varsizes.size(), 3);
     EXPECT_EQUAL(varsizes[0], "surface");
     EXPECT_EQUAL(varsizes[1], "volume");
     EXPECT_EQUAL(varsizes[2], "vertical");
 
-    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
+    oops::Variables not_vars{{oops::Variable{"NOTAVARIBLE"}}};
     EXPECT_THROWS_AS(geometry.variableNemoSpaces(not_vars), eckit::BadValue);
 
     eckit::LocalConfiguration bad_config;

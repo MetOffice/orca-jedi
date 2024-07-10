@@ -81,17 +81,16 @@ CASE("test basic interpolator") {
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
 
-  // Disable this section until jopa-bundle uses a new version of atlas
-  // SECTION("test interpolator succeeds even with no locations") {
-  //  Interpolator interpolator(interpolator_conf, geometry, {}, {});
-  // }
+  SECTION("test interpolator succeeds even with no locations") {
+    Interpolator interpolator(interpolator_conf, geometry, {}, {});
+  }
 
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
 
   SECTION("test interpolator.apply fails missing variable") {
-    oops::Variables variables({"NOTAVARIABLE"});
+    oops::Variables variables{{oops::Variable{"NOTAVARIABLE"}}};
     std::vector<double> vals(3);
-    std::vector<bool> mask(3);
+    std::vector<bool> mask(3, true);
     EXPECT_THROWS_AS(interpolator.apply(variables, state, mask, vals),
         eckit::BadParameter);
   }
@@ -99,9 +98,9 @@ CASE("test basic interpolator") {
   SECTION("test interpolator.apply") {
     // two variables at n locations
     std::vector<double> vals(2*nlocs);
-    std::vector<bool> mask(2*nlocs);
-    interpolator.apply(oops::Variables({"sea_ice_area_fraction",
-        "sea_surface_foundation_temperature"}), state, mask, vals);
+    std::vector<bool> mask(nlocs, true);
+    interpolator.apply(oops::Variables{{oops::Variable{"sea_ice_area_fraction"},
+        oops::Variable{"sea_surface_foundation_temperature"}}}, state, mask, vals);
 
     double missing_value = util::missingValue<double>();
     std::vector<double> testvals = {1, missing_value, 0, 18.4888916016,
@@ -115,8 +114,8 @@ CASE("test basic interpolator") {
   }
   SECTION("test interpolator.apply multiple levels") {
     std::vector<double> vals(nlevs*nlocs);
-    std::vector<bool> mask(nlevs*nlocs);
-    interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
+    std::vector<bool> mask(nlocs, true);
+    interpolator.apply(oops::Variables{{oops::Variable{"sea_water_potential_temperature"}}},
                                        state, mask, vals);
 
     double missing_value = util::missingValue<double>();

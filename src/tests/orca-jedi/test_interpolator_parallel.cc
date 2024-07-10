@@ -115,7 +115,7 @@ CASE("test serial interpolator") {
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
 
   SECTION("test interpolator.apply fails missing variable") {
-    oops::Variables variables({"NOTAVARIABLE"});
+    oops::Variables variables{oops::Variable{"NOTAVARIABLE"}};
     std::vector<double> vals(nlocs);
     std::vector<bool> mask(nlocs);
     EXPECT_THROWS_AS(interpolator.apply(variables, state, mask, vals),
@@ -126,8 +126,8 @@ CASE("test serial interpolator") {
     // two variables at n locations
     std::vector<double> vals(2*nlocs);
     std::vector<bool> mask(2*nlocs);
-    interpolator.apply(oops::Variables({"sea_surface_height_anomaly",
-        "sea_surface_foundation_temperature"}), state, mask, vals);
+    interpolator.apply(oops::Variables({oops::Variable{"sea_surface_height_anomaly"},
+        oops::Variable{"sea_surface_foundation_temperature"}}), state, mask, vals);
 
     double missing_value = util::missingValue<double>();
     std::vector<double> testvals(2*nlocs, 0);
@@ -153,7 +153,7 @@ CASE("test serial interpolator") {
   //  SECTION("test interpolator.apply multiple levels") {
   //    std::vector<double> vals(nlevs*nlocs);
   //    std::vector<bool> mask(nlevs*nlocs);
-  //    interpolator.apply(oops::Variables({"sea_water_potential_temperature"}),
+  //    interpolator.apply(oops::Variables{oops::Variable{"sea_water_potential_temperature"}},
   //                                       state, mask, vals);
 
   //    double missing_value = util::missingValue<double>();
@@ -261,7 +261,7 @@ CASE("test checkerboard interpolator") {
   Interpolator interpolator(interpolator_conf, geometry, lats, lons);
 
   SECTION("test interpolator.apply fails missing variable") {
-    oops::Variables variables({"NOTAVARIABLE"});
+    oops::Variables variables{oops::Variable{"NOTAVARIABLE"}};
     std::vector<double> vals(nlocs);
     std::vector<bool> mask(nlocs);
     EXPECT_THROWS_AS(interpolator.apply(variables, state, mask, vals),
@@ -272,8 +272,8 @@ CASE("test checkerboard interpolator") {
     // two variables at n locations
     std::vector<double> vals(2*nlocs);
     std::vector<bool> mask(2*nlocs);
-    interpolator.apply(oops::Variables({"sea_surface_height_anomaly",
-        "sea_surface_foundation_temperature"}), state, mask, vals);
+    interpolator.apply(oops::Variables{oops::Variable{"sea_surface_height_anomaly"},
+        oops::Variable{"sea_surface_foundation_temperature"}}, state, mask, vals);
 
     double missing_value = util::missingValue<double>();
     std::vector<double> testvals(2*nlocs, 0);

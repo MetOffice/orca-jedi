@@ -28,13 +28,13 @@
 
 // Forward declarations
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace orcamodel {
-  class Increment;
-  class ModelBias;
-  class State;
+class Increment;
+class ModelBias;
+class State;
 
 
 class OrcaModelParameters : public oops::Parameters {

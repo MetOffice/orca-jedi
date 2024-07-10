@@ -16,7 +16,7 @@
 
 // Forward declarations
 namespace oops {
-  class Variables;
+class Variables;
 }
 
 namespace orcamodel {

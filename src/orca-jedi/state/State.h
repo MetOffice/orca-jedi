@@ -26,17 +26,17 @@
 #include "orca-jedi/state/StateParameters.h"
 
 namespace ufo {
-  class GeoVaLs;
+class GeoVaLs;
 }
 
 namespace oops {
-  class Variables;
+class Variables;
 }
 
 namespace orcamodel {
-  class Geometry;
-  class GetValuesTraj;
-  class Increment;
+class Geometry;
+class GetValuesTraj;
+class Increment;
 
 /// orcaModel model state
 /*!
@@ -111,10 +111,10 @@ class State : public util::Printable,
   void setupStateFields();
   void print(std::ostream &) const override;
   std::shared_ptr<const Geometry> geom_;
+  OrcaStateParameters params_;
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet stateFields_;
-  OrcaStateParameters params_;
 };
 // -----------------------------------------------------------------------------
 

@@ -27,17 +27,18 @@ oops::Variables orcaVariableFactory(const eckit::Configuration & config) {
   OrcaGeometryParameters params;
   params.validateAndDeserialize(config);
 
-  std::vector<int> channels{};
+  oops::Variables variables{};
   std::vector<std::string> names{};
   for (const NemoFieldParameters& nemoVariable :
         params.nemoFields.value()) {
-    std::string  name = nemoVariable.name.value();
+    std::string name = nemoVariable.name.value();
     if (std::find(names.begin(), names.end(), name) == names.end()) {
-      names.push_back(name);
+      names.emplace_back(name);
+      variables.push_back(oops::Variable(name));
     }
   }
 
-  return oops::Variables(names, channels);
+  return variables;
 }
 
 // -----------------------------------------------------------------------------
@@ -52,6 +53,12 @@ Geometry::Geometry(const eckit::Configuration & config,
     log_status();
     params_.validateAndDeserialize(config);
     int64_t halo = params_.sourceMeshHalo.value();
+    if ( ( (params_.partitioner.value() == "serial") || (comm.size() == 1) )
+         && (halo > 0) ) {
+      halo = 0;
+      oops::Log::info() << "Warning: forcing halo = 0"
+                        << " as settings imply all processors have all data" << std::endl;
+    }
     auto meshgen_config = grid_.meshgenerator()
                           | atlas::option::halo(halo);
 
@@ -96,7 +103,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
 
   for (size_t i=0; i < vars.size(); ++i) {
     for (const auto & nemoField : nemoFields) {
-      if (nemoField.name.value() == vars[i]) {
+      if (nemoField.name.value() == vars[i].name()) {
         if (nemoField.modelSpace.value() == "surface") {
           varSizes[i] = 1;
         } else {
@@ -107,7 +114,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
     if (varSizes[i] == 0) {
       std::stringstream err_stream;
       err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
-      err_stream << "\" " << vars[i] << " not recognised. " << std::endl;
+      err_stream << "\" " << vars[i].name() << " not recognised. " << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
   }
@@ -151,7 +158,7 @@ std::vector<std::string> Geometry::variableNemoSpaces(
 
   for (size_t i=0; i < vars.size(); ++i) {
     for (const auto & nemoField : nemoFields) {
-      if (nemoField.name.value() == vars[i]) {
+      if (nemoField.name.value() == vars[i].name()) {
         if (nemoField.modelSpace.value() == "surface" ||
             nemoField.modelSpace.value() == "volume" ||
             nemoField.modelSpace.value() == "vertical" ) {

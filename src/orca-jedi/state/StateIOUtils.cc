@@ -58,7 +58,7 @@ void readFieldsFromFile(
       const std::vector<std::string> coordSpaces =
         geom.variableNemoSpaces(vars);
       for (size_t i = 0; i < vars.size(); ++i)
-        varCoordTypeMap[vars[i]] = coordSpaces[i];
+        varCoordTypeMap[vars[i].name()] = coordSpaces[i];
     }
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
@@ -185,7 +185,7 @@ void writeFieldsToFile(
       const std::vector<std::string> coordSpaces =
         geom.variableNemoSpaces(vars);
       for (size_t i=0; i < vars.size(); ++i)
-        varCoordTypeMap[vars[i]] = coordSpaces[i];
+        varCoordTypeMap[vars[i].name()] = coordSpaces[i];
     }
 
     oops::Log::debug() << "orcamodel::writeFieldsToFile:: nemo_field_path "

@@ -7,6 +7,8 @@
 #include <vector>
 #include <cmath>
 #include <ostream>
+#include <sstream>
+#include <limits>
 
 #include "atlas/array/MakeView.h"
 #include "atlas/field/Field.h"
@@ -88,15 +90,21 @@ Increment::Increment(const Increment & other, const bool copy)
       // copy variable from _Fields to new field set
       atlas::Field field = other.incrementFields_[i];
       oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
-      incrementFields_->add(field);
+      auto field_view = atlas::array::make_view<double, 2>(incrementFields_[i]);
+      auto field_view_other = atlas::array::make_view<double, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          field_view(j, k) = field_view_other(j, k);
+        }
+      }
     }
   }
 
   oops::Log::debug() << "Increment(ORCA)::Increment copied." << std::endl;
 
-  oops::Log::debug() << "increment copy self print";
+  oops::Log::debug() << "increment copy self print" << std::endl;
   print(oops::Log::debug());
-  oops::Log::debug() << "increment copy other print";
+  oops::Log::debug() << "increment copy other print" << std::endl;
   other.print(oops::Log::debug());
 }
 
@@ -400,6 +408,19 @@ void Increment::dirac(const eckit::Configuration & conf) {
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   std::vector<int> jpt;
+  // check validity of the configuration
+  for (atlas::Field field : incrementFields_) {
+    for (int i = 0; i < ndir; i++) {
+      if ( (iydir[i]*nx + ixdir[i] >= field.shape(0)) || (izdir[i] >= field.shape(1)) ) {
+        std::ostringstream err_stream;
+        err_stream << orcamodel::Increment::classname()
+                   << " field shape and delta function location configuration mismatch,"
+                   << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", "
+                   << izdir[i] << ") for field with shape " << field.shape();
+        throw eckit::BadValue(err_stream.str(), Here());
+      }
+    }
+  }
   for (int i = 0; i < ndir; i++) {
     jpt.push_back(iydir[i]*nx + ixdir[i]);
     oops::Log::debug() << "orcamodel::Increment::dirac:: delta function " << i
@@ -484,13 +505,15 @@ void Increment::setupIncrementFields() {
   for (size_t i=0; i < vars_.size(); ++i) {
     // add variable if it isn't already in incrementFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
-    if (!incrementFields_.has(vars_[i])) {
+    if (!incrementFields_.has(vars_[i].name())) {
       incrementFields_.add(geom_->functionSpace().createField<double>(
-           atlas::option::name(vars_[i]) |
+           atlas::option::name(vars_[i].name()) |
            atlas::option::levels(varSizes[i])));
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
-                         << vars_[i] << "has dtype: "
-                         << (*(incrementFields_.end()-1)).datatype().str() << std::endl;
+                         << vars_[i].name()
+                         << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
+                         << ", " << (*(incrementFields_.end()-1)).shape(1) << ")"
+                         << std::endl;
       geom_->log_status();
     }
   }
@@ -547,8 +570,8 @@ struct Increment::stats Increment::stats(const std::string & fieldName) const {
   s.valid_points = 0;
   s.sumx = 0;
   s.sumx2 = 0;
-  s.min = 1e30;
-  s.max = -1e30;
+  s.min = std::numeric_limits<double>::max();
+  s.max = std::numeric_limits<double>::lowest();
 
   auto field_view = atlas::array::make_view<double, 2>(
       incrementFields_[fieldName]);
