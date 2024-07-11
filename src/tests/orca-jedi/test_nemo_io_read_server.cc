@@ -16,7 +16,6 @@
 #include "atlas/mesh.h"
 #include "atlas/grid.h"
 #include "atlas/meshgenerator.h"
-#include "atlas/output/Gmsh.h"
 #include "atlas/field/Field.h"
 
 #include "atlas-orca/grid/OrcaGrid.h"
@@ -35,7 +34,7 @@ namespace test {
 
 //-----------------------------------------------------------------------------
 //
-CASE("test MPI distributed reads regular grid field array view") {
+CASE("test MPI distributed reads structured grid field array view") {
   eckit::PathName test_data_path("../Data/amm1_nemo.nc");
   eckit::PathName grid_spec_path("../Data/amm1_atlas_grid_spec.yaml");
   auto partitioner_names = std::vector<std::string>{"serial"};
@@ -108,47 +107,6 @@ CASE("test MPI distributed reads regular grid field array view") {
         }
         EXPECT_EQUAL(raw_value, field_view(i, 0));
       }
-      auto lonlat = atlas::array::make_view<double, 2>(mesh.nodes().lonlat());
-      std::array<std::array<double, 19>, 15> diag_lon;
-      std::array<std::array<double, 19>, 15> diag_lat;
-      std::array<std::array<float, 19>, 15> diag_data;
-      for (size_t inode = 0; inode < field_view.size(); ++inode) {
-        auto[i, j] = atlas_index->ij(inode);
-        diag_lon[i][j] = lonlat(inode, 0);
-        diag_lat[i][j] = lonlat(inode, 1);
-        diag_data[i][j] = field_view(inode, 0);
-      }
-
-      std::ofstream diagnostics_file("structured_diagnostics_"
-          + partitioner_name + std::to_string(atlas::mpi::rank()) + ".txt");
-      diagnostics_file << "longitude = ";
-      for (size_t j = 0; j < atlas_index->ny(); ++j) {
-        for (size_t i = 0; i < atlas_index->nx(); ++i) {
-          diagnostics_file << diag_lon[i][j] << " ";
-        }
-        diagnostics_file << std::endl;
-      }
-      diagnostics_file << "latitude = ";
-      for (size_t j = 0; j < atlas_index->ny(); ++j) {
-        for (size_t i = 0; i < atlas_index->nx(); ++i) {
-          diagnostics_file << diag_lat[i][j] << " ";
-        }
-        diagnostics_file << std::endl;
-      }
-      diagnostics_file << "seaSurfaceHeightAnomaly = ";
-      for (size_t j = 0; j < atlas_index->ny(); ++j) {
-        for (size_t i = 0; i < atlas_index->nx(); ++i) {
-          diagnostics_file << diag_data[i][j] << " ";
-        }
-        diagnostics_file << std::endl;
-      }
-      diagnostics_file.close();
-      atlas::output::Gmsh gmsh(
-         "structured_diagnostics_" + partitioner_name
-         + std::to_string(atlas::mpi::rank()) + ".msh",
-         atlas::util::Config("info", true));
-      gmsh.write(mesh);
-      gmsh.write(field);
     }
 
     SECTION(partitioner_name + " volume field") {

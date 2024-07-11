@@ -145,7 +145,7 @@ CASE("test  interpolator") {
         oops::Variable{"mass_concentration_of_chlorophyll_in_sea_water"}}};
     settings_map["AMM1"].surf_values = std::vector<double>{
         -0.470139563084, -0.286416769028, -0.433749824762,
-        0.345775008202,  -236.421875,      2.09327220917};
+        0.345775008202,  0.83959633112,  2.09327220917};
 
     settings_map["AMM1"].vol_vars = oops::Variables{
         {oops::Variable{"sea_water_potential_temperature"}}};
@@ -184,6 +184,7 @@ CASE("test  interpolator") {
       // two variables at n locations
       std::vector<double> vals(2*settings.nlocs);
       std::vector<bool> mask(settings.nlocs, true);
+
       interpolator.apply(settings.surf_vars, state, mask, vals);
 
       for (size_t i=0; i < settings.surf_values.size(); ++i) {
@@ -197,6 +198,7 @@ CASE("test  interpolator") {
     SECTION("test " + key + " interpolator.apply multiple levels") {
       std::vector<double> vals(settings.nlevs*settings.nlocs);
       std::vector<bool> mask(settings.nlocs, true);
+
       interpolator.apply(settings.vol_vars, state, mask, vals);
 
       for (size_t i=0; i < settings.vol_values.size(); ++i) {
