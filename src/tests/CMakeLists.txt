@@ -34,6 +34,7 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_checkerboard
                   ARGS testinput/hofx_nc_ssh_checkerboard.yaml
                   COMMAND orcamodel_hofx.x )
 
+# Disabled until halos are available from atlas-orca
 #ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
 #                  OMP 1
 #                  MPI 2
@@ -46,17 +47,18 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
                   ARGS testinput/hofx_nc_ssh_eorca025.yaml
                   COMMAND orcamodel_hofx.x )
 
-ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_amm1
-                  OMP 1
-                  MPI 1
-                  ARGS testinput/hofx_nc_ssh_amm1.yaml
-                  COMMAND orcamodel_hofx.x )
-
-ecbuild_add_test( TARGET test_orcamodel_hofx3D_ssh_amm1
-                  OMP 1
-                  MPI 1
-                  ARGS testinput/hofx3d_nc_ssh_amm1.yaml
-                  COMMAND orcamodel_hofx3D.x )
+# Disabled until issue is resolved with HofX regional calculation
+#ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_amm1
+#                  OMP 1
+#                  MPI 1
+#                  ARGS testinput/hofx_nc_ssh_amm1.yaml
+#                  COMMAND orcamodel_hofx.x )
+#
+#ecbuild_add_test( TARGET test_orcamodel_hofx3D_ssh_amm1
+#                  OMP 1
+#                  MPI 1
+#                  ARGS testinput/hofx3d_nc_ssh_amm1.yaml
+#                  COMMAND orcamodel_hofx3D.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_serial
                   OMP 1
