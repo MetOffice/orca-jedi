@@ -16,6 +16,7 @@
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/state/StateIOUtils.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
@@ -49,12 +50,27 @@ CASE("test increment") {
   config.set("number levels", 10);
   Geometry geometry(config, eckit::mpi::comm());
 
+  eckit::LocalConfiguration inc_config;
+  inc_config.set("date", "2021-06-30T00:00:00Z");
+
+  OrcaIncrementParameters params;
+
   oops::Variables oops_vars2{{oops::Variable{"sea_ice_area_fraction"},
     oops::Variable{"sea_water_potential_temperature"}}};
 
   oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"}}};
 
   util::DateTime datetime("2021-06-30T00:00:00Z");
+
+  SECTION("test increment parameters") {
+    inc_config.set("filepath", "../Data/orca2_t_nemo.nc");
+    params.validateAndDeserialize(inc_config);
+    EXPECT(params.nemoFieldFile.value() ==
+        inc_config.getString("filepath"));
+    auto datetime = static_cast<util::DateTime>(inc_config.getString("date"));
+    EXPECT(params.date.value() == datetime);
+//    EXPECT(params.variables.value()[0].name() == variables[0]);
+  }
 
   SECTION("test constructor") {
     Increment increment(geometry, oops_vars2, datetime);
@@ -154,6 +170,26 @@ CASE("test increment") {
     increment.diff(state1, state2);
     std::cout << "increment (diff state1 state2):" << std::endl;
     increment.print(std::cout);
+  }
+
+  SECTION("test increment write") {
+    Increment increment1(geometry, oops_vars, datetime);
+    increment1.ones();
+    inc_config.set("filepath", "../testoutput/orca2_t_increment_output.nc");
+    params.validateAndDeserialize(inc_config);
+    increment1.write(params);
+//    Increment increment3(geometry, oops_vars, datetime);
+//    increment3.read(params)
+//    EXPECT_EQUAL(increment1.norm(), increment3.norm());
+  }
+
+  SECTION("test orca atlas fieldset write") {
+    Increment increment1(geometry, oops_vars, datetime);
+    increment1.ones();
+    increment1 *=2;
+    atlas::FieldSet incfset = atlas::FieldSet();
+    increment1.Increment::toFieldSet(incfset);
+    writeFieldsToFile("../testoutput/orca2_t_inc_fs_output.nc", geometry, datetime, incfset);
   }
 }
 

@@ -28,11 +28,6 @@ void writeStateFieldsToFile(
   const Geometry & geom,
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs);
-void writeIncrementFieldsToFile(
-  const eckit::Configuration & params,
-  const Geometry & geom,
-  const util::DateTime & valid_date,
-  const atlas::FieldSet & fs);
 void writeFieldsToFile(
   const std::string nemo_field_path,
   const Geometry & geom,

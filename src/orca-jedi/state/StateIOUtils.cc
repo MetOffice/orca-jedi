@@ -136,37 +136,12 @@ void writeStateFieldsToFile(
     std::string output_filename =
       params.outputNemoFieldFile.value().value_or("");
     if (output_filename == "")
-      throw eckit::BadValue(std::string("orcamodel::writeFieldsToFile:: ")
+      throw eckit::BadValue(std::string("orcamodel::writeStateFieldsToFile:: ")
           + "file name not specified", Here());
 
     auto nemo_field_path = eckit::PathName(output_filename);
     oops::Log::debug() << "orcamodel::writeStateFieldsToFile:: "
                        << nemo_field_path << std::endl;
-
-    writeFieldsToFile(nemo_field_path, geom, valid_date, fs);
-}
-
-void writeIncrementFieldsToFile(
-  const eckit::Configuration & conf,
-  const Geometry & geom,
-  const util::DateTime & valid_date,
-  const atlas::FieldSet & fs) {
-    oops::Log::trace() << "orcamodel::writeIncrementFieldsToFile:: start for valid_date"
-                       << " " << valid_date << std::endl;
-
-    // Filepath
-    std::string filepath = conf.getString("filepath");
-    if (conf.has("member")) {
-      std::ostringstream out;
-      out << std::setfill('0') << std::setw(6) << conf.getInt("member");
-      filepath.append("_");
-      filepath.append(out.str());
-    }
-
-    oops::Log::debug() << "filepath " << filepath << std::endl;
-    std::string nemo_field_path = filepath;
-    nemo_field_path.append(".nc");
-      oops::Log::info() << "Writing file: " << nemo_field_path << std::endl;
 
     writeFieldsToFile(nemo_field_path, geom, valid_date, fs);
 }

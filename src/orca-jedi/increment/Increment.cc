@@ -32,6 +32,7 @@
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/state/StateIOUtils.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/increment/IncrementParameters.h"
 
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
@@ -526,12 +527,26 @@ void Increment::read(const eckit::Configuration & conf) {
   throw eckit::NotImplemented(err_message, Here());
 }
 
-void Increment::write(const eckit::Configuration & conf) const {
+void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "orcamodel::increment::write" << std::endl;
 
   // OrcaStateParameters params
 
-  writeIncrementFieldsToFile(conf, *geom_, validTime(), incrementFields_);
+  // Filepath
+//    std::string filepath = conf.getString("filepath");
+  std::string output_filename = params.nemoFieldFile.value();
+  if (output_filename == "")
+    throw eckit::BadValue(std::string("orcamodel::writeIncrementFieldsToFile:: ")
+        + "file name not specified", Here());
+
+  auto nemo_field_path = eckit::PathName(output_filename);
+  oops::Log::debug() << "Increment::write to filename "
+                     << nemo_field_path << std::endl;
+
+//    file_path.append(".nc");                      DJL
+//      oops::Log::info() << "Writing file: " << file_path << std::endl;             DJL
+
+  writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 
   // DJL debug
   for (atlas::Field field : incrementFields_) {
@@ -542,6 +557,10 @@ void Increment::write(const eckit::Configuration & conf) const {
     oops::Log::debug() << std::endl;
   }
   // DJL debug end
+}
+
+void Increment::write(const eckit::Configuration & config) const {
+  write(oops::validateAndDeserialize<OrcaIncrementParameters>(config));
 }
 
 /// \brief Print some basic information about the self increment object.

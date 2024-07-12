@@ -21,6 +21,7 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/increment/IncrementParameters.h"
 
 #include "eckit/exception/Exceptions.h"
 
@@ -78,6 +79,7 @@ class Increment : public util::Printable,
   double dot_product_with(const Increment &) const;
   void schur_product_with(const Increment &);
   void random();
+// void dirac(const OrcaDiracParameters &);   // DJL add this
   void dirac(const eckit::Configuration &);
 
 /// ATLAS
@@ -96,7 +98,9 @@ class Increment : public util::Printable,
   };
 
   void read(const eckit::Configuration &);
+  void write(const OrcaIncrementParameters &) const;
   void write(const eckit::Configuration &) const;
+
   void print(std::ostream & os) const override;
   struct stats stats(const std::string & field_name) const;
   double norm() const;
