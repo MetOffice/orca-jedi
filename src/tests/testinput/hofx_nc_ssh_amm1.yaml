@@ -43,7 +43,7 @@ observations:
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/hofx_ssh_obs.nc
+          obsfile: Data/amm_ssh_obs.nc
       obsdataout:
         engine:
           type: H5File
