@@ -6,7 +6,7 @@ Test     :         sea_surface_height_anomaly: 3.35877e-02
 Test     :         sea_surface_height_anomaly_background_error: 3.35877e-02
 
 Test     : H(x): 
-Test     : Sea Surface Height nobs=17 Min=-3.37532e-01, Max=-3.37532e-01, RMS=3.37532e-01
+Test     : Sea Surface Height nobs= 19 Min=-4.86354e-01, Max=-1.43070e-01, RMS=4.07939e-01
 
 Test     : End H(x)
 
