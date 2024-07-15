@@ -87,9 +87,18 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
       auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
       return (*this)(ij(inode, 0), ij(inode, 1));
   }
+
+  /// \brief i, j pair corresponding to a node number. Only use this for diagnostic purposes as
+  ///        it is not robust at the orca halo.
+  /// \param inode
+  /// \return std::pair of the 2D indices corresponding to the node.
   std::pair<int, int> ij(const size_t inode) const {
     auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
-    return std::pair<int, int>{ij(inode, 0), ij(inode, 1)};
+    int i = ij(inode, 0) >= 0 ? ij(inode, 0) : nx_ + ij(inode, 0);
+    const int ci = i >= nx_ ? i - nx_ : i;
+    int j = ij(inode, 1) + 1;
+    const int cj = j >= ny_ ? ny_ - 1 : j;
+    return std::pair<int, int>{ci, cj};
   }
 };
 
@@ -143,6 +152,9 @@ class RegLonLatIndexToBufferIndex : public AtlasIndexToBufferIndex {
     return (*this)(i, j);
   }
 
+  /// \brief i, j pair corresponding to a node number.
+  /// \param inode
+  /// \return std::pair of the 2D indices corresponding to the node.
   std::pair<int, int> ij(const size_t inode) const {
     return inode2ij[inode];
   }
