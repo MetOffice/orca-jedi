@@ -185,7 +185,7 @@ void writeFieldsToFile(
         }
       };
 
-      std::cout << "field " << fieldName
+      oops::Log::debug() << "field " << fieldName
                 << " datatype " << field.datatype().str() << std::endl;
       ApplyForFieldType(write,
                         field.datatype(),

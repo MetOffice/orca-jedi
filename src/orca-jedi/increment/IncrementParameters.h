@@ -13,7 +13,6 @@
 #include "oops/base/ParameterTraitsVariables.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
-// include "oops/util/parameters/OptionalParameter.h"
 
 namespace orcamodel {
 

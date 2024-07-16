@@ -177,9 +177,6 @@ CASE("test increment") {
     inc_config.set("filepath", "../testoutput/orca2_t_increment_output.nc");
     params.validateAndDeserialize(inc_config);
     increment1.write(params);
-//    Increment increment3(geometry, oops_vars, datetime);
-//    increment3.read(params)
-//    EXPECT_EQUAL(increment1.norm(), increment3.norm());
   }
 
   SECTION("test orca atlas fieldset write") {

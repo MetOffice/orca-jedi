@@ -534,10 +534,6 @@ void Increment::read(const eckit::Configuration & conf) {
 void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "orcamodel::increment::write" << std::endl;
 
-  // OrcaStateParameters params
-
-  // Filepath
-//    std::string filepath = conf.getString("filepath");
   std::string output_filename = params.nemoFieldFile.value();
   if (output_filename == "")
     throw eckit::BadValue(std::string("orcamodel::writeIncrementFieldsToFile:: ")
