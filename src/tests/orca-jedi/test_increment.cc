@@ -69,7 +69,6 @@ CASE("test increment") {
         inc_config.getString("filepath"));
     auto datetime = static_cast<util::DateTime>(inc_config.getString("date"));
     EXPECT(params.date.value() == datetime);
-//    EXPECT(params.variables.value()[0].name() == variables[0]);
   }
 
   SECTION("test constructor") {

@@ -79,7 +79,7 @@ class Increment : public util::Printable,
   double dot_product_with(const Increment &) const;
   void schur_product_with(const Increment &);
   void random();
-// void dirac(const OrcaDiracParameters &);   // DJL add this
+  void dirac(const OrcaDiracParameters &);
   void dirac(const eckit::Configuration &);
 
 /// ATLAS

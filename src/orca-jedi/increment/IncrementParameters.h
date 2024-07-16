@@ -21,12 +21,16 @@ class OrcaIncrementParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(OrcaIncrementParameters, oops::Parameters)
 
  public:
-  oops::RequiredParameter<std::string> nemoFieldFile{"filepath", this};  // DJL reconsider names
-  oops::RequiredParameter<util::DateTime> date{"date", this};   // DJL needed?
-//  oops::RequiredParameter<oops::Variables> stateVariables{"state variables",
-//    this};
+  oops::RequiredParameter<std::string> nemoFieldFile{"filepath", this};
+  oops::RequiredParameter<util::DateTime> date{"date", this};
 };
 
-// DJL Add something for the dirac test parameters  ixdir, iydir, izdir ??
+class OrcaDiracParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(OrcaDiracParameters, oops::Parameters)
 
+ public:
+  oops::RequiredParameter<std::vector<int>> ixdir{"ixdir", this};
+  oops::RequiredParameter<std::vector<int>> iydir{"iydir", this};
+  oops::RequiredParameter<std::vector<int>> izdir{"izdir", this};
+};
 }  //  namespace orcamodel

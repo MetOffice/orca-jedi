@@ -397,12 +397,16 @@ void Increment::random() {
   }
 }
 
+void Increment::dirac(const eckit::Configuration & config) {
+  dirac(oops::validateAndDeserialize<OrcaDiracParameters>(config));
+}
+
 /// \brief Apply Dirac delta functions to configuration specified points.
-void Increment::dirac(const eckit::Configuration & conf) {
+void Increment::dirac(const OrcaDiracParameters & params) {
 // Adding a delta function at points specified by ixdir, iydir, izdir
-  const std::vector<int> & ixdir = conf.getIntVector("ixdir");
-  const std::vector<int> & iydir = conf.getIntVector("iydir");
-  const std::vector<int> & izdir = conf.getIntVector("izdir");
+  const std::vector<int> & ixdir = params.ixdir;
+  const std::vector<int> & iydir = params.iydir;
+  const std::vector<int> & izdir = params.izdir;
 
   ASSERT(ixdir.size() == iydir.size() && ixdir.size() == izdir.size());
   int ndir = ixdir.size();
@@ -543,20 +547,7 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "Increment::write to filename "
                      << nemo_field_path << std::endl;
 
-//    file_path.append(".nc");                      DJL
-//      oops::Log::info() << "Writing file: " << file_path << std::endl;             DJL
-
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
-
-  // DJL debug
-  for (atlas::Field field : incrementFields_) {
-    std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::Increment::write:: field name = " << fieldName
-                       << std::endl;
-
-    oops::Log::debug() << std::endl;
-  }
-  // DJL debug end
 }
 
 void Increment::write(const eckit::Configuration & config) const {

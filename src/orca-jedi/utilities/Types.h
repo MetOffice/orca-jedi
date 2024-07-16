@@ -33,10 +33,10 @@ void ApplyForFieldType(const Functor& functor, FieldDType field_type,
   }
 }
 
+/// \brief Apply a function for a given Atlas DataType
 template<typename Functor>
 void ApplyForFieldType(const Functor& functor, atlas::DataType datatype,
      const std::string& error_message) {
-  std::cout << "DJL type " << datatype.str() << std::endl;
   if (datatype.str() == "real32") {
     functor(float{});
   } else if (datatype.str() == "real64") {
