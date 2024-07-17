@@ -42,7 +42,9 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
  private:
   atlas::OrcaGrid orcaGrid_;
   int32_t ix_glb_max;
+  int32_t ix_glb_min;
   int32_t iy_glb_max;
+  int32_t iy_glb_min;
   int32_t glbarray_offset;
   int32_t glbarray_jstride;
   size_t nx_;
@@ -62,8 +64,8 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
     ny_ = orcaGrid_.ny() + orcaGrid_.haloSouth() + orcaGrid_.haloNorth();
 
     // vector of local indices: necessary for remote indices of ghost nodes
-    int iy_glb_min = -orcaGrid_.haloSouth();
-    int ix_glb_min = -orcaGrid_.haloWest();
+    iy_glb_min = -orcaGrid_.haloSouth();
+    ix_glb_min = -orcaGrid_.haloWest();
     glbarray_offset  = -(nx_ * iy_glb_min) - ix_glb_min;
     glbarray_jstride = nx_;
   }
