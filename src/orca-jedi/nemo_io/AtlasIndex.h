@@ -77,6 +77,10 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
           std::to_string(i) + " > " + std::to_string(ix_glb_max));
       ATLAS_ASSERT(j <= iy_glb_max,
           std::to_string(j) + " > " + std::to_string(iy_glb_max));
+      ATLAS_ASSERT(i >= ix_glb_min,
+          std::to_string(i) + " < " + std::to_string(ix_glb_min));
+      ATLAS_ASSERT(j >= iy_glb_min,
+          std::to_string(j) + " < " + std::to_string(iy_glb_min));
       return glbarray_offset + j * glbarray_jstride + i;
   }
 
