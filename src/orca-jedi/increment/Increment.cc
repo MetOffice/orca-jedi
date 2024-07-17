@@ -397,11 +397,12 @@ void Increment::random() {
   }
 }
 
+/// \brief Apply Dirac delta functions to configuration specified points.
 void Increment::dirac(const eckit::Configuration & config) {
   dirac(oops::validateAndDeserialize<OrcaDiracParameters>(config));
 }
 
-/// \brief Apply Dirac delta functions to configuration specified points.
+/// \brief Apply Dirac delta functions to params specified points.
 void Increment::dirac(const OrcaDiracParameters & params) {
 // Adding a delta function at points specified by ixdir, iydir, izdir
   const std::vector<int> & ixdir = params.ixdir;
@@ -531,6 +532,7 @@ void Increment::read(const eckit::Configuration & conf) {
   throw eckit::NotImplemented(err_message, Here());
 }
 
+/// \brief write out increments fields to a file using params specified filename.
 void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "orcamodel::increment::write" << std::endl;
 
@@ -546,6 +548,7 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 }
 
+/// \brief write out increments fields to a file using config specified filename.
 void Increment::write(const eckit::Configuration & config) const {
   write(oops::validateAndDeserialize<OrcaIncrementParameters>(config));
 }

@@ -125,6 +125,7 @@ template void populateField<float>(
   ReadServer & nemo_reader,
   atlas::Field & field);
 
+/// \brief write out state fields to a file.
 void writeStateFieldsToFile(
   const OrcaStateParameters & params,
   const Geometry & geom,
@@ -146,6 +147,8 @@ void writeStateFieldsToFile(
     writeFieldsToFile(nemo_field_path, geom, valid_date, fs);
 }
 
+/// \brief write out generic orca atlas fields to a file.
+/// Used by Increment::write and writeStateFieldsToFile.
 void writeFieldsToFile(
   const std::string nemo_field_path,
   const Geometry & geom,
