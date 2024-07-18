@@ -15,7 +15,7 @@
 #include "atlas/field/MissingValue.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
-#include "orca-jedi/nemo_io/OrcaIndex.h"
+#include "orca-jedi/nemo_io/AtlasIndex.h"
 #include "orca-jedi/nemo_io/NemoFieldWriter.h"
 
 #include "eckit/exception/Exceptions.h"
@@ -63,7 +63,7 @@ class WriteServer {
   const size_t mpiroot = 0;
   const size_t myrank = atlas::mpi::rank();
   const atlas::Mesh& mesh_;
-  const OrcaIndexToBufferIndex orca_indices_;
+  std::unique_ptr<AtlasIndexToBufferIndex> buffer_indices_;
   std::vector<size_t> unsorted_buffer_indices_;
   std::vector<int> recvcounts_;
   std::vector<int> recvdispls_;

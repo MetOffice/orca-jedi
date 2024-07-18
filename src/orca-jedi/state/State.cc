@@ -125,6 +125,7 @@ State::~State() {
 }
 
 void State::subsetFieldSet(const oops::Variables & variables) {
+  oops::Log::trace() << "State(ORCA)::subsetFieldSet subsetting." << std::endl;
   atlas::FieldSet subset;
   for (int iVar = 0; iVar < variables.size(); iVar++) {
     auto variable = variables[iVar].name();
@@ -142,6 +143,7 @@ void State::subsetFieldSet(const oops::Variables & variables) {
     stateFields_.add(subset[variable]);
   }
   vars_ = variables;
+  oops::Log::trace() << "State(ORCA)::subsetFieldSet complete" << std::endl;
 }
 
 
