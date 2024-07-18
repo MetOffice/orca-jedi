@@ -15,7 +15,7 @@
 #include "atlas/grid.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
-#include "orca-jedi/nemo_io/OrcaIndex.h"
+#include "orca-jedi/nemo_io/AtlasIndex.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
 #include "eckit/exception/Exceptions.h"
@@ -61,7 +61,7 @@ void log_status() const {
   const size_t mpiroot = 0;
   const size_t myrank = atlas::mpi::rank();
   const atlas::Mesh& mesh_;
-  const OrcaIndexToBufferIndex orca_buffer_indices_;
+  std::unique_ptr<AtlasIndexToBufferIndex> buffer_indices_;
   std::unique_ptr<NemoFieldReader> reader_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
 };
