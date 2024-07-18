@@ -20,6 +20,10 @@ hofx_two_vars_obs.nc
 hofx_potm_obs.nc
 hofx_prof_2var_obs.nc
 hofx_ssh_obs.nc
+amm1_coords.nc
+amm1_nemo.nc
+amm1_atlas_grid_spec.yaml
+amm_ssh_obs.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})

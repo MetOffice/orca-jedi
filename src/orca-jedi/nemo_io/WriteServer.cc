@@ -5,6 +5,7 @@
 #include "orca-jedi/nemo_io/WriteServer.h"
 
 #include<algorithm>
+#include<utility>
 
 #include "atlas-orca/grid/OrcaGrid.h"
 
@@ -54,7 +55,7 @@ template<class T> std::vector<T> WriteServer::sort_buffer(
   const std::vector<T> & buffer) const {
   oops::Log::trace() << "State(ORCA)::nemo_io::WriteServer::sort_buffer "
                      << std::endl;
-  std::vector<T> sorted_buffer(orca_indices_.nx() * orca_indices_.ny());
+  std::vector<T> sorted_buffer(buffer_indices_->nx() * buffer_indices_->ny());
   for (size_t i_buf = 0; i_buf < buffer.size(); ++i_buf) {
     const size_t source_index = unsorted_buffer_indices_[i_buf];
     ASSERT(source_index < sorted_buffer.size());
@@ -79,7 +80,7 @@ template<class T> std::vector<T> WriteServer::gather_field_on_root(
                      << std::endl;
 
   std::vector<T> local_buffer;
-  size_t size = orca_indices_.nx() * orca_indices_.ny();
+  size_t size = buffer_indices_->nx() * buffer_indices_->ny();
   const bool has_mv = static_cast<bool>(missingValue);
 
   // handle the serial data case
@@ -136,7 +137,7 @@ template<class T> void WriteServer::write_vol_var(const std::string& var_name,
   oops::Log::trace() << "State(ORCA)::nemo_io::WriteServer::write_vol_var "
                      << var_name << std::endl;
   std::vector<T> buffer;
-  size_t size = orca_indices_.nx() * orca_indices_.ny();
+  size_t size = buffer_indices_->nx() * buffer_indices_->ny();
   if (myrank == mpiroot) {
     buffer.resize(n_levels_*size);
   }
@@ -197,7 +198,7 @@ void WriteServer::write_dimensions() {
   atlas::array::ArrayView<double, 2> lonlat{atlas::array::make_view<double, 2>(
                                               mesh_.nodes().lonlat())};
   atlas::field::MissingValue missingValue(mesh_.nodes().lonlat());
-  size_t size = orca_indices_.nx() * orca_indices_.ny();
+  size_t size = buffer_indices_->nx() * buffer_indices_->ny();
 
   const std::vector<double> lon_buffer = this->gather_field_on_root(lonlat, 0, missingValue);
   const std::vector<double> lat_buffer = this->gather_field_on_root(lonlat, 1, missingValue);
@@ -214,29 +215,28 @@ WriteServer::WriteServer(std::shared_ptr<eckit::Timer> eckit_timer,
     const atlas::Mesh& mesh,
     const std::vector<util::DateTime> datetimes,
     const std::vector<double> depths,
-    bool is_serial) : mesh_(mesh),
-  orca_indices_(mesh), eckit_timer_(eckit_timer), is_serial_(is_serial),
+    bool is_serial) : mesh_(mesh), eckit_timer_(eckit_timer), is_serial_(is_serial),
   n_levels_(depths.size()) {
   oops::Log::trace() << "State(ORCA)::nemo_io::WriteServer::WriteServer" << std::endl;
+  buffer_indices_ = std::move(AtlasIndexToBufferIndexCreator::create_unique(
+          mesh.grid().type(), mesh));
+
   std::vector<size_t> local_buf_indices;
 
   if (is_serial_) {
     if (myrank == mpiroot) {
       writer_ = std::make_unique<NemoFieldWriter>(file_path, datetimes,
-                                                  orca_indices_.nx(), orca_indices_.ny(),
+                                                  buffer_indices_->nx(), buffer_indices_->ny(),
                                                   depths);
     }
     this->write_dimensions();
-    recvcnt_ = orca_indices_.nx() * orca_indices_.ny();
+    recvcnt_ = buffer_indices_->nx() * buffer_indices_->ny();
     return;
   }
 
-  auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
   auto orcaGrid = atlas::OrcaGrid(mesh_.grid());
   for (atlas::idx_t i_node = 0; i_node < mesh_.nodes().size(); ++i_node) {
-    const size_t i = ij(i_node, 0);
-    const size_t j = ij(i_node, 1);
-    local_buf_indices.emplace_back(orca_indices_(i, j));
+    local_buf_indices.emplace_back((*buffer_indices_)(i_node));
   }
 
   // gather all remote buffer indices
@@ -253,11 +253,11 @@ WriteServer::WriteServer(std::shared_ptr<eckit::Timer> eckit_timer,
       recvcnt_ += recvcounts_[jproc];
   }
 
-  ASSERT(recvcnt_ >= static_cast<int>(orca_indices_.nx()*orca_indices_.ny()));
+  ASSERT(recvcnt_ >= static_cast<int>(buffer_indices_->nx()*buffer_indices_->ny()));
 
   if (myrank == mpiroot) {
     writer_ = std::make_unique<NemoFieldWriter>(file_path, datetimes,
-                                                orca_indices_.nx(), orca_indices_.ny(),
+                                                buffer_indices_->nx(), buffer_indices_->ny(),
                                                 depths);
     unsorted_buffer_indices_.resize(recvcnt_);
   }

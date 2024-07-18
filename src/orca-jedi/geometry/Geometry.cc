@@ -46,12 +46,19 @@ Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
                       n_levels_(config.getInt("number levels")),
-                      grid_(config.getString("grid name")),
                       eckit_timer_(new eckit::Timer("Geometry(ORCA): ", oops::Log::trace()))
 {
     eckit_timer_->start();
     log_status();
     params_.validateAndDeserialize(config);
+    {
+      eckit::PathName grid_spec_path(params_.gridName.value());
+      if (grid_spec_path.exists()) {
+        grid_ = atlas::Grid{atlas::Grid::Spec{grid_spec_path}};
+      } else {
+        grid_ = atlas::Grid{params_.gridName.value()};
+      }
+    }
     int64_t halo = params_.sourceMeshHalo.value();
     std::string partitioner_name = params_.partitioner.value();
     if ( ( (partitioner_name == "serial") || (comm.size() == 1) )
