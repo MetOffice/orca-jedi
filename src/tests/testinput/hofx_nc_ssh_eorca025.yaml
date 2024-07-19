@@ -16,7 +16,7 @@ geometry :
   grid name: eORCA025_T
   number levels: 1
   partitioner: checkerboard
-  source mesh halo: 1
+  source mesh halo: 0
 initial condition :
   date: 2021-06-28T23:00:00Z
   state variables:
