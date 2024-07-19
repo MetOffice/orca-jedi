@@ -35,11 +35,11 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_checkerboard
                   COMMAND orcamodel_hofx.x )
 
 # Requires atlas-orca halos > 0 change (https://github.com/ecmwf/atlas-orca/pull/20)
-#ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
-#                  OMP 1
-#                  MPI 2
-#                  ARGS testinput/hofx_nc_ssh_eorca025.yaml
-#                  COMMAND orcamodel_hofx.x )
+ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
+                  OMP 1
+                  MPI 2
+                  ARGS testinput/hofx_nc_ssh_eorca025.yaml
+                  COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
                   OMP 1
