@@ -7,7 +7,7 @@ on:
     branches: [develop]
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:feature-use-personal-ghcr-container
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.3.0
 jobs:
   build:
     runs-on: ubuntu-latest

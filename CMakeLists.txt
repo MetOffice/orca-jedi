@@ -27,7 +27,7 @@ ecbuild_debug( "   NetCDF_FEATURES: [${NetCDF_FEATURES}]" )
 find_package( eckit 1.18 COMPONENTS LZ4 REQUIRED )
 ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 
-find_package( atlas 0.29 REQUIRED )
+find_package( atlas 0.38 REQUIRED )
 ecbuild_debug( "   atlas_FEATURES: [${atlas_FEATURES}]" )
 
 find_package( atlas-orca REQUIRED )
