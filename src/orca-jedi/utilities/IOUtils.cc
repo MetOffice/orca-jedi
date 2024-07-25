@@ -2,7 +2,7 @@
  * (C) British Crown Copyright 2024 Met Office
  */
 
-#include "orca-jedi/state/StateIOUtils.h"
+#include "orca-jedi/utilities/IOUtils.h"
 
 #include <sstream>
 #include <vector>
@@ -15,30 +15,27 @@
 #include "atlas/field/MissingValue.h"
 
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/state/State.h"
 #include "orca-jedi/nemo_io/WriteServer.h"
+#include "orca-jedi/utilities/Types.h"
 
 #define NEMO_FILL_TOL 1e-6
 
 namespace orcamodel {
 
+/// \brief Read atlas fields to a file.
+/// \param nemo_file_name The name of the netCDF file to read.
+/// \param geom The orcamodel::Geometry of the model data.
+/// \param valid_date The datetime of data to write to the file.
+/// \param variable_type The type of variable (e.g "background" for background data).
+/// \param fs The atlas FieldSet collection of fields to write.
 void readFieldsFromFile(
-  const OrcaStateParameters & params,
+  const std::string & nemo_file_name,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const std::string & variable_type,
   atlas::FieldSet & fs) {
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: start for valid_date"
                        << " " << valid_date << std::endl;
-
-    // Open Nemo field file
-    std::string nemo_file_name;
-    if (variable_type == "background") {
-      nemo_file_name = params.nemoFieldFile.value();
-    }
-    if (variable_type == "background variance") {
-      nemo_file_name = params.varianceFieldFile.value().value_or("");
-    }
 
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
@@ -77,7 +74,7 @@ void readFieldsFromFile(
         };
         ApplyForFieldType(populate,
                           geom.fieldPrecision(fieldName),
-                          std::string("State(ORCA)::readFieldsFromFile '")
+                          std::string("orcamodel::readFieldsFromFile '")
                             + nemoName + "' field type not recognised");
         // Add a halo exchange following read to fill out halo points
         geom.functionSpace().haloExchange(field);
@@ -125,39 +122,29 @@ template void populateField<float>(
   ReadServer & nemo_reader,
   atlas::Field & field);
 
-/// \brief write out state fields to a file.
-void writeStateFieldsToFile(
-  const OrcaStateParameters & params,
+/// \brief write out atlas fields to a file.
+/// \param output_file_name The name of the netCDF file.
+/// \param geom The orcamodel::Geometry of the model data.
+/// \param valid_date The datetime of data to write to the file.
+/// \param fs The atlas FieldSet collection of fields to write.
+void writeFieldsToFile(
+  const std::string & output_file_name,
   const Geometry & geom,
   const util::DateTime & valid_date,
   const atlas::FieldSet & fs) {
     oops::Log::trace() << "orcamodel::writeStateFieldsToFile:: start for valid_date"
                        << " " << valid_date << std::endl;
 
-    std::string output_filename =
-      params.outputNemoFieldFile.value().value_or("");
-    if (output_filename == "")
+    if (output_file_name == "")
       throw eckit::BadValue(std::string("orcamodel::writeStateFieldsToFile:: ")
           + "file name not specified", Here());
 
-    auto nemo_field_path = eckit::PathName(output_filename);
+    auto nemo_field_path = eckit::PathName(output_file_name);
     oops::Log::debug() << "orcamodel::writeStateFieldsToFile:: "
                        << nemo_field_path << std::endl;
 
-    writeFieldsToFile(nemo_field_path, geom, valid_date, fs);
-}
-
-/// \brief write out generic orca atlas fields to a file.
-/// Used by Increment::write and writeStateFieldsToFile.
-void writeFieldsToFile(
-  const std::string nemo_field_path,
-  const Geometry & geom,
-  const util::DateTime & valid_date,
-  const atlas::FieldSet & fs) {
-    oops::Log::trace() << "orcamodel::writeFieldsToFile:: start for valid_date"
-                       << " " << valid_date << std::endl;
-
     std::map<std::string, std::string> varCoordTypeMap;
+
     {
       const oops::Variables vars = geom.variables();
       const std::vector<std::string> coordSpaces =
@@ -189,11 +176,11 @@ void writeFieldsToFile(
       };
 
       oops::Log::debug() << "field " << fieldName
-                << " datatype " << field.datatype().str() << std::endl;
+                         << " data type " << field.datatype().str() << std::endl;
       ApplyForFieldType(write,
                         field.datatype(),
-                        std::string("State(ORCA)::writeFieldsToFile '")
-                          + nemoName + "' field datatype not recognised.");
+                        std::string("orcamodel::writeFieldsToFile '")
+                          + nemoName + "' field data type not recognised.");
     }
 }
 

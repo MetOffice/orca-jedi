@@ -16,7 +16,7 @@
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/increment/Increment.h"
-#include "orca-jedi/state/StateIOUtils.h"
+#include "orca-jedi/utilities/IOUtils.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
@@ -63,10 +63,10 @@ CASE("test increment") {
   util::DateTime datetime("2021-06-30T00:00:00Z");
 
   SECTION("test increment parameters") {
-    inc_config.set("filepath", "../Data/orca2_t_nemo.nc");
+    inc_config.set("output path", "../Data/orca2_t_nemo.nc");
     params.validateAndDeserialize(inc_config);
     EXPECT(params.nemoFieldFile.value() ==
-        inc_config.getString("filepath"));
+        inc_config.getString("output path"));
     auto datetime = static_cast<util::DateTime>(inc_config.getString("date"));
     EXPECT(params.date.value() == datetime);
   }
@@ -97,14 +97,14 @@ CASE("test increment") {
     std::vector<int> ix = {20, 30};
     std::vector<int> iy = {10, 40};
     std::vector<int> iz = {1, 3};
-    dirac_config.set("ixdir", ix);
-    dirac_config.set("iydir", iy);
-    dirac_config.set("izdir", iz);
+    dirac_config.set("x indices", ix);
+    dirac_config.set("y indices", iy);
+    dirac_config.set("z indices", iz);
 
     Increment increment(geometry, oops_vars, datetime);
     EXPECT_THROWS_AS(increment.dirac(dirac_config), eckit::BadValue);
 
-    dirac_config.set("izdir", std::vector<int>{0, 0});
+    dirac_config.set("z indices", std::vector<int>{0, 0});
     increment.dirac(dirac_config);
     increment.print(std::cout);
     EXPECT(std::abs(increment.norm() - 0.0086788) < 1e-6);
@@ -174,7 +174,7 @@ CASE("test increment") {
   SECTION("test increment write") {
     Increment increment1(geometry, oops_vars, datetime);
     increment1.ones();
-    inc_config.set("filepath", "../testoutput/orca2_t_increment_output.nc");
+    inc_config.set("output path", "../testoutput/orca2_t_increment_output.nc");
     params.validateAndDeserialize(inc_config);
     increment1.write(params);
   }
