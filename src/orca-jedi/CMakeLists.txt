@@ -21,8 +21,6 @@ model/ModelBiasIncrement.h
 model/Model.h
 state/State.h
 state/State.cc
-state/StateIOUtils.h
-state/StateIOUtils.cc
 nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
 nemo_io/NemoFieldWriter.h
@@ -35,6 +33,8 @@ nemo_io/WriteServer.cc
 utilities/OrcaModelTraits.h
 utilities/Types.h
 utilities/Types.cc
+utilities/IOUtils.h
+utilities/IOUtils.cc
 variablechanges/VariableChangeParameters.h
 variablechanges/VariableChange.h
 )

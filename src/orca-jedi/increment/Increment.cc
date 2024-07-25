@@ -28,10 +28,11 @@
 
 #include "ufo/GeoVaLs.h"
 
+#include "orca-jedi/utilities/IOUtils.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/state/StateIOUtils.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/increment/IncrementParameters.h"
 
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
@@ -397,11 +398,16 @@ void Increment::random() {
 }
 
 /// \brief Apply Dirac delta functions to configuration specified points.
-void Increment::dirac(const eckit::Configuration & conf) {
+void Increment::dirac(const eckit::Configuration & config) {
+  dirac(oops::validateAndDeserialize<OrcaDiracParameters>(config));
+}
+
+/// \brief Apply Dirac delta functions to params specified points.
+void Increment::dirac(const OrcaDiracParameters & params) {
 // Adding a delta function at points specified by ixdir, iydir, izdir
-  const std::vector<int> & ixdir = conf.getIntVector("ixdir");
-  const std::vector<int> & iydir = conf.getIntVector("iydir");
-  const std::vector<int> & izdir = conf.getIntVector("izdir");
+  const std::vector<int> & ixdir = params.ixdir;
+  const std::vector<int> & iydir = params.iydir;
+  const std::vector<int> & izdir = params.izdir;
 
   ASSERT(ixdir.size() == iydir.size() && ixdir.size() == izdir.size());
   int ndir = ixdir.size();
@@ -526,10 +532,25 @@ void Increment::read(const eckit::Configuration & conf) {
   throw eckit::NotImplemented(err_message, Here());
 }
 
-void Increment::write(const eckit::Configuration & conf) const {
-  std::string err_message =
-      "orcamodel::Increment::write not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+/// \brief write out increments fields to a file using params specified filename.
+void Increment::write(const OrcaIncrementParameters & params) const {
+  oops::Log::debug() << "orcamodel::increment::write" << std::endl;
+
+  std::string output_filename = params.nemoFieldFile.value();
+  if (output_filename == "")
+    throw eckit::BadValue(std::string("orcamodel::writeIncrementFieldsToFile:: ")
+        + "file name not specified", Here());
+
+  auto nemo_field_path = eckit::PathName(output_filename);
+  oops::Log::debug() << "Increment::write to filename "
+                     << nemo_field_path << std::endl;
+
+  writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
+}
+
+/// \brief write out increments fields to a file using config specified filename.
+void Increment::write(const eckit::Configuration & config) const {
+  write(oops::validateAndDeserialize<OrcaIncrementParameters>(config));
 }
 
 /// \brief Print some basic information about the self increment object.

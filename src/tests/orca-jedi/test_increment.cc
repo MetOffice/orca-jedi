@@ -16,6 +16,7 @@
 #include "atlas/library/Library.h"
 
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/utilities/IOUtils.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
@@ -49,12 +50,26 @@ CASE("test increment") {
   config.set("number levels", 10);
   Geometry geometry(config, eckit::mpi::comm());
 
+  eckit::LocalConfiguration inc_config;
+  inc_config.set("date", "2021-06-30T00:00:00Z");
+
+  OrcaIncrementParameters params;
+
   oops::Variables oops_vars2{{oops::Variable{"sea_ice_area_fraction"},
     oops::Variable{"sea_water_potential_temperature"}}};
 
   oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"}}};
 
   util::DateTime datetime("2021-06-30T00:00:00Z");
+
+  SECTION("test increment parameters") {
+    inc_config.set("output path", "../Data/orca2_t_nemo.nc");
+    params.validateAndDeserialize(inc_config);
+    EXPECT(params.nemoFieldFile.value() ==
+        inc_config.getString("output path"));
+    auto datetime = static_cast<util::DateTime>(inc_config.getString("date"));
+    EXPECT(params.date.value() == datetime);
+  }
 
   SECTION("test constructor") {
     Increment increment(geometry, oops_vars2, datetime);
@@ -82,14 +97,14 @@ CASE("test increment") {
     std::vector<int> ix = {20, 30};
     std::vector<int> iy = {10, 40};
     std::vector<int> iz = {1, 3};
-    dirac_config.set("ixdir", ix);
-    dirac_config.set("iydir", iy);
-    dirac_config.set("izdir", iz);
+    dirac_config.set("x indices", ix);
+    dirac_config.set("y indices", iy);
+    dirac_config.set("z indices", iz);
 
     Increment increment(geometry, oops_vars, datetime);
     EXPECT_THROWS_AS(increment.dirac(dirac_config), eckit::BadValue);
 
-    dirac_config.set("izdir", std::vector<int>{0, 0});
+    dirac_config.set("z indices", std::vector<int>{0, 0});
     increment.dirac(dirac_config);
     increment.print(std::cout);
     EXPECT(std::abs(increment.norm() - 0.0086788) < 1e-6);
@@ -154,6 +169,23 @@ CASE("test increment") {
     increment.diff(state1, state2);
     std::cout << "increment (diff state1 state2):" << std::endl;
     increment.print(std::cout);
+  }
+
+  SECTION("test increment write") {
+    Increment increment1(geometry, oops_vars, datetime);
+    increment1.ones();
+    inc_config.set("output path", "../testoutput/orca2_t_increment_output.nc");
+    params.validateAndDeserialize(inc_config);
+    increment1.write(params);
+  }
+
+  SECTION("test orca atlas fieldset write") {
+    Increment increment1(geometry, oops_vars, datetime);
+    increment1.ones();
+    increment1 *=2;
+    atlas::FieldSet incfset = atlas::FieldSet();
+    increment1.Increment::toFieldSet(incfset);
+    writeFieldsToFile("../testoutput/orca2_t_inc_fs_output.nc", geometry, datetime, incfset);
   }
 }
 
