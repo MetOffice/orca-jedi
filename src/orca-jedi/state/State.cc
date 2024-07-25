@@ -39,7 +39,7 @@
 #include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
-#include "orca-jedi/state/StateIOUtils.h"
+#include "orca-jedi/utilities/IOUtils.h"
 #include "orca-jedi/utilities/Types.h"
 
 
@@ -78,9 +78,12 @@ State::State(const Geometry & geom,
   if (params_.analyticInit.value().value_or(false)) {
     this->analytic_init(*geom_);
   } else {
-    readFieldsFromFile(params_, *geom_, validTime(), "background",
-       stateFields_);
-    readFieldsFromFile(params_, *geom_, validTime(), "background variance",
+    std::string nemo_file_name;
+    nemo_file_name = params.nemoFieldFile.value();
+    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
+         stateFields_);
+    nemo_file_name = params.varianceFieldFile.value().value_or("");
+    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background variance",
        stateFields_);
   }
   geom_->log_status();
@@ -185,7 +188,8 @@ void State::read(const OrcaStateParameters & params) {
     throw eckit::UserError(msg.str(), Here());
   }
 
-  readFieldsFromFile(params, *geom_, validTime(), "background",
+  std::string nemo_file_name = params.nemoFieldFile.value();
+  readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
       stateFields_);
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
@@ -225,7 +229,8 @@ void State::setupStateFields() {
 
 void State::write(const OrcaStateParameters & params) const {
   oops::Log::trace() << "State(ORCA)::write starting" << std::endl;
-  writeStateFieldsToFile(params, *geom_, validTime(), stateFields_);
+  writeFieldsToFile(params.outputNemoFieldFile.value().value_or(""), *geom_, validTime(),
+      stateFields_);
 }
 
 void State::write(const eckit::Configuration & config) const {
