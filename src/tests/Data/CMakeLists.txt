@@ -24,6 +24,7 @@ amm1_coords.nc
 amm1_nemo.nc
 amm1_atlas_grid_spec.yaml
 amm_ssh_obs.nc
+sic_obs_ideal.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
