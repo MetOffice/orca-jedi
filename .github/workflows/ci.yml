@@ -30,6 +30,13 @@ jobs:
           repository: JCSDA-internal/oops
           token: ${{ secrets.GH_PAT }}
 
+      - name: checkout saber
+        uses: actions/checkout@v3
+        with:
+          path: ci/saber
+          repository: JCSDA-internal/saber
+          token: ${{ secrets.GH_PAT }}
+
       - name: checkout ioda
         uses: actions/checkout@v3
         with:

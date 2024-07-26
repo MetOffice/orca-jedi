@@ -19,25 +19,25 @@
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
-//LinearVariableChange::LinearVariableChange(const Parameters_ &, const Geometry &) {}      
+// LinearVariableChange::LinearVariableChange(const Parameters_ &, const Geometry &) {}
 LinearVariableChange::LinearVariableChange(const Geometry &, const Parameters_ &) {}
 LinearVariableChange::LinearVariableChange(const Geometry &, const eckit::Configuration &) {}
 // -----------------------------------------------------------------------------
-//LinearVariableChange::~LinearVariableChange() {}
+// LinearVariableChange::~LinearVariableChange() {}
 
-void LinearVariableChange::changeVarTL(Increment & dx, const oops::Variables & vars) 
-const { }
+void LinearVariableChange::changeVarTL(Increment & dx, const oops::Variables & vars)
+const {}
 
 void LinearVariableChange::changeVarInverseTL(Increment & dx, const oops::Variables & vars)
-const { }
+const {}
 
-void LinearVariableChange::changeVarAD(Increment & dx, const oops::Variables & vars) 
-const { }
+void LinearVariableChange::changeVarAD(Increment & dx, const oops::Variables & vars)
+const {}
 
 void LinearVariableChange::changeVarInverseAD(Increment & dx, const oops::Variables & vars)
-const { }
+const {}
 
 void LinearVariableChange::changeVarTraj(const State & xbg, const oops::Variables & xfg)
-{ }
+{}
 
-}
+}  // namespace orcamodel

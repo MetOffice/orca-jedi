@@ -379,12 +379,9 @@ void State::toFieldSet(atlas::FieldSet & fset) const {
 }
 
 void State::accumul(const double & zz, const State & xx) {
-
   std::string err_message =
       "orcamodel::State::accumul not implemented";
   throw eckit::NotImplemented(err_message, Here());
-
 }
-
 
 }  // namespace orcamodel

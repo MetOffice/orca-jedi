@@ -20,7 +20,7 @@
 
 // Forward declarations
 namespace oops {
-  class Variables;
+class Variables;
 }
 
 namespace orcamodel {
@@ -34,7 +34,7 @@ class LinearVariableChange: public util::Printable {
   static const std::string classname() {
     return "orcamodel::LinearVariableChange";
   }
-  
+
   LinearVariableChange(const Geometry &, const Parameters_ &);
   LinearVariableChange(const Geometry &, const eckit::Configuration &);
 

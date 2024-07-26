@@ -107,7 +107,7 @@ class State : public util::Printable,
 
   atlas::Field getField(int) const;
   void toFieldSet(atlas::FieldSet &) const;
-  
+
   void accumul(const double &, const State &);
 
  private:
