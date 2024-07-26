@@ -359,4 +359,31 @@ atlas::Field State::getField(int i) const {
   return stateFields_[i];
 }
 
+/// \brief Output state fieldset as an atlas fieldset.
+/// \param fset Atlas fieldset to output to.
+void State::toFieldSet(atlas::FieldSet & fset) const {
+  oops::Log::debug() << "State toFieldSet starting" << std::endl;
+
+  fset = atlas::FieldSet();
+
+  for (size_t i=0; i < vars_.size(); ++i) {
+    // copy variable from increments to new field set
+    atlas::Field field = stateFields_[i];
+    std::string fieldName = field.name();
+    oops::Log::debug() << "Copy state toFieldSet " << fieldName << std::endl;
+
+    fset->add(field);
+  }
+  oops::Log::debug() << "State toFieldSet done" << std::endl;
+}
+
+void State::accumul(const double & zz, const State & xx) {
+
+  std::string err_message =
+      "orcamodel::State::accumul not implemented";
+  throw eckit::NotImplemented(err_message, Here());
+
+}
+
+
 }  // namespace orcamodel

@@ -35,15 +35,20 @@ utilities/Types.h
 utilities/Types.cc
 utilities/IOUtils.h
 utilities/IOUtils.cc
+utilities/ModelData.h
+utilities/ModelData.cc
 variablechanges/VariableChangeParameters.h
 variablechanges/VariableChange.h
+variablechanges/LinearVariableChange.h
+variablechanges/LinearVariableChange.cc
+variablechanges/LinearVariableChangeParameters.h
 )
 
 
 
 ecbuild_add_library( TARGET   orcamodel
                      SOURCES  ${oops_orcamodel_src_files}
-                     PUBLIC_LIBS  oops ufo atlas atlas-orca eckit netcdf
+                     PUBLIC_LIBS  oops saber ufo atlas atlas-orca eckit netcdf
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
