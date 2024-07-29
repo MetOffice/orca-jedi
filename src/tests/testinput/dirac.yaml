@@ -2,27 +2,11 @@ background error:
   covariance model: SABER
   saber central block:
     saber block name: ID
-  saber outer blocks:
-  - saber block name: BUMP_StdDev
-    read:
-      general:
-        testing: true
-      io:
-        data directory: Data
-        files prefix: test
-      drivers:
-        compute variance: true
-      variance:
-        explicit stddev: true
-        stddev:
-        - variables:
-          - ice_area_fraction
-          value: 1
 
 dirac:
   x indices: [20]
   y indices: [10]
-  z indices: [1]
+  z indices: [0]
 
 geometry:
   nemo variables:
@@ -50,7 +34,8 @@ background:
   state variables: [ ice_area_fraction ]
   nemo field file: Data/orca2_t_nemo.nc
 output dirac:
-  output path: testoutput/dirac_cov_%id%
+  date: 2021-06-30T12:00:00Z
+  output path: testoutput/dirac_cov_%id%.nc
 
 #test:
 #  reference filename: testoutput/test_dirac.ref
