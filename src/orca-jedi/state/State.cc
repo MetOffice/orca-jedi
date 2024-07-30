@@ -165,10 +165,35 @@ State & State::operator=(const State & rhs) {
 // Interactions with Increments
 
 State & State::operator+=(const Increment & dx) {
-  std::string err_message =
-      "orcamodel::State::State::operator+= not implemented";
-  throw eckit::NotImplemented(err_message, Here());
+
   oops::Log::trace() << "State(ORCA)::add increment starting" << std::endl;
+
+  ASSERT(this->validTime() == dx.validTime());
+
+// DJL assumes state and increments have the same fields in the field set
+// DJL add something to enforce/check this
+
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
+  for (int i = 0; i< stateFields_.size();i++)
+  {
+    atlas::Field field = stateFields_[i];
+    atlas::Field fieldi = dx.incrementFields()[i];
+
+    std::string fieldName = field.name();
+    std::string fieldNamei = fieldi.name();
+    oops::Log::debug() << "orcamodel::Increment::add:: state field name = " << fieldName
+                       << " increment field name = " << fieldNamei
+                       << std::endl;
+    auto field_view = atlas::array::make_view<double, 2>(field);
+    auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        if (!ghost(j)) field_view(j, k) += field_viewi(j, k);
+      }
+    }
+  }
+ 
   oops::Log::trace() << "State(ORCA)::add increment done" << std::endl;
   return *this;
 }

@@ -44,7 +44,7 @@ cost function:
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/test_3dvar.nc
+            obsfile: testoutput/test_3dvar_obsdataout.nc
         simulated variables: [ice_area_fraction]
       get values:
         time interpolation: linear
@@ -52,7 +52,7 @@ cost function:
           type: unstructured-bilinear-lonlat
           non_linear: missing-if-all-missing
           max_fraction_elems_to_try: 0.0
-#          adjoint: true
+          adjoint: true
       obs operator:
         name: Composite
         components:
@@ -91,20 +91,17 @@ variational:
       write increment: true
       increment:
         state component:
-          datadir: Data
-          output path: testoutput/increments_ice
+          output path: testoutput/increments_ice.nc
           date: 2021-06-30T00:00:00Z
-          exp: 3dvar.iter1
-          type: in
+#          type: in
 final:
   diagnostics:
     departures: oman
 output:
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_ice
-#  exp: 3dvar
-#  steps: ["2021-06-29T12:00:00Z"]               # state write not implemented 
-
+  nemo field file: testoutput/3dvar_ice2.nc
+  output nemo field file: testoutput/3dvar_ice_analysis.nc
+#  steps: ["2021-06-29T12:00:00Z"]
 #test:
 #  reference filename: testoutput/test_3dvar_ice_obs.ref
