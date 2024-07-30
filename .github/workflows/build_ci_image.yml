@@ -48,6 +48,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Install hpccm
+        run: |
+          python3 -m pip install hpccm
+      - name: Recipe to Dockerfile
+        run: |
+          hpccm --recipe ./ci/hpccm_recipe_almalinux9.py >./Dockerfile
       # This step uses the `docker/build-push-action` action to build the
       # image, based on your repository's `Dockerfile`. If the build succeeds,
       # it pushes the image to GitHub Packages.  It uses the `context`
@@ -63,7 +69,6 @@ jobs:
         with:
           context: .
           push: true
-          file: ./ci/Dockerfile.almalinux9
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 

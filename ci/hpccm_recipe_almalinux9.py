@@ -36,7 +36,7 @@ fiat_vn = USERARG.get('fiat_vn', '1.4.1')
 fparser_vn = USERARG.get('fparser_vn', '0.1.4')
 gsl_lite_vn = USERARG.get('gsl_lite_vn', '0.41.0')
 gsw_fortran_vn = USERARG.get('gsw_fortran_vn', '3.07')
-hdf5_vn = USERARG.get('hdf5_vn', '1.14.2')
+hdf5_vn = USERARG.get('hdf5_vn', 'hdf5-1_14_2')
 json_schema_validator_vn = USERARG.get('json_schema_validator_vn', '2.3.0')
 json_vn = USERARG.get('json_vn', '3.9.1')
 lapack_vn = USERARG.get('lapack_vn', '3.11.0')
@@ -131,23 +131,25 @@ mpi = openmpi(
 )
 Stage0 += mpi
 
-Stage0 += hdf5(
-    version=hdf5_vn,
+Stage0 += generic_autotools(
     prefix='/usr/local',
-    with_zlib='/usr/local',
-    with_szlib='/usr/local',
+    repository='https://github.com/HDFGroup/hdf5',
+    commit=hdf5_vn,
     enable_build_mode='production',
-    configure_opts=['--enable-cxx', '--enable-fortran'],
+    enable_cxx=True,
+    enable_fortran=True,
     enable_parallel=True,
     enable_threadsafe=True,
     enable_unsupported=True,
     toolchain=mpi.toolchain,
+    with_szlib='/usr/local',
+    with_zlib='/usr/local',
 )
 # - Post-process h5pcc to avoid f951: Warning:
 # Nonexistent include directory '/var/tmp/hdf5-1.14.0/src/H5FDsubfiling'
 # sed -i "s|-I${TMPDIR}/hdf5-${hdf5_vn}/src/H5FDsubfiling||g" "/usr/local/bin/h5pcc"
 Stage0 += shell(commands=[
-    f'sed -i "s|-I/var/tmp/hdf5-${hdf5_vn}/src/H5FDsubfiling||g" "/usr/local/bin/h5pcc"'
+    f'sed -i "s|-I/var/tmp/hdf5/src/H5FDsubfiling||g" "/usr/local/bin/h5pcc"'
 ])
 Stage0 += environment(variables={'H5DIR': '/usr/local', 'LIBS': '-ldl'})
 Stage0 += netcdf(
