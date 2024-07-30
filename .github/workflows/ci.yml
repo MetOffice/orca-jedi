@@ -44,12 +44,6 @@ jobs:
           repository: JCSDA-internal/ufo
           token: ${{ secrets.GH_PAT }}
 
-      - name: checkout atlas-orca
-        uses: actions/checkout@v3
-        with:
-          path: ci/atlas-orca
-          repository: ECMWF/atlas-orca
-
       - name: checkout atlas-data
         uses: actions/checkout@v3
         with:
@@ -64,4 +58,4 @@ jobs:
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            'jcsda/docker-gnu-openmpi-dev:latest'
+            'ghcr.io/twsearle/orca-jedi/ci-almalinux9:develop'
