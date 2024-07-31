@@ -44,12 +44,6 @@ jobs:
           repository: JCSDA-internal/ufo
           token: ${{ secrets.GH_PAT }}
 
-      - name: checkout atlas-orca
-        uses: actions/checkout@v3
-        with:
-          path: ci/atlas-orca
-          repository: ECMWF/atlas-orca
-
       - name: checkout atlas-data
         uses: actions/checkout@v3
         with:
@@ -58,10 +52,20 @@ jobs:
           lfs: true
           token: ${{ secrets.GH_PAT }}
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: darth
+          password: ${{ secrets.GH_PAT }}
+
+      - name: Pull Docker image
+        run: docker pull ghcr.io/darth/orca-jedi/ci-almalinux9:develop
+
       - name: build and test
         run: |
           docker run --rm \
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            'jcsda/docker-gnu-openmpi-dev:latest'
+            'ghcr.io/darth/orca-jedi/ci-almalinux9:v1.2.0'
