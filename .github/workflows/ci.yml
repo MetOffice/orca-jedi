@@ -5,7 +5,9 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
-
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:feature-use-personal-ghcr-container
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,34 +23,28 @@ jobs:
           path: ci/jedicmake
           repository: JCSDA-internal/jedi-cmake
           submodules: true
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout oops
         uses: actions/checkout@v3
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda
         uses: actions/checkout@v3
         with:
           path: ci/ioda
           repository: JCSDA-internal/ioda
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ufo
         uses: actions/checkout@v3
         with:
           path: ci/ufo
           repository: JCSDA-internal/ufo
-          token: ${{ secrets.GH_PAT }}
-
-      - name: checkout atlas-orca
-        uses: actions/checkout@v3
-        with:
-          path: ci/atlas-orca
-          repository: ECMWF/atlas-orca
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout atlas-data
         uses: actions/checkout@v3
@@ -56,7 +52,17 @@ jobs:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
           lfs: true
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: twsearle
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Pull Docker image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: build and test
         run: |
@@ -64,4 +70,4 @@ jobs:
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            'jcsda/docker-gnu-openmpi-dev:latest'
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
