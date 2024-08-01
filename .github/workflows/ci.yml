@@ -28,28 +28,28 @@ jobs:
           path: ci/jedicmake
           repository: JCSDA-internal/jedi-cmake
           submodules: true
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout oops
         uses: actions/checkout@v3
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda
         uses: actions/checkout@v3
         with:
           path: ci/ioda
           repository: JCSDA-internal/ioda
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ufo
         uses: actions/checkout@v3
         with:
           path: ci/ufo
           repository: JCSDA-internal/ufo
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout atlas-data
         uses: actions/checkout@v3
@@ -57,7 +57,7 @@ jobs:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
           lfs: true
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
