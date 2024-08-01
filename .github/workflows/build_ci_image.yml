@@ -68,9 +68,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max`
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
 
       # This step generates an artifact attestation for the image, which is an
       # unforgeable statement about where and how it was built. It increases
