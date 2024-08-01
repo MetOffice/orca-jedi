@@ -12,7 +12,7 @@ on:
 # workflow builds.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: darth/orca-jedi/ci-almalinux9
+  IMAGE_NAME: ${{ github.actor }}/orca-jedi/ci-almalinux9
 
 jobs:
   build-and-push-image:
@@ -36,7 +36,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # This step uses
       # [docker/metadata-action](https://github.com/docker/metadata-action#about)
       # to extract tags and labels that will be applied to the specified image.

@@ -20,7 +20,20 @@ trap finally EXIT
 
 cd "${WORKD}"
 
-source /opt/spack-environment/activate.sh
+if [[ -f /opt/spack-environment/activate.sh ]]; then
+    source /opt/spack-environment/activate.sh
+fi
+
+# -- Enable OpenMPI over subscription -----------------------------------------
+if command -v ompi_info &>/dev/null; then
+    echo "Check support for MPI_THREAD_MULTIPLE"
+    ompi_info | grep -i 'thread support'
+    ompi_vn=$(ompi_info | awk '/Ident string:/ {print $3}')
+    case $ompi_vn in
+        4.*) export OMPI_MCA_rmaps_base_oversubscribe=1 ;;
+        5.*) export PRTE_MCA_rmaps_default_mapping_policy=:oversubscribe ;;
+    esac
+fi
 
 echo "
 -------------------------------
@@ -40,11 +53,6 @@ rm -f "${HERE}/orca-jedi"
 ln -s '..' "${HERE}/orca-jedi"
 ecbuild -S "${HERE}"
 make -j "${NPROC}"
-
-if [[ ! -f share/plugins/atlas-orca.yml ]]; then
- echo "ERROR atlas-orca.yml not found!" | tee >(cat >&2)
- exit 1
-fi
 
 env OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
     ATLAS_TRACE=1 ATLAS_DEBUG=1 \
