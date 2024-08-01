@@ -26,28 +26,28 @@ jobs:
           path: ci/jedicmake
           repository: JCSDA-internal/jedi-cmake
           submodules: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: checkout oops
         uses: actions/checkout@v3
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: checkout ioda
         uses: actions/checkout@v3
         with:
           path: ci/ioda
           repository: JCSDA-internal/ioda
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: checkout ufo
         uses: actions/checkout@v3
         with:
           path: ci/ufo
           repository: JCSDA-internal/ufo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: checkout atlas-data
         uses: actions/checkout@v3
@@ -55,17 +55,17 @@ jobs:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
           lfs: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: darth
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor}}
+          password: ${{ secrets.GH_PAT }}
 
       - name: Pull Docker image
-        run: docker pull ghcr.io/darth/orca-jedi/ci-almalinux9:develop
+        run: docker pull ghcr.io/${{ github.actor }}/orca-jedi/ci-almalinux9:develop
 
       - name: build and test
         run: |
@@ -73,4 +73,4 @@ jobs:
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            ghcr.io/${{ github.actor }}/orca-jedi/ci-almalinux9:v1.2.0
+            ghcr.io/${{ github.actor }}/orca-jedi/ci-almalinux9:develop
