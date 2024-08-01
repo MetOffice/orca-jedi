@@ -5,7 +5,9 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
-
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:latest
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,12 +62,12 @@ jobs:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor}}
-          password: ${{ secrets.GH_PAT }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull Docker image
-        run: docker pull ghcr.io/${{ github.actor }}/orca-jedi/ci-almalinux9:develop
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: build and test
         run: |
@@ -73,4 +75,4 @@ jobs:
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            ghcr.io/${{ github.actor }}/orca-jedi/ci-almalinux9:develop
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
