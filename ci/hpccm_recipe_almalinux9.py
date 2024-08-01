@@ -45,6 +45,8 @@ nceplibs_bufr_vn = USERARG.get('nceplibs_bufr_vn', '12.0.1')
 netcdf_vn = USERARG.get('netcdf_vn', '4.9.2')
 netcdfcxx_vn = USERARG.get('netcdfcxx_vn', '4.3.1')
 netcdfftn_vn = USERARG.get('netcdfftn_vn', '4.6.1')
+netcdf4python_vn = USERARG.get('netcdf4python_vn', '1.6.5')
+numpy_vn = USERARG.get('numpy_vn', '1.26.4')
 odc_vn = USERARG.get('odc_vn', '1.5.2')
 openmpi_vn = USERARG.get('openmpi_vn', '4.1.5')
 pycodestyle_vn = USERARG.get('pycodestyle_vn', '2.10')
@@ -266,6 +268,11 @@ Stage0 += generic_autotools(
     configure_opts=['--with-idxtype=long', '--without-regard-for-quality'],
 )
 
+Stage0 += pip(pip='pip3', packages=[
+    f"pycodestyle=={pycodestyle_vn}",
+    f"numpy=={numpy_vn}",
+    f"netcdf4=={netcdf4python_vn}",
+])
 Stage1 += baseimage(image='almalinux:9', _distro='rhel')
 Stage1 += comment('JEDI development image with GNU and OpenMPI')
 Stage1 += label(metadata={
