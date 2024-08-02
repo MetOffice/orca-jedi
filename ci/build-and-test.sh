@@ -44,7 +44,6 @@ eckit version $(eckit-version ||:)
 ectrans version $(ectrans --version ||:)
 fckit version $(fckit --version ||:)
 fiat version $(fiat --version ||:)
-lz4 version $(lz4 --version ||:)
 odc version $(odc --version ||:)
 -------------------------------
 "
