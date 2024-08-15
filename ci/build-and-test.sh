@@ -35,16 +35,19 @@ if command -v ompi_info &>/dev/null; then
     esac
 fi
 
+atlas_orca_v=$(atlas --info |
+  sed -n 's/ *atlas-orca version (\([0-9]*\.[0-9]*\.[0-9]*\)).*/\1/p')
+
 echo "
 -------------------------------
 gcc version $(gcc -dumpversion ||:)
 $(ecbuild --version ||:)
 atlas version $(atlas --version ||:)
+atlas-orca version ${atlas_orca_v:-:}
 eckit version $(eckit-version ||:)
 ectrans version $(ectrans --version ||:)
 fckit version $(fckit --version ||:)
 fiat version $(fiat --version ||:)
-lz4 version $(lz4 --version ||:)
 odc version $(odc --version ||:)
 -------------------------------
 "
