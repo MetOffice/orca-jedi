@@ -12,7 +12,7 @@ geometry :
     - name: sea_surface_height_anomaly_background_error
       nemo field name: sossheig
       model space: surface
-      variable type: background variance
+      variable type: background standard deviation
   grid name: eORCA025_T
   number levels: 1
   partitioner: checkerboard
@@ -23,18 +23,18 @@ initial condition :
     - sea_surface_height_anomaly
     - sea_surface_height_anomaly_background_error
   nemo field file: Data/eorca025_t_nemo.nc
-  variance field file: Data/eorca025_t_nemo.nc
+  nemo error field file: Data/eorca025_t_nemo.nc
 model :
   name: PseudoModel
   tstep: P1D
   states:
     - date: 2021-06-29T23:00:00Z
       nemo field file: Data/eorca025_t_nemo.nc
-      variance field file: Data/eorca025_t_bkg_var.nc
+      nemo error field file: Data/eorca025_t_bkg_var.nc
       state variables: &state_variables [ sea_surface_height_anomaly ]
     - date: 2021-06-30T23:00:00Z
       nemo field file: Data/eorca025_t_nemo.nc
-      variance field file: Data/eorca025_t_nemo.nc
+      nemo error field file: Data/eorca025_t_nemo.nc
       state variables: *state_variables
 observations:
   observers:

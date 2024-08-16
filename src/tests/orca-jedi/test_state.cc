@@ -39,7 +39,7 @@ CASE("test basic state") {
     .set("field precision", "double")
     .set("nemo field name", "sic_tot_var")
     .set("model space", "surface")
-    .set("variable type", "background variance");
+    .set("variable type", "background standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("field precision", "double")
     .set("nemo field name", "votemper")
@@ -61,12 +61,12 @@ CASE("test basic state") {
 
   SECTION("test state parameters") {
     state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-    state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+    state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
     params.validateAndDeserialize(state_config);
     EXPECT(params.nemoFieldFile.value() ==
         state_config.getString("nemo field file"));
-    EXPECT(params.varianceFieldFile.value() ==
-        state_config.getString("variance field file"));
+    EXPECT(params.errorFieldFile.value() ==
+        state_config.getString("nemo error field file"));
     EXPECT(params.analyticInit.value().value_or(true));
     auto datetime = static_cast<util::DateTime>(state_config.getString("date"));
     EXPECT(params.date.value() == datetime);
@@ -105,7 +105,7 @@ CASE("test basic state") {
   }
 
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-  state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+  state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
   state_config.set("output nemo field file", "../testoutput/orca2_t_output.nc");
   params.validateAndDeserialize(state_config);
   State state(geometry, params);

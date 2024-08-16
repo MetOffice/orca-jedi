@@ -21,7 +21,7 @@ state :
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   nemo field file: Data/orca2_t_nemo.nc
-  variance field file: Data/orca2_t_bkg_var.nc
+  nemo error field file: Data/orca2_t_bkg_var.nc
 time window:
   begin: 2021-06-29T12:00:00Z
   length: P1D

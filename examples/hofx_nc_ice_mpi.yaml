@@ -15,7 +15,7 @@ geometry:
     - name: ice_area_fraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
-      variable type: background variance
+      variable type: background standard deviation
   grid name: eORCA12_T
   source mesh halo: 0
   number levels: 2
@@ -24,7 +24,7 @@ initial condition :
   date: 2021-06-28T23:00:00Z
   state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
   nemo field file: your_example_data/eorca12_20210630.nc
-  variance field file: your_example_data/eorca12_err_20210630.nc
+  nemo error field file: your_example_data/eorca12_err_20210630.nc
 model :
   name: PseudoModel
   tstep: P1D
@@ -32,15 +32,15 @@ model :
   states:
     - date: 2021-06-28T23:00:00Z
       nemo field file: your_example_data/eorca12_20210630.nc
-      variance field file: your_example_data/eorca12_err_20210630.nc
+      nemo error field file: your_example_data/eorca12_err_20210630.nc
       state variables: [ ice_area_fraction ]
     - date: 2021-06-29T23:00:00Z
       nemo field file: your_example_data/eorca12_20210630.nc
-      variance field file: your_example_data/eorca12_err_20210630.nc
+      nemo error field file: your_example_data/eorca12_err_20210630.nc
       state variables: [ ice_area_fraction ]
     - date: 2021-07-01T23:00:00Z
       nemo field file: your_example_data/eorca12_20210630.nc
-      variance field file: your_example_data/eorca12_err_20210630.nc
+      nemo error field file: your_example_data/eorca12_err_20210630.nc
       state variables: [ ice_area_fraction ]
 observations:
   observers:

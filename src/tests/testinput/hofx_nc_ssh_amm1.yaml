@@ -12,7 +12,7 @@ geometry :
     - name: sea_surface_height_anomaly_background_error
       nemo field name: sossheig
       model space: surface
-      variable type: background variance
+      variable type: background standard deviation
   grid name: Data/amm1_atlas_grid_spec.yaml
   number levels: 1
   partitioner: serial
@@ -23,18 +23,18 @@ initial condition :
     - sea_surface_height_anomaly
     - sea_surface_height_anomaly_background_error
   nemo field file: &field_file Data/amm1_nemo.nc
-  variance field file: *field_file
+  nemo error field file: *field_file
 model :
   name: PseudoModel
   tstep: P1D
   states:
     - date: 2021-06-29T23:00:00Z
       nemo field file: *field_file
-      variance field file: *field_file
+      nemo error field file: *field_file
       state variables: &state_variables [ sea_surface_height_anomaly ]
     - date: 2021-06-30T23:00:00Z
       nemo field file: *field_file
-      variance field file: *field_file
+      nemo error field file: *field_file
       state variables: *state_variables
 observations:
   observers:
