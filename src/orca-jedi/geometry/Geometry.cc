@@ -20,6 +20,38 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 
+namespace {
+/// \brief Construct an atlas grid given a string containing either a grid name
+///        or a path to a grid specification yaml configuration file.
+/// \param[in]     grid_specification  string containing the path/name.
+/// \return        constructed atlas grid object.
+atlas::Grid construct_grid_from_name(std::string grid_specification) {
+  auto grid_name = grid_specification;
+  eckit::PathName grid_spec_path(grid_specification);
+
+  std::vector<std::string> orca_grid_names;
+  for (auto && orca_type : std::vector<std::string>{"F", "T", "U", "V", "W"}) {
+    for (auto && resolution : std::vector<std::string>{"1", "2", "025", "12"}) {
+      orca_grid_names.emplace_back("ORCA" + resolution + "_" + orca_type);
+      orca_grid_names.emplace_back("eORCA" + resolution + "_" + orca_type);
+    }
+  }
+  auto grid = atlas::Grid();
+  if (std::find(std::begin(orca_grid_names), std::end(orca_grid_names), grid_name)
+      != std::end(orca_grid_names)) {
+    grid = atlas::Grid{grid_name};
+  } else if (grid_spec_path.exists()) {
+    grid = atlas::Grid{atlas::Grid::Spec{grid_spec_path}};
+  } else {
+    std::stringstream err_stream;
+    err_stream << "orcamodel::Geometry:: grid  \"" << grid_specification
+               << "\" " << " is neither a valid named grid,"
+               << " nor a path to a grid specification. " << std::endl;
+    throw eckit::BadValue(err_stream.str(), Here());
+  }
+  return grid;
+}
+}  // namespace
 
 namespace orcamodel {
 
@@ -51,14 +83,9 @@ Geometry::Geometry(const eckit::Configuration & config,
     eckit_timer_->start();
     log_status();
     params_.validateAndDeserialize(config);
-    {
-      eckit::PathName grid_spec_path(params_.gridName.value());
-      if (grid_spec_path.exists()) {
-        grid_ = atlas::Grid{atlas::Grid::Spec{grid_spec_path}};
-      } else {
-        grid_ = atlas::Grid{params_.gridName.value()};
-      }
-    }
+
+    grid_ = construct_grid_from_name(params_.gridName.value());
+
     int64_t halo = params_.sourceMeshHalo.value();
     if ( ( (params_.partitioner.value() == "serial") || (comm.size() == 1) )
          && (halo > 0) ) {
