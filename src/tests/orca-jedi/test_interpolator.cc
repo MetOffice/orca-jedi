@@ -95,13 +95,13 @@ CASE("test  interpolator") {
         oops::Variable{"sea_surface_foundation_temperature"}}};
     settings_map["ORCA2_T"].surf_values = std::vector<double>{
         1,             missing_value, 0,
-        18.4888916016, missing_value, 18.1592999503};
+        18.4888877869, missing_value, 18.1592998505};
 
     settings_map["ORCA2_T"].vol_vars = oops::Variables{
         {oops::Variable{"sea_water_potential_temperature"}}};
     settings_map["ORCA2_T"].vol_values = std::vector<double>{
-        18.4888916016, missing_value, 18.1592999503,
-        17.9419364929, missing_value, 17.75000288,
+        18.4888877869, missing_value, 18.1592998505,
+        18           , missing_value, 17.7500019073,
         missing_value, missing_value, missing_value};
   }
 
