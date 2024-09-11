@@ -1,7 +1,6 @@
 # (C) British Crown Copyright 2024 Met Office
 
 list( APPEND orcajedi_test_input
-  basic.yaml
   ostia_seaice_obs_hofx3d.yaml
   hofx_odb_ice.yaml
   hofx_nc_ice.yaml
@@ -10,10 +9,12 @@ list( APPEND orcajedi_test_input
   hofx_nc_ssh_checkerboard.yaml
   hofx_nc_ssh_eorca025.yaml
   hofx_nc_ssh_amm1.yaml
+  hofx_nc_potm_amm1r.yaml
   hofx3d_nc_sst.yaml
   hofx3d_nc_potm.yaml
   hofx3d_nc_prof_2vars.yaml
   hofx3d_nc_ssh_amm1.yaml
+  hofx3d_nc_ssh_amm1r.yaml
   odb_ice_query.yaml
   odb_ice_mapping.yaml
   test_name_map.yaml

@@ -23,6 +23,9 @@ hofx_ssh_obs.nc
 amm1_coords.nc
 amm1_nemo.nc
 amm1_atlas_grid_spec.yaml
+amm1r_nemo.nc
+amm1r_atlas_grid_spec.yaml
+hofx_potm_amm1r_obs.nc
 amm_ssh_obs.nc
 )
 
