@@ -11,14 +11,14 @@ geometry :
     - name: sea_water_potential_temperature_background_error
       nemo field name: t_tot_var
       model space: volume
-      variable type: background variance
+      variable type: background error variance
     - name: salinity
       nemo field name: vosaline
       model space: volume
     - name: salinity_background_error
       nemo field name: t_tot_var
       model space: volume
-      variable type: background standard deviation
+      variable type: background error standard deviation
   grid name: ORCA2_T
   number levels: 3
 state :

@@ -47,7 +47,7 @@ CASE("test serial interpolator") {
   nemo_var_mappings[1].set("name", "sea_surface_height_anomaly_error")
     .set("nemo field name", "ssh_tot_std")
     .set("model space", "surface")
-    .set("variable type", "background standard deviation");
+    .set("variable type", "background error standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
@@ -194,7 +194,7 @@ CASE("test checkerboard interpolator") {
   nemo_var_mappings[1].set("name", "sea_surface_height_anomaly_error")
     .set("nemo field name", "ssh_tot_std")
     .set("model space", "surface")
-    .set("variable type", "background standard deviation");
+    .set("variable type", "background error standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");

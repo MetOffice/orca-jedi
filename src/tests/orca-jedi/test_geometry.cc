@@ -32,7 +32,7 @@ CASE("test basic geometry") {
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
     .set("model space", "surface")
-    .set("variable type", "background standard deviation");
+    .set("variable type", "background error standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
@@ -52,11 +52,11 @@ CASE("test basic geometry") {
     EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction",
                                               "background"));
     EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction_error",
-                                              "background standard deviation"));
+                                              "background error standard deviation"));
     EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction_error",
                                                "background"));
     EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction",
-                                               "background standard deviation"));
+                                               "background error standard deviation"));
   }
 
   SECTION("test geometry variable sizes") {

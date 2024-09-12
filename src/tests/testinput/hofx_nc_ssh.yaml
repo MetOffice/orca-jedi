@@ -12,7 +12,7 @@ geometry :
     - name: sea_surface_height_anomaly_background_error
       nemo field name: ssh_tot_std
       model space: surface
-      variable type: background standard deviation
+      variable type: background error standard deviation
   grid name: ORCA2_T
   number levels: 1
   partitioner: serial

@@ -26,8 +26,8 @@ class NemoFieldParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> nemoName {"nemo field name", this};
   oops::RequiredParameter<std::string> modelSpace {"model space", this};
   oops::Parameter<std::string> variableType {"variable type",
-    "type of variable (default is 'background' other options are 'background variance' and"
-    "'background standard deviation' both are included for clarity, but both variables are"
+    "type of variable (default is 'background' other options are 'background error variance' and"
+    "'background error standard deviation' both are included for clarity, but both variables are"
     " read from the error file",
     "background",
     this};

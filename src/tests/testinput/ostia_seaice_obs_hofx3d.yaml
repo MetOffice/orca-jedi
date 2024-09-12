@@ -14,7 +14,7 @@ geometry :
     - name: ice_area_fraction_background_error
       nemo field name: sic_tot_var
       model space: surface
-      variable type: background variance
+      variable type: background error variance
   grid name: ORCA2_T
   number levels: 10
 state :
