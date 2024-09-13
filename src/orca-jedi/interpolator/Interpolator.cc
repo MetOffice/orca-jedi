@@ -304,18 +304,21 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
       atlas::option::name(gv_varname) |
       atlas::option::levels(varSizes[jvar]));
 
+// Copying observation array vector to an atlas observation field (tgt_field)
+// DJL not sure if the missing value aspect does anything here
     auto field_view = atlas::array::make_view<double, 2>(tgt_field);
 //    field_view.assign(0.0);
-
+    atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
+    bool has_mv = static_cast<bool>(mv);
     for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
-//          if (has_mv && mv(field_view(iloc, klev))) {
-////            result[out_idx] = util::missingValue(result[out_idx]);
-//          } else {
+          if (has_mv && mv(field_view(iloc, klev))) {
+             field_view(iloc, klev) = util::missingValue<double>();
+          } else {
         oops::Log::debug() << "DJL iloc " << iloc << " klev " << klev << " out_idx "
                           << out_idx << " resultin[out_idx] " << resultin[out_idx] << std::endl;
-        field_view(iloc, klev) = resultin[out_idx];
-//          }
+             field_view(iloc, klev) = resultin[out_idx];
+          }
         ++out_idx;
       }
     }
@@ -323,8 +326,6 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
 // halo exchange update ghost points DJL
     geom->functionSpace().haloExchange(inc.incrementFields()[gv_varname]);
 
-//      atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
-//      bool has_mv = static_cast<bool>(mv);
     interpolator_.execute_adjoint(inc.incrementFields()[gv_varname], tgt_field);
 
   }    // jvar
