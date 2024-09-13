@@ -37,7 +37,7 @@ jobs:
         with:
           path: ci/saber
           repository: JCSDA-internal/saber
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda
         uses: actions/checkout@v3

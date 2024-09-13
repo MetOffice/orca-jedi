@@ -37,6 +37,11 @@
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
+#include <boost/uuid/uuid.hpp>            // uuid class DJL
+#include <boost/uuid/uuid_generators.hpp> // generators DJL
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc. DJL
+
+
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
@@ -264,10 +269,17 @@ void Increment::setval(const double & val) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
           }
+        } else {
+          field_view(j, k) = -99;            /// DJL
         }
       }
     }
   }
+  
+  // DJL write debug fields to file
+    boost::uuids::uuid uuid = boost::uuids::random_generator()();    
+    writeFieldsToFile("incsetval"+ boost::uuids::to_string(uuid) +".nc", *geom_, validTime(), incrementFields_);
+
 
   oops::Log::trace() << "Increment(ORCA)::setval done" << std::endl;
 }
