@@ -32,11 +32,11 @@ observations:
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/ostia_seaice_obs.nc
+          obsfile: Data/hofx_sic_ostia_obs.nc
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/test_ostia_seaice_obs_hofx3d_jopa.nc
+          obsfile: testoutput/test_hofx3d_nc_sic_jopa_out.nc
       simulated variables: [seaIceFraction]
     get values:
       atlas-interpolator:
@@ -62,4 +62,4 @@ observations:
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:
-  reference filename: testoutput/test_ostia_seaice_obs_hofx3d.ref
+  reference filename: testoutput/test_hofx3d_nc_sic.ref

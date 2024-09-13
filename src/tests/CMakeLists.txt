@@ -8,14 +8,14 @@ ecbuild_add_test( TARGET test_orcajedi_coding_norms
                   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/cpplint.py
                   ARGS --recursive ${CMAKE_CURRENT_SOURCE_DIR}/../ )
 
-ecbuild_add_test( TARGET test_orcamodel_hofx_ice
+ecbuild_add_test( TARGET test_orcamodel_hofx_sic
                   OMP 1
-                  ARGS testinput/hofx_nc_ice.yaml
+                  ARGS testinput/hofx_nc_sic.yaml
                   COMMAND orcamodel_hofx.x )
 
-ecbuild_add_test( TARGET test_orcamodel_hofx3D_ice
+ecbuild_add_test( TARGET test_orcamodel_hofx3D_sic
                   OMP 1
-                  ARGS testinput/ostia_seaice_obs_hofx3d.yaml
+                  ARGS testinput/hofx3d_nc_sic.yaml
                   COMMAND orcamodel_hofx3D.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx3D_sst
