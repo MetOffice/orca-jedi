@@ -34,7 +34,7 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_checkerboard
                   ARGS testinput/hofx_nc_ssh_checkerboard.yaml
                   COMMAND orcamodel_hofx.x )
 
-# Disabled until halos are available from atlas-orca
+# Requires atlas-orca halos > 0 change (https://github.com/ecmwf/atlas-orca/pull/20)
 #ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
 #                  OMP 1
 #                  MPI 2

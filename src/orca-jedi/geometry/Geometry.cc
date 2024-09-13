@@ -87,10 +87,12 @@ Geometry::Geometry(const eckit::Configuration & config,
     grid_ = construct_grid_from_name(params_.gridName.value());
 
     int64_t halo = params_.sourceMeshHalo.value();
-    if ( ( (params_.partitioner.value() == "serial") || (comm.size() == 1) )
+    std::string partitioner_name = params_.partitioner.value();
+    if ( ( (partitioner_name == "serial") || (comm.size() == 1) )
          && (halo > 0) ) {
       halo = 0;
-      oops::Log::info() << "Warning: forcing halo = 0"
+      partitioner_name = "serial";
+      oops::Log::info() << "Warning: forcing halo = 0 and serial partitioner"
                         << " as settings imply all processors have all data" << std::endl;
     }
     auto meshgen_config = grid_.meshgenerator()
@@ -99,8 +101,7 @@ Geometry::Geometry(const eckit::Configuration & config,
     atlas::MeshGenerator meshgen(meshgen_config);
     log_status();
     auto partitioner_config = grid_.partitioner();
-    partitioner_config.set("type",
-        params_.partitioner.value());
+    partitioner_config.set("type", partitioner_name);
     partitioner_ = atlas::grid::Partitioner(partitioner_config);
     log_status();
     mesh_ = meshgen.generate(grid_, partitioner_);
