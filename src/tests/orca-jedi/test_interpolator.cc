@@ -77,6 +77,7 @@ CASE("test  interpolator") {
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
     interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("adjoint", true);
     settings_map["ORCA2_T"].interpolator_config.set("atlas-interpolator", interp_conf);
 
     std::vector<std::string> state_variables {
@@ -130,6 +131,7 @@ CASE("test  interpolator") {
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
     interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("adjoint", true);
     settings_map["AMM1"].interpolator_config.set("atlas-interpolator", interp_conf);
 
     std::vector<std::string> state_variables {
@@ -233,23 +235,22 @@ CASE("test  interpolator") {
       // increment -> observation space
       interpolator.apply(settings.surf_vars, increment, mask, vals);
 
+      double kgo_value=1;
+
       for (size_t i=0; i < settings.surf_values.size(); ++i) {
         std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
-                  << " kgo_values[" << i << "] " << settings.surf_values[i] << std::endl;
+                  << " kgo_values[" << i << "] " << kgo_value << std::endl;
       }
-      //for (size_t i=0; i < settings.surf_values.size(); ++i) {
-      //  EXPECT(std::abs(vals[i] - settings.surf_values[i]) < ATOL);
-      //}
+      for (size_t i=0; i < settings.surf_values.size(); ++i) {
+        EXPECT(std::abs(vals[i] - kgo_value) < ATOL);
+      }
       
       Increment incrementout(geometry, settings.surf_vars, incrementParams.date);
       // observation space -> increment
       interpolator.applyAD(settings.surf_vars, incrementout, mask, vals);
       
-      incrementout.write(incrementParams);
-            
+      incrementout.write(incrementParams);            
     }
-    
-    
   }
 }
 
