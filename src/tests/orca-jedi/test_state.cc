@@ -39,7 +39,7 @@ CASE("test basic state") {
     .set("field precision", "double")
     .set("nemo field name", "sic_tot_var")
     .set("model space", "surface")
-    .set("variable type", "background error standard deviation");
+    .set("variable type", "background error variance");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("field precision", "double")
     .set("nemo field name", "votemper")

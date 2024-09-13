@@ -15,7 +15,7 @@ geometry:
     - name: ice_area_fraction_background_error
       nemo field name: seaice_tot_var
       model space: surface
-      variable type: background error standard deviation
+      variable type: background error variance
   grid name: eORCA12_T
   source mesh halo: 0
   number levels: 2

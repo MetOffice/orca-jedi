@@ -15,7 +15,7 @@ geometry :
     - name: sea_surface_temperature_background_error
       nemo field name: t_tot_var
       model space: surface
-      variable type: background error standard deviation
+      variable type: background error variance
   grid name: ORCA2_T
   number levels: 1
 state :

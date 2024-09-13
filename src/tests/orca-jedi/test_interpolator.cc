@@ -65,7 +65,7 @@ CASE("test  interpolator") {
     nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
       .set("nemo field name", "sic_tot_var")
       .set("model space", "surface")
-      .set("variable type", "background error standard deviation");
+      .set("variable type", "background error variance");
     nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
       .set("nemo field name", "votemper")
       .set("model space", "surface");
