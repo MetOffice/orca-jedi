@@ -178,6 +178,9 @@ State & State::operator+=(const Increment & dx) {
   for (int i = 0; i< stateFields_.size();i++)
   {
     atlas::Field field = stateFields_[i];
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+
     atlas::Field fieldi = dx.incrementFields()[i];
 
     std::string fieldName = field.name();
@@ -189,7 +192,11 @@ State & State::operator+=(const Increment & dx) {
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += field_viewi(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j,k)))) {
+            field_view(j, k) += field_viewi(j, k);
+          }
+        }
       }
     }
   }

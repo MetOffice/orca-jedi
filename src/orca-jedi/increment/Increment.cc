@@ -212,7 +212,7 @@ Increment & Increment::operator*=(const double & zz) {
   return *this;
 }
 
-/// \brief Create increment from the different of two state objects.
+/// \brief Create increment from the difference of two state objects.
 /// \param x1 State object.
 /// \param x2 State object subtracted.
 void Increment::diff(const State & x1, const State & x2) {
@@ -227,6 +227,13 @@ void Increment::diff(const State & x1, const State & x2) {
     atlas::Field field2 = x2.getField(i);
     atlas::Field fieldi = incrementFields_[i];
 
+    atlas::field::MissingValue mv1(field1);
+    bool has_mv1 = static_cast<bool>(mv1);
+    atlas::field::MissingValue mv2(field2);
+    bool has_mv2 = static_cast<bool>(mv2);
+    bool has_mv = has_mv1 || has_mv2;
+    oops::Log::debug() << "DJL Increment::diff mv1 " << mv1 << " mv2 " << mv2 << " has_mv " << has_mv << std::endl; 
+
     std::string fieldName1 = field1.name();
     std::string fieldName2 = field2.name();
     std::string fieldNamei = fieldi.name();
@@ -239,8 +246,15 @@ void Increment::diff(const State & x1, const State & x2) {
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_viewi.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_viewi.shape(1); ++k) {
-        if (!ghost(j)) { field_viewi(j, k) = field_view1(j, k) - field_view2(j, k);
-        } else { field_viewi(j, k) = 0; }
+        if (!ghost(j)) { 
+          if (!has_mv1 || (has_mv1 && !mv1(field_view1(j,k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view2(j,k)))) {
+              field_viewi(j, k) = field_view1(j, k) - field_view2(j, k);
+            }
+          }
+        } else {
+          field_viewi(j, k) = 0;
+        }
       }
     }
   }

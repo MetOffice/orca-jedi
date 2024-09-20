@@ -229,6 +229,7 @@ void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
     auto field_view = atlas::array::make_view<double, 2>(tgt_field);
     atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
     bool has_mv = static_cast<bool>(mv);
+    oops::Log::debug() << "DJL Interpolator::apply mv " << mv << " has_mv " << has_mv << std::endl; 
     for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
         if (has_mv && mv(field_view(iloc, klev))) {
@@ -310,6 +311,8 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
 //    field_view.assign(0.0);
     atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
     bool has_mv = static_cast<bool>(mv);
+    oops::Log::debug() << "DJL Interpolator::applyAD mv " << mv << " has_mv " << has_mv << std::endl; 
+
     for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
           if (has_mv && mv(field_view(iloc, klev))) {
