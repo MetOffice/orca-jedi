@@ -46,11 +46,11 @@ observations:
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/ostia_seaice_obs.nc
+          obsfile: Data/hofx_sic_ostia_obs.nc
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/test_hofx_nc_ice_jopa.nc
+          obsfile: testoutput/test_hofx_nc_sic_jopa.nc
       simulated variables: [seaIceFraction]
     get values:
       time interpolation: linear
@@ -152,4 +152,4 @@ observations:
         flag: BayBgCheckReject
       - name: reject
 test:
-  reference filename: testoutput/test_hofx_nc_ice.ref
+  reference filename: testoutput/test_hofx_nc_sic.ref

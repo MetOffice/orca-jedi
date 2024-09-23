@@ -6,23 +6,26 @@ time window:
   length: P2D
 geometry :
   nemo variables:
-    - name: sea_surface_height_anomaly
-      nemo field name: sossheig
-      model space: surface
-    - name: sea_surface_height_anomaly_background_error
-      nemo field name: sossheig
-      model space: surface
+    - name: depth
+      nemo field name: nav_lev
+      model space: vertical
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: sea_water_potential_temperature_background_error
+      nemo field name: vosaline
+      model space: volume
       variable type: background variance
-  grid name: Data/amm1_atlas_grid_spec.yaml
+  grid name: Data/amm1r_atlas_grid_spec.yaml
   number levels: 1
   partitioner: serial
   source mesh halo: 1
 initial condition :
   date: 2021-06-28T23:00:00Z
-  state variables:
-    - sea_surface_height_anomaly
-    - sea_surface_height_anomaly_background_error
-  nemo field file: &field_file Data/amm1_nemo.nc
+  state variables: &state_variables
+    - sea_water_potential_temperature
+    - sea_water_potential_temperature_background_error
+  nemo field file: &field_file Data/amm1r_nemo.nc
   variance field file: *field_file
 model :
   name: PseudoModel
@@ -31,7 +34,7 @@ model :
     - date: 2021-06-29T23:00:00Z
       nemo field file: *field_file
       variance field file: *field_file
-      state variables: &state_variables [ sea_surface_height_anomaly ]
+      state variables: *state_variables
     - date: 2021-06-30T23:00:00Z
       nemo field file: *field_file
       variance field file: *field_file
@@ -39,16 +42,21 @@ model :
 observations:
   observers:
   - obs space:
-      name: Sea Surface Height
+      name: Sea Temperature
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/hofx_ssh_amm_obs.nc
+          obsfile: Data/hofx_potm_amm1r_obs.nc
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+          sort variable: depthBelowWaterSurface
+          sort group: ObsValue
+          sort order: descending
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/hofx_nc_ssh_jopa.nc
-      simulated variables: [seaSurfaceHeightAnomaly]
+          obsfile: testoutput/test_hofx_nc_potm_amm1r_jopa_out.nc
+      simulated variables: [waterPotentialTemperature]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
@@ -60,12 +68,6 @@ observations:
         observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
         observation alias file: testinput/test_name_map.yaml
-    obs filters:
-    - filter: Variable Assignment
-      assignments:
-      - name: GrossErrorProbability/seaSurfaceHeightAnomaly
-        type: float
-        value: 0.04
 test:
-  reference filename: testoutput/test_hofx_nc_ssh_amm1.ref
+  reference filename: testoutput/test_hofx_nc_potm_amm1r.ref
   float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
