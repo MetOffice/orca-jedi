@@ -50,6 +50,7 @@ numpy_vn = USERARG.get('numpy_vn', '1.26.4')
 odc_vn = USERARG.get('odc_vn', '1.5.2')
 openmpi_vn = USERARG.get('openmpi_vn', '4.1.5')
 pycodestyle_vn = USERARG.get('pycodestyle_vn', '2.10')
+qhull_vn = USERARG.get('qhull_vn', '8.0.2')  # no qhull-devel rpm
 udunits_vn = USERARG.get('udunits_vn', '2.2.28')
 yaxt_vn = USERARG.get('yaxt_vn', '528-0.10.0')  # URL has a number and a version
 
@@ -201,6 +202,13 @@ Stage0 += generic_cmake(
     url=github_url('nlohmann/json', f'v{json_vn}'),
     directory=f'json-{json_vn}',
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DJSON_BuildTests=OFF'],
+)
+
+Stage0 += generic_cmake(
+    prefix='/usr/local',
+    url=github_url('qhull/qhull', f'v{qhull_vn}'),
+    directory=f'qhull-{qhull_vn}',
+    cmake_opts=['-DCMAKE_BUILD_TYPE=Release'],
 )
 
 Stage0 += generic_cmake(
