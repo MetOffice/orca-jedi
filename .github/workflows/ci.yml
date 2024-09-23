@@ -5,6 +5,7 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
+  workflow_dispatch:
 env:
     REGISTRY: ghcr.io
     IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.4.0
