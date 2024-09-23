@@ -4,7 +4,7 @@ on:
   push:
     branches: [develop]
   pull_request:
-    branches: [develop, feature/add_simple_dirac_3dvar]
+    branches: [develop]
   workflow_dispatch:
 env:
     REGISTRY: ghcr.io
