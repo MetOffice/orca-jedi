@@ -37,11 +37,6 @@
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
-#include <boost/uuid/uuid.hpp>             // uuid class DJL
-#include <boost/uuid/uuid_generators.hpp>  // generators DJL
-#include <boost/uuid/uuid_io.hpp>          // streaming operators etc. DJL
-
-
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
@@ -232,8 +227,6 @@ void Increment::diff(const State & x1, const State & x2) {
     atlas::field::MissingValue mv2(field2);
     bool has_mv2 = static_cast<bool>(mv2);
     bool has_mv = has_mv1 || has_mv2;
-    oops::Log::debug() << "DJL Increment::diff mv1 " << mv1 << " mv2 " << mv2 << " has_mv "
-        << has_mv << std::endl;
 
     std::string fieldName1 = field1.name();
     std::string fieldName2 = field2.name();
@@ -284,17 +277,10 @@ void Increment::setval(const double & val) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
           }
-        } else {
-          field_view(j, k) = -99;            /// DJL
         }
       }
     }
   }
-
-  // DJL write debug fields to file
-    boost::uuids::uuid uuid = boost::uuids::random_generator()();
-    writeFieldsToFile("incsetval"+ boost::uuids::to_string(uuid) +".nc", *geom_,
-        validTime(), incrementFields_);
 
   oops::Log::trace() << "Increment(ORCA)::setval done" << std::endl;
 }
@@ -559,7 +545,7 @@ void Increment::read(const eckit::Configuration & conf) {
   throw eckit::NotImplemented(err_message, Here());
 }
 
-/// \brief write out increments fields to a file using params specified filename.
+/// \brief Write out increments fields to a file using params specified filename.
 void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "orcamodel::increment::write" << std::endl;
 
@@ -572,10 +558,16 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "Increment::write to filename "
                      << nemo_field_path << std::endl;
 
+  for (size_t i=0; i < vars_.size(); ++i) {
+    auto gv_varname = vars_[i].name();
+// halo exchange update ghost points
+    geom_->functionSpace().haloExchange(incrementFields_[gv_varname]);
+  }
+
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 }
 
-/// \brief write out increments fields to a file using config specified filename.
+/// \brief Write out increments fields to a file using config specified filename.
 void Increment::write(const eckit::Configuration & config) const {
   write(oops::validateAndDeserialize<OrcaIncrementParameters>(config));
 }

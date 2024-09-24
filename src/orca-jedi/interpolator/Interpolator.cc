@@ -31,13 +31,6 @@
 
 #include "orca-jedi/interpolator/Interpolator.h"
 
-#include <boost/uuid/uuid.hpp>             // uuid class DJL
-#include <boost/uuid/uuid_generators.hpp>  // generators DJL
-#include <boost/uuid/uuid_io.hpp>          // streaming operators etc. DJL
-
-#include "orca-jedi/utilities/IOUtils.h"  // DJL
-
-
 namespace eckit {
 class Configuration;
 }
@@ -193,7 +186,6 @@ template void Interpolator::executeInterpolation<float>(
 void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
            const std::vector<bool> & mask,
            std::vector<double>& result) const {
-  // DJL question can the atlas templates help?
   // input is inc output is result
   const size_t nvars = vars.size();
 
@@ -226,7 +218,6 @@ void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
     auto field_view = atlas::array::make_view<double, 2>(tgt_field);
     atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
     bool has_mv = static_cast<bool>(mv);
-    oops::Log::debug() << "DJL Interpolator::apply mv " << mv << " has_mv " << has_mv << std::endl;
     for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
         if (has_mv && mv(field_view(iloc, klev))) {
@@ -254,10 +245,6 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
   oops::Log::trace() << "orcamodel::Interpolator::applyAD start "
                      << std::endl;
 
-  oops::Log::debug() << "DJL ** Interpolator::applyAD this needs checking **" << std::endl;
-
-// ** Trying to do the opposite of apply DJL
-
   const size_t nvars = vars.size();
 
   for (size_t j=0; j < nvars; ++j) {
@@ -277,64 +264,37 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
     inc.geometry()->variableSizes(vars);
   size_t nvals = 0;
 
-// DJL write debug fields to file
-    boost::uuids::uuid uuid = boost::uuids::random_generator()();
-    std::shared_ptr<const Geometry> geom = inc.geometry();
-    writeFieldsToFile("applyADpre"+ boost::uuids::to_string(uuid) +".nc", *geom,
-        inc.validTime(), inc.incrementFields());
-
   for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
-//    result.resize(nvals);
-
 
   std::size_t out_idx = 0;
   for (size_t jvar=0; jvar < nvars; ++jvar) {
-    oops::Log::debug() << "DJL ** jvar " << jvar << " " << nvars
-                       << "varSizes " << varSizes[jvar]
-                       << std::endl;
     auto gv_varname = vars[jvar].name();
-//      atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
-//          atlas::option::name(gv_varname) |
-//          atlas::option::levels(varSizes[jvar]));
-//      atlas::Field incField = inc.incrementFields()[jvar];
-
     auto tgt_field = atlasObsFuncSpace_.createField<double>(
       atlas::option::name(gv_varname) |
       atlas::option::levels(varSizes[jvar]));
 
 // Copying observation array vector to an atlas observation field (tgt_field)
-// DJL not sure if the missing value aspect does anything here
     auto field_view = atlas::array::make_view<double, 2>(tgt_field);
-//    field_view.assign(0.0);
     atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
     bool has_mv = static_cast<bool>(mv);
-    oops::Log::debug() << "DJL Interpolator::applyAD mv "
-        << mv << " has_mv " << has_mv << std::endl;
 
     for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
       for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
           if (has_mv && mv(field_view(iloc, klev))) {
              field_view(iloc, klev) = util::missingValue<double>();
           } else {
-        oops::Log::debug() << "DJL iloc " << iloc << " klev " << klev << " out_idx "
-                          << out_idx << " resultin[out_idx] " << resultin[out_idx] << std::endl;
              field_view(iloc, klev) = resultin[out_idx];
           }
         ++out_idx;
       }
     }
 
-// halo exchange update ghost points DJL
+// halo exchange update ghost points
+    std::shared_ptr<const Geometry> geom = inc.geometry();
     geom->functionSpace().haloExchange(inc.incrementFields()[gv_varname]);
 
     interpolator_.execute_adjoint(inc.incrementFields()[gv_varname], tgt_field);
   }    // jvar
-
-// DJL write debug fields to file
-//    boost::uuids::uuid uuid = boost::uuids::random_generator()();
-//    std::shared_ptr<const Geometry> geom = inc.geometry();
-    writeFieldsToFile("applyAD"+ boost::uuids::to_string(uuid) +".nc", *geom, inc.validTime(),
-        inc.incrementFields());
 
   oops::Log::trace() << "orcamodel::Interpolator::applyAD done "
                      << std::endl;

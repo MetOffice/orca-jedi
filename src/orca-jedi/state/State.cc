@@ -164,13 +164,13 @@ State & State::operator=(const State & rhs) {
 
 // Interactions with Increments
 
+/// \brief Add increment to state.
+/// \brief Requires increment and state to have the same field names (currently).
+/// \param Increment.
 State & State::operator+=(const Increment & dx) {
   oops::Log::trace() << "State(ORCA)::add increment starting" << std::endl;
 
   ASSERT(this->validTime() == dx.validTime());
-
-// DJL assumes state and increments have the same fields in the field set
-// DJL add something to enforce/check this
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
@@ -187,6 +187,8 @@ State & State::operator+=(const Increment & dx) {
     oops::Log::debug() << "orcamodel::Increment::add:: state field name = " << fieldName
                        << " increment field name = " << fieldNamei
                        << std::endl;
+    ASSERT(fieldName == fieldNamei);
+
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
