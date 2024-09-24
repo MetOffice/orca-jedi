@@ -1,0 +1,21 @@
+# (C) British Crown Copyright 2024 Met Office
+
+type : "regional"
+nx : 15
+ny : 13
+north : 10.9
+south : -7.29
+west  : 8.79
+east  : -10.9
+y_numbering : +1
+
+projection :
+  type: "rotated_lonlat"
+  north_pole : [177, 37.5]
+
+check:
+   size: 195
+   lonlat(first)     : [9.262,44.463]
+   lonlat(last)      : [-26.022,61.654]
+   uid: 35244078cc9483703ac9be75be0314e4
+   bounding_box(n,w,s,e) : [63.401, -26.023, 44.066, 333.977]
