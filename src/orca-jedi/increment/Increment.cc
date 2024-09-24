@@ -37,9 +37,9 @@
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
-#include <boost/uuid/uuid.hpp>            // uuid class DJL
-#include <boost/uuid/uuid_generators.hpp> // generators DJL
-#include <boost/uuid/uuid_io.hpp>         // streaming operators etc. DJL
+#include <boost/uuid/uuid.hpp>             // uuid class DJL
+#include <boost/uuid/uuid_generators.hpp>  // generators DJL
+#include <boost/uuid/uuid_io.hpp>          // streaming operators etc. DJL
 
 
 namespace orcamodel {
@@ -232,7 +232,8 @@ void Increment::diff(const State & x1, const State & x2) {
     atlas::field::MissingValue mv2(field2);
     bool has_mv2 = static_cast<bool>(mv2);
     bool has_mv = has_mv1 || has_mv2;
-    oops::Log::debug() << "DJL Increment::diff mv1 " << mv1 << " mv2 " << mv2 << " has_mv " << has_mv << std::endl; 
+    oops::Log::debug() << "DJL Increment::diff mv1 " << mv1 << " mv2 " << mv2 << " has_mv "
+        << has_mv << std::endl;
 
     std::string fieldName1 = field1.name();
     std::string fieldName2 = field2.name();
@@ -246,9 +247,9 @@ void Increment::diff(const State & x1, const State & x2) {
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_viewi.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_viewi.shape(1); ++k) {
-        if (!ghost(j)) { 
-          if (!has_mv1 || (has_mv1 && !mv1(field_view1(j,k)))) {
-            if (!has_mv2 || (has_mv2 && !mv2(field_view2(j,k)))) {
+        if (!ghost(j)) {
+          if (!has_mv1 || (has_mv1 && !mv1(field_view1(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view2(j, k)))) {
               field_viewi(j, k) = field_view1(j, k) - field_view2(j, k);
             }
           }
@@ -289,11 +290,11 @@ void Increment::setval(const double & val) {
       }
     }
   }
-  
-  // DJL write debug fields to file
-    boost::uuids::uuid uuid = boost::uuids::random_generator()();    
-    writeFieldsToFile("incsetval"+ boost::uuids::to_string(uuid) +".nc", *geom_, validTime(), incrementFields_);
 
+  // DJL write debug fields to file
+    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    writeFieldsToFile("incsetval"+ boost::uuids::to_string(uuid) +".nc", *geom_,
+        validTime(), incrementFields_);
 
   oops::Log::trace() << "Increment(ORCA)::setval done" << std::endl;
 }

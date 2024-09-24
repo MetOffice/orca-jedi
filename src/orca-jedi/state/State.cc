@@ -165,7 +165,6 @@ State & State::operator=(const State & rhs) {
 // Interactions with Increments
 
 State & State::operator+=(const Increment & dx) {
-
   oops::Log::trace() << "State(ORCA)::add increment starting" << std::endl;
 
   ASSERT(this->validTime() == dx.validTime());
@@ -175,7 +174,7 @@ State & State::operator+=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< stateFields_.size();i++)
+  for (int i = 0; i< stateFields_.size(); i++)
   {
     atlas::Field field = stateFields_[i];
     atlas::field::MissingValue mv(field);
@@ -193,14 +192,14 @@ State & State::operator+=(const Increment & dx) {
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
-          if (!has_mv || (has_mv && !mv(field_view(j,k)))) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) += field_viewi(j, k);
           }
         }
       }
     }
   }
- 
+
   oops::Log::trace() << "State(ORCA)::add increment done" << std::endl;
   return *this;
 }

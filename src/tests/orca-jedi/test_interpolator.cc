@@ -90,7 +90,8 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
 
     settings_map["ORCA2_T"].increment_config.set("date", "2021-06-30T00:00:00Z");
-    settings_map["ORCA2_T"].increment_config.set("output path", "../testoutput/orca2_t_increment_interptest.nc");
+    settings_map["ORCA2_T"].increment_config.set("output path",
+        "../testoutput/orca2_t_increment_interptest.nc");
 
     settings_map["ORCA2_T"].lons = std::vector<double>{0, 120, 270};
     settings_map["ORCA2_T"].lats = std::vector<double>{88, 0, 30};
@@ -144,7 +145,8 @@ CASE("test  interpolator") {
     settings_map["AMM1"].state_config.set("variance field file", "../Data/amm1_nemo.nc");
 
     settings_map["AMM1"].increment_config.set("date", "2021-06-30T00:00:00Z");
-    settings_map["AMM1"].increment_config.set("output path", "../testoutput/amm1_t_increment_interptest.nc");
+    settings_map["AMM1"].increment_config.set("output path",
+        "../testoutput/amm1_t_increment_interptest.nc");
 
     settings_map["AMM1"].lons = std::vector<double>{-17.5, -6.78, -16.1};
     settings_map["AMM1"].lats = std::vector<double>{58.16, 58.91, 63.55};
@@ -204,6 +206,7 @@ CASE("test  interpolator") {
         EXPECT(std::abs(vals[i] - settings.surf_values[i]) < ATOL);
       }
     }
+
     SECTION("test " + key + " interpolator.apply multiple levels") {
       std::vector<double> vals(settings.nlevs*settings.nlocs);
       std::vector<bool> mask(settings.nlocs, true);
@@ -219,14 +222,12 @@ CASE("test  interpolator") {
       }
     }
 
-    
     SECTION("test " + key + " interpolator.apply/applyAD with increment") {
-
       OrcaIncrementParameters incrementParams;
       incrementParams.validateAndDeserialize(settings.increment_config);
 
       Increment increment(geometry, settings.surf_vars, incrementParams.date);
-      increment.ones();  
+      increment.ones();
 
       // two variables at n locations
       std::vector<double> vals(2*settings.nlocs);
@@ -235,7 +236,7 @@ CASE("test  interpolator") {
       // increment -> observation space
       interpolator.apply(settings.surf_vars, increment, mask, vals);
 
-      double kgo_value=1;
+      double kgo_value = 1;
 
       for (size_t i=0; i < settings.surf_values.size(); ++i) {
         std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
@@ -244,12 +245,12 @@ CASE("test  interpolator") {
       for (size_t i=0; i < settings.surf_values.size(); ++i) {
         EXPECT(std::abs(vals[i] - kgo_value) < ATOL);
       }
-      
+
       Increment incrementout(geometry, settings.surf_vars, incrementParams.date);
       // observation space -> increment
       interpolator.applyAD(settings.surf_vars, incrementout, mask, vals);
-      
-      incrementout.write(incrementParams);            
+
+      incrementout.write(incrementParams);
     }
   }
 }
