@@ -57,7 +57,7 @@ state :
   date:  # ISO8601 datetime
   state variables: # list of the model state variables matching the `name` field above
   nemo field file: # input background data
-  variance field file: # input error data
+  nemo error field file: # input error data
 ```
 
 ## Help
