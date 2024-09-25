@@ -50,9 +50,9 @@ observations:
       obsdatain:
         engine:
           type: ODB
-          obsfile: orca-jedi/src/tests/Data/ostia_seaice_obs.odb
-          mapping file: orca-jedi/src/tests/testinput/odb_ice_mapping.yaml
-          query file: orca-jedi/src/tests/testinput/odb_ice_query.yaml
+          obsfile: orca-jedi/src/tests/Data/hofx_sic_ostia_obs.odb
+          mapping file: orca-jedi/src/tests/testinput/odb_sic_mapping.yaml
+          query file: orca-jedi/src/tests/testinput/odb_sic_query.yaml
       obsdataout:
         engine:
           type: H5File

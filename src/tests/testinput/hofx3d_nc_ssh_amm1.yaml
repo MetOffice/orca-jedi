@@ -30,7 +30,7 @@ observations:
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/amm_ssh_obs.nc
+          obsfile: Data/hofx_ssh_amm_obs.nc
       simulated variables: [seaSurfaceHeightAnomaly]
     get values:
       atlas-interpolator:
