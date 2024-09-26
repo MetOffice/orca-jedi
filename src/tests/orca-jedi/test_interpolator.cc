@@ -66,7 +66,7 @@ CASE("test  interpolator") {
     nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
       .set("nemo field name", "sic_tot_var")
       .set("model space", "surface")
-      .set("variable type", "background variance");
+      .set("variable type", "background error variance");
     nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
       .set("nemo field name", "votemper")
       .set("model space", "surface");
@@ -87,7 +87,7 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].state_config.set("state variables", state_variables);
     settings_map["ORCA2_T"].state_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["ORCA2_T"].state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-    settings_map["ORCA2_T"].state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+    settings_map["ORCA2_T"].state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
 
     settings_map["ORCA2_T"].increment_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["ORCA2_T"].increment_config.set("output path",
@@ -142,7 +142,7 @@ CASE("test  interpolator") {
     settings_map["AMM1"].state_config.set("state variables", state_variables);
     settings_map["AMM1"].state_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["AMM1"].state_config.set("nemo field file", "../Data/amm1_nemo.nc");
-    settings_map["AMM1"].state_config.set("variance field file", "../Data/amm1_nemo.nc");
+    settings_map["AMM1"].state_config.set("nemo error field file", "../Data/amm1_nemo.nc");
 
     settings_map["AMM1"].increment_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["AMM1"].increment_config.set("output path",

@@ -82,10 +82,11 @@ State::State(const Geometry & geom,
     nemo_file_name = params.nemoFieldFile.value();
     readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
          stateFields_);
-    nemo_file_name = params.varianceFieldFile.value().value_or("");
-    if (nemo_file_name != "") {
-      readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background variance",
-         stateFields_); }
+    nemo_file_name = params.errorFieldFile.value().value_or("");
+    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
+       stateFields_);
+    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error variance",
+       stateFields_);
   }
   geom_->log_status();
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;

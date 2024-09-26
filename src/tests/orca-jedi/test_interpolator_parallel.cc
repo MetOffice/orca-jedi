@@ -47,7 +47,7 @@ CASE("test serial interpolator") {
   nemo_var_mappings[1].set("name", "sea_surface_height_anomaly_error")
     .set("nemo field name", "ssh_tot_std")
     .set("model space", "surface")
-    .set("variable type", "background variance");
+    .set("variable type", "background error standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
@@ -103,7 +103,7 @@ CASE("test serial interpolator") {
   state_config.set("date", "2021-06-30T00:00:00Z");
   state_config.set("analytic initialisation", true);
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-  state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+  state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
   OrcaStateParameters stateParams;
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);
@@ -194,7 +194,7 @@ CASE("test checkerboard interpolator") {
   nemo_var_mappings[1].set("name", "sea_surface_height_anomaly_error")
     .set("nemo field name", "ssh_tot_std")
     .set("model space", "surface")
-    .set("variable type", "background variance");
+    .set("variable type", "background error standard deviation");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
@@ -249,7 +249,7 @@ CASE("test checkerboard interpolator") {
   state_config.set("date", "2021-06-30T00:00:00Z");
   state_config.set("analytic initialisation", true);
   state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
-  state_config.set("variance field file", "../Data/orca2_t_bkg_var.nc");
+  state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
   OrcaStateParameters stateParams;
   stateParams.validateAndDeserialize(state_config);
   State state(geometry, stateParams);

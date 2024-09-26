@@ -15,7 +15,7 @@ geometry :
     - name: sea_water_potential_temperature_background_error
       nemo field name: vosaline
       model space: volume
-      variable type: background variance
+      variable type: background error variance
   grid name: Data/amm1r_atlas_grid_spec.yaml
   number levels: 1
   partitioner: serial
@@ -26,18 +26,18 @@ initial condition :
     - sea_water_potential_temperature
     - sea_water_potential_temperature_background_error
   nemo field file: &field_file Data/amm1r_nemo.nc
-  variance field file: *field_file
+  nemo error field file: *field_file
 model :
   name: PseudoModel
   tstep: P1D
   states:
     - date: 2021-06-29T23:00:00Z
       nemo field file: *field_file
-      variance field file: *field_file
+      nemo error field file: *field_file
       state variables: *state_variables
     - date: 2021-06-30T23:00:00Z
       nemo field file: *field_file
-      variance field file: *field_file
+      nemo error field file: *field_file
       state variables: *state_variables
 observations:
   observers:
