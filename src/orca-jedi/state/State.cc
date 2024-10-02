@@ -83,7 +83,7 @@ State::State(const Geometry & geom,
     readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
-    if (nemo_file_name != "") {
+    if (params.errorFieldFile.value()) {
       readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
          stateFields_);
       readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error variance",

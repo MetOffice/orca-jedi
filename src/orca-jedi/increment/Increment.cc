@@ -558,11 +558,7 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "Increment::write to filename "
                      << nemo_field_path << std::endl;
 
-  for (size_t i=0; i < vars_.size(); ++i) {
-    auto gv_varname = vars_[i].name();
-// halo exchange update ghost points
-    geom_->functionSpace().haloExchange(incrementFields_[gv_varname]);
-  }
+incrementFields_.haloExchange();
 
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 }

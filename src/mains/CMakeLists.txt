@@ -42,5 +42,5 @@ ecbuild_add_executable( TARGET  orcamodel_ErrorCovarianceToolbox.x
 
 oops_output_json_schema( "orcamodel_hofx.x" )
 oops_output_json_schema( "orcamodel_hofx3D.x" )
-#oops_output_json_schema( "orcamodel_3DVar.x" )
-#oops_output_json_schema( "orcamodel_ErrorCovarianceToolbox.x" )
+oops_output_json_schema( "orcamodel_3DVar.x" )
+oops_output_json_schema( "orcamodel_ErrorCovarianceToolbox.x" )

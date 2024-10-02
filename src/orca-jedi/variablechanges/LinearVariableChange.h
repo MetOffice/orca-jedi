@@ -28,7 +28,6 @@ namespace orcamodel {
 // -----------------------------------------------------------------------------
 
 class LinearVariableChange: public util::Printable {
-// private util::ObjectCounter<LinearVariableChange>
  public:
   typedef LinearVariableChangeParameters Parameters_;
   static const std::string classname() {
