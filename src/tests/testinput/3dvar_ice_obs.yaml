@@ -101,3 +101,6 @@ output:
   state variables: [ ice_area_fraction ]
   nemo field file: testoutput/3dvar_ice2.nc
   output nemo field file: testoutput/analysis_3dvar_ice.nc
+test:
+  reference filename: testoutput/test_3dvar_ice_obs.ref
+  test output filename: testoutput/test_3dvar_ice_obs.out

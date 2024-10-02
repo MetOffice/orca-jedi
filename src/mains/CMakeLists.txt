@@ -42,5 +42,7 @@ ecbuild_add_executable( TARGET  orcamodel_ErrorCovarianceToolbox.x
 
 oops_output_json_schema( "orcamodel_hofx.x" )
 oops_output_json_schema( "orcamodel_hofx3D.x" )
-oops_output_json_schema( "orcamodel_3DVar.x" )
-oops_output_json_schema( "orcamodel_ErrorCovarianceToolbox.x" )
+# The applications below throw an error generating json schema.
+# This appears to be a generic issue see also oops/qg/mains/CMakeLists.txt
+#oops_output_json_schema( "orcamodel_3DVar.x" )
+#oops_output_json_schema( "orcamodel_ErrorCovarianceToolbox.x" )

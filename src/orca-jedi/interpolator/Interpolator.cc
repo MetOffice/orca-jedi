@@ -208,9 +208,26 @@ void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
   for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
   result.resize(nvals);
 
-  auto res_iter = result.begin();
+  std::size_t out_idx = 0;
   for (size_t jvar=0; jvar < nvars; ++jvar) {
-      executeInterpolation<double>(vars[jvar].name(), varSizes[jvar], state, mask, res_iter);
+    auto gv_varname = vars[jvar].name();
+    atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
+        atlas::option::name(gv_varname) |
+        atlas::option::levels(varSizes[jvar]));
+    interpolator_.execute(inc.incrementFields()[gv_varname], tgt_field);
+    auto field_view = atlas::array::make_view<double, 2>(tgt_field);
+    atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
+    bool has_mv = static_cast<bool>(mv);
+    for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
+      for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
+        if (has_mv && mv(field_view(iloc, klev))) {
+          result[out_idx] = util::missingValue<double>();
+        } else {
+          result[out_idx] = field_view(iloc, klev);
+        }
+        ++out_idx;
+      }
+    }
   }
 }
 
