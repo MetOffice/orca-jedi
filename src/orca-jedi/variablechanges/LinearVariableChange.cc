@@ -19,7 +19,6 @@
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
-// LinearVariableChange::LinearVariableChange(const Parameters_ &, const Geometry &) {}
 LinearVariableChange::LinearVariableChange(const Geometry &, const Parameters_ &) {}
 LinearVariableChange::LinearVariableChange(const Geometry &, const eckit::Configuration &) {}
 // -----------------------------------------------------------------------------
