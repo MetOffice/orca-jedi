@@ -44,7 +44,7 @@ cost function:
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_ice.nc
+            obsfile: testoutput/obsdataout_3dvar_sic.nc
         simulated variables: [ice_area_fraction]
       get values:
         time interpolation: linear
@@ -91,7 +91,7 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_ice.nc
+          output path: testoutput/increments_3dvar_sic.nc
           date: 2021-06-30T00:00:00Z
 final:
   diagnostics:
@@ -99,8 +99,8 @@ final:
 output:
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_ice2.nc
-  output nemo field file: testoutput/analysis_3dvar_ice.nc
+  nemo field file: testoutput/3dvar_sic2.nc
+  output nemo field file: testoutput/analysis_3dvar_sic.nc
 test:
-  reference filename: testoutput/test_3dvar_ice_obs.ref
-  test output filename: testoutput/test_3dvar_ice_obs.out
+  reference filename: testoutput/test_3dvar_sic.ref
+  test output filename: testoutput/test_3dvar_sic.out
