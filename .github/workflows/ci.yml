@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.4.0
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.5.0
 jobs:
   build:
     runs-on: ubuntu-latest
