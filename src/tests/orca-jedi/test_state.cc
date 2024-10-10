@@ -135,6 +135,11 @@ CASE("test basic state") {
     std::cout << field.name() << std::endl;
     EXPECT(field.name() == "sea_ice_area_fraction");
   }
+  SECTION("test state to fieldset") {
+    atlas::FieldSet statefset = atlas::FieldSet();
+    state.State::toFieldSet(statefset);
+    EXPECT(statefset[0].name() == "sea_ice_area_fraction");
+  }
 }
 
 }  // namespace test

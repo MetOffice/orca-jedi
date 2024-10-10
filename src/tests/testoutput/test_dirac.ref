@@ -1,0 +1,10 @@
+Input Dirac increment:Increment valid at time: 2021-06-30T12:00:00Z
+    1 variables: ice_area_fraction
+    atlas field:
+        ice_area_fraction num: 26553 mean: 3.76605e-05 rms: 6.13682e-03 min: 0.00000e+00 max: 1.00000e+00
+
+Covariance(SABER) * Increment:Increment valid at time: 2021-06-30T12:00:00Z
+    1 variables: ice_area_fraction
+    atlas field:
+        ice_area_fraction num: 26553 mean: 3.76605e-05 rms: 6.13682e-03 min: 0.00000e+00 max: 1.00000e+00
+

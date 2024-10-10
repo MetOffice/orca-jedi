@@ -26,6 +26,7 @@ amm1r_nemo.nc
 amm1r_atlas_grid_spec.yaml
 hofx_potm_amm1r_obs.nc
 hofx_ssh_amm_obs.nc
+sic_obs_ideal.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
