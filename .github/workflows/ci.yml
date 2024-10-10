@@ -5,9 +5,10 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
+  workflow_dispatch:
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.3.0
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.4.0
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,6 +31,20 @@ jobs:
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
+          token: ${{ secrets.GHCR_PAT }}
+
+      - name: checkout vader
+        uses: actions/checkout@v3
+        with:
+          path: ci/vader
+          repository: JCSDA-internal/vader
+          token: ${{ secrets.GHCR_PAT }}
+
+      - name: checkout saber
+        uses: actions/checkout@v3
+        with:
+          path: ci/saber
+          repository: JCSDA-internal/saber
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda

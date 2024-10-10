@@ -83,10 +83,12 @@ State::State(const Geometry & geom,
     readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
-    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
-       stateFields_);
-    readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error variance",
-       stateFields_);
+    if (params.errorFieldFile.value()) {
+      readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
+         stateFields_);
+      readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error variance",
+         stateFields_);
+    }
   }
   geom_->log_status();
   oops::Log::trace() << "State(ORCA)::State created." << std::endl;
@@ -165,11 +167,44 @@ State & State::operator=(const State & rhs) {
 
 // Interactions with Increments
 
+/// \brief Add increment to state.
+/// \brief Requires increment and state to have the same field names (currently).
+/// \param Increment.
 State & State::operator+=(const Increment & dx) {
-  std::string err_message =
-      "orcamodel::State::State::operator+= not implemented";
-  throw eckit::NotImplemented(err_message, Here());
   oops::Log::trace() << "State(ORCA)::add increment starting" << std::endl;
+
+  ASSERT(this->validTime() == dx.validTime());
+
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      geom_->mesh().nodes().ghost());
+  for (int i = 0; i< stateFields_.size(); i++)
+  {
+    atlas::Field field = stateFields_[i];
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+
+    atlas::Field fieldi = dx.incrementFields()[i];
+
+    std::string fieldName = field.name();
+    std::string fieldNamei = fieldi.name();
+    oops::Log::debug() << "orcamodel::Increment::add:: state field name = " << fieldName
+                       << " increment field name = " << fieldNamei
+                       << std::endl;
+    ASSERT(fieldName == fieldNamei);
+
+    auto field_view = atlas::array::make_view<double, 2>(field);
+    auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) += field_viewi(j, k);
+          }
+        }
+      }
+    }
+  }
+
   oops::Log::trace() << "State(ORCA)::add increment done" << std::endl;
   return *this;
 }
@@ -359,6 +394,30 @@ template double State::norm<float>(const std::string & field_name) const;
 
 atlas::Field State::getField(int i) const {
   return stateFields_[i];
+}
+
+/// \brief Output state fieldset as an atlas fieldset.
+/// \param fset Atlas fieldset to output to.
+void State::toFieldSet(atlas::FieldSet & fset) const {
+  oops::Log::debug() << "State toFieldSet starting" << std::endl;
+
+  fset = atlas::FieldSet();
+
+  for (size_t i=0; i < vars_.size(); ++i) {
+    // copy variable from increments to new field set
+    atlas::Field field = stateFields_[i];
+    std::string fieldName = field.name();
+    oops::Log::debug() << "Copy state toFieldSet " << fieldName << std::endl;
+
+    fset->add(field);
+  }
+  oops::Log::debug() << "State toFieldSet done" << std::endl;
+}
+
+void State::accumul(const double & zz, const State & xx) {
+  std::string err_message =
+      "orcamodel::State::accumul not implemented";
+  throw eckit::NotImplemented(err_message, Here());
 }
 
 }  // namespace orcamodel

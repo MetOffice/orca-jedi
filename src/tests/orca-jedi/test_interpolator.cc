@@ -34,6 +34,7 @@ struct InterpTestSettingsFixture {
  public:
   eckit::LocalConfiguration geometry_config;
   eckit::LocalConfiguration state_config;
+  eckit::LocalConfiguration increment_config;
   eckit::LocalConfiguration interpolator_config;
   size_t nlocs, nlevs;
   std::vector<double> lons;
@@ -76,6 +77,7 @@ CASE("test  interpolator") {
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
     interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("adjoint", true);
     settings_map["ORCA2_T"].interpolator_config.set("atlas-interpolator", interp_conf);
 
     std::vector<std::string> state_variables {
@@ -86,6 +88,10 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].state_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["ORCA2_T"].state_config.set("nemo field file", "../Data/orca2_t_nemo.nc");
     settings_map["ORCA2_T"].state_config.set("nemo error field file", "../Data/orca2_t_bkg_var.nc");
+
+    settings_map["ORCA2_T"].increment_config.set("date", "2021-06-30T00:00:00Z");
+    settings_map["ORCA2_T"].increment_config.set("output path",
+        "../testoutput/orca2_t_increment_interptest.nc");
 
     settings_map["ORCA2_T"].lons = std::vector<double>{0, 120, 270};
     settings_map["ORCA2_T"].lats = std::vector<double>{88, 0, 30};
@@ -126,6 +132,7 @@ CASE("test  interpolator") {
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
     interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("adjoint", true);
     settings_map["AMM1"].interpolator_config.set("atlas-interpolator", interp_conf);
 
     std::vector<std::string> state_variables {
@@ -136,6 +143,10 @@ CASE("test  interpolator") {
     settings_map["AMM1"].state_config.set("date", "2021-06-30T00:00:00Z");
     settings_map["AMM1"].state_config.set("nemo field file", "../Data/amm1_nemo.nc");
     settings_map["AMM1"].state_config.set("nemo error field file", "../Data/amm1_nemo.nc");
+
+    settings_map["AMM1"].increment_config.set("date", "2021-06-30T00:00:00Z");
+    settings_map["AMM1"].increment_config.set("output path",
+        "../testoutput/amm1_t_increment_interptest.nc");
 
     settings_map["AMM1"].lons = std::vector<double>{-17.5, -6.78, -16.1};
     settings_map["AMM1"].lats = std::vector<double>{58.16, 58.91, 63.55};
@@ -195,6 +206,7 @@ CASE("test  interpolator") {
         EXPECT(std::abs(vals[i] - settings.surf_values[i]) < ATOL);
       }
     }
+
     SECTION("test " + key + " interpolator.apply multiple levels") {
       std::vector<double> vals(settings.nlevs*settings.nlocs);
       std::vector<bool> mask(settings.nlocs, true);
@@ -208,6 +220,37 @@ CASE("test  interpolator") {
       for (size_t i=0; i < settings.vol_values.size(); ++i) {
         EXPECT(std::abs(vals[i] - settings.vol_values[i]) < ATOL);
       }
+    }
+
+    SECTION("test " + key + " interpolator.apply/applyAD with increment") {
+      OrcaIncrementParameters incrementParams;
+      incrementParams.validateAndDeserialize(settings.increment_config);
+
+      Increment increment(geometry, settings.surf_vars, incrementParams.date);
+      increment.ones();
+
+      // two variables at n locations
+      std::vector<double> vals(2*settings.nlocs);
+      std::vector<bool> mask(settings.nlocs, true);
+
+      // increment -> observation space
+      interpolator.apply(settings.surf_vars, increment, mask, vals);
+
+      double kgo_value = 1;
+
+      for (size_t i=0; i < settings.surf_values.size(); ++i) {
+        std::cout << "vals[" << i << "] " << std::setprecision(12) << vals[i]
+                  << " kgo_values[" << i << "] " << kgo_value << std::endl;
+      }
+      for (size_t i=0; i < settings.surf_values.size(); ++i) {
+        EXPECT(std::abs(vals[i] - kgo_value) < ATOL);
+      }
+
+      Increment incrementout(geometry, settings.surf_vars, incrementParams.date);
+      // observation space -> increment
+      interpolator.applyAD(settings.surf_vars, incrementout, mask, vals);
+
+      incrementout.write(incrementParams);
     }
   }
 }

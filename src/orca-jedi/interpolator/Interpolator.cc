@@ -27,6 +27,7 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/increment/Increment.h"
 
 #include "orca-jedi/interpolator/Interpolator.h"
 
@@ -176,6 +177,128 @@ template void Interpolator::executeInterpolation<float>(
     const State& state,
     const std::vector<bool> & mask,
     std::vector<double>::iterator& iter) const;
+
+/// \brief Interpolate from model space to observation space
+/// \param vars Oops variables
+/// \param inc Increment object (input)
+/// \param mask Mask vector in observation space
+/// \param result Result (output) vector in observation space
+void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
+           const std::vector<bool> & mask,
+           std::vector<double>& result) const {
+  // input is inc output is result
+  const size_t nvars = vars.size();
+
+  for (size_t j=0; j < nvars; ++j) {
+    if (!inc.variables().has(vars[j])) {
+      std::stringstream err_stream;
+      err_stream << "orcamodel::Interpolator::apply varname \" "
+                 << "\" " << vars[j]
+                 << " not found in the model increment." << std::endl;
+      err_stream << "    add the variable to the increment variables and "
+                 << "add a mapping from the geometry to that variable."
+                 << std::endl;
+      throw eckit::BadParameter(err_stream.str(), Here());
+    }
+  }
+
+  const std::vector<size_t> varSizes =
+    inc.geometry()->variableSizes(vars);
+  size_t nvals = 0;
+  for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
+  result.resize(nvals);
+
+  std::size_t out_idx = 0;
+  for (size_t jvar=0; jvar < nvars; ++jvar) {
+    auto gv_varname = vars[jvar].name();
+    atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
+        atlas::option::name(gv_varname) |
+        atlas::option::levels(varSizes[jvar]));
+    interpolator_.execute(inc.incrementFields()[gv_varname], tgt_field);
+    auto field_view = atlas::array::make_view<double, 2>(tgt_field);
+    atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
+    bool has_mv = static_cast<bool>(mv);
+    for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
+      for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
+        if (has_mv && mv(field_view(iloc, klev))) {
+          result[out_idx] = util::missingValue<double>();
+        } else {
+          result[out_idx] = field_view(iloc, klev);
+        }
+        ++out_idx;
+      }
+    }
+  }
+}
+
+/// \brief Interpolate from observation space to model space
+/// \param vars Oops variables
+/// \param inc Increment object (output)
+/// \param mask Mask (observation space) vector
+/// \param resultin Values (observation space) vector (input)
+void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
+             const std::vector<bool> & mask,
+             const std::vector<double> & resultin) const
+{
+  // input is resultin output is inc
+
+  oops::Log::trace() << "orcamodel::Interpolator::applyAD start "
+                     << std::endl;
+
+  const size_t nvars = vars.size();
+
+  for (size_t j=0; j < nvars; ++j) {
+    if (!inc.variables().has(vars[j])) {
+      std::stringstream err_stream;
+      err_stream << "orcamodel::Interpolator::apply varname \" "
+                 << "\" " << vars[j]
+                 << " not found in the model increment." << std::endl;
+      err_stream << "    add the variable to the increment variables and "
+                 << "add a mapping from the geometry to that variable."
+                 << std::endl;
+      throw eckit::BadParameter(err_stream.str(), Here());
+    }
+  }
+
+  const std::vector<size_t> varSizes =
+    inc.geometry()->variableSizes(vars);
+  size_t nvals = 0;
+
+  for (size_t jvar=0; jvar < nvars; ++jvar) nvals += nlocs_ * varSizes[jvar];
+
+  std::size_t out_idx = 0;
+  for (size_t jvar=0; jvar < nvars; ++jvar) {
+    auto gv_varname = vars[jvar].name();
+    auto tgt_field = atlasObsFuncSpace_.createField<double>(
+      atlas::option::name(gv_varname) |
+      atlas::option::levels(varSizes[jvar]));
+
+// Copying observation array vector to an atlas observation field (tgt_field)
+    auto field_view = atlas::array::make_view<double, 2>(tgt_field);
+    atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
+    bool has_mv = static_cast<bool>(mv);
+
+    for (std::size_t klev=0; klev < varSizes[jvar]; ++klev) {
+      for (std::size_t iloc=0; iloc < nlocs_; iloc++) {
+          if (has_mv && mv(field_view(iloc, klev))) {
+             field_view(iloc, klev) = util::missingValue<double>();
+          } else {
+             field_view(iloc, klev) = resultin[out_idx];
+          }
+        ++out_idx;
+      }
+    }
+
+// halo exchange update ghost points
+    std::shared_ptr<const Geometry> geom = inc.geometry();
+    geom->functionSpace().haloExchange(inc.incrementFields()[gv_varname]);
+
+    interpolator_.execute_adjoint(inc.incrementFields()[gv_varname], tgt_field);
+  }    // jvar
+
+  oops::Log::trace() << "orcamodel::Interpolator::applyAD done "
+                     << std::endl;
+}
 
 void Interpolator::print(std::ostream & os) const {
   os << "orcamodel::Interpolator: " << std::endl;

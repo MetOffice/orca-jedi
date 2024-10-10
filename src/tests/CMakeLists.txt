@@ -90,3 +90,13 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_prof_2var
                   OMP 1
                   ARGS testinput/hofx3d_nc_prof_2vars.yaml
                   COMMAND orcamodel_hofx3D.x )
+
+ecbuild_add_test( TARGET test_orcamodel_3DVar_sic
+                  OMP 1
+                  ARGS testinput/3dvar_sic.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET test_orcamodel_Dirac
+                  OMP 1
+                  ARGS testinput/dirac.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
