@@ -100,3 +100,9 @@ ecbuild_add_test( TARGET test_orcamodel_Dirac
                   OMP 1
                   ARGS testinput/dirac.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
+                  
+ecbuild_add_test( TARGET test_orcamodel_bump_nicas_setup
+                  OMP 1
+                  ARGS testinput/bump_nicas_setup.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+

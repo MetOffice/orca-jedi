@@ -3,8 +3,18 @@ Input Dirac increment:Increment valid at time: 2021-06-30T12:00:00Z
     atlas field:
         ice_area_fraction num: 26553 mean: 3.76605e-05 rms: 6.13682e-03 min: 0.00000e+00 max: 1.00000e+00
 
+       Independent levels:  1[1]
+          Subset Sc0 size:            26136
+          Domain area (% of Earth area): 0.643E+02%
+             Level   1 ~>  64.3%
+             Level   1 ~>  0.100E+01 vert. coord.
+       Independent levels:  1[1]
+          Subset Sc0 size:            26136
+          Domain area (% of Earth area): 0.643E+02%
+             Level   1 ~>  64.3%
+             Level   1 ~>  0.100E+01 vert. coord.
 Covariance(SABER) * Increment:Increment valid at time: 2021-06-30T12:00:00Z
     1 variables: ice_area_fraction
     atlas field:
-        ice_area_fraction num: 26553 mean: 3.76605e-05 rms: 6.13682e-03 min: 0.00000e+00 max: 1.00000e+00
+        ice_area_fraction num: 26553 mean: -1.17187e+38 rms: 1.97685e+38 min: -3.33477e+38 max: 1.00000e+00
 
