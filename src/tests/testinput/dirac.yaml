@@ -1,11 +1,50 @@
 background error:
   covariance model: SABER
   saber central block:
-    saber block name: ID
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    read:
+      general:
+        testing: true
+      io:
+        data directory: Data
+        files prefix: dirac_bump_nicas/test
+        overriding nicas file: test_nicas
+      drivers:
+        multivariate strategy: univariate
+        read local nicas: true
+      model:
+        do not cross mask boundaries: true
+      nicas:
+        explicit length-scales: true
+        horizontal length-scale:
+        - groups: 
+          - ice_area_fraction
+          value: 2.0e6
+        vertical length-scale:
+        - groups:
+          - ice_area_fraction 
+          value: 10
+  saber outer blocks:
+  - saber block name: BUMP_StdDev
+    read:
+      general:
+        testing: true
+      io:
+        data directory: Data
+        files prefix: test
+      drivers:
+        compute variance: true
+      variance:
+        explicit stddev: true
+        stddev:
+        - variables:
+          - ice_area_fraction
+          value: 1
 
 dirac:
   x indices: [20]
-  y indices: [10]
+  y indices: [25]
   z indices: [0]
 
 geometry:
