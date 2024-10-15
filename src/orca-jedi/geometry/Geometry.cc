@@ -2,14 +2,10 @@
  * (C) British Crown Copyright 2024 Met Office
  */
 
-#include <tuple>
-
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/utilities/Types.h"
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
-#include "atlas/field/MissingValue.h"
 #include "atlas/functionspace/StructuredColumns.h"
 #include "atlas/mesh.h"
 #include "atlas/meshgenerator.h"
@@ -113,83 +109,6 @@ Geometry::Geometry(const eckit::Configuration & config,
     funcSpace_ = atlas::functionspace::NodeColumns(
         mesh_, atlas::option::halo(halo));
     log_status();
-
-    // Fill extra geometry fields for BUMP / SABER
-    // these are area (DJL needed?), vunit, hmask, gmask
-    extraFields_ = atlas::FieldSet();
-
-    // Vertical unit - DJL set to something sensible?
-    atlas::Field vunit = funcSpace_.createField<double>(
-      atlas::option::name("vunit") | atlas::option::levels(n_levels_));
-    auto field_view = atlas::array::make_view<double, 2>(vunit);
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-         field_view(j, k) = 1.;
-      }
-    }
-    extraFields_->add(vunit);
-
-    // halo mask / owned
-//    atlas::Field hmask = funcSpace_.createField<int>(
-// DJL temporary <int to <double * 2
-    atlas::Field hmask = funcSpace_.createField<int32_t>(
-      atlas::option::name("owned") | atlas::option::levels(n_levels_));
-    auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
-
-    auto field_view1 = atlas::array::make_view<int32_t, 2>(hmask);
-    for (atlas::idx_t j = 0; j < field_view1.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view1.shape(1); ++k) {
-        int x, y;
-        std::tie(x, y) = xypt(j);
-        // DJL hardwired to orca2 needs generalising
-        if (ghost(j) || x < 2 || y >= 146 ) {field_view1(j, k) = 0;
-//                      if (k==0) {oops::Log::debug() << "hmask ghost point " << j << std::endl; }
-// 0 mask, 1 ocean
-        } else {field_view1(j, k) = 1;}
-      }
-    }
-    // Add field
-    oops::Log::debug() << "Geometry adding hmask (set to all ocean except halo)"
-                       << std::endl;         // DJL
-    extraFields_->add(hmask);
-
-    // geometry mask
-//    atlas::Field hmask = funcSpace_.createField<int>(
-// DJL temporary <int to <double * 2
-    atlas::Field gmask = funcSpace_.createField<int32_t>(
-      atlas::option::name("gmask") | atlas::option::levels(n_levels_));
-//    auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
-
-    auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
-    for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view2.shape(1); ++k) {
-        int x, y;
-        std::tie(x, y) = xypt(j);
-        // DJL hardwired to orca2 needs generalising
-        if (ghost(j) || x < 2 || y >= 146 ) {field_view2(j, k) = 0;
-//                      if (k==0) {oops::Log::debug() << "gmask ghost point " << j << std::endl; }
-// 0 mask, 1 ocean
-        } else {field_view2(j, k) = 1;}
-      }
-    }
-    // Add field
-    oops::Log::debug() << "Geometry adding gmask (set to all ocean except halo)"
-                       << std::endl;         // DJL
-    extraFields_->add(gmask);
-
-    atlas::Field area = funcSpace_.createField<double>(
-      atlas::option::name("area") | atlas::option::levels(n_levels_));
-    auto field_view3 = atlas::array::make_view<double, 2>(area);
-
-    for (atlas::idx_t j = 0; j < field_view3.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view3.shape(1); ++k) {
-        field_view3(j, k) = 4e10;           // DJL should change   2 degrees
-      }
-    }
-    log_status();
-
-    // Add field
-    extraFields_->add(area);
 }
 
 // -----------------------------------------------------------------------------
@@ -354,46 +273,4 @@ void Geometry::log_status() const {
       << " Gb" << std::endl;
 }
 
-void Geometry::set_gmask(atlas::Field & field) const {
-  oops::Log::debug() << "Geometry setting gmask from field missing values" << std::endl;
-  oops::Log::debug() << "Fieldname: " << field.name() << std::endl;  // DJL
-
-  atlas::Field gmask = extraFields_.field("gmask");
-
-  atlas::field::MissingValue mv(field);
-  bool has_mv = static_cast<bool>(mv);
-  oops::Log::debug() << "has_mv " << has_mv << std::endl;       // DJL
-
-  const auto setGmaskField = [&](auto typeVal) {
-    using T = decltype(typeVal);
-    auto field_viewin = atlas::array::make_view<T, 2>(field);
-    auto field_viewgm = atlas::array::make_view<int32_t, 2>(gmask);
-//    auto lonlat_view = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
-
-    if (has_mv) {
-      for (atlas::idx_t j = 0; j < field_viewgm.shape(0); ++j) {
-        for (atlas::idx_t k = 0; k < field_viewgm.shape(1); ++k) {
-// only change values that are currently unmasked ( 0 mask, 1 ocean )
-          if (field_viewgm(j, k) == 1) {
-            if (mv(field_viewin(j, k))) {
-              field_viewgm(j, k) = 0;
-            }
-          }
-        }
-      }
-    }
-  };
-  ApplyForFieldType(setGmaskField,
-                    fieldPrecision(field.name()),
-                    std::string("Geometry(ORCA)::set_gmask ")
-                    + field.name() + "' field type not recognised");
-  log_status();
-}
-
-// Determine x,y location from jpt
-// DJL hardwired to orca2 needs generalising
-std::tuple<int, int> xypt(int jpt) {
-  int xwid = 182; int y = jpt / xwid;
-  int x = jpt - y*xwid;
-  return std::make_tuple(x, y); }
 }  // namespace orcamodel

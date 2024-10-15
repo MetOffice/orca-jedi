@@ -1,26 +1,16 @@
-       Independent levels:  1[1]
-          Subset Sc0 size:            26136
-          Domain area (% of Earth area): 0.100E+03%
-             Level   1 ~> 100.0%
-             Level   1 ~>  0.100E+01 vert. coord.
-       Independent levels:  1[1]
-          Subset Sc0 size:            26136
-          Domain area (% of Earth area): 0.100E+03%
-             Level   1 ~> 100.0%
-             Level   1 ~>  0.100E+01 vert. coord.
 CostJb   : Nonlinear Jb = 0.0000000000000000e+00
 CostJo   : Nonlinear Jo(Sea Ice) = 1.5000000000000000e+00, nobs = 48, Jo/n = 3.1250000000000000e-02, err = 2.0000000000000000e+00
 CostFunction: Nonlinear J = 1.5000000000000000e+00
-DRPCGMinimizer: reduction in residual norm = 1.2748291035575463e+02
+DRIPCGMinimizer: reduction in residual norm = 7.2455060481720379e-01
 CostFunction::addIncrement: Analysis: 
  Model state valid at time: 2021-06-29T12:00:00Z
     1 variables: ice_area_fraction
     atlas field norms:
-        ice_area_fraction: 3.21124e-03
+        ice_area_fraction: 3.20155e-03
 
 
 
 
 CostJb   : Nonlinear Jb = 0.00000e+00
-CostJo   : Nonlinear Jo(Sea Ice) = 8.72908e-01, nobs = 48, Jo/n = 1.81856e-02, err = 2.00000e+00
-CostFunction: Nonlinear J = 8.72908e-01
+CostJo   : Nonlinear Jo(Sea Ice) = 1.13468e+00, nobs = 48, Jo/n = 2.36392e-02, err = 2.00000e+00
+CostFunction: Nonlinear J = 1.13468e+00

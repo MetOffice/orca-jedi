@@ -20,7 +20,6 @@ list( APPEND orcajedi_test_input
   test_name_map.yaml
   dirac.yaml
   3dvar_sic.yaml
-  bump_nicas_setup.yaml
 )
 
 foreach(FILENAME ${orcajedi_test_input})
