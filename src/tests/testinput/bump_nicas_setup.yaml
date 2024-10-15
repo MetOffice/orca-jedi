@@ -1,0 +1,86 @@
+background error:
+  covariance model: SABER
+  saber central block:
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    read:
+      general:
+        testing: true
+        universe length-scale: 40000.0e3
+      io:
+#        data directory: Data
+        data directory: testoutput
+        files prefix: test
+      drivers:
+        compute covariance: false
+        compute correlation: false
+        multivariate strategy: univariate
+        compute moments: false
+        write diagnostics: true
+        compute nicas: true
+        write local nicas: true
+    #    write global nicas: true
+        write nicas grids: true
+    #  sampling:
+    #    computation grid size: 500
+    #    diagnostic grid size: 250
+    #    distance classes: 10
+    #    angular sectors: 4
+    #    distance class width: 800.0e3
+    #    reduced levels: 2
+    #  ensemble sizes:
+    #    total ensemble size: 50
+      model:
+        do not cross mask boundaries: true
+      nicas:
+        explicit length-scales: true
+#        resolution: 4.0
+        resolution: 8.0
+        horizontal length-scale:
+        - groups: 
+          - ice_area_fraction
+          value: 2.0e6
+        vertical length-scale:
+        - groups:
+          - ice_area_fraction 
+          value: 10
+background:
+  date: '2021-06-30T12:00:00Z'
+  state variables: &vars [ ice_area_fraction ]
+  nemo field file: Data/orca2_t_nemo.nc
+# this needs looking at why read the variance in here
+# also a missing error check...
+#  variance field file: Data/orca2_t_bkg_var.nc
+
+#output:
+#- parameter: cor_rh
+#  file:
+##    filepath: testdata/error_covariance_training_bump_nicas/cor_rh
+#    filepath: Data/cor_rh
+#- parameter: cor_rv
+#  file:
+##    filepath: testdata/error_covariance_training_bump_nicas/cor_rv
+#    filepath: Data/cor_rv
+
+geometry:
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background variance
+  grid name: ORCA2_T
+  number levels: 10
+
+#input variables: *vars
+#
+#test:
+#  reference filename: #testref/quench_error_covariance_training_bump_nicas/test.log.out

@@ -17,6 +17,9 @@ list( APPEND orcajedi_test_input
   odb_ice_query.yaml
   odb_ice_mapping.yaml
   test_name_map.yaml
+  dirac.yaml
+  3dvar_sic.yaml
+  bump_nicas_setup.yaml
 )
 
 foreach(FILENAME ${orcajedi_test_input})
