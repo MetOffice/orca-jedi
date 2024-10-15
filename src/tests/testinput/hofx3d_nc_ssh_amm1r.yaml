@@ -1,6 +1,5 @@
 # (C) British Crown Copyright 2024 Met Office
 
-forecast length : P2D
 time window:
   begin: 2021-06-28T23:00:00Z
   length: P2D
@@ -12,30 +11,18 @@ geometry :
     - name: sea_surface_height_anomaly_background_error
       nemo field name: sossheig
       model space: surface
-      variable type: background error standard deviation
-  grid name: Data/amm1_atlas_grid_spec.yaml
+      variable type: background error variance
+  grid name: Data/amm1r_atlas_grid_spec.yaml
   number levels: 1
   partitioner: serial
   source mesh halo: 1
-initial condition :
-  date: 2021-06-28T23:00:00Z
+state :
+  date: 2021-06-29T23:00:00Z
   state variables:
     - sea_surface_height_anomaly
     - sea_surface_height_anomaly_background_error
-  nemo field file: &field_file Data/amm1_nemo.nc
+  nemo field file: &field_file Data/amm1r_nemo.nc
   nemo error field file: *field_file
-model :
-  name: PseudoModel
-  tstep: P1D
-  states:
-    - date: 2021-06-29T23:00:00Z
-      nemo field file: *field_file
-      nemo error field file: *field_file
-      state variables: &state_variables [ sea_surface_height_anomaly ]
-    - date: 2021-06-30T23:00:00Z
-      nemo field file: *field_file
-      nemo error field file: *field_file
-      state variables: *state_variables
 observations:
   observers:
   - obs space:
@@ -44,11 +31,11 @@ observations:
         engine:
           type: H5File
           obsfile: Data/hofx_ssh_amm_obs.nc
+      simulated variables: [seaSurfaceHeightAnomaly]
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/hofx_nc_ssh_jopa.nc
-      simulated variables: [seaSurfaceHeightAnomaly]
+          obsfile: testoutput/test_hofx3d_nc_ssh_amm1r_jopa_out.nc
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
@@ -60,12 +47,6 @@ observations:
         observation alias file: testinput/test_name_map.yaml
       - name: BackgroundErrorIdentity
         observation alias file: testinput/test_name_map.yaml
-    obs filters:
-    - filter: Variable Assignment
-      assignments:
-      - name: GrossErrorProbability/seaSurfaceHeightAnomaly
-        type: float
-        value: 0.04
 test:
-  reference filename: testoutput/test_hofx_nc_ssh_amm1.ref
+  reference filename: testoutput/test_hofx3d_nc_ssh_amm1r.ref
   float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences

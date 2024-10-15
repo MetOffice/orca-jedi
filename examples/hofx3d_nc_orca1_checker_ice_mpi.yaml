@@ -15,7 +15,7 @@ state :
   date: 2021-06-29T12:00:00Z
   state variables: [ ice_area_fraction ]
   nemo field file: your_example_data/orca1_sic.nc
-  variance field file: your_example_data/orca1_sic_err.nc
+  nemo error field file: your_example_data/orca1_sic_err.nc
 observations:
   observers:
   - obs space:

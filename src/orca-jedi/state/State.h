@@ -106,6 +106,9 @@ class State : public util::Printable,
   oops::Variables & variables() {return vars_;}
 
   atlas::Field getField(int) const;
+  void toFieldSet(atlas::FieldSet &) const;
+
+  void accumul(const double &, const State &);
 
  private:
   void setupStateFields();

@@ -1,0 +1,15 @@
+Test     : Initial state: 
+Test     :  Model state valid at time: 2021-06-28T23:00:00Z
+Test     :     2 variables: sea_water_potential_temperature, sea_water_potential_temperature_background_error
+Test     :     atlas field norms:
+Test     :         sea_water_potential_temperature: 1.58670e+00
+Test     :         sea_water_potential_temperature_background_error: 2.80065e+00
+Test     : Final state: 
+Test     :  Model state valid at time: 2021-06-30T23:00:00Z
+Test     :     2 variables: sea_water_potential_temperature, sea_water_potential_temperature_background_error
+Test     :     atlas field norms:
+Test     :         sea_water_potential_temperature: 1.58670e+00
+Test     :         sea_water_potential_temperature_background_error: 2.80065e+00
+Test     : H(x): 
+Test     : Sea Temperature nobs= 10 Min=1.83026e+01, Max=1.83026e+01, RMS=1.83026e+01
+Test     : End H(x)

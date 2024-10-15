@@ -11,7 +11,7 @@ geometry :
     - name: sea_surface_height_anomaly_background_error
       nemo field name: sossheig
       model space: surface
-      variable type: background variance
+      variable type: background error standard deviation
   grid name: Data/amm1_atlas_grid_spec.yaml
   number levels: 1
   partitioner: serial
@@ -22,7 +22,7 @@ state :
     - sea_surface_height_anomaly
     - sea_surface_height_anomaly_background_error
   nemo field file: &field_file Data/amm1_nemo.nc
-  variance field file: *field_file
+  nemo error field file: *field_file
 observations:
   observers:
   - obs space:
@@ -30,7 +30,7 @@ observations:
       obsdatain:
         engine:
           type: H5File
-          obsfile: Data/amm_ssh_obs.nc
+          obsfile: Data/hofx_ssh_amm_obs.nc
       simulated variables: [seaSurfaceHeightAnomaly]
     get values:
       atlas-interpolator:

@@ -307,7 +307,7 @@ const oops::Variables & Geometry::variables() const {
 }
 
 /// \brief Check if a variable's data is a member of a type (e.g if it can be
-///        sourced from the background file, variance file, or MDT file).
+///        sourced from the background file, error file, or MDT file).
 /// \param[in]     variable_name  Name of variable.
 /// \param[in]     variable_type  Type of variable.
 /// \return        Boolean for membership.

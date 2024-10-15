@@ -11,14 +11,14 @@ geometry :
     - name: sea_water_potential_temperature_background_error
       nemo field name: t_tot_var
       model space: volume
-      variable type: background variance
+      variable type: background error variance
   grid name: ORCA2_T
   number levels: 3
 state :
   date: 2021-06-30T00:00:00Z
   state variables: [ sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth ]
   nemo field file: Data/orca2_t_nemo.nc
-  variance field file: Data/orca2_t_bkg_var.nc
+  nemo error field file: Data/orca2_t_bkg_var.nc
 time window:
   begin: 2021-06-29T12:00:00Z
   length: P1D

@@ -185,7 +185,8 @@ CASE("test increment") {
     increment1 *=2;
     atlas::FieldSet incfset = atlas::FieldSet();
     increment1.Increment::toFieldSet(incfset);
-    writeFieldsToFile("../testoutput/orca2_t_inc_fs_output.nc", geometry, datetime, incfset);
+    writeFieldsToFile("../testoutput/orca2_t_increment_fieldset_output.nc",
+        geometry, datetime, incfset);
   }
 }
 

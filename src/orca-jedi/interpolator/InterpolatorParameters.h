@@ -22,6 +22,7 @@ class OrcaAtlasInterpolatorParameters : public oops::Parameters {
   oops::OptionalParameter<std::string> non_linear{"non_linear", this};
   oops::OptionalParameter<double>
     max_fraction_elems_to_try{"max_fraction_elems_to_try", this};
+  oops::OptionalParameter<bool> adjoint{"adjoint", this};
 };
 
 class OrcaInterpolatorParameters : public oops::Parameters {
