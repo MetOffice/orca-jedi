@@ -130,8 +130,6 @@ Geometry::Geometry(const eckit::Configuration & config,
     extraFields_->add(vunit);
 
     // halo mask / owned
-//    atlas::Field hmask = funcSpace_.createField<int>(
-// DJL temporary <int to <double * 2
     atlas::Field hmask = funcSpace_.createField<int32_t>(
       atlas::option::name("owned") | atlas::option::levels(n_levels_));
     auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
@@ -142,23 +140,19 @@ Geometry::Geometry(const eckit::Configuration & config,
         int x, y;
         std::tie(x, y) = xypt(j);
         // DJL hardwired to orca2 needs generalising
-        if (ghost(j) || x < 2 || y >= 146 ) {field_view1(j, k) = 0;
-//                      if (k==0) {oops::Log::debug() << "hmask ghost point " << j << std::endl; }
-// 0 mask, 1 ocean
+        // 0 mask, 1 ocean
+        if (ghost(j) || x >= 181 || y >= 147 ) {field_view1(j, k) = 0;
         } else {field_view1(j, k) = 1;}
       }
     }
     // Add field
     oops::Log::debug() << "Geometry adding hmask (set to all ocean except halo)"
-                       << std::endl;         // DJL
+                       << std::endl;
     extraFields_->add(hmask);
 
     // geometry mask
-//    atlas::Field hmask = funcSpace_.createField<int>(
-// DJL temporary <int to <double * 2
     atlas::Field gmask = funcSpace_.createField<int32_t>(
       atlas::option::name("gmask") | atlas::option::levels(n_levels_));
-//    auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
 
     auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
     for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
@@ -166,15 +160,14 @@ Geometry::Geometry(const eckit::Configuration & config,
         int x, y;
         std::tie(x, y) = xypt(j);
         // DJL hardwired to orca2 needs generalising
-        if (ghost(j) || x < 2 || y >= 146 ) {field_view2(j, k) = 0;
-//                      if (k==0) {oops::Log::debug() << "gmask ghost point " << j << std::endl; }
-// 0 mask, 1 ocean
+        if (ghost(j) || x >= 181 || y >= 147 ) {field_view2(j, k) = 0;
+        // 0 mask, 1 ocean
         } else {field_view2(j, k) = 1;}
       }
     }
     // Add field
     oops::Log::debug() << "Geometry adding gmask (set to all ocean except halo)"
-                       << std::endl;         // DJL
+                       << std::endl;
     extraFields_->add(gmask);
 
     atlas::Field area = funcSpace_.createField<double>(
@@ -369,6 +362,8 @@ void Geometry::set_gmask(atlas::Field & field) const {
     auto field_viewin = atlas::array::make_view<T, 2>(field);
     auto field_viewgm = atlas::array::make_view<int32_t, 2>(gmask);
 //    auto lonlat_view = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
+
+    
 
     if (has_mv) {
       for (atlas::idx_t j = 0; j < field_viewgm.shape(0); ++j) {

@@ -34,8 +34,8 @@ background error:
         do not cross mask boundaries: true
       nicas:
         explicit length-scales: true
-#        resolution: 4.0
-        resolution: 8.0
+        resolution: 4.0
+#        resolution: 8.0
         horizontal length-scale:
         - groups: 
           - ice_area_fraction
@@ -48,9 +48,6 @@ background:
   date: '2021-06-30T12:00:00Z'
   state variables: &vars [ ice_area_fraction ]
   nemo field file: Data/orca2_t_nemo.nc
-# this needs looking at why read the variance in here
-# also a missing error check...
-#  variance field file: Data/orca2_t_bkg_var.nc
 
 #output:
 #- parameter: cor_rh
@@ -80,7 +77,5 @@ geometry:
   grid name: ORCA2_T
   number levels: 10
 
-#input variables: *vars
-#
 #test:
 #  reference filename: #testref/quench_error_covariance_training_bump_nicas/test.log.out
