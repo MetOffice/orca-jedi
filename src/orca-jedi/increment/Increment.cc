@@ -37,6 +37,9 @@
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
+#define INCREMENT_FILL_TOL 1e-6
+#define INCREMENT_FILL_VALUE 1e20
+
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
@@ -525,9 +528,13 @@ void Increment::setupIncrementFields() {
     // add variable if it isn't already in incrementFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!incrementFields_.has(vars_[i].name())) {
-      incrementFields_.add(geom_->functionSpace().createField<double>(
+      atlas::Field field = geom_->functionSpace().createField<double>(
            atlas::option::name(vars_[i].name()) |
-           atlas::option::levels(varSizes[i])));
+           atlas::option::levels(varSizes[i]));
+      field.metadata().set("missing_value", INCREMENT_FILL_VALUE);
+      field.metadata().set("missing_value_type", "approximately-equals");
+      field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
+      incrementFields_.add(field);
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
                          << vars_[i].name()
                          << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
@@ -558,7 +565,7 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "Increment::write to filename "
                      << nemo_field_path << std::endl;
 
-incrementFields_.haloExchange();
+  incrementFields_.haloExchange();
 
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 }
