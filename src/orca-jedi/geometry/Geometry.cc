@@ -363,8 +363,6 @@ void Geometry::set_gmask(atlas::Field & field) const {
     auto field_viewgm = atlas::array::make_view<int32_t, 2>(gmask);
 //    auto lonlat_view = atlas::array::make_view<double, 2>(funcSpace_.lonlat());
 
-    
-
     if (has_mv) {
       for (atlas::idx_t j = 0; j < field_viewgm.shape(0); ++j) {
         for (atlas::idx_t k = 0; k < field_viewgm.shape(1); ++k) {

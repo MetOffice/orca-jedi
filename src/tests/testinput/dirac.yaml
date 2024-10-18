@@ -8,8 +8,8 @@ background error:
         testing: true
       io:
         data directory: Data
-        files prefix: dirac_bump_nicas/test
-        overriding nicas file: test_nicas
+        files prefix: dirac_bump_nicas/orca2
+        overriding nicas file: orca2_nicas
       drivers:
         multivariate strategy: univariate
         read local nicas: true
@@ -33,7 +33,7 @@ background error:
         testing: true
       io:
         data directory: Data
-        files prefix: test
+        files prefix: orca2
       drivers:
         compute variance: true
       variance:

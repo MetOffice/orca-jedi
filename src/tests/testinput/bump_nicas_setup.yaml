@@ -8,9 +8,8 @@ background error:
         testing: true
         universe length-scale: 40000.0e3
       io:
-#        data directory: Data
         data directory: testoutput
-        files prefix: test
+        files prefix: orca2
       drivers:
         compute covariance: false
         compute correlation: false
@@ -19,17 +18,7 @@ background error:
         write diagnostics: true
         compute nicas: true
         write local nicas: true
-    #    write global nicas: true
         write nicas grids: true
-    #  sampling:
-    #    computation grid size: 500
-    #    diagnostic grid size: 250
-    #    distance classes: 10
-    #    angular sectors: 4
-    #    distance class width: 800.0e3
-    #    reduced levels: 2
-    #  ensemble sizes:
-    #    total ensemble size: 50
       model:
         do not cross mask boundaries: true
       nicas:
