@@ -7,7 +7,46 @@ cost function:
   background error:
     covariance model: SABER
     saber central block:
-      saber block name: ID
+#      saber block name: ID
+      saber block name: BUMP_NICAS
+      read:
+        general:
+          testing: true
+        io:
+          data directory: Data
+          files prefix: dirac_bump_nicas/orca2
+          overriding nicas file: orca2_nicas
+        drivers:
+          multivariate strategy: univariate
+          read local nicas: true
+        model:
+          do not cross mask boundaries: true
+        nicas:
+          explicit length-scales: true
+          horizontal length-scale:
+          - groups: 
+            - ice_area_fraction
+            value: 2.0e6
+          vertical length-scale:
+          - groups:
+            - ice_area_fraction 
+            value: 10
+    saber outer blocks:
+    - saber block name: BUMP_StdDev
+      read:
+        general:
+          testing: true
+        io:
+          data directory: Data
+          files prefix: orca2
+        drivers:
+          compute variance: true
+        variance:
+          explicit stddev: true
+          stddev:
+          - variables:
+            - ice_area_fraction
+            value: 1
   geometry :
     nemo variables:
       - name: ice_area_fraction
@@ -50,7 +89,7 @@ cost function:
         time interpolation: linear
         atlas-interpolator:
           type: unstructured-bilinear-lonlat
-          non_linear: missing-if-all-missing
+#          non_linear: missing-if-all-missing
           max_fraction_elems_to_try: 0.0
           adjoint: true
       obs operator:
