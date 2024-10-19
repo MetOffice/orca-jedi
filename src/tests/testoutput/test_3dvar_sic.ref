@@ -21,6 +21,6 @@ CostFunction::addIncrement: Analysis:
 
 
 
-CostJb   : Nonlinear Jb = -2.51949e-03
+CostJb   : Nonlinear Jb = 0.00000e+00
 CostJo   : Nonlinear Jo(Sea Ice) = 1.00960e+08, nobs = 48, Jo/n = 2.10333e+06, err = 2.00000e+00
 CostFunction: Nonlinear J = 1.00960e+08

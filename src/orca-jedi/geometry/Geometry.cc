@@ -15,6 +15,8 @@
 #include "atlas/meshgenerator.h"
 #include "atlas/parallel/mpi/mpi.h"
 
+#include "atlas-orca/grid/OrcaGrid.h"
+
 #include "eckit/mpi/Comm.h"
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
@@ -114,6 +116,13 @@ Geometry::Geometry(const eckit::Configuration & config,
         mesh_, atlas::option::halo(halo));
     log_status();
 
+    atlas::OrcaGrid orcaGrid = mesh_.grid();
+    nx_ = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+    ny_ = orcaGrid.ny() + orcaGrid.haloNorth();
+
+    oops::Log::debug() << "nx_ " << nx_ << " ny_ " << ny_
+                       << std::endl;
+
     // Fill extra geometry fields for BUMP / SABER
     // these are area (DJL needed?), vunit, hmask, gmask
     extraFields_ = atlas::FieldSet();
@@ -138,10 +147,10 @@ Geometry::Geometry(const eckit::Configuration & config,
     for (atlas::idx_t j = 0; j < field_view1.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view1.shape(1); ++k) {
         int x, y;
-        std::tie(x, y) = xypt(j);
-        // DJL hardwired to orca2 needs generalising
+        std::tie(x, y) = xypt(j, nx_);
         // 0 mask, 1 ocean
-        if (ghost(j) || x >= 181 || y >= 147 ) {field_view1(j, k) = 0;
+//        if (ghost(j) || x >= 181 || y >= 147 ) {field_view1(j, k) = 0;    // DJL
+        if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view1(j, k) = 0;    // DJL
         } else {field_view1(j, k) = 1;}
       }
     }
@@ -158,9 +167,10 @@ Geometry::Geometry(const eckit::Configuration & config,
     for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view2.shape(1); ++k) {
         int x, y;
-        std::tie(x, y) = xypt(j);
+        std::tie(x, y) = xypt(j, nx_);
         // DJL hardwired to orca2 needs generalising
-        if (ghost(j) || x >= 181 || y >= 147 ) {field_view2(j, k) = 0;
+//        if (ghost(j) || x >= 181 || y >= 147 ) {field_view2(j, k) = 0;   // DJL
+        if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view2(j, k) = 0;    // DJL
         // 0 mask, 1 ocean
         } else {field_view2(j, k) = 1;}
       }
@@ -384,9 +394,8 @@ void Geometry::set_gmask(atlas::Field & field) const {
 }
 
 // Determine x,y location from jpt
-// DJL hardwired to orca2 needs generalising
-std::tuple<int, int> xypt(int jpt) {
-  int xwid = 182; int y = jpt / xwid;
-  int x = jpt - y*xwid;
+std::tuple<int, int> xypt(int jpt, int nx) {
+  int y = jpt / nx;
+  int x = jpt - y*nx;
   return std::make_tuple(x, y); }
 }  // namespace orcamodel

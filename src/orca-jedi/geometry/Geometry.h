@@ -89,9 +89,11 @@ class Geometry : public util::Printable {
   atlas::FieldSet nofields_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
   atlas::FieldSet extraFields_;
+  int nx_;
+  int ny_;
 };
 
-std::tuple<int, int> xypt(int jpt);
+std::tuple<int, int> xypt(int, int);
 
 // -----------------------------------------------------------------------------
 
