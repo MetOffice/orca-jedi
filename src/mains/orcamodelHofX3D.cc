@@ -22,7 +22,7 @@ int main(int argc,  char ** argv) {
   atlas::Library::instance().initialise();
   ufo::instantiateObsFilterFactory();
 #if defined(NEMO_FEEDBACK_EXISTS)
-  nemo_feedback::instantiateObsFilterFactory<ufo::ObsTraits>();
+  nemo_feedback::instantiateObsFilterFactory();
 #endif
   oops::HofX3D<orcamodel::OrcaModelTraits , ufo::ObsTraits> hofx;
   int i = run.execute(hofx);

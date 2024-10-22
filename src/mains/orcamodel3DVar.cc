@@ -27,7 +27,7 @@ int main(int argc,  char ** argv) {
   saber::instantiateCovarFactory<orcamodel::OrcaModelTraits>();
   ufo::instantiateObsFilterFactory();
 #if defined(NEMO_FEEDBACK_EXISTS)
-  nemo_feedback::instantiateObsFilterFactory<ufo::ObsTraits>();
+  nemo_feedback::instantiateObsFilterFactory();
 #endif
   oops::Variational<orcamodel::OrcaModelTraits , ufo::ObsTraits> var;
   int i = run.execute(var);
