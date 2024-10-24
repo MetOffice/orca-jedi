@@ -23,12 +23,13 @@ background error:
         do not cross mask boundaries: true
       nicas:
         explicit length-scales: true
-        resolution: 4.0
+        resolution: 3.0
 #        resolution: 8.0
         horizontal length-scale:
         - groups: 
           - ice_area_fraction
-          value: 2.0e6
+          value: 4.0e7
+#          value: 4.0e6
         vertical length-scale:
         - groups:
           - ice_area_fraction 

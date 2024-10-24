@@ -89,7 +89,7 @@ cost function:
         time interpolation: linear
         atlas-interpolator:
           type: unstructured-bilinear-lonlat
-#          non_linear: missing-if-all-missing
+          non_linear: missing-if-all-missing
           max_fraction_elems_to_try: 0.0
           adjoint: true
       obs operator:
