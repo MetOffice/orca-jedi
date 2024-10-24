@@ -27,6 +27,8 @@ amm1r_atlas_grid_spec.yaml
 hofx_potm_amm1r_obs.nc
 hofx_ssh_amm_obs.nc
 sic_obs_ideal.nc
+orca2_nicas_grids_local_000001-000001.nc
+orca2_nicas_local_000001-000001.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})
