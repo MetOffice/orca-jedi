@@ -327,9 +327,17 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += zz * field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) += zz * field_view_dx(j, k);
+          }
+        }
       }
     }
   }
@@ -353,13 +361,23 @@ double Increment::dot_product_with(const Increment & dx) const {
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
+    int count = 0;      // DJL
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) zz += field_view(j, k) * field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            zz += field_view(j, k) * field_view_dx(j, k);
+            count++;     // DJL
+          }
+        }
       }
     }
+    oops::Log::debug() << "count " << count << std::endl;  // DJL
   }
-
   oops::Log::debug() << "orcamodel::Increment::dot_product_with ended :: zz = " << zz << std::endl;
 
   return zz;
@@ -381,9 +399,17 @@ void Increment::schur_product_with(const Increment & dx) {
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) *= field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) *= field_view_dx(j, k);
+          }
+        }
       }
     }
   }
@@ -403,11 +429,19 @@ void Increment::random() {
     auto field_view = atlas::array::make_view<double, 2>(field);
     // Seed currently hardwired in increment.h
     util::NormalDistribution<double> xx(field_view.shape(0)*field_view.shape(1), 0.0, 1.0, seed_);
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     int idx = 0;
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) = xx[idx];
-        idx++;
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) = xx[idx];
+            idx++;
+          }
+        }
       }
     }
   }

@@ -226,6 +226,17 @@ CASE("test  interpolator") {
       OrcaIncrementParameters incrementParams;
       incrementParams.validateAndDeserialize(settings.increment_config);
 
+      eckit::LocalConfiguration interp_conf2;
+      interp_conf2.set("type", "unstructured-bilinear-lonlat");
+      interp_conf2.set("adjoint", true);
+      eckit::LocalConfiguration interpolator_config2;
+      interpolator_config2.set("atlas-interpolator", interp_conf2);
+
+      OrcaInterpolatorParameters params;
+      params.validateAndDeserialize(interpolator_config2);
+      Interpolator interpolator2(interpolator_config2,
+                                 geometry, settings.lats, settings.lons);
+
       Increment increment(geometry, settings.surf_vars, incrementParams.date);
       increment.ones();
 
@@ -234,7 +245,7 @@ CASE("test  interpolator") {
       std::vector<bool> mask(settings.nlocs, true);
 
       // increment -> observation space
-      interpolator.apply(settings.surf_vars, increment, mask, vals);
+      interpolator2.apply(settings.surf_vars, increment, mask, vals);
 
       double kgo_value = 1;
 
@@ -248,7 +259,7 @@ CASE("test  interpolator") {
 
       Increment incrementout(geometry, settings.surf_vars, incrementParams.date);
       // observation space -> increment
-      interpolator.applyAD(settings.surf_vars, incrementout, mask, vals);
+      interpolator2.applyAD(settings.surf_vars, incrementout, mask, vals);
 
       incrementout.write(incrementParams);
     }

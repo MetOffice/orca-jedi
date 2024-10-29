@@ -116,83 +116,86 @@ Geometry::Geometry(const eckit::Configuration & config,
         mesh_, atlas::option::halo(halo));
     log_status();
 
-    atlas::OrcaGrid orcaGrid = mesh_.grid();
-    nx_ = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-    ny_ = orcaGrid.ny() + orcaGrid.haloNorth();
+    if (params_.extraFieldsInit.value().value_or(false)) {
+      // Fill extra geometry fields for BUMP / SABER
+      // these are area, vunit, hmask, gmask
+      extraFields_ = atlas::FieldSet();
 
-    oops::Log::debug() << "nx_ " << nx_ << " ny_ " << ny_
-                       << std::endl;
+      oops::Log::debug() << "calling orcagrid" << std::endl;
+      atlas::OrcaGrid orcaGrid = mesh_.grid();
+      nx_ = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+      ny_ = orcaGrid.ny() + orcaGrid.haloNorth();
 
-    // Fill extra geometry fields for BUMP / SABER
-    // these are area (DJL needed?), vunit, hmask, gmask
-    extraFields_ = atlas::FieldSet();
+      oops::Log::debug() << "orcagrid nx_ " << nx_ << " ny_ " << ny_
+                         << std::endl;
 
-    // Vertical unit - DJL set to something sensible?
-    atlas::Field vunit = funcSpace_.createField<double>(
-      atlas::option::name("vunit") | atlas::option::levels(n_levels_));
-    auto field_view = atlas::array::make_view<double, 2>(vunit);
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-         field_view(j, k) = 1.;
+      // Vertical unit - DJL set to something sensible?
+      atlas::Field vunit = funcSpace_.createField<double>(
+        atlas::option::name("vunit") | atlas::option::levels(n_levels_));
+      auto field_view = atlas::array::make_view<double, 2>(vunit);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+           field_view(j, k) = 1.;
+        }
       }
-    }
-    extraFields_->add(vunit);
+      extraFields_->add(vunit);
 
-    // halo mask / owned
-    atlas::Field hmask = funcSpace_.createField<int32_t>(
-      atlas::option::name("owned") | atlas::option::levels(n_levels_));
-    auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
+      // halo mask / owned
+      atlas::Field hmask = funcSpace_.createField<int32_t>(
+        atlas::option::name("owned") | atlas::option::levels(n_levels_));
+      auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
 
-    auto field_view1 = atlas::array::make_view<int32_t, 2>(hmask);
-    for (atlas::idx_t j = 0; j < field_view1.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view1.shape(1); ++k) {
-        int x, y;
-        std::tie(x, y) = xypt(j, nx_);
-        // 0 mask, 1 ocean
-//        if (ghost(j) || x >= 181 || y >= 147 ) {field_view1(j, k) = 0;    // DJL
-        if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view1(j, k) = 0;    // DJL
-        } else {field_view1(j, k) = 1;}
+      auto field_view1 = atlas::array::make_view<int32_t, 2>(hmask);
+      for (atlas::idx_t j = 0; j < field_view1.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view1.shape(1); ++k) {
+          int x, y;
+          std::tie(x, y) = xypt(j, nx_);
+          // 0 mask, 1 ocean
+  //        if (ghost(j) || x >= 181 || y >= 147 ) {field_view1(j, k) = 0;    // DJL
+          if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view1(j, k) = 0;    // DJL
+          } else {field_view1(j, k) = 1;}
+        }
       }
-    }
-    // Add field
-    oops::Log::debug() << "Geometry adding hmask (set to all ocean except halo)"
-                       << std::endl;
-    extraFields_->add(hmask);
+      // Add field
+      oops::Log::debug() << "Geometry adding hmask (set to all ocean except halo)"
+                         << std::endl;
+      extraFields_->add(hmask);
 
-    // geometry mask
-    atlas::Field gmask = funcSpace_.createField<int32_t>(
-      atlas::option::name("gmask") | atlas::option::levels(n_levels_));
+      // geometry mask
+      atlas::Field gmask = funcSpace_.createField<int32_t>(
+        atlas::option::name("gmask") | atlas::option::levels(n_levels_));
 
-    auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
-    for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view2.shape(1); ++k) {
-        int x, y;
-        std::tie(x, y) = xypt(j, nx_);
-        // DJL hardwired to orca2 needs generalising
-//        if (ghost(j) || x >= 181 || y >= 147 ) {field_view2(j, k) = 0;   // DJL
-        if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view2(j, k) = 0;    // DJL
-        // 0 mask, 1 ocean
-        } else {field_view2(j, k) = 1;}
+      auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
+      for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view2.shape(1); ++k) {
+          int x, y;
+          std::tie(x, y) = xypt(j, nx_);
+          // DJL hardwired to orca2 needs generalising
+  //        if (ghost(j) || x >= 181 || y >= 147 ) {field_view2(j, k) = 0;   // DJL
+          if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view2(j, k) = 0;    // DJL
+          // 0 mask, 1 ocean
+          } else {field_view2(j, k) = 1;}
+        }
       }
-    }
-    // Add field
-    oops::Log::debug() << "Geometry adding gmask (set to all ocean except halo)"
-                       << std::endl;
-    extraFields_->add(gmask);
+      // Add field
+      oops::Log::debug() << "Geometry adding gmask (set to all ocean except halo)"
+                         << std::endl;
+      extraFields_->add(gmask);
 
-    atlas::Field area = funcSpace_.createField<double>(
-      atlas::option::name("area") | atlas::option::levels(n_levels_));
-    auto field_view3 = atlas::array::make_view<double, 2>(area);
+      atlas::Field area = funcSpace_.createField<double>(
+        atlas::option::name("area") | atlas::option::levels(n_levels_));
+      auto field_view3 = atlas::array::make_view<double, 2>(area);
 
-    for (atlas::idx_t j = 0; j < field_view3.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view3.shape(1); ++k) {
-        field_view3(j, k) = 4e10;           // DJL should change   2 degrees
+      for (atlas::idx_t j = 0; j < field_view3.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view3.shape(1); ++k) {
+          field_view3(j, k) = 4e10;           // DJL should change   2 degrees
+        }
       }
-    }
-    log_status();
+      log_status();
 
-    // Add field
-    extraFields_->add(area);
+      // Add field
+      extraFields_->add(area);
+    }
 }
 
 // -----------------------------------------------------------------------------
