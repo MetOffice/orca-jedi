@@ -135,6 +135,38 @@ CASE("test basic geometry") {
     EXPECT(geometry.levelsAreTopDown());
     EXPECT(geometry.distributionType() == "serial");
   }
+
+  SECTION("test geometry extrafields") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 10);
+    config2.set("extrafields initialisation", true);
+    Geometry geometry2(config2, eckit::mpi::comm());
+    atlas::FieldSet extraFields;
+    extraFields = geometry2.extraFields();
+    std::vector<std::string> extraFieldNames {
+        "vunit",
+        "owned",
+        "gmask",
+        "area"};
+    int num_matches = 0;
+    std::cout << "extraField list: ";
+    for (atlas::Field field : extraFields) {
+      std::string fieldname = field.name();
+      std::cout << fieldname << " ";
+      for (std::string fieldnametest : extraFieldNames) {
+        if ( fieldnametest == fieldname ) {
+          num_matches++;
+        }
+      }
+    }
+    std::cout << std::endl;
+    std::cout << "Number of extraFields " << extraFields.size() << std::endl;
+    std::cout << "Number matches to expected names " << num_matches << std::endl;
+    EXPECT(extraFields.size() == num_matches);
+    EXPECT(extraFieldNames.size() == num_matches);
+  }
 }
 
 }  // namespace test

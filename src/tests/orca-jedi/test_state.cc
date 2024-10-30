@@ -140,6 +140,37 @@ CASE("test basic state") {
     state.State::toFieldSet(statefset);
     EXPECT(statefset[0].name() == "sea_ice_area_fraction");
   }
+  SECTION("test set_gmask") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 10);
+    config2.set("extrafields initialisation", true);
+    Geometry geometry2(config2, eckit::mpi::comm());
+    params.validateAndDeserialize(state_config);
+    State state(geometry2, params);
+    state_config.set("set gmask", true);
+    // Count number of points in gmask.
+    atlas::FieldSet extraFields;
+    extraFields = geometry2.extraFields();
+    int gmask_sum = 0;
+    for (atlas::Field field : extraFields) {
+      std::string fieldname = field.name();
+      std::cout << "extraFields field name: " << fieldname << std::endl;
+      if (fieldname == "gmask") {
+        auto field_view = atlas::array::make_view<int32_t, 2>(field);
+        int field_sum = 0;
+        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+            field_sum += field_view(j, k);
+          }
+        }
+        std::cout << fieldname << " values sum " << field_sum << std::endl;
+        gmask_sum = field_sum;
+      }
+    }
+    EXPECT(gmask_sum == 264600);
+  }
 }
 
 }  // namespace test

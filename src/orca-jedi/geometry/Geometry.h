@@ -55,10 +55,10 @@ class Geometry : public util::Printable {
       const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
   const oops::Variables & variables() const;
+  void create_extrafields();
   void latlon(std::vector<double> & lats, std::vector<double> & lons,
               const bool halo) const;
   const atlas::FunctionSpace & functionSpace() const {return funcSpace_;}
-//  const atlas::FieldSet & fields() const {return nofields_;}  // DJL
   const atlas::FieldSet & extraFields() const {return extraFields_;}
   const atlas::FieldSet & fields() const {return extraFields_;}
   atlas::FieldSet & extraFields() {return extraFields_;}
@@ -75,6 +75,7 @@ class Geometry : public util::Printable {
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
   void set_gmask(atlas::Field &) const;
+  std::tuple<int, int> xypt(int);
 
  private:
   void print(std::ostream &) const;
@@ -86,14 +87,11 @@ class Geometry : public util::Printable {
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
-  atlas::FieldSet nofields_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
   atlas::FieldSet extraFields_;
-  int nx_;
-  int ny_;
+  int nx_ = 0;
+  int ny_ = 0;
 };
-
-std::tuple<int, int> xypt(int, int);
 
 // -----------------------------------------------------------------------------
 

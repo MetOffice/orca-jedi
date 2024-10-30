@@ -84,7 +84,8 @@ State::State(const Geometry & geom,
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
     if (params_.setGmask.value().value_or(false)) {
-      geom.set_gmask(stateFields_[0]);    // DJL
+      // Using the mask from the first state field to set geometry extrafields gmask.
+      geom.set_gmask(stateFields_[0]);
     }
     if (params.errorFieldFile.value()) {
       readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",

@@ -14,6 +14,7 @@ list( APPEND orcajedi_test_output
   test_hofx3d_nc_ssh_amm1r.ref
   test_3dvar_sic.ref
   test_dirac.ref
+  test_bump_nicas.ref
 )
 
 foreach(FILENAME ${orcajedi_test_output})

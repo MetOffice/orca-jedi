@@ -229,7 +229,6 @@ void Increment::diff(const State & x1, const State & x2) {
     bool has_mv1 = static_cast<bool>(mv1);
     atlas::field::MissingValue mv2(field2);
     bool has_mv2 = static_cast<bool>(mv2);
-    bool has_mv = has_mv1 || has_mv2;
 
     std::string fieldName1 = field1.name();
     std::string fieldName2 = field2.name();
@@ -365,18 +364,15 @@ double Increment::dot_product_with(const Increment & dx) const {
     atlas::field::MissingValue mv(incrementFields()[fieldName]);
     bool has_mv = static_cast<bool>(mv);
 
-    int count = 0;      // DJL
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             zz += field_view(j, k) * field_view_dx(j, k);
-            count++;     // DJL
           }
         }
       }
     }
-    oops::Log::debug() << "count " << count << std::endl;  // DJL
   }
   oops::Log::debug() << "orcamodel::Increment::dot_product_with ended :: zz = " << zz << std::endl;
 

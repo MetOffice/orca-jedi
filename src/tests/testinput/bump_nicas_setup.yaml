@@ -59,5 +59,6 @@ geometry:
   number levels: 10
   extrafields initialisation: true
 
-#test:
-#  reference filename: #testref/quench_error_covariance_training_bump_nicas/test.log.out
+test:
+  reference filename: testoutput/test_bump_nicas.ref
+  test output filename: testoutput/test_bump_nicas.out
