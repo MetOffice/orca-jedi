@@ -368,7 +368,7 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-            if (!has_mv2 || (has_mv2 && !mv(field_view_dx(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
               field_view(j, k) += zz * field_view_dx(j, k);
             }
           }
@@ -406,7 +406,7 @@ double Increment::dot_product_with(const Increment & dx) const {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-            if (!has_mv2 || (has_mv2 && !mv(field_view_dx(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
               zz += field_view(j, k) * field_view_dx(j, k);
             }
           }
@@ -445,7 +445,7 @@ void Increment::schur_product_with(const Increment & dx) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-            if (!has_mv2 || (has_mv2 && !mv(field_view_dx(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
               field_view(j, k) *= field_view_dx(j, k);
             }
           }
