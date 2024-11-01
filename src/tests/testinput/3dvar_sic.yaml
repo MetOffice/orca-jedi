@@ -31,6 +31,7 @@ cost function:
           - groups:
             - ice_area_fraction 
             value: 10
+      msvalr: 1e20
     saber outer blocks:
     - saber block name: BUMP_StdDev
       read:
@@ -47,6 +48,7 @@ cost function:
           - variables:
             - ice_area_fraction
             value: 1
+      msvalr: 1e20
   geometry: &Geom
     nemo variables:
       - name: ice_area_fraction
