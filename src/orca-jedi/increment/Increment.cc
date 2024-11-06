@@ -355,6 +355,7 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
     std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::axpy:: field name = " << fieldName
                        << " field name dx = " << fieldName_dx
+                       << " zz = " << zz
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
@@ -550,6 +551,8 @@ void Increment::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
+  incrementFields_.haloExchange();
+
   for (size_t i=0; i < vars_.size(); ++i) {
     // copy variable from increments to new field set
     atlas::Field fieldinc = incrementFields_[i];
@@ -593,6 +596,9 @@ void Increment::fromFieldSet(const atlas::FieldSet & fset) {
       }
     }
   }
+
+  incrementFields_.haloExchange();
+
   oops::Log::debug() << "Increment fromFieldSet done" << std::endl;
 }
 

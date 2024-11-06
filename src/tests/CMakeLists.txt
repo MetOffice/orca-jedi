@@ -96,6 +96,11 @@ ecbuild_add_test( TARGET test_orcamodel_3DVar_sic
                   ARGS testinput/3dvar_sic.yaml
                   COMMAND orcamodel_3DVar.x )
 
+ecbuild_add_test( TARGET test_orcamodel_3DVar_sic_identity
+                  OMP 1
+                  ARGS testinput/3dvar_sic_identity.yaml
+                  COMMAND orcamodel_3DVar.x )
+
 ecbuild_add_test( TARGET test_orcamodel_Dirac
                   OMP 1
                   ARGS testinput/dirac.yaml

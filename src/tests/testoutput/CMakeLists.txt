@@ -13,6 +13,7 @@ list( APPEND orcajedi_test_output
   test_hofx3d_nc_ssh_amm1.ref
   test_hofx3d_nc_ssh_amm1r.ref
   test_3dvar_sic.ref
+  test_3dvar_sic_identity.ref
   test_dirac.ref
   test_bump_nicas.ref
 )
