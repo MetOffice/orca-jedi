@@ -188,10 +188,13 @@ State & State::operator+=(const Increment & dx) {
     bool has_mv = static_cast<bool>(mv);
 
     atlas::Field fieldi = dx.incrementFields()[i];
+    atlas::field::MissingValue mvi(fieldi);
+    bool has_mvi = static_cast<bool>(mvi);
 
     std::string fieldName = field.name();
     std::string fieldNamei = fieldi.name();
-    oops::Log::debug() << "orcamodel::Increment::add:: state field name = " << fieldName
+    oops::Log::debug() << "orcamodel::State::add increment:: state field name = "
+                       << fieldName
                        << " increment field name = " << fieldNamei
                        << std::endl;
     ASSERT(fieldName == fieldNamei);
@@ -202,7 +205,9 @@ State & State::operator+=(const Increment & dx) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-            field_view(j, k) += field_viewi(j, k);
+            if (!has_mvi || (has_mvi && !mvi(field_viewi(j, k)))) {
+              field_view(j, k) += field_viewi(j, k);
+            }
           }
         }
       }

@@ -38,7 +38,7 @@
 #include "atlas-orca/grid/OrcaGrid.h"
 
 #define INCREMENT_FILL_TOL 1e-6
-#define INCREMENT_FILL_VALUE 1e20
+#define INCREMENT_FILL_VALUE 1e30
 
 namespace orcamodel {
 
@@ -274,6 +274,7 @@ void Increment::diff(const State & x1, const State & x2) {
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_viewi.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_viewi.shape(1); ++k) {
+        field_viewi(j, k) = 0;
         if (!ghost(j)) {
           if (!has_mv1 || (has_mv1 && !mv1(field_view1(j, k)))) {
             if (!has_mv2 || (has_mv2 && !mv2(field_view2(j, k)))) {
@@ -551,8 +552,6 @@ void Increment::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
-  incrementFields_.haloExchange();
-
   for (size_t i=0; i < vars_.size(); ++i) {
     // copy variable from increments to new field set
     atlas::Field fieldinc = incrementFields_[i];
@@ -596,8 +595,6 @@ void Increment::fromFieldSet(const atlas::FieldSet & fset) {
       }
     }
   }
-
-  incrementFields_.haloExchange();
 
   oops::Log::debug() << "Increment fromFieldSet done" << std::endl;
 }
