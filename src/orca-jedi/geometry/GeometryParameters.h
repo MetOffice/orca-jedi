@@ -58,7 +58,7 @@ class OrcaGeometryParameters : public oops::Parameters {
         " The default will not distribute the data ('serial').",
       "serial",
       this};
-  oops::OptionalParameter<bool> extraFieldsInit{"extrafields initialisation", this};
+  oops::OptionalParameter<bool> extraFieldsInit{"initialise extra fields", this};
 };
 
 }  //  namespace orcamodel

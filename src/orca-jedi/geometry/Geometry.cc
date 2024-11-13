@@ -172,8 +172,11 @@ void Geometry::create_extrafields() {
       std::tie(x, y) = xypt(j);
       // 0 mask, 1 ocean
       // setting some edge points to the mask value to prevent BUMP giving duplicate points error.
-      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view1(j, k) = 0;
-      } else {field_view1(j, k) = 1;}
+      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {
+        field_view1(j, k) = 0;
+      } else {
+        field_view1(j, k) = 1;
+      }
     }
   }
   oops::Log::debug()
@@ -192,8 +195,11 @@ void Geometry::create_extrafields() {
       std::tie(x, y) = xypt(j);
       // 0 mask, 1 ocean
       // Setting some edge points to the mask value to prevent BUMP giving duplicate points error.
-      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view2(j, k) = 0;
-      } else {field_view2(j, k) = 1;}
+      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {
+        field_view2(j, k) = 0;
+      } else {
+        field_view2(j, k) = 1;
+      }
     }
   }
   oops::Log::debug() << "orcamodel::Geometry: adding gmask (set to all ocean except halo)."
