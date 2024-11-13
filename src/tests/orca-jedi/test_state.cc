@@ -145,7 +145,7 @@ CASE("test basic state") {
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
     config2.set("number levels", 10);
-    config2.set("extrafields initialisation", true);
+    config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
     params.validateAndDeserialize(state_config);
     State state(geometry2, params);
@@ -169,6 +169,8 @@ CASE("test basic state") {
         gmask_sum = field_sum;
       }
     }
+    // The sum should be equal to the number of ocean points in the orca2 grid
+    // minus ghost points and some additional masked points needed for BUMP to work.
     EXPECT(gmask_sum == 264600);
   }
 }

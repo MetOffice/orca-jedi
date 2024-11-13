@@ -141,7 +141,7 @@ CASE("test basic geometry") {
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
     config2.set("number levels", 10);
-    config2.set("extrafields initialisation", true);
+    config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
     atlas::FieldSet extraFields;
     extraFields = geometry2.extraFields();

@@ -7,7 +7,6 @@ cost function:
   background error:
     covariance model: SABER
     saber central block:
-#      saber block name: ID
       saber block name: BUMP_NICAS
       read:
         general:
@@ -70,7 +69,7 @@ cost function:
         field precision: double
     grid name: ORCA2_T
     number levels: 10
-    extrafields initialisation: true
+    initialise extra fields: true
   background:
     date: 2021-06-29T12:00:00Z
     state variables: [ ice_area_fraction ]

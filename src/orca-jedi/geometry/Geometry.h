@@ -75,7 +75,6 @@ class Geometry : public util::Printable {
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
   void set_gmask(atlas::Field &) const;
-  std::tuple<int, int> xypt(int);
 
  private:
   void print(std::ostream &) const;
@@ -89,8 +88,6 @@ class Geometry : public util::Printable {
   atlas::functionspace::NodeColumns funcSpace_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
   atlas::FieldSet extraFields_;
-  int nx_ = 0;
-  int ny_ = 0;
 };
 
 // -----------------------------------------------------------------------------

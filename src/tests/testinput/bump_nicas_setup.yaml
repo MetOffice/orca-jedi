@@ -58,7 +58,7 @@ geometry:
       variable type: background variance
   grid name: ORCA2_T
   number levels: 10
-  extrafields initialisation: true
+  initialise extra fields: true
 
 test:
   reference filename: testoutput/test_bump_nicas.ref

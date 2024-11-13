@@ -142,9 +142,9 @@ void Geometry::create_extrafields() {
   extraFields_ = atlas::FieldSet();
 
   atlas::OrcaGrid orcaGrid = mesh_.grid();
-  nx_ = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-  ny_ = orcaGrid.ny() + orcaGrid.haloNorth();
-  oops::Log::debug() << "orcagrid nx_ " << nx_ << " ny_ " << ny_
+  int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+  int ny = orcaGrid.ny() + orcaGrid.haloNorth();
+  oops::Log::debug() << "orcagrid nx " << nx << " ny " << ny
                      << std::endl;
 
   // Create vertical unit field - the value used is not tuned.
@@ -164,15 +164,16 @@ void Geometry::create_extrafields() {
   atlas::Field hmask = funcSpace_.createField<int32_t>(
     atlas::option::name("owned") | atlas::option::levels(n_levels_));
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
+  auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
 
   auto field_view1 = atlas::array::make_view<int32_t, 2>(hmask);
   for (atlas::idx_t j = 0; j < field_view1.shape(0); ++j) {
     for (atlas::idx_t k = 0; k < field_view1.shape(1); ++k) {
-      int x, y;
-      std::tie(x, y) = xypt(j);
+      int x = ij(j, 0) + 1;
+      int y = ij(j, 1) + 1;
       // 0 mask, 1 ocean
       // setting some edge points to the mask value to prevent BUMP giving duplicate points error.
-      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {
+      if (ghost(j) || x >= nx - 1 || y >= ny - 1) {
         field_view1(j, k) = 0;
       } else {
         field_view1(j, k) = 1;
@@ -191,11 +192,11 @@ void Geometry::create_extrafields() {
   auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
   for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
     for (atlas::idx_t k = 0; k < field_view2.shape(1); ++k) {
-      int x, y;
-      std::tie(x, y) = xypt(j);
+      int x = ij(j, 0) + 1;
+      int y = ij(j, 1) + 1;
       // 0 mask, 1 ocean
       // Setting some edge points to the mask value to prevent BUMP giving duplicate points error.
-      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {
+      if (ghost(j) || x >= nx - 1 || y >= ny - 1) {
         field_view2(j, k) = 0;
       } else {
         field_view2(j, k) = 1;
@@ -206,7 +207,7 @@ void Geometry::create_extrafields() {
                      << std::endl;
   extraFields_->add(gmask);
 
-  // Create area field - the value used is not tuned.
+  // Create grid cell area field /m^2 - the value used is not tuned.
   atlas::Field area = funcSpace_.createField<double>(
     atlas::option::name("area") | atlas::option::levels(n_levels_));
   auto field_view3 = atlas::array::make_view<double, 2>(area);
@@ -406,14 +407,6 @@ void Geometry::set_gmask(atlas::Field & field) const {
                     std::string("orcamodel::Geometry::set_gmask ")
                     + field.name() + "' field type not recognised");
   log_status();
-}
-
-// Determine x,y location from jpt
-std::tuple<int, int> Geometry::xypt(int jpt) {
-  ASSERT(nx_ > 0);
-  int y = jpt / nx_;
-  int x = jpt - y*nx_;
-  return std::make_tuple(x, y);
 }
 
 }  // namespace orcamodel
