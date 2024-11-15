@@ -208,6 +208,7 @@ void Geometry::create_extrafields() {
   extraFields_->add(gmask);
 
   // Create grid cell area field /m^2 - the value used is not tuned.
+  // Curerently ~= area of 2 degree square grid cell at the equator.
   atlas::Field area = funcSpace_.createField<double>(
     atlas::option::name("area") | atlas::option::levels(n_levels_));
   auto field_view3 = atlas::array::make_view<double, 2>(area);
