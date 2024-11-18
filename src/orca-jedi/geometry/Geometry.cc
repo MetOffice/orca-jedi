@@ -7,6 +7,9 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/utilities/Types.h"
 
+#include "orca-jedi/nemovar_jedi/GeometryNV.h"
+#include "orca-jedi/nemovar_jedi/FortranNV.h"
+
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
@@ -84,6 +87,8 @@ Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
                       n_levels_(config.getInt("number levels")),
+                      initnemovar_(config.getBool("init nemovar", false)),
+                      storenemovar_(config.getBool("store nemovar", false)),
                       eckit_timer_(new eckit::Timer("Geometry(ORCA): ", oops::Log::trace()))
 {
     eckit_timer_->start();
@@ -115,6 +120,33 @@ Geometry::Geometry(const eckit::Configuration & config,
     funcSpace_ = atlas::functionspace::NodeColumns(
         mesh_, atlas::option::halo(halo));
     log_status();
+
+    static bool nemovar_initialised = false;
+
+    oops::Log::debug()
+      << "Checking if we want to initialise nemovar DJL initnemovar_ = "
+      << initnemovar_ << std::endl;         // DJL
+    oops::Log::debug()
+      << "Checking if we want to initialise nemovar DJL nemovar_initialised = "
+      << nemovar_initialised << std::endl;         // DJL
+
+    if (initnemovar_ && !nemovar_initialised) {
+       oops::Log::debug() << "Now calling nemovar init DJL" << std::endl;         // DJL
+       const eckit::Configuration * configc = &config;
+       nv::nv_init_f90(&configc);
+       nemovar_initialised = true;
+    }
+
+    oops::Log::debug()
+      << "Checking if we want to set up orca-jedi nemovar geometry DJL storenemovar_ = "
+      << storenemovar_ << std::endl;         // DJL
+    // DJL might not be needed for SABER
+    if (storenemovar_) {
+       oops::Log::debug()
+         << "Setting up orca-jedi nemovar geometry to be stored in jedi geometry DJL"
+         << std::endl;         // DJL
+       nvgeom_.reset(new nv::GeometryNV(config));
+    }
 
     if (params_.extraFieldsInit.value().value_or(false)) {
       // Fill extra geometry fields for BUMP / SABER
@@ -172,8 +204,11 @@ void Geometry::create_extrafields() {
       std::tie(x, y) = xypt(j);
       // 0 mask, 1 ocean
       // setting some edge points to the mask value to prevent BUMP giving duplicate points error.
-      if (ghost(j) || x >= nx_-1 || y >= ny_-1 ) {field_view1(j, k) = 0;
-      } else {field_view1(j, k) = 1;}
+      if (ghost(j) || x >= nx_-1 || y >= ny_-1) {
+        field_view1(j, k) = 0;
+      } else {
+        field_view1(j, k) = 1;
+      }
     }
   }
   oops::Log::debug()

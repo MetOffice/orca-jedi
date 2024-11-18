@@ -1,0 +1,49 @@
+geometry: &geom
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+      field precision: double
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+      field precision: double
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+      field precision: double
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background variance
+      field precision: double
+  grid name: ORCA2_T
+  number levels: 10
+  extrafields initialisation: true
+  init nemovar: true
+  store nemovar: false
+
+background error:
+  covariance model: SABER
+  saber central block:
+    saber block name: orca jedi filter
+    geometry: *geom
+#    covtype: Nemovar
+    covtype: Shapiro
+
+dirac:
+  x indices: [20]
+  y indices: [25]
+  z indices: [0]
+
+background:
+  date: 2021-06-30T12:00:00Z
+  state variables: [ ice_area_fraction ]
+  nemo field file: Data/orca2_t_nemo.nc
+  set gmask: true
+output dirac:
+  date: 2021-06-30T12:00:00Z
+  output path: testoutput/dirac_cov_%id%.nc
+test:
+  reference filename: testoutput/test_dirac.ref
+  test output filename: testoutput/test_dirac.out

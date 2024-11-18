@@ -32,6 +32,8 @@
 #include "orca-jedi/geometry/GeometryParameters.h"
 #include "orca-jedi/utilities/Types.h"
 
+#include "orca-jedi/nemovar_jedi/GeometryNV.h"
+
 namespace atlas {
 class Field;
 class FieldSet;
@@ -84,6 +86,8 @@ class Geometry : public util::Printable {
   size_t n_levels_;
   OrcaGeometryParameters params_;
   atlas::Grid grid_;
+  bool initnemovar_;
+  bool storenemovar_;
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
@@ -91,6 +95,7 @@ class Geometry : public util::Printable {
   atlas::FieldSet extraFields_;
   int nx_ = 0;
   int ny_ = 0;
+  std::shared_ptr<nv::GeometryNV> nvgeom_;
 };
 
 // -----------------------------------------------------------------------------

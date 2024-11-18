@@ -19,8 +19,10 @@ list( APPEND orcajedi_test_input
   odb_sic_mapping.yaml
   test_name_map.yaml
   dirac.yaml
+  nv_dirac.yaml
   3dvar_sic.yaml
   3dvar_sic_identity.yaml
+  nv_3dvar_sic.yaml
   bump_nicas_setup.yaml
 )
 
