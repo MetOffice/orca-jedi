@@ -20,7 +20,7 @@ geometry: &geom
   grid name: ORCA2_T
   number levels: 10
   extrafields initialisation: true
-  init nemovar: true
+  initialise nemovar: true
   store nemovar: false
 
 background error:
@@ -28,8 +28,8 @@ background error:
   saber central block:
     saber block name: orca jedi filter
     geometry: *geom
-#    covtype: Nemovar
-    covtype: Shapiro
+    covtype: Nemovar
+#    covtype: Shapiro
 
 dirac:
   x indices: [20]
@@ -39,11 +39,11 @@ dirac:
 background:
   date: 2021-06-30T12:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: Data/orca2_t_nemo.nc
+  nemo field file: Data/orca2_t_nemo_masked_bkg.nc
   set gmask: true
 output dirac:
   date: 2021-06-30T12:00:00Z
-  output path: testoutput/dirac_cov_%id%.nc
+  output path: testoutput/dirac_cov_%id%_nv.nc
 test:
-  reference filename: testoutput/test_dirac.ref
-  test output filename: testoutput/test_dirac.out
+  reference filename: testoutput/test_dirac_nv.ref
+  test output filename: testoutput/test_dirac_nv.out

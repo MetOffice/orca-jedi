@@ -59,6 +59,8 @@ class OrcaGeometryParameters : public oops::Parameters {
       "serial",
       this};
   oops::OptionalParameter<bool> extraFieldsInit{"extrafields initialisation", this};
+  oops::OptionalParameter<bool> initNemovar{"initialise nemovar", this};
+  oops::OptionalParameter<bool> storeNemovar{"store nemovar", this};
 };
 
 }  //  namespace orcamodel

@@ -87,7 +87,7 @@ Geometry::Geometry(const eckit::Configuration & config,
                    const eckit::mpi::Comm & comm) :
                       comm_(comm), vars_(orcaVariableFactory(config)),
                       n_levels_(config.getInt("number levels")),
-                      initnemovar_(config.getBool("init nemovar", false)),
+                      initnemovar_(config.getBool("initialise nemovar", false)),
                       storenemovar_(config.getBool("store nemovar", false)),
                       eckit_timer_(new eckit::Timer("Geometry(ORCA): ", oops::Log::trace()))
 {

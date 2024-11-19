@@ -26,20 +26,20 @@ cost function:
     grid name: ORCA2_T
     number levels: 10
     extrafields initialisation: true
-    init nemovar: true
+    initialise nemovar: true
     store nemovar: false
   background error:
     covariance model: SABER
     saber central block:
       saber block name: orca jedi filter
-      geometry: *geom
-  #    covtype: Nemovar
-      covtype: Shapiro
+      geometry: *Geom
+      covtype: Nemovar
+#      covtype: Shapiro
 
   background:
     date: 2021-06-29T12:00:00Z
     state variables: [ ice_area_fraction ]
-    nemo field file: Data/orca2_t_nemo.nc
+    nemo field file: Data/orca2_t_nemo_masked_bkg.nc
     set gmask: true
   observations:
     observers:
@@ -52,7 +52,7 @@ cost function:
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_sic_identity.nc
+            obsfile: testoutput/obsdataout_3dvar_sic_nv.nc
         simulated variables: [ice_area_fraction]
       get values:
         time interpolation: linear
@@ -86,7 +86,7 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_sic_identity.nc
+          output path: testoutput/increments_3dvar_sic_nv.nc
           date: 2021-06-30T00:00:00Z
 final:
   diagnostics:
@@ -94,8 +94,8 @@ final:
 output:
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_sic_identity2.nc
-  output nemo field file: testoutput/analysis_3dvar_sic_identity.nc
+  nemo field file: testoutput/3dvar_sic_nv2.nc
+  output nemo field file: testoutput/analysis_3dvar_sic_nv.nc
 test:
-  reference filename: testoutput/test_3dvar_sic_identity.ref
-  test output filename: testoutput/test_3dvar_sic_identity.out
+  reference filename: testoutput/test_3dvar_sic_nv.ref
+  test output filename: testoutput/test_3dvar_sic_nv.out

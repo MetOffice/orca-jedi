@@ -24,6 +24,13 @@ list( APPEND orcajedi_test_input
   3dvar_sic_identity.yaml
   nv_3dvar_sic.yaml
   bump_nicas_setup.yaml
+  namelist.nemovar
+  namelist.variable_s
+  namelist.variable_sic
+  namelist.variable_ssh
+  namelist.variable_t
+  namelist.variable_u
+  namelist.variable_v
 )
 
 foreach(FILENAME ${orcajedi_test_input})
