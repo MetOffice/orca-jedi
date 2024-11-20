@@ -7,47 +7,7 @@ cost function:
   background error:
     covariance model: SABER
     saber central block:
-      saber block name: BUMP_NICAS
-      read:
-        general:
-          testing: true
-        io:
-          data directory: Data
-          files prefix: dirac_bump_nicas/orca2
-          overriding nicas file: orca2_nicas
-        drivers:
-          multivariate strategy: univariate
-          read local nicas: true
-        model:
-          do not cross mask boundaries: true
-        nicas:
-          explicit length-scales: true
-          horizontal length-scale:
-          - groups: 
-            - ice_area_fraction
-            value: 2.0e6
-          vertical length-scale:
-          - groups:
-            - ice_area_fraction 
-            value: 10
-      msvalr: 1e30
-    saber outer blocks:
-    - saber block name: BUMP_StdDev
-      read:
-        general:
-          testing: true
-        io:
-          data directory: Data
-          files prefix: orca2
-        drivers:
-          compute variance: true
-        variance:
-          explicit stddev: true
-          stddev:
-          - variables:
-            - ice_area_fraction
-            value: 1
-      msvalr: 1e30
+      saber block name: ID
   geometry: &Geom
     nemo variables:
       - name: ice_area_fraction
@@ -86,7 +46,7 @@ cost function:
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_sic.nc
+            obsfile: testoutput/obsdataout_3dvar_sic_identity.nc
         simulated variables: [ice_area_fraction]
       get values:
         time interpolation: linear
@@ -120,7 +80,7 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_sic.nc
+          output path: testoutput/increments_3dvar_sic_identity.nc
           date: 2021-06-30T00:00:00Z
 final:
   diagnostics:
@@ -128,8 +88,8 @@ final:
 output:
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_sic2.nc
-  output nemo field file: testoutput/analysis_3dvar_sic.nc
+  nemo field file: testoutput/3dvar_sic_identity2.nc
+  output nemo field file: testoutput/analysis_3dvar_sic_identity.nc
 test:
-  reference filename: testoutput/test_3dvar_sic.ref
-  test output filename: testoutput/test_3dvar_sic.out
+  reference filename: testoutput/test_3dvar_sic_identity.ref
+  test output filename: testoutput/test_3dvar_sic_identity.out

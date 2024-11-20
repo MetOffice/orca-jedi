@@ -37,6 +37,9 @@
 #include "atlas/mesh.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
+#define INCREMENT_FILL_TOL 1e-6
+#define INCREMENT_FILL_VALUE 1e30
+
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------
@@ -140,11 +143,23 @@ Increment & Increment::operator+=(const Increment & dx) {
     oops::Log::debug() << "orcamodel::Increment::add:: field name = " << fieldName
                        << " field name dx = " << fieldName_dx
                        << std::endl;
+
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+    atlas::field::MissingValue mv2(field_dx);
+    bool has_mv2 = static_cast<bool>(mv2);
+
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
+              field_view(j, k) += field_view_dx(j, k);
+            }
+          }
+        }
       }
     }
   }
@@ -172,11 +187,23 @@ Increment & Increment::operator-=(const Increment & dx) {
     oops::Log::debug() << "orcamodel::Increment::subtract:: field name = " << fieldName
                        << " field name dx = " << fieldName_dx
                        << std::endl;
+
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+    atlas::field::MissingValue mv2(field_dx);
+    bool has_mv2 = static_cast<bool>(mv2);
+
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) -= field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
+              field_view(j, k) -= field_view_dx(j, k);
+            }
+          }
+        }
       }
     }
   }
@@ -195,10 +222,18 @@ Increment & Increment::operator*=(const double & zz) {
     oops::Log::debug() << "orcamodel::Increment::multiply:: field name = " << fieldName
                        << " zz " << zz
                        << std::endl;
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     auto field_view = atlas::array::make_view<double, 2>(field);
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) *= zz;
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) *= zz;
+          }
+        }
       }
     }
   }
@@ -226,7 +261,6 @@ void Increment::diff(const State & x1, const State & x2) {
     bool has_mv1 = static_cast<bool>(mv1);
     atlas::field::MissingValue mv2(field2);
     bool has_mv2 = static_cast<bool>(mv2);
-    bool has_mv = has_mv1 || has_mv2;
 
     std::string fieldName1 = field1.name();
     std::string fieldName2 = field2.name();
@@ -240,6 +274,7 @@ void Increment::diff(const State & x1, const State & x2) {
     auto field_viewi = atlas::array::make_view<double, 2>(fieldi);
     for (atlas::idx_t j = 0; j < field_viewi.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_viewi.shape(1); ++k) {
+        field_viewi(j, k) = 0;
         if (!ghost(j)) {
           if (!has_mv1 || (has_mv1 && !mv1(field_view1(j, k)))) {
             if (!has_mv2 || (has_mv2 && !mv2(field_view2(j, k)))) {
@@ -321,12 +356,25 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
     std::string fieldName_dx = field_dx.name();
     oops::Log::debug() << "orcamodel::Increment::axpy:: field name = " << fieldName
                        << " field name dx = " << fieldName_dx
+                       << " zz = " << zz
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+    atlas::field::MissingValue mv2(field_dx);
+    bool has_mv2 = static_cast<bool>(mv2);
+
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) += zz * field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
+              field_view(j, k) += zz * field_view_dx(j, k);
+            }
+          }
+        }
       }
     }
   }
@@ -350,13 +398,24 @@ double Increment::dot_product_with(const Increment & dx) const {
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+    atlas::field::MissingValue mv2(field_dx);
+    bool has_mv2 = static_cast<bool>(mv2);
+
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) zz += field_view(j, k) * field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
+              zz += field_view(j, k) * field_view_dx(j, k);
+            }
+          }
+        }
       }
     }
   }
-
   oops::Log::debug() << "orcamodel::Increment::dot_product_with ended :: zz = " << zz << std::endl;
 
   return zz;
@@ -378,9 +437,21 @@ void Increment::schur_product_with(const Increment & dx) {
                        << std::endl;
     auto field_view = atlas::array::make_view<double, 2>(field);
     auto field_view_dx = atlas::array::make_view<double, 2>(field_dx);
+
+    atlas::field::MissingValue mv(field);
+    bool has_mv = static_cast<bool>(mv);
+    atlas::field::MissingValue mv2(field_dx);
+    bool has_mv2 = static_cast<bool>(mv2);
+
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) *= field_view_dx(j, k);
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
+              field_view(j, k) *= field_view_dx(j, k);
+            }
+          }
+        }
       }
     }
   }
@@ -400,11 +471,19 @@ void Increment::random() {
     auto field_view = atlas::array::make_view<double, 2>(field);
     // Seed currently hardwired in increment.h
     util::NormalDistribution<double> xx(field_view.shape(0)*field_view.shape(1), 0.0, 1.0, seed_);
+
+    atlas::field::MissingValue mv(incrementFields()[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+
     int idx = 0;
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
-        if (!ghost(j)) field_view(j, k) = xx[idx];
-        idx++;
+        if (!ghost(j)) {
+          if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
+            field_view(j, k) = xx[idx];
+            idx++;
+          }
+        }
       }
     }
   }
@@ -516,6 +595,7 @@ void Increment::fromFieldSet(const atlas::FieldSet & fset) {
       }
     }
   }
+
   oops::Log::debug() << "Increment fromFieldSet done" << std::endl;
 }
 
@@ -525,9 +605,13 @@ void Increment::setupIncrementFields() {
     // add variable if it isn't already in incrementFields
     std::vector<size_t> varSizes = geom_->variableSizes(vars_);
     if (!incrementFields_.has(vars_[i].name())) {
-      incrementFields_.add(geom_->functionSpace().createField<double>(
+      atlas::Field field = geom_->functionSpace().createField<double>(
            atlas::option::name(vars_[i].name()) |
-           atlas::option::levels(varSizes[i])));
+           atlas::option::levels(varSizes[i]));
+      field.metadata().set("missing_value", INCREMENT_FILL_VALUE);
+      field.metadata().set("missing_value_type", "approximately-equals");
+      field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
+      incrementFields_.add(field);
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
                          << vars_[i].name()
                          << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
@@ -558,7 +642,7 @@ void Increment::write(const OrcaIncrementParameters & params) const {
   oops::Log::debug() << "Increment::write to filename "
                      << nemo_field_path << std::endl;
 
-incrementFields_.haloExchange();
+  incrementFields_.haloExchange();
 
   writeFieldsToFile(nemo_field_path, *geom_, time_, incrementFields_);
 }

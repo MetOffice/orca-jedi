@@ -13,6 +13,7 @@
 #include "oops/base/ParameterTraitsVariables.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "orca-jedi/geometry/GeometryParameterTraitsFieldDType.h"
 #include "orca-jedi/utilities/Types.h"
 
@@ -57,6 +58,7 @@ class OrcaGeometryParameters : public oops::Parameters {
         " The default will not distribute the data ('serial').",
       "serial",
       this};
+  oops::OptionalParameter<bool> extraFieldsInit{"initialise extra fields", this};
 };
 
 }  //  namespace orcamodel

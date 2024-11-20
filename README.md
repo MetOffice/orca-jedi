@@ -23,6 +23,7 @@ _orca-jedi_ includes executables to calculate model values at observation locati
   * [JCSDA/ufo](https://github.com/JCSDA/ufo)
   * [ecmwf/atlas](https://github.com/ecmwf/atlas)
   * [ecmwf/atlas-orca](https://github.com/ecmwf/atlas-orca)
+  * [saber](https://github.com/JCSDA/saber)
 
 ### Installing
 
@@ -67,6 +68,8 @@ See the JEDI documentation for help. Additional debugging/trace output is availa
 OOPS_DEBUG=true
 OOPS_TRACE=true
 ```
+
+For help with SABER specifically please refer to the [SABER](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/jedi-components/saber/index.html) section in the JEDI documentation. 
 
 ## Authors
 
