@@ -43,8 +43,6 @@ nrannowper_tru   = 100      !
 ln_norexa_tru    = .false.  ! 
 ln_norran_tru    = .true.   ! 
 ln_norranper_tru = .true.   ! 
-ln_norranwri_tru = .false.  ! 
-ln_norranrea_tru = .false.  ! 
 ln_ranrea_tru    = .false.  ! 
 ln_ranreaper_tru = .false.  ! 
 / 
@@ -55,7 +53,6 @@ ndiftyp_mod      = 2              !
 ndiften_mod      = 0              ! 
 ndifit_exp_h_mod = 150            ! 
 ndifit_imp_h_mod = 10             ! 
-nintstp_mod      = 1              ! 
 npartot_mod(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_mod / 2 elements
 nten_h_mod(:)    = 2              !  Array of values depending on value of ncovmod
 wgtten_h_mod(:)  = 1.0            !  Array of values depending on value of ncovmod
@@ -63,13 +60,15 @@ scalen_h_mod     = 2.0            !  in degrees
 scagrd_h_mod     = 5.0            ! 
 rcoast_mod       = 100.0          ! 
 ln_coa_mod       = .false.        ! 
-!ln_rgrd_dif_lscl = .false.        ! 
+ln_rgrd_dif_lscl = .false.        ! 
 nlstyp_mod       = 0              ! 
 / 
 !-----------------------------------------------------------------------
 &nambge_dif_mod_sol	! 
 !-----------------------------------------------------------------------
 ln_eigrea_mod = .false.  ! 
+ln_cgsolall2d_mod = .false.
+ln_solall2d_mod   = .false.
 / 
 !-----------------------------------------------------------------------
 &nambge_dif_tru	! 
@@ -86,7 +85,8 @@ nsdvsca_mod    = 0        !
 sdv_mod        = 0.01     ! 
 wgtcst_mod(:)  = 1.0      !  Array of values depending on value of ncovmod
 ln_wgtramp_mod = .false.  ! 
-!ln_sdvsca_mod  = .false.  ! 
+ln_sdvsca_mod  = .false.  ! 
+rcoast_mod(:)      = 100.0    ! in km 
 / 
 !-----------------------------------------------------------------------
 &nambge_sdv_tru	! 
@@ -95,6 +95,8 @@ nsdv_tru       = 1        !
 nsdvwgt_tru    = 0        ! 
 wgtcst_tru(:)  = 1.0      !  Array of values depending on value of ncovtru
 ln_wgtramp_tru = .false.  ! 
+ln_coa_tru(:)  = .false.
+rcoast_tru(:)  = 100.0  ! in km
 / 
 !-----------------------------------------------------------------------
 &nam_asminc	!    assimilation increments
@@ -109,7 +111,6 @@ ndiftyp_paf      = 2              !
 ndiften_paf      = 0              ! 
 ndifit_exp_h_paf = 600            ! 
 ndifit_imp_h_paf = 10             ! 
-nintstp_paf      = 1              ! 
 npartot_paf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_sic_paf / 2 elements
 nten_h_paf       = 3              ! 
 scalen_h_paf     = 2.0            !  in degrees
@@ -122,28 +123,7 @@ nlstyp_paf       = 0              !
 &nampar_fil_sol	! 
 !-----------------------------------------------------------------------
 ln_eigrea_paf = .false.  ! 
-/ 
-!-----------------------------------------------------------------------
-&namran_fil	! 
-!-----------------------------------------------------------------------
-ndiftyp_raf      = 2              ! 
-ndifit_exp_h_raf = 1000           ! 
-ndifit_imp_h_raf = 10             ! 
-nintstp_raf      = 1              ! 
-npartot_raf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_sic_raf / 2 elements
-nten_h_raf       = 0              ! 
-scalen_h_raf     = 20.0           !  in degrees
-scagrd_h_raf     = 2.0            ! 
-ln_coa_raf       = .false.        ! 
-rcoast_raf       = 500.0          !  in km
-nlstyp_raf       = 0              ! 
-/ 
-!-----------------------------------------------------------------------
-&nambge_def_mod	! 
-!-----------------------------------------------------------------------
-scaten_h_def = 0.33     ! 
-ln_coa_def   = .false.  ! 
-rcoast_def   = 500.0    ! 
+ln_solall2d_paf = .false.
 / 
 !-----------------------------------------------------------------------
 &nambge_ens_loc	! 
@@ -175,6 +155,11 @@ ln_fillct_h_ens = .false.  !
 !-----------------------------------------------------------------------
 &namens_fil	!     Ensemble-estimated parameter filtering (namens_fil)
 !-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namens_fil_sol !
+!-----------------------------------------------------------------------
+   ln_solall2d_enf = .false.
 / 
 !-----------------------------------------------------------------------
 &namens_fil_trf	!  Ensemble parameter filtering transfer operator

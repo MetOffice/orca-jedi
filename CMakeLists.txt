@@ -44,6 +44,8 @@ ecbuild_debug( "   ufo_FEATURES : [${ufo_FEATURES}]" )
 
 find_package( nemo-feedback )
 
+find_package( nemovar )
+
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
 

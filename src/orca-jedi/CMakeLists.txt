@@ -87,4 +87,4 @@ target_link_libraries( orcamodel PUBLIC NetCDF::NetCDF_CXX)
 target_include_directories(orcamodel PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
                                             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_include_directories(orcamodel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/nemovar/module>)
+target_include_directories(orcamodel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/nemovar/nemovar-module>)
