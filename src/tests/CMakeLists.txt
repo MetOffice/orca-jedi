@@ -101,9 +101,20 @@ ecbuild_add_test( TARGET test_orcamodel_3DVar_sic_identity
                   ARGS testinput/3dvar_sic_identity.yaml
                   COMMAND orcamodel_3DVar.x )
 
+
+ecbuild_add_test( TARGET test_orcamodel_nv_3DVar_sic
+                  OMP 1
+                  ARGS testinput/nv_3dvar_sic.yaml
+                  COMMAND orcamodel_3DVar.x )
+
 ecbuild_add_test( TARGET test_orcamodel_Dirac
                   OMP 1
                   ARGS testinput/dirac.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+
+ecbuild_add_test( TARGET test_orcamodel_nv_Dirac
+                  OMP 1
+                  ARGS testinput/nv_dirac.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
                   
 ecbuild_add_test( TARGET test_orcamodel_bump_nicas_setup

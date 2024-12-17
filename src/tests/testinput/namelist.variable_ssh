@@ -1,0 +1,286 @@
+!-----------------------------------------------------------------------
+&nambge_cov	!  background error covariance
+!-----------------------------------------------------------------------
+ln_mod  = .true.  ! 
+ncovmod = 1       ! 
+ncovtru = 1       ! 
+ncortyp = 0       ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cov_tst	!  background error covariance test parameters
+!-----------------------------------------------------------------------
+dinnov = 0.1  ! 
+obesdv = 0.1  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_mod	!  Background error correlation model
+!-----------------------------------------------------------------------
+nortyp_mod     = 0        ! 
+nrannow_mod    = 100      ! 
+nmlmc_crse_mod = 1000     ! 
+nmlmc_corr_mod = 100      ! 
+ln_norexa_mod  = .false.  ! 
+ln_norran_mod  = .true.   ! 
+ln_ranrea_mod  = .false.  ! 
+ln_nordia_mod  = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod_trf	!  Background error correlation transfer operator
+!-----------------------------------------------------------------------
+nitsha_trf_mod(:) = 1        !  Array of values depending on value of ncovmod
+ln_trfgrd_mod(:)  = .false.  !  Array of values depending on value of ncovmod
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_tru	! 
+!-----------------------------------------------------------------------
+nortyp_tru       = 2        ! 
+nrannow_tru      = 100      ! 
+nrannowper_tru   = 100      ! 
+ln_norexa_tru    = .false.  ! 
+ln_norran_tru    = .true.   ! 
+ln_norranper_tru = .true.   ! 
+ln_ranrea_tru    = .false.  ! 
+ln_ranreaper_tru = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod	!  Diffusion for the background error covariance model
+!-----------------------------------------------------------------------
+ndiftyp_mod              = 2              ! 
+ndiften_mod              = 0              ! 
+ndifit_exp_h_mod         = 150            ! 
+ndifit_imp_h_mod         = 10             ! 
+npartot_mod(:)           = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_mod / 2 elements
+nten_h_clim_hyb_mod(:)   = 3              ! 
+wgtten_h_mod(:)          = 1.0            !  Array of values depending on value of ncovmod
+scalen_h_mod             = 2.0            !  in degrees
+scagrd_h_mod             = 5.0            ! 
+rcoast_mod               = 100.0          ! 
+ln_coa_mod               = .false.        ! 
+ln_rgrd_dif_lscl         = .false.        ! 
+ln_dif_ten_h_clim_hyb(:) = .false.        ! 
+nestten_h_mod            = 3              ! 
+rten_hyb_cutlat_mod      = 20.0           ! 
+rten_hyb_cutlat_bnd_mod  = 5.0            ! 
+rten_hyb_cutlat_wgt_mod  = 0.0            ! 
+nlstyp_mod               = 0              ! 
+nten_h_mod(:)            = 2              ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod_sol	! 
+!-----------------------------------------------------------------------
+ln_eigrea_mod = .false.  ! 
+ln_cgsolall2d_mod = .false.
+ln_solall2d_mod   = .false.
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_tru	! 
+!-----------------------------------------------------------------------
+nten_h_tru(:)   = 1    !  Array of values depending on value of ncovtru
+wgtten_h_tru(:) = 1.0  !  Array of values depending on value of ncovtru
+/ 
+!-----------------------------------------------------------------------
+&nambge_sdv_mod	!  Background error standard deviation(nambge_sdv_mod)
+!-----------------------------------------------------------------------
+nsdv_mod           = 1        ! 
+nsdvwgt_mod        = 0        ! 
+nsdvsca_mod        = 0        ! 
+wgt_Bmod           = 1.0      ! 
+wgtcst_mod(:)      = 1.0      !  Array of values depending on value of ncovmod
+sdv_mod            = 0.01     ! 
+wgt_mod_var_mod    = 1.0      ! 
+wgt_ens_var_mod    = 0.0      ! 
+hfac_max_sdv_mod   = 100.0    !  1/metres
+rsdv_hyb_parm_mod  = 1.0      ! 
+rsdv_hyb_clim_mod  = 1.0      ! 
+ln_wgtramp_mod     = .false.  ! 
+ln_sdvsca_mod      = .false.  ! 
+ln_sdv_hyb_mod     = .false.  ! 
+ln_sdv_sca_hyb_mod = .false.  ! 
+nhybvar_mod        = 0        ! 
+rcoast_mod(:)      = 100.0    ! in km 
+/ 
+!-----------------------------------------------------------------------
+&nambge_sdv_tru	! 
+!-----------------------------------------------------------------------
+nsdv_tru       = 1        ! 
+nsdvwgt_tru    = 0        ! 
+wgtcst_tru(:)  = 1.0      !  Array of values depending on value of ncovtru
+ln_wgtramp_tru = .false.  ! 
+ln_coa_tru(:)  = .false.
+rcoast_tru(:)  = 100.0  ! in km
+/ 
+!-----------------------------------------------------------------------
+&nam_asminc	!    assimilation increments
+!-----------------------------------------------------------------------
+ln_inc = .true.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil	!  Parameter filtering
+!-----------------------------------------------------------------------
+ln_paf           = .false.        ! 
+ndiftyp_paf      = 2              ! 
+ndiften_paf      = 0              ! 
+ndifit_exp_h_paf = 600            ! 
+ndifit_imp_h_paf = 10             ! 
+npartot_paf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_ssh_paf / 2 elements
+nten_h_paf       = 3              ! 
+scalen_h_paf     = 2.0            !  in degrees
+scagrd_h_paf     = 2.0            ! 
+ln_coa_paf       = .false.        ! 
+rcoast_paf       = 100.0          !  in km
+nlstyp_paf       = 0              ! 
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil_sol	! 
+!-----------------------------------------------------------------------
+ln_eigrea_paf = .false.  ! 
+ln_solall2d_paf = .false.
+/ 
+!-----------------------------------------------------------------------
+&nambge_ens_loc	! 
+!-----------------------------------------------------------------------
+nortyp_loc       = 0        ! 
+nrannow_loc      = 100      ! 
+nmlmc_crse_loc   = 1000     ! 
+nmlmc_corr_loc   = 100      ! 
+ln_norexa_loc    = .false.  ! 
+ln_norran_loc    = .true.   ! 
+ln_ranrea_loc    = .false.  ! 
+ln_nordia_loc    = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc	! 
+!-----------------------------------------------------------------------
+ndiftyp_loc       = 2              ! 
+ndifit_exp_h_loc  = 720            ! 
+ndifit_imp_h_loc  = 10             ! 
+npartot_loc(:)    = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_ssh_loc / 2 elements
+nten_h_loc(:)     = 1              ! 
+wgtten_h_loc(:)   = 1.0            !  Array of values depending on value of nlocsca
+scalen_h_loc(:,:) = 8.0            !  in degrees
+scagrd_h_loc(:,:) = 8.0            ! 
+scaten_h_loc      = 1.0            ! 
+ln_coa_loc        = .false.        ! 
+rcoast_loc        = 100.0          !  in km
+nlstyp_loc        = 0              ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_sol	! 
+!-----------------------------------------------------------------------
+ln_eigrea_loc = .false.  ! 
+ln_cgsolall2d_loc = .false.
+ln_solall2d_loc   = .false.
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_trf	! 
+!-----------------------------------------------------------------------
+ln_trfgrd_loc(:)  = .false.  !  Array of values depending on value of nlocsca
+nitsha_trf_loc(:) = 1        !  Array of values depending on value of nlocsca
+/ 
+!-----------------------------------------------------------------------
+&nambge_eof	! 
+!-----------------------------------------------------------------------
+ln_eof      = .false.
+wgt_Beof    = 0.0      ! 
+ln_read_eof = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&namens	!     Ensemble estimation
+!-----------------------------------------------------------------------
+ln_ens              = .false.  ! 
+ln_ens_per          = .false.  ! 
+ln_var_ens          = .false.  ! 
+ln_lctgrd_ens       = .false.  ! 
+ln_lctbump_ens      = .false.  ! 
+ln_filvar_ens       = .true.   ! 
+ln_fillct_h_ens     = .true.   ! 
+ln_dalrea_ens       = .false.  ! 
+ln_sdvrea_ens       = .false.  ! 
+ln_varwri_ens       = .false.  ! 
+ln_sdvwri_ens       = .false.  ! 
+ln_dalwri_ens       = .false.  ! 
+facinf_ens          = 1.0      ! 
+wgt_Bens            = 0.0      ! 
+nenssca             = 1        ! 
+nlocsca             = 1        ! 
+ncovfun             = 1        ! 
+ln_ens_rem_lin_mean = .false.  ! 
+ln_ens_rem_per_mean = .true.   ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_fil	!     Ensemble-estimated parameter filtering (namens_fil)
+!-----------------------------------------------------------------------
+ndiftyp_enf      = 2              ! 
+ndifit_exp_h_enf = 600            ! 
+ndifit_imp_h_enf = 10             ! 
+npartot_enf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_ssh_enf / 2 elements
+nten_h_enf       = 0              ! 
+scalen_h_enf     = 30.0           !  in degrees
+scagrd_h_enf     = 2.0            ! 
+ln_coa_enf       = .false.        ! 
+rcoast_enf       = 500.0          !  in km
+nlstyp_enf       = 0              ! 
+/
+!-----------------------------------------------------------------------
+&namens_fil_sol !
+!-----------------------------------------------------------------------
+   ln_solall2d_enf = .false.
+/
+!-----------------------------------------------------------------------
+&namens_fil_trf	!  Ensemble parameter filtering transfer operator
+!-----------------------------------------------------------------------
+ln_trfgrd_enf  = .false.  ! 
+nitsha_trf_enf = 1        ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_scf	!  Scale-dependent filtering
+!-----------------------------------------------------------------------
+ndiftyp_scf      = 2              ! 
+ndifit_exp_h_scf = 550            ! 
+ndifit_imp_h_scf = 10             ! 
+npartot_scf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_ssh_scf / 2 elements
+nten_h_scf(:)    = 0              !  Array of values depending on value of nenssca
+wgtten_h_scf(:)  = 1.0            !  Array of values depending on value of nenssca
+scalen_h_scf(:,:)  = 20.0         !  in degrees
+scagrd_h_scf(:,:)  = 2.0          ! 
+ln_coa_scf       = .false.        ! 
+rcoast_scf       = 100.0          !  in km
+nlstyp_scf       = 0              ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_scf_sol	!  Scale-dependent filtering solver
+!-----------------------------------------------------------------------
+ln_eigrea_scf = .false.  ! 
+ln_solall2d_scf = .false.
+/ 
+!-----------------------------------------------------------------------
+&namens_scf_trf	!  Scale-dependent filtering transfer operator
+!-----------------------------------------------------------------------
+ln_trfgrd_scf(:)  = .false.  ! 
+nitsha_trf_scf(:) = 1        ! 
+/
+!-----------------------------------------------------------------------
+&nambal_mat_sol !   Balance solver parameters
+!-----------------------------------------------------------------------
+   nbalmat_solimp       = 4
+   nbalmat_nsolitmax    = 5000
+   nbalmat_nsolitfix(1) = 3153 ! Number required to achieve 1.0e-5 with Chebyshev, ORCA1, diagonal prec
+   ln_balmat_ritznam    = .false.
+   ln_balmat_lanczos    = .false.
+   ln_balmat_ritzlmp    = .false.
+   ln_balmat_ritzgal    = .false.
+   ln_balmat_ritzortho  = .false.
+   nbalmat_nritzpair    = 100
+   nbalmat_soldia       = 0
+   nbalmat_verbose      = 2
+   ln_balmat_ritztst    = .false.
+   balmat_soltol        = 1.0e-5
+   balmat_ritzmin(1)    = 6.672087596722204e-006    ! Value for ORCA1 with diagonal preconditioning
+   balmat_ritzmax(1)    = 2.0                       ! Value for ORCA1 with diagonal preconditioning
+   balmat_ritzminper    = 0.0
+   balmat_ritzmaxper    = 0.0
+   balmat_cgsoltol      = 1.0e-10
+   ln_balmat_diaprc     = .true.
+   nbalmat_solstp       = 0
+   nbalmat_solfgs       = 0
+/

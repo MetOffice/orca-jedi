@@ -6,6 +6,7 @@ eorca025_t_nemo.nc
 orca2_t_bkg_var.nc
 orca2_t_coords.nc
 orca2_t_nemo.nc
+orca2_t_nemo_masked_bkg.nc
 orca1_t_nemo.nc
 hofx_sic_ostia_obs.nc
 simple_nemo.nc
@@ -29,6 +30,9 @@ hofx_ssh_amm_obs.nc
 sic_obs_ideal.nc
 orca2_nicas_grids_local_000001-000001.nc
 orca2_nicas_local_000001-000001.nc
+bathy_meter.nc
+coordinates.nc
+dist_coast_uvtf.nc
 )
 
 foreach(FILENAME ${orcajedi_test_data})

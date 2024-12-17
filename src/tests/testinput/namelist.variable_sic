@@ -1,0 +1,179 @@
+!-----------------------------------------------------------------------
+&nambge_cov	!  background error covariance
+!-----------------------------------------------------------------------
+ln_mod  = .true.  ! 
+ncovmod = 1       ! 
+ncovtru = 1       ! 
+ncortyp = 0       ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cov_tst	!  background error covariance test parameters
+!-----------------------------------------------------------------------
+dinnov = 0.1  ! 
+obesdv = 0.1  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_mod	!  Background error correlation model
+!-----------------------------------------------------------------------
+nortyp_mod     = 0        ! 
+nrannow_mod    = 100      ! 
+nmlmc_crse_mod = 1000     ! 
+nmlmc_corr_mod = 100      ! 
+ln_norexa_mod  = .false.  ! 
+ln_norran_mod  = .true.   ! 
+ln_ranrea_mod  = .false.  ! 
+ln_nordia_mod  = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nameof	! 
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod_trf	!  Background error correlation transfer operator
+!-----------------------------------------------------------------------
+nitsha_trf_mod(:) = 1        !  Array of values depending on value of ncovmod
+ln_trfgrd_mod(:)  = .false.  !  Array of values depending on value of ncovmod
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_tru	! 
+!-----------------------------------------------------------------------
+nortyp_tru       = 2        ! 
+nrannow_tru      = 100      ! 
+nrannowper_tru   = 100      ! 
+ln_norexa_tru    = .false.  ! 
+ln_norran_tru    = .true.   ! 
+ln_norranper_tru = .true.   ! 
+ln_ranrea_tru    = .false.  ! 
+ln_ranreaper_tru = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod	!  Diffusion for the background error covariance model
+!-----------------------------------------------------------------------
+ndiftyp_mod      = 2              ! 
+ndiften_mod      = 0              ! 
+ndifit_exp_h_mod = 150            ! 
+ndifit_imp_h_mod = 10             ! 
+npartot_mod(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_mod / 2 elements
+nten_h_mod(:)    = 2              !  Array of values depending on value of ncovmod
+wgtten_h_mod(:)  = 1.0            !  Array of values depending on value of ncovmod
+scalen_h_mod     = 2.0            !  in degrees
+scagrd_h_mod     = 5.0            ! 
+rcoast_mod       = 100.0          ! 
+ln_coa_mod       = .false.        ! 
+ln_rgrd_dif_lscl = .false.        ! 
+nlstyp_mod       = 0              ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod_sol	! 
+!-----------------------------------------------------------------------
+ln_eigrea_mod = .false.  ! 
+ln_cgsolall2d_mod = .false.
+ln_solall2d_mod   = .false.
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_tru	! 
+!-----------------------------------------------------------------------
+nten_h_tru(:)   = 1    !  Array of values depending on value of ncovtru
+wgtten_h_tru(:) = 1.0  !  Array of values depending on value of ncovtru
+/ 
+!-----------------------------------------------------------------------
+&nambge_sdv_mod	!  Background error standard deviation(nambge_sdv_mod)
+!-----------------------------------------------------------------------
+nsdv_mod       = 1        ! 
+nsdvwgt_mod    = 0        ! 
+nsdvsca_mod    = 0        ! 
+sdv_mod        = 0.01     ! 
+wgtcst_mod(:)  = 1.0      !  Array of values depending on value of ncovmod
+ln_wgtramp_mod = .false.  ! 
+ln_sdvsca_mod  = .false.  ! 
+rcoast_mod(:)      = 100.0    ! in km 
+/ 
+!-----------------------------------------------------------------------
+&nambge_sdv_tru	! 
+!-----------------------------------------------------------------------
+nsdv_tru       = 1        ! 
+nsdvwgt_tru    = 0        ! 
+wgtcst_tru(:)  = 1.0      !  Array of values depending on value of ncovtru
+ln_wgtramp_tru = .false.  ! 
+ln_coa_tru(:)  = .false.
+rcoast_tru(:)  = 100.0  ! in km
+/ 
+!-----------------------------------------------------------------------
+&nam_asminc	!    assimilation increments
+!-----------------------------------------------------------------------
+ln_inc = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil	!  Parameter filtering
+!-----------------------------------------------------------------------
+ln_paf           = .false.        ! 
+ndiftyp_paf      = 2              ! 
+ndiften_paf      = 0              ! 
+ndifit_exp_h_paf = 600            ! 
+ndifit_imp_h_paf = 10             ! 
+npartot_paf(:)   = 1, 1, 1, 1, 1  !  Array of values with ndifit_imp_h_sic_paf / 2 elements
+nten_h_paf       = 3              ! 
+scalen_h_paf     = 2.0            !  in degrees
+scagrd_h_paf     = 2.0            ! 
+ln_coa_paf       = .false.        ! 
+rcoast_paf       = 100.0          !  in km
+nlstyp_paf       = 0              ! 
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil_sol	! 
+!-----------------------------------------------------------------------
+ln_eigrea_paf = .false.  ! 
+ln_solall2d_paf = .false.
+/ 
+!-----------------------------------------------------------------------
+&nambge_ens_loc	! 
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc	! 
+!-----------------------------------------------------------------------
+ln_coa_loc = .false.  ! 
+rcoast_loc = 100.0    !  in km
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_sol	! 
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_trf	! 
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&namens	!     Ensemble estimation
+!-----------------------------------------------------------------------
+ln_ens          = .false.  ! 
+ln_ens_per      = .false.  ! 
+ln_var_ens      = .false.  ! 
+ln_filvar_ens   = .false.  ! 
+ln_fillct_h_ens = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_fil	!     Ensemble-estimated parameter filtering (namens_fil)
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namens_fil_sol !
+!-----------------------------------------------------------------------
+   ln_solall2d_enf = .false.
+/ 
+!-----------------------------------------------------------------------
+&namens_fil_trf	!  Ensemble parameter filtering transfer operator
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&namens_scf	!  Scale-dependent filtering
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&namens_scf_sol	!  Scale-dependent filtering solver
+!-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&namens_scf_trf	!  Scale-dependent filtering transfer operator
+!-----------------------------------------------------------------------
+/ 

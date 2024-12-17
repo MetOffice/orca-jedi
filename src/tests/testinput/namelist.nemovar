@@ -1,0 +1,1579 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! NEMO/OPA  :  1 - run manager      (namrun)
+!! namelists    2 - Domain           (namzgr, namzgr_sco, namdom)
+!!              4 - lateral boundary (namlbc, namcla)
+!!              6 - Tracer           (nameos)
+!!              9 - diagnostics      (namnc4)
+!!             10 - miscellaneous    (nammpp, nammpp_dyndist, namctl)
+!!             11 - Obs & Assim      (namobs_var, nam_asminc, nambias)
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!======================================================================
+!!                   ***  Run management namelists  ***
+!!======================================================================
+!!   namrun        parameters of the run
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&namrun	!    parameters of the run
+!-----------------------------------------------------------------------
+nn_no               = 1                       !   job number
+cn_exp              = "ORCA2_Z31"             ! 
+nn_it000            = 1                       !   first time step
+nn_itend            = 24                      ! 
+nn_date0            = 20090101                !   initial calendar date yymmdd (used if nn_rstctl
+nn_leapy            = 1                       !   Leap year calendar (1) or not (0)
+ln_rstart           = .true.                  !   start from rest (F) or from a restart file (T)
+nn_rstctl           = 0                       !   restart control 
+cn_ocerst_in        = "restart"               !   suffix of ocean restart name (input)
+cn_ocerst_out       = "restart"               !   suffix of ocean restart name (output)
+nn_istate           = 0                       !   output the initial state (1) or not (0)
+nn_stock            = 24                      ! 
+nn_write            = 24                      ! 
+ln_dimgnnn          = .false.                 !   DIMG file format: 1 file for all processors (F) or by processor (T)
+ln_mskland          = .false.                 !   mask land points in NetCDF outputs (costly: + ~15%)
+ln_clobber          = .false.                 !   clobber (overwrite) an existing file
+nn_chunksz          = 0                       !   chunksize (bytes) for NetCDF file (works only with iom_nf90 routines)
+nn_inc_out_prec     = 8                       !   precision of the increments in the output NetCDF file (4 
+nn_normfac_out_prec = 8                       !   precision of the normalization factor files in the output file (4 
+cn_oceinc_out       = "increments_outer"      !    suffix of increment name (output)
+cn_oceinc_out_path  = "."                     !    path of increment files  (output)
+cn_oceinc_in        = "increments_outer"      !    suffix of increment name (input)
+cn_oceinc_in_path   = "."                     !    path of increment files  (input)
+cn_rstctl_out       = "restart_ctlvec_outer"  !    suffix of restart ctlvec files (output)
+cn_rstctl_out_path  = "."                     !    path of restart ctlvec files (output)
+/ 
+!!======================================================================
+!!                      ***  Domain namelists  ***
+!!======================================================================
+!!   namzgr       vertical coordinate
+!!   namzgr_sco   s-coordinate or hybrid z-s-coordinate
+!!   namdom       space and time domain (bathymetry, mesh, timestep)
+!!   namtsd       data: temperature & salinity
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&namzgr	!    vertical coordinate
+!-----------------------------------------------------------------------
+ln_zco = .false.  !   z-coordinate - full    steps   (T/F)      ("key_zco" may also be defined)
+ln_zps = .true.   !   z-coordinate - partial steps   (T/F)
+ln_sco = .false.  !   s- or hybrid z-s-coordinate    (T/F)
+/ 
+!-----------------------------------------------------------------------
+&namzgr_sco	!    s-coordinate or hybrid z-s-coordinate
+!-----------------------------------------------------------------------
+rn_sbot_min = 300.   !   minimum depth of s-bottom surface (>0) (m)
+rn_sbot_max = 5250.  !   maximum depth of s-bottom surface (
+rn_theta    = 6.0    !   surface control parameter (0<
+rn_thetb    = 0.75   !   bottom control parameter  (0<
+rn_rmax     = 0.15   !   maximum cut-off r-value allowed (0<rn_max<1)
+rn_bb       = 0.8    !   stretching with s-sigma
+rn_hc       = 150.0  !   critical depth with s-sigma
+/ 
+!-----------------------------------------------------------------------
+&namdom	!    space and time domain (bathymetry, mesh, timestep)
+!-----------------------------------------------------------------------
+nn_bathy            = 1        !   compute (
+nn_closea           = 0        !   remove (
+nn_msh              = 0        !   create (
+rn_hmin             = -3.      !   min depth of the ocean (>0) or min number of ocean level (<0)
+rn_e3zps_min        = 20.      !   partial step thickness is set larger than the minimum of
+rn_e3zps_rat        = 0.1      !   rn_e3zps_min and rn_e3zps_rat*e3t, with 0<rn_e3zps_rat<1
+rn_rdt              = 3600.0   !   time step for the dynamics (and tracer if nn_acc
+nn_baro             = 64       !   number of barotropic time step            ("key_dynspg_ts")
+rn_atfp             = 0.1      !   asselin time filter parameter
+nn_acc              = 0        !   acceleration of convergence : 
+rn_rdtmin           = 28800.   !   minimum time step on tracers (used if nn_acc
+rn_rdtmax           = 28800.   !   maximum time step on tracers (used if nn_acc
+rn_rdth             = 800.     !   depth variation of tracer time step  (used if nn_acc
+ln_read_closea_mask = .false.  !  Open coordinates file and read the closed sea mask
+/ 
+!-----------------------------------------------------------------------
+&namdom_sup	!  Additional domain settings
+!-----------------------------------------------------------------------
+jphgr_msh = 0                  !   type of horizontal mesh
+ppglam0   = 999999.0           !   longitude of first raw and column T-point (jphgr_msh 
+ppgphi0   = 999999.0           !  latitude  of first raw and column T-point (jphgr_msh 
+ppe1_deg  = 999999.0           !   zonal      grid-spacing (degrees)
+ppe2_deg  = 999999.0           !   meridional grid-spacing (degrees)
+ppe1_m    = 999999.0           !   zonal      grid-spacing (degrees)
+ppe2_m    = 999999.0           !   meridional grid-spacing (degrees)
+ppsur     = -3152.95254623653  !   ORCA r4, r2 and r05 coefficients
+ppa0      = 155.00000000000    !  (default coefficients)
+ppa1      = 145.00000000000    ! 
+ppkth     = 25.48709749900     ! 
+ppacr     = 5.5                ! 
+ppdzmin   = 999999.            !   Minimum vertical spacing
+pphmax    = 999999.            !   Maximum depth
+ldbletanh = .false.            !   Use/do not use double tanf function for vertical coordinates
+ppa2      = 999999.            !   Double tanh function parameters
+ppkth2    = 999999.            ! 
+ppacr2    = 999999.            ! 
+/ 
+!!======================================================================
+!!               ***  Lateral boundary condition  ***
+!!======================================================================
+!!   namlbc        lateral momentum boundary condition
+!!   namcla        cross land advection
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&namlbc	!    lateral momentum boundary condition
+!-----------------------------------------------------------------------
+rn_shlat  = 2.       !   shlat 
+ln_vorlat = .false.  !   consistency of vorticity boundary condition with analytical eqs.
+/ 
+!-----------------------------------------------------------------------
+&namcla	!    cross land advection
+!-----------------------------------------------------------------------
+nn_cla = 0  !   advection between 2 ocean pts separates by land
+/ 
+!!======================================================================
+!!                        Tracer (T & S ) namelists
+!!======================================================================
+!!   nameos        equation of state
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&nameos	!    ocean physical parameters
+!-----------------------------------------------------------------------
+nn_eos   = 0       !   type of equation of state and Brunt-Vaisala frequency
+rn_alpha = 2.0e-4  !   thermal expension coefficient (nn_eos
+rn_beta  = 7.7e-4  !   saline  expension coefficient (nn_eos
+/ 
+!!======================================================================
+!!                  ***  Miscellaneous namelists  ***
+!!======================================================================
+!!   nammpp            Massively Parallel Processing                    ("key_mpp_mpi")
+!!   namctl            Control prints & Benchmark
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&nammpp	!    Massively Parallel Processing                        ("key_mpp_mpi")
+!-----------------------------------------------------------------------
+cn_mpi_send  = 'I'     !   mpi send/recieve type   
+nn_buffer    = 0       !   size in bytes of exported buffer ('B' case), 0 no exportation
+jpni         = 1       !   jpni   number of processors following i (set automatically if < 1)
+jpnj         = 1       !   jpnj   number of processors following j (set automatically if < 1)
+jpnij        = 1       !   jpnij  number of local domains (set automatically if < 1)
+ln_nnogather = .true.  ! 
+/ 
+!-----------------------------------------------------------------------
+&namcfg	!    parameters of the configuration
+!-----------------------------------------------------------------------
+cp_cfg      = "orca"  !   name of the configuration
+jp_cfg      =       2               !  resolution of the configuration
+jpidta      =     182               !  1st lateral dimension ( >= jpi )
+jpjdta      =     149               !  2nd    "         "    ( >= jpj )
+jpkdta      =      31               !  number of levels      ( >= jpk )
+jpiglo      =     182               !  1st dimension of global domain --> i =jpidta
+jpjglo      =     149               !  2nd    -                  -    --> j  =jpjdta
+jperio      =       4               !  lateral cond. type (between 0 and 6)
+ln_trabbl   = .TRUE.                !  key_trabbl set
+ln_zdfddm   = .TRUE.                !  key_zdfddm
+ln_traldf_eiv  = .TRUE.         !  key_traldf_eiv
+/ 
+!-----------------------------------------------------------------------
+&namctl	!    Control prints & Benchmark
+!-----------------------------------------------------------------------
+ln_ctl              = .false.  !   trends control print (expensive
+ln_errfort          = .false.  !   output fort files on error
+nn_print            = 0        !   level of print (0 no extra print)
+nn_ictls            = 0        !   start i indice of control sum (use to compare mono versus
+nn_ictle            = 0        !   end   i indice of control sum        multi processor runs
+nn_jctls            = 0        !   start j indice of control               over a subdomain)
+nn_jctle            = 0        !   end   j indice of control
+nn_isplt            = 1        !   number of processors in i-direction
+nn_jsplt            = 1        !   number of processors in j-direction
+nn_bench            = 0        !   Bench mode (1/0): CAUTION use zero except for bench
+nn_timing           = 0        ! 
+ln_timing_exclusive = .true.   ! 
+ln_timing_overhead  = .true.   ! 
+ln_timing_cpu       = .true.   ! 
+ln_mtreinit         = .false.  ! 
+/ 
+!!======================================================================
+!!                  ***  Diagnostics namelists  ***
+!!======================================================================
+!!   namnc4       netcdf4 chunking and compression settings             ("key_netcdf4")
+!!   namtrd       dynamics and/or tracer trends                         ("key_trddyn","key_trdtra","key_trdmld")
+!!   namflo       float parameters                                      ("key_float")
+!!   namptr       Poleward Transport Diagnostics
+!!   namhsb       Heat and salt budgets
+!!======================================================================
+!
+!-----------------------------------------------------------------------
+&namnc4	!    netcdf4 chunking and compression settings            ("key_netcdf4")
+!-----------------------------------------------------------------------
+nn_nchunks_i = 4       !   number of chunks in i-dimension
+nn_nchunks_j = 4       !   number of chunks in j-dimension
+nn_nchunks_k = 31      !   number of chunks in k-dimension
+ln_nc4zip    = .true.  !   (T) use netcdf4 chunking and compression
+/ 
+!!======================================================================
+!!            ***  Observation & Assimilation namelists ***
+!!======================================================================
+!!   namobs       observation and model comparison
+!!   nam_asminc   assimilation increments
+!!======================================================================
+!
+&namobs	!   observation usage switch
+!-----------------------------------------------------------------------
+ln_t3d                = .true.                   !  Logical switch for T profile observations
+ln_s3d                = .true.                   !  Logical switch for S profile observations
+ln_ena                = .false.                  !  Logical switch for ENACT insitu data set
+ln_cor                = .false.                  !  Logical switch for Coriolis insitu data set
+ln_profb              = .true.                   !  Logical switch for feedback insitu data set
+ln_sla                = .true.                   !  Logical switch for SLA observations
+ln_sladt              = .false.                  !  Logical switch for AVISO SLA data
+ln_slafb              = .true.                   !  Logical switch for feedback SLA data
+ln_sst                = .false.                  !  Logical switch for SST observations
+ln_sstbias            = .false.                  ! 
+ln_grdsst             = .false.                  ! 
+ln_sstfb              = .false.                  !  Logical switch for feedback SST data
+profbfiles            = 'profiles_01.nc'         ! 
+enactfiles            = ''                       ! 
+ln_profb_enatim       = .true.                   ! 
+slafbfiles            = 'sla_01.nc'              ! 
+nmsshc                = 1                        !  MSSH correction scheme
+ln_altbias            = .false.                  !  Logical switch for alt bias
+ln_ignmis             = .false.                  !  Logical switch for ignoring missing files
+ln_grid_global        = .true.                   ! 
+ln_grid_search_lookup = .false.                  ! 
+ln_velfb              = .false.                  ! 
+velfbfiles            = ''                       ! 
+ln_velfb_av           = .false.                  ! 
+n1dint                = 1                        ! 
+n2dint                = 3                        ! 
+ln_nea                = .true.                   ! 
+mdtcutoff             = 65.0                     ! 
+mdtcorr               = 1.61                     ! 
+dobsini               = 20090101                 ! 
+dobsend               = 20090110                 ! 
+ln_profb_ena          = .true.                   ! 
+ln_seaice             = .false.                  ! 
+ln_grdseaice          = .false.                  ! 
+grdseaicename         = 'ice_cover_yYYYYmMM.nc'  ! 
+/ 
+!-----------------------------------------------------------------------
+&nam_asminc	!    assimilation increments
+!-----------------------------------------------------------------------
+ln_bkgwri = .false.  !   Logical switch for writing out background state
+ln_asmdin = .true.   !   Logical switch for Direct Initialization (DI)
+ln_asmiau = .false.  !   Logical switch for Incremental Analysis Updating (IAU)
+nitbkg    = 0        !   Timestep of background in [0,nitend-nit000-1]
+nitdin    = 0        !   Timestep of background for DI in [0,nitend-nit000-1]
+nitiaustr = 1        !   Timestep of start of IAU interval in [0,nitend-nit000-1]
+nitiaufin = 24       ! 
+niaufn    = 0        !   Type of IAU weighting function
+ln_salfix = .false.  !   Logical switch for ensuring that the sa > salfixmin
+salfixmin = -9999    !   Minimum salinity after applying the increments
+nn_divdmp = 0        !   Number of iterations of divergence damping operator
+/ 
+! ======================================================================
+! NEMO/VAR specific section
+! ======================================================================
+!-----------------------------------------------------------------------
+!       namobs_var    inner loop observation usage switch
+! ln_p3d                   ! Switch for profiles
+! ln_t3d                   ! Switch for temperature profiles
+! ln_s3d                   ! Switch for salinity profiles
+! ln_sla                   ! Switch for sea level anomalies
+! ln_sst                   ! Switch for sea surface temperature data
+! ln_sst_grid              ! Switch for gridded sea surface temperature data
+! ln_sst_grid_write        ! Switch for writing the gridded SST fields as output
+! ln_sss                   ! Switch for sea surface salinity data
+! ln_ssv                   ! Switch for sea surface velocity data
+! ln_sic                   ! Switch for sea ice concentration data
+! ln_grid_search           ! Switch for redoing grid search
+! ln_grid_search_lookup    ! Switch for using lookup table to speed up grid search
+! ln_grid_global           ! Switch for using global distribution of observations
+! ln_sgl                   ! Switch for single observation experiment
+! ln_syn_data              ! Switch to overwrite the innovation vector with synthetic data
+! ln_p3d_vthin             ! Switch for vertical thinning of TS profiles
+! ln_sla_superob           ! Switch for using SLA superob information to define the SLA OBE std dev
+! ln_sla_remmean           ! Switch for removing mean from SLA data
+! ln_sla_remmean_all       ! Switch for using mean of all SLA satellites rather than individual satellites
+!
+! ln_obsini                ! Switch for including observations at start or end of time window
+!  .TRUE.  = include observations that satisfy (default value):
+!              time window start <= obs time <  time window end
+!  .FALSE. = include observations that satisfy:
+!              time window start <  obs time <= time window end
+! ln_minval_sst            ! Switch for rejecting SST observations smaller than a minimum value
+! ln_minval_sss            ! Switch for rejecting SSS observations smaller than a minimum value
+! ln_minval_ssv            ! Switch for rejecting SSV observations smaller than a minimum value
+! ln_nearlandrej           ! Switch for rejecting observations near land
+! ln_ranrej_p3d            ! Switch for random rejection of profile observations with specified probability
+! ln_ranrej_sla            ! Switch for random rejection of SLA     observations with specified probability
+!
+! Switches for specifying the footprint size units for different observation types:
+!   = .TRUE.  => in degrees
+!   = .FALSE. => in metres
+!
+! ln_fpindegs_sla          !   Switch for SLA footprint
+! ln_fpindegs_sst          !   Switch for SST footprint
+! ln_fpindegs_sss          !   Switch for SSS footprint
+! ln_fpindegs_ssv          !   Switch for SSV footprint
+! ln_fpindegs_sic          !   Switch for SIC footprint
+! ln_dailyavg_p3d          ! Switch for data types that contain daily averages
+! nn_sets_p3d              ! Number of profile data sets
+! nn_sets_sla              ! Number of SLA data sets
+! nn_sets_sst              ! Number of SST data sets
+! nn_sets_sss              ! Number of SSS data sets
+! nn_sets_ssv              ! Number of SSV data sets
+! nn_sets_sic              ! Number of SIC data sets
+! nn_z1dint                ! Vertical interpolation method
+! nn_h2dint                ! Default horizontal interpolation method (can be changed for specific obs types below)
+! nn_p3d_vpos              ! Vertical perturbation of TS profiles: 0 = off, 1 = option 1, 2 = option 2
+!                          ! (see comments in subroutine header for obs_vthints)
+! nn_p3d_vthin             ! Vertical thinning factor TS profiles
+! nn_probrejseed           ! Random number seed for random rejection of observations
+! nn_probvtseed            ! Random number seed for vertical perturbation of observations
+! nn_rejarea_p3d           ! Number of areas to reject profile observations
+! nn_rejarea_sla           ! Number of areas to reject SLA observations
+! nn_rejarea_sst           ! Number of areas to reject SST observations
+! nn_rejarea_sss           ! Number of areas to reject SSS observations
+! nn_rejarea_ssv           ! Number of areas to reject SSV observations
+! nn_h2dint_sst            ! Horizontal interpolation method for each set of SST data
+! nn_h2dint_sss            ! Horizontal interpolation method for each set of SSS data
+! nn_h2dint_ssv            ! Horizontal interpolation method for each set of SSV data
+! nn_h2dint_sla            ! Horizontal interpolation method for each set of SLA data
+! nn_h2dint_sic            ! Horizontal interpolation method for each set of SIC data
+! nn_dailyavgtypes_p3d     ! Profile data types that are daily averages
+! nn_rejtype_p3d           ! Rejection types for profile data
+! nn_rejtype_sla           ! Rejection types for SLA data
+! nn_rejtype_sst           ! Rejection types for SST data
+! nn_rejtype_sss           ! Rejection types for SSS data
+! nn_rejtype_ssv           ! Rejection types for SSV data
+! nn_rejtype_sic           ! Rejection types for SIC data
+! rn_maxlat_sst            ! Maximum latitude for SST data
+! rn_maxlat_sss            ! Maximum latitude for SSS data
+! rn_maxlat_ssv            ! Maximum latitude for SSV data
+! rn_maxlat_sla            ! Maximum latitude for SLA data
+! rn_mincoadis_t3d         ! Minimum distance to coast for T3D data
+! rn_mincoadis_s3d         ! Minimum distance to coast for S3D data
+! rn_mincoadis_sla         ! Minimum distance to coast for SLA data
+! rn_mincoadis_sst         ! Minimum distance to coast for SST data
+! rn_mincoadis_sss         ! Minimum distance to coast for SSS data
+! rn_mincoadis_ssv         ! Minimum distance to coast for SSV data
+! rn_minmoddep_p3d         ! Minimum model depth for profiles
+! rn_minmoddep_sla         ! Minimum model depth for SLA data
+! rn_minmoddep_sst         ! Minimum model depth for SST data
+! rn_minmoddep_sss         ! Minimum model depth for SSS data
+! rn_minmoddep_ssv         ! Minimum model depth for SSV data
+! rn_mindep_p3d            ! Minimum depth in T/S profile data
+! rn_minlat_sic            ! Minimum latitude for SIC data
+! rn_rejminval_sst         ! Threshold minimum value for SST observations
+! rn_rejminval_sss         ! Threshold minimum value for SSS observations
+! rn_rejminval_ssv         ! Threshold minimum value for SSV observations
+! rn_grid_search_res       ! Resolution of grid
+! rn_rejminlat_p3d         ! Minimum latitude  of rejection area for profile observations
+! rn_rejmaxlat_p3d         ! Maximum latitude  of rejection area for profile observations
+! rn_rejminlon_p3d         ! Minimum longitude of rejection area for profile observations
+! rn_rejmaxlon_p3d         ! Maximum longitude of rejection area for profile observations
+! rn_rejminlat_sla         ! Minimum latitude  of rejection area for SLA observations
+! rn_rejmaxlat_sla         ! Maximum latitude  of rejection area for SLA observations
+! rn_rejminlon_sla         ! Minimum longitude of rejection area for SLA observations
+! rn_rejmaxlon_sla         ! Maximum longitude of rejection area for SLA observations
+! rn_rejminlat_sst         ! Minimum latitude  of rejection area for SST observations
+! rn_rejmaxlat_sst         ! Maximum latitude  of rejection area for SST observations
+! rn_rejminlon_sst         ! Minimum longitude of rejection area for SST observations
+! rn_rejmaxlon_sst         ! Maximum longitude of rejection area for SST observations
+! rn_rejminlat_sss         ! Minimum latitude  of rejection area for SSS observations
+! rn_rejmaxlat_sss         ! Maximum latitude  of rejection area for SSS observations
+! rn_rejminlon_sss         ! Minimum longitude of rejection area for SSS observations
+! rn_rejmaxlon_sss         ! Maximum longitude of rejection area for SSS observations
+! rn_rejminlat_ssv         ! Minimum latitude  of rejection area for SSV observations
+! rn_rejmaxlat_ssv         ! Maximum latitude  of rejection area for SSV observations
+! rn_rejminlon_ssv         ! Minimum longitude of rejection area for SSV observations
+! rn_rejmaxlon_ssv         ! Maximum longitude of rejection area for SSV observations
+! rn_lonscl_sst            ! Size of footprint for SST data in i direction for each set
+! rn_latscl_sst            ! Size of footprint for SST data in j direction for each set
+! rn_lonscl_sss            ! Size of footprint for SSS data in i direction for each set
+! rn_latscl_sss            ! Size of footprint for SSS data in j direction for each set
+! rn_lonscl_ssv            ! Size of footprint for SSV data in i direction for each set
+! rn_latscl_ssv            ! Size of footprint for SSV data in j direction for each set
+! rn_lonscl_sla            ! Size of footprint for SLA data in i direction for each set
+! rn_latscl_sla            ! Size of footprint for SLA data in j direction for each set
+! rn_lonscl_sic            ! Size of footprint for SIC data in i direction for each set
+! rn_latscl_sic            ! Size of footprint for SIC data in j direction for each set
+! dobsini                  ! Observation window start date YYYYMMDD.HHMMSS
+! dobsend                  ! Observation window end date YYYYMMDD.HHMMSS
+! rn_rejprob_p3d           ! Probablity for random rejection for profile data
+! rn_rejprob_sla           ! Probablity for random rejection for SLA data
+! cn_grid_search_file      ! File name head for grid search lookup
+! cn_obias_types_sst       ! List of SST observation types to be bias corrected
+! cn_obias_types_sss       ! List of SSS observation types to be bias corrected
+! cn_obias_types_ssv       ! List of SSV observation types to be bias corrected
+! cn_obias_types_sla       ! List of SLA observation types to be bias corrected
+! cn_obias_types_sic       ! List of SIC observation types to be bias corrected
+! cn_probtypes_p3d         ! Profiles types to randomly reject
+! cn_probtypes_sla         ! SLA types to randomly reject
+! cn_bltypes_p3d           ! Profiles types to blacklist
+! cn_bltypes_sla           ! SLA types to blacklist
+!-----------------------------------------------------------------------
+&namobs_var	!  inner loop observation usage switch
+!-----------------------------------------------------------------------
+dobsini                 = 20090101            ! 
+dobsend                 = 20090110            ! 
+ln_p3d                  = .true.              ! 
+ln_t3d                  = .true.              ! 
+ln_s3d                  = .true.              ! 
+ln_sla                  = .true.              ! 
+ln_sst                  = .false.             ! 
+ln_sss                  = .false.             ! 
+ln_ssv                  = .false.             ! 
+ln_sic                  = .false.             ! 
+ln_grid_search          = .false.             ! 
+ln_grid_search_lookup   = .true.              ! 
+ln_grid_global          = .true.              ! 
+ln_sla_superob          = .false.             ! 
+ln_sla_remmean          = .true.              ! 
+ln_sla_remmean_all      = .true.              ! 
+ln_sgl                  = .false.             ! 
+ln_syn_data             = .false.             !
+ln_obsini               = .true.              ! 
+ln_p3d_vthin            = .false.             ! 
+ln_minval_sst           = .false.             ! 
+ln_minval_sss           = .false.             ! 
+ln_minval_ssv           = .false.             ! 
+ln_nearlandrej          = .false.             ! 
+ln_ranrej_p3d           = .false.             ! 
+ln_ranrej_sla           = .false.             ! 
+ln_fpindegs_sst(:)      = .false.             ! 
+ln_fpindegs_sss(:)      = .false.             ! 
+ln_fpindegs_ssv(:)      = .false.             ! 
+ln_fpindegs_sla(:)      = .false.             ! 
+ln_fpindegs_sic(:)      = .false.             ! 
+nn_sets_p3d             = 1                   ! 
+nn_sets_sla             = 1                   ! 
+nn_sets_sst             = 1                   ! 
+nn_sets_sss             = 1                   ! 
+nn_sets_ssv             = 1                   ! 
+nn_sets_sic             = 1                   ! 
+nn_z1dint               = 1                   ! 
+nn_h2dint               = 3                   ! 
+nn_p3d_vthin            = 1                   ! 
+nn_p3d_vpos             = 0                   ! 
+nn_probvtseed           = -1                  ! 
+nn_probrejseed          = -19881228           ! 
+nn_rejarea_p3d          = 0                   ! 
+nn_rejarea_sla          = 0                   ! 
+nn_rejarea_sst          = 0                   ! 
+nn_rejarea_sss          = 0                   ! 
+nn_rejarea_ssv          = 0                   ! 
+nn_h2dint_sst(:)        = 3                   ! 
+nn_h2dint_sss(:)        = 3                   ! 
+nn_h2dint_ssv(:)        = 3                   ! 
+nn_h2dint_sla(:)        = 3                   ! 
+nn_h2dint_sic(:)        = 3                   ! 
+nn_rejtype_p3d(:)       = -1                  ! 
+nn_rejtype_sla(:)       = -1                  ! 
+nn_rejtype_sst(:)       = -1                  ! 
+nn_rejtype_sss(:)       = -1                  ! 
+nn_rejtype_ssv(:)       = -1                  ! 
+nn_rejtype_sic(:)       = -1                  ! 
+nn_dailyavgtypes_p3d(:) = -1                  ! 
+rn_maxlat_sst           = 50.0                ! 
+rn_maxlat_sss           = 40.0                ! 
+rn_maxlat_ssv           = 90.0                ! 
+rn_maxlat_sla           = 50.0                ! 
+rn_minlat_sic           = 0.0                 ! 
+rn_mincoadis_t3d        = -1.0                ! 
+rn_mincoadis_s3d        = -1.0                ! 
+rn_mincoadis_sla        = 250.e3              ! 
+rn_mincoadis_sst        = -1.0                ! 
+rn_mincoadis_sss        = -1.0                ! 
+rn_mincoadis_ssv        = -1.0                ! 
+rn_minmoddep_p3d        = 500.0               ! 
+rn_minmoddep_sla        = -1.0                ! 
+rn_minmoddep_sst        = -1.0                ! 
+rn_minmoddep_sss        = -1.0                ! 
+rn_minmoddep_ssv        = -1.0                ! 
+rn_mindep_p3d           = -1.0                ! 
+rn_rejminval_sst        = 0.0                 ! 
+rn_rejminval_sss        = 0.0                 ! 
+rn_rejminval_ssv        = 0.0                 ! 
+rn_grid_search_res      = 0.5                 ! 
+rn_rejminlat_p3d(:)     = -90.0               ! 
+rn_rejminlat_sla(:)     = -90.0               ! 
+rn_rejminlat_sst(:)     = -90.0               ! 
+rn_rejminlat_sss(:)     = -90.0               ! 
+rn_rejminlat_ssv(:)     = -90.0               ! 
+rn_rejmaxlat_p3d(:)     = 90.0                ! 
+rn_rejmaxlat_sla(:)     = 90.0                ! 
+rn_rejmaxlat_sst(:)     = 90.0                ! 
+rn_rejmaxlat_sss(:)     = 90.0                ! 
+rn_rejmaxlat_ssv(:)     = 90.0                ! 
+rn_rejminlon_p3d(:)     = -180.0              ! 
+rn_rejminlon_sla(:)     = -180.0              ! 
+rn_rejminlon_sst(:)     = -180.0              ! 
+rn_rejminlon_sss(:)     = -180.0              ! 
+rn_rejminlon_ssv(:)     = -180.0              ! 
+rn_rejmaxlon_p3d(:)     = 180.0               ! 
+rn_rejmaxlon_sla(:)     = 180.0               ! 
+rn_rejmaxlon_sst(:)     = 180.0               ! 
+rn_rejmaxlon_sss(:)     = 180.0               ! 
+rn_rejmaxlon_ssv(:)     = 180.0               ! 
+rn_lonscl_sla(:)        = 0.0                 ! 
+rn_lonscl_sst(:)        = 0.0                 ! 
+rn_lonscl_sss(:)        = 0.0                 ! 
+rn_lonscl_ssv(:)        = 0.0                 ! 
+rn_lonscl_sic(:)        = 0.0                 ! 
+rn_latscl_sla(:)        = 0.0                 ! 
+rn_latscl_sst(:)        = 0.0                 ! 
+rn_latscl_sss(:)        = 0.0                 ! 
+rn_latscl_ssv(:)        = 0.0                 ! 
+rn_latscl_sic(:)        = 0.0                 ! 
+rn_rejprob_p3d          = 0.1,0.05,0.05,0.05  ! 
+rn_rejprob_sla          = 0.1                 ! 
+cn_grid_search_file     = 'xypos'             ! 
+cn_obias_types_sst(:)   = ''                  ! 
+cn_obias_types_sss(:)   = ''                  ! 
+cn_obias_types_ssv(:)   = ''                  ! 
+cn_obias_types_sla(:)   = ''                  ! 
+cn_obias_types_sic(:)   = ''                  ! 
+cn_probtypes_p3d        = 'none'              ! 
+cn_probtypes_sla        = 'none'              ! 
+cn_bltypes_p3d          = 'XXXX'              ! 
+cn_bltypes_sla          = 'XXXX'              ! 
+ln_dailyavg_p3d(1)      = .false.             ! 
+/ 
+!-----------------------------------------------------------------------
+!       namobe_sdv          observation error parameters
+! ln_wricsterr              ! Switch to write out constant observation error standard deviations in NetCDF format
+! ln_sdvcoa_t3d             ! Switch to inflate T3D observation error standard deviations near coast lines
+! ln_sdvcoa_s3d             ! Switch to inflate S3D observation error standard deviations near coast lines
+! ln_sdvcoa_sla             ! Switch to inflate SLA observation error standard deviations near coast lines
+! ln_sdvcoa_sst             ! Switch to inflate SST observation error standard deviations near coast lines
+! ln_sdvcoa_sss             ! Switch to inflate SSS observation error standard deviations near coast lines
+! ln_sdvcoa_ssv             ! Switch to inflate SSV observation error standard deviations near coast lines
+! ln_sdvmearep_sst          ! Switch to combine measurement error with representativity error for SST
+! ln_sdvmearep_sla          ! Switch to combine measurement error with representativity error for SLA
+! ln_sdvlat_sst             ! Switch for latitude dependent standard deviations for SST
+! ln_sdvlat_sss             ! Switch for latitude dependent standard deviations for SSS
+! ln_sdvlat_ssv             ! Switch for latitude dependent standard deviations for SSV
+! nn_sdv_t3d                ! Flag for type of T3D observation error standard deviations
+!                           !   jp_obe_sdv_cst     = Constant
+!                           !   jp_obe_sdv_ana     = Analytical function of depth
+!                           !                        (fit to Ingleby and Huddleston values)
+!                           !   jp_obe_sdv_rea     = Gridded field read in from file on model grid and
+!                           !                        interpolated to observation points
+!                           !   jp_obe_sdv_rea_reg = Gridded field read in from file on regular grid and
+!                           !                        interpolated to observation points
+!                           !   jp_obe_sdv_fdbk    = Read from fdbk file with the observations
+!                           !
+! nn_sdv_s3d                ! Flag for type of S3D observation error standard deviations
+!                           !   jp_obe_sdv_cst     = Constant
+!                           !   jp_obe_sdv_ana     = Analytical function of depth
+!                           !                        (fit to Ingleby and Huddleston values)
+!                           !   jp_obe_sdv_rea     = Gridded field read in from file on model grid and
+!                           !                        interpolated to observation points
+!                           !   jp_obe_sdv_rea_reg = Gridded field read in from file on regular grid and
+!                           !                        interpolated to observation points
+!                           !   jp_obe_sdv_fdbk    = Read from fdbk file with the observations
+!                           !
+! nn_sdv_sla                ! Flag for type of SLA observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sdv_mdt                ! Flag for type of MDT observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sdv_sst                ! Flag for type of SST observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sdv_sss                ! Flag for type of SSS observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sdv_ssv                ! Flag for type of SSV observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sdv_sic                ! Flag for type of SIC observation error standard deviations
+!                           !   jp_obe_sdv_cst  = Constant
+!                           !   jp_obe_sdv_rea  = Gridded field read in from file and
+!                           !                     interpolated to observation points
+!                           !   jp_obe_sdv_fdbk = Read from fdbk file with the observations
+!                           !
+! nn_sla_supobsmin          ! Minimum number of observations forming SLA superob before the observation is inflated
+!
+! rn_coafac_t3d             ! Temperature observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_s3d             ! Salinity observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_sla             ! Sea level anomoly observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_mdt             ! Mean Dynamic Topography error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_sst             ! Sea surface temperature observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_sss             ! Sea surface salinity observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+! rn_coafac_ssv             ! Sea surface velocity observation error standard deviation
+!                           !  inflation factor at the coast (representativeness error)
+!                           !
+! rn_coadis_t3d             ! Distance to the coastlines (in metres) at which
+!                           !  the temperature obs error std deviations are increased
+! rn_coadis_s3d             ! Distance to the coastlines (in metres) at which
+!                           !  the salinity obs error std deviations are increased
+! rn_coadis_sla             ! Distance to the coastlines (in metres) at which
+!                           !  the Sea level anomoly obs error std deviations are increased
+! rn_coadis_mdt             ! Distance to the coastlines (in metres) at which
+!                           !  the Mean Dynamic Topography err. std deviations are increased
+! rn_coadis_sst             ! Distance to the coastlines (in metres) at which
+!                           !  the sea surface temperature obs error std deviations are increased
+! rn_coadis_sss             ! Distance to the coastlines (in metres) at which
+!                           !  the sea surface salinity obs error std deviations are increased
+! rn_coadis_ssv             ! Distance to the coastlines (in metres) at which
+!                           !  the sea surface velocity obs error std deviations are increased
+!                           !
+! rn_sdv_t3d                ! Standard deviation for T3D observation errors
+!                           !  (constant value used if nn_sdv_t3d = jp_obe_sdv_cst)
+! rn_sdv_s3d                ! Standard deviation for S3D observation errors
+!                           !  (constant value used if nn_sdv_s3d = jp_obe_sdv_cst)
+! rn_sdv_sla                ! Standard deviation for along-track altimeter SLA observation errors
+! rn_sdv_sla_syn            ! Standard deviation used to generate along-track altimeter SLA observation
+!                           ! errors for synthetic data. Defaults to rn_sdv_sla if set to -1.
+! rn_sdv_mdt                ! Standard deviation for MDT observations errors
+! rn_sdv_sst                ! Standard deviation for SST observations errors
+! rn_sdv_sss                ! Standard deviation for SSS observations errors
+! rn_sdv_ssvu               ! Standard deviation for SSVU observations errors
+! rn_sdv_ssvv               ! Standard deviation for SSVV observations errors
+! rn_sdv_sic                ! Standard deviation for SIC observations errors
+!                           !
+! rn_sdvsca_t3d             ! Scaling factor for nn_sdv_t3d = jp_obe_sdv_ana
+! rn_sdvsca_s3d             ! Scaling factor for nn_sdv_s3d = jp_obe_sdv_ana
+!                           !
+! rn_sdvscalat_sst          ! Amplification factor for SST latitude dependent standard deviation
+! rn_sdvscalat_sss          ! Amplification factor for SSS latitude dependent standard deviation
+! rn_sdvscalat_ssv          ! Amplification factor for SSV latitude dependent standard deviation
+!                                     !
+! rn_sdvlatcutoff_sst       ! Latitude cutoff for SST latitude dependent standard deviation
+! rn_sdvlatcutoff_sss       ! Latitude cutoff for SSS latitude dependent standard deviation
+! rn_sdvlatcutoff_ssv       ! Latitude cutoff for SSV latitude dependent standard deviation
+!                           !
+! rn_sdvmaxmea_sst          ! Maximum allowed SST measurement error standard deviation
+! rn_sdvmaxmea_sla          ! Maximum allowed SLA measurement error standard deviation
+!-----------------------------------------------------------------------
+&namobe_sdv	!  observation error sdv parameters
+!-----------------------------------------------------------------------
+ln_wricsterr        = .false.      ! 
+ln_sdvcoa_t3d       = .true.       ! 
+ln_sdvcoa_s3d       = .true.       ! 
+ln_sdvcoa_sla       = .true.       ! 
+ln_sdvcoa_sst       = .true.       ! 
+ln_sdvcoa_sss       = .true.       ! 
+ln_sdvcoa_ssv       = .true.       ! 
+ln_sdvmearep_sst    = .false.      ! 
+ln_sdvmearep_sla    = .false.      ! 
+ln_sdvlat_sst       = .false.      ! 
+ln_sdvlat_sss       = .false.      ! 
+ln_sdvlat_ssv       = .false.      ! 
+nn_sdv_t3d          = 1            ! 
+nn_sdv_s3d          = 1            ! 
+nn_sdv_sla          = 0            !
+nn_sdv_mdt          = 0            ! 
+nn_sdv_sst          = 0            ! 
+nn_sdv_sss          = 0            ! 
+nn_sdv_ssv          = 0            ! 
+nn_sdv_sic          = 0            ! 
+nn_sla_supobsmin    = 10           ! 
+rn_coafac_t3d       = 6.0          ! 
+rn_coafac_s3d       = 2.0          ! 
+rn_coafac_sla       = 6.0          ! 
+rn_coafac_mdt       = 6.0          ! 
+rn_coafac_sst       = 2.0          ! 
+rn_coafac_sss       = 2.0          ! 
+rn_coafac_ssv       = 2.0          ! 
+rn_coadis_t3d       = 800.e3       ! 
+rn_coadis_s3d       = 800.e3       ! 
+rn_coadis_sla       = 800.e3       ! 
+rn_coadis_mdt       = 800.e3       ! 
+rn_coadis_sst       = 300.e3       ! 
+rn_coadis_sss       = 300.e3       ! 
+rn_coadis_ssv       = 300.e3       ! 
+rn_sdv_t3d          = 1.0          ! 
+rn_sdv_s3d          = 0.18         ! 
+rn_sdv_sla          = 0.05         ! 
+rn_sdv_sla_syn      = -1.0
+rn_sdv_mdt          = 0.05         ! 
+rn_sdv_sst          = 0.2          ! 
+rn_sdv_sss          = 0.5          ! 
+rn_sdv_ssvu         = 0.2          ! 
+rn_sdv_ssvv         = 0.2          ! 
+rn_sdv_sic          = 0.01         ! 
+rn_sdvsca_t3d       = 1.414213562  ! 
+rn_sdvsca_s3d       = 1.414213562  ! 
+rn_sdvscalat_sst    = 1.0          ! 
+rn_sdvscalat_sss    = 1.0          ! 
+rn_sdvscalat_ssv    = 1.0          ! 
+rn_sdvlatcutoff_sst = 90.0         ! 
+rn_sdvlatcutoff_sss = 40.0         ! 
+rn_sdvlatcutoff_ssv = 90.0         ! 
+rn_sdvmaxmea_sst    = 10.0         ! 
+rn_sdvmaxmea_sla    = 1.0          ! 
+/
+!-----------------------------------------------------------------------
+! namobe_tst : Observation error test parameters
+!-----------------------------------------------------------------------
+!  ln_obe_covadj_tst    ! Switch to test the self-adjointness of the observation error covariance operator and its inverse
+!  ln_obe_mppadj_tst    ! Switch to test the adjoint of obe_halo_exchange for each instrument
+!  ln_obe_femadj_tst    ! Switch to test the adjoint of the finite-elements method routines
+!  ln_obe_feminv_tst    ! Switch to test the inverse of the finite-elements method routines
+!  ln_obe_covinv_tst    ! Switch to test the inverse of the observation error covariance operator
+!  ln_obe_covpts_tst    ! Switch for computing the covariance function at different observation locations
+!  ln_obe_corpts_tst    ! Switch for computing the correlation function at different observation locations
+!  ln_obe_pts_tst_quick ! Switch for applying the cov/cor tests to all the instruments and points simultaneously
+!  rn_obe_pts_tst_ratio ! Ratio of minimum distance between test points divided by constant length scale
+!  nn_obe_tstpts_max    ! Maximum number of test points (applied only if ln_obe_pts_tst_quick = .FALSE.)
+/
+!-----------------------------------------------------------------------
+&namobe_tst ! Observation error test parameters
+!-----------------------------------------------------------------------
+   ln_obe_covadj_tst    = .true.
+   ln_obe_mppadj_tst    = .true.
+   ln_obe_femadj_tst    = .true.
+   ln_obe_feminv_tst    = .true.
+   ln_obe_covinv_tst    = .true.
+   ln_obe_covpts_tst    = .false.
+   ln_obe_corpts_tst    = .false.
+   ln_obe_pts_tst_quick = .true.
+   rn_obe_pts_tst_ratio = 100.0
+   nn_obe_tstpts_max    = 100
+/
+!-----------------------------------------------------------------------
+!  namobe_cor : Observation error correlation parameters
+!-----------------------------------------------------------------------
+!  ln_obe_nor_wri             ! If true, write normalization factors in NetCDF file
+!                             !
+!  ln_obe_cor_ndralt          ! Master switch to activate nadir altimeter error correlations
+!                             !
+!  nn_len_sca_spec_ndralt     ! Flag for method of specification of observation error correlation length scales
+!                             !   0 = jp_obe_cor_lensca_cst : Constant
+!                             !
+!  nn_len_sca_typ_ndralt      ! Type of Matern function length-scale for nadir altimeter error correlation model
+!                             !   0 = jp_dif_len_sca_dal : From Weaver and Mirouze (2013) derived from Daley (1991) general relation
+!                             !      D =           L sqrt( 2M - d - 2 )
+!                             !   1 = jp_dif_len_sca_ras : From Rasumssen and Williams (2006)
+!                             !      D =           L sqrt( 2M - d     )
+!                             !   2 = jp_dif_len_sca_ste : From Stein (1999)
+!                             !      D = sqrt( 2 ) L sqrt( 2M - d     )
+!                             !   3 = jp_dif_len_sca_lin : From Lindgren, Rue and Lindstrom (2011)
+!                             !      D =       2   L sqrt( 2M - d     )
+!                             !
+!  nn_dist_typ_ndralt         ! Type of distance used to model observation error correlation length scales
+!                             !   0 = jp_dist_great_circle : Great circle distance
+!                             !   1 = jp_dist_time         : Distance estimated from observation time difference
+!                             !
+!  nn_nortyp_ndralt           ! Type of computation method for normalization factors
+!                             !   0 = jp_cor_nor_ana     : Analytical estimate
+!                             !   1 = jp_cor_nor_exa     : Exact coefficients
+!                             !   2 = jp_cor_nor_ran     : Randomization method
+!                             !   5 = jp_cor_nor_comb    : Comb method
+!                             !
+!  nn_ran_nor_ndralt          ! Number of random samples used in randomized estimation of normalization factors
+!                             !
+! rn_comb_nor_ratio_ndralt    ! Ratio of (dmin/constant length scale) where dmin is the minimum distance between points
+!                             ! where the normalization coefficients are estimated simultaneously
+!                             !
+!  cn_obe_cor_ndralt          ! List of instrument short names (e.g., cn_cor_nadir_alt = 'EN', 'J2') for which observation error
+!                             ! correlations should be modelled
+!  nn_difit_ndralt(:)         ! Number of implicit diffusion iterations used to model observation error correlations for each nadir altimeter
+!  nn_difit_ndralt_syn(:)     ! If different from -1, replaces nn_difit_ndralt(:) when simulating observation error to generate synthetic data
+!  rn_len_sca_ndralt(:)       ! Constant observation error correlation length scale (in km) used if nn_len_sca_spec_ndralt = jp_obe_len_sca_cst
+!                             ! for each nadir altimeter
+!  rn_len_sca_ndralt_syn(:)   ! If different from -1, replaces rn_len_sca_ndralt(:) when simulating observation error to generate synthetic data
+!  rn_vel_ndralt(:)           ! Average ground scanning velocity in km/s of each nadir altimeter
+!                             ! (for correlation length scale/time scale conversions)
+!  rn_noise_ratio_syn         ! Ratio of uncorrelated error to correlated error in the synthetic observations
+
+!-----------------------------------------------------------------------
+&namobe_cor ! Observation error correlation parameters
+!-----------------------------------------------------------------------
+   ln_obe_nor_wri           = .false.
+   ln_obe_cor_ndralt        = .false.
+   nn_len_sca_spec_ndralt   = 0
+   nn_len_sca_typ_ndralt    = 1
+   nn_dist_typ_ndralt       = 1
+   nn_nortyp_ndralt         = 5
+   nn_ran_nor_ndralt        = 10000
+   rn_comb_nor_ratio_ndralt = 3
+   cn_obe_cor_ndralt        = 'EN', 'J2'
+   nn_difit_ndralt(:)       = 2
+   nn_difit_ndralt_syn(:)   = -1
+   rn_len_sca_ndralt(:)     = 140.0E3
+   rn_len_sca_ndralt_syn(:) = -1.0
+   rn_vel_ndralt(:)         = 6.6E3, 5.8E3
+   rn_noise_ratio_syn       = 0.0
+/
+!-----------------------------------------------------------------------
+!  namobe_sol : Solver parameters used for the observation error correlation operator
+!-----------------------------------------------------------------------
+!  tol_cbv_difstp          ! Tolerance of Chebyshev iteration used to invert diffusion steps
+!  tol_cbv_difstp_syn      ! Replaces tol_cbv_difstp when simulating observation error to generate synthetic data
+!  nitmax_cbv_difstp       ! Maximum number of iterations of Chebyshev iteration used to invert diffusion steps
+!  nitmax_cbv_difstp_syn   ! Replaces nitmax_cbv_difstp when simulating observation error to generate synthetic data
+!  ln_cg_ritz              ! Switch to activate the estimation of Ritz values with CG/Lanczos
+!  tol_cg_ritz             ! Tolerance of CG/Lanczos algorithm used to estimate Ritz values
+!  nitmax_cg_ritz          ! Maximum number of iterations of CG/Lanczos algorithm used to estimate ritz values
+!
+!-----------------------------------------------------------------------
+&namobe_sol ! Solver parameters used for the observation error correlation operator
+!-----------------------------------------------------------------------
+   tol_cbv_difstp        = 1.0e-2
+   nitmax_cbv_difstp     = 500
+   tol_cbv_difstp_syn    = 1.0e-15
+   nitmax_cbv_difstp_syn = 2000
+   ln_cg_ritz            = .true.
+   tol_cg_ritz           = 1.0e-15
+   nitmax_cg_ritz        = 500
+/ 
+!-----------------------------------------------------------------------
+&namalg	!  Incremental algorithm parameters
+!-----------------------------------------------------------------------
+ninnout         = 10,0     ! 
+noutit          = 1        ! 
+noutmax         = 2        ! 
+nvarex          = 0        ! 
+ln_HBHT_only    = .false.  ! 
+ln_bge_ran_post = .false.  !
+ln_Jm_diags     = .false. 
+/ 
+!-----------------------------------------------------------------------
+&namopp	!  Optimization parameters
+!-----------------------------------------------------------------------
+npcond   = 0        ! 
+toltst   = 1.e-2    ! 
+nppvmx   = 0        ! 
+ln_purge = .false.  ! 
+northo   = 1        ! 
+reperr   = 1.e-5    ! 
+npairs   = 0        ! 
+nmin_typ = 1        ! 
+npress   = 5        ! 
+repsg    = 1.e-10   ! 
+/ 
+!-----------------------------------------------------------------------
+&namtst_var	! 
+!-----------------------------------------------------------------------
+ln_tst_obeadj = .true.   ! 
+ln_tst_obeinv = .true.   ! 
+ln_tst_obsadj = .true.   ! 
+ln_tst_invbal = .true.   ! 
+ln_tst_bgeadj = .true.   ! 
+ln_tst_mdeadj = .false.  ! 
+ln_tst_tamadj = .false.  ! 
+ln_tst_grad   = .true.   ! 
+ln_tst_var    = .true.   ! 
+ln_tst_only   = .false.  ! 
+rn_fact_grd   = 1.0      ! 
+/ 
+!-----------------------------------------------------------------------
+&nambal	!  Background multivariate balance operator
+!-----------------------------------------------------------------------
+ln_balsal             = .false.                  ! 
+ln_balssh             = .false.                  ! 
+ln_balvel             = .false.                  ! 
+ln_balsal_ramp_mxl    = .false.                 ! 
+ln_balsal_coa         = .false.                 ! 
+ln_balsal_none_mxl    = .true.                  ! 
+ln_balsal_lat         = .false.                 ! 
+ln_balsal_masksha_kst    = .false.
+ln_balden_ubsal       = .false.                 !  Could be set to .true. ?
+ln_balden_lat         = .false.                 ! 
+ln_balden_masksha_alpbet = .false.
+ln_balssh_base_mxl    = .true.                  !  MetO 
+ln_balssh_pro         = .false.                 !  Safer to use ln_prosshinc 
+ln_balssh_coa         = .true.                  !  MetO 
+ln_balssh_lat         = .false.                 ! 
+ln_balssh_tst         = .false.                 !  MetO 
+ln_balssh_sol_pro        = .true.
+ln_balssh_masksha_wtst   = .false.
+ln_balvel_finv        = .false.                 !  Set to .false. in both MetO and ECMWF
+ln_balvel_coa         = .true.                  ! 
+ln_balvel_dep         = .false.                 ! 
+ln_balvel_barocl_equ  = .false.                 !  New baroclinic weighting near equator
+ln_balvel_barotr_equ  = .false.                 !  New barotropic weighting near equator
+ln_balvel_masksha_dpdy   = .false.
+ln_bal_masksha_mld       = .true.
+ln_unbal_inc_wri      = .false.                 ! 
+ln_bal_par_wri        = .false.                  ! 
+ln_balvel_dia_wri        = .false.
+ln_balpsi_sol_pro        = .true.
+ln_balchi_sol_pro        = .true.
+ln_balpsi_masksha_psi    = .true.
+ln_psi_chi_inv_tst       = .false.
+nbalsal_fil_kst       = 0                       ! 
+nbalsal_nitsha_kst    = 1                       !  Used with nbalsal_fil_kst 
+nbalsal_dsdtm         = 1                       ! 
+nbalden_alpbet        = 1                       ! 
+nbalden_fil_alpbet    = 0                       ! 
+nbalden_cutoff        = 1                       !  MetO 
+nbalden_nitsha_alpbet = 1                       !  Used with nbalden_filalpbet 
+nbalssh               = 0                       ! 
+nbalssh_fil_wtst      = 0                       !  Used with ln_balssh_tst
+nbalssh_nitsha_wtst   = 1                       !  Used with ln_balssh_tst
+nbalvel               = 0                       ! 
+nbalvel_equ           = 1                       !  MetO 
+nbalvel_fil_dpdy      = 2                       !  Used with nbalvel_equ 
+nbalvel_nitsha_dpdy   = 10                      !  Used with nbalvel_equ 
+nbal_mxl              = 2                       !  MetO 
+nbal_mxl_lev          = 1                       !  Should be the same as nbge_mxl_lev
+nbal_fil_mld          = 0                       !  Should be the same as nbge_fil_mld
+nbal_nitsha_mld       = 10                      !  Used with nbal_fil_mld 
+nbal_psi_chi_inv         = 1
+balsal_dsdtmax        = 1.0                     !  Sensitivity? Revisit?
+balsal_dtdzmin        = 1.0e-3                  !  Used with nbalden_cutoff 
+balsal_dsdzmin        = 3.0e-3                  !  Used with nbalden_cutoff 
+balsal_latmax         = 100.0                   ! 
+balsal_latrmp         = 10.0                    ! 
+balden_dn2min         = 5.0e-5                  !  Used with nbalden_cutoff 
+balden_latmax         = 100.0                   ! 
+balden_latrmp         = 10.0                    ! 
+balssh_latmax         = 100.0                   ! 
+balssh_latrmp         = 10.0                    ! 
+balssh_tstmin         = 5.0                     !  Used with MetO ln_balssh_tst
+balssh_tstrmp         = 10.0                    !  Used with MetO ln_balssh_tst
+balssh_tikcof            = 0.0
+balvel_dep            = 5000.0                  !  MetO 
+balvel_betals         = 2.2                     !  MetO 
+balvel_rampls         = 150.0e3                 !  Used with ln_balvel_finv
+balvel_barocl_equls   = 15.0                    !  Used with ln_balvel_barocl_equ
+balvel_barotr_equls   = 15.0                    !  Used with ln_balvel_barotr_equ
+balvel_barocl_equwgt  = 1.0                     !  Used with ln_balvel_barocl_equ
+balvel_barotr_equwgt  = 0.0                     !  Used with ln_balvel_barotr_equ
+balvel_barocl_glowgt  = 1.0                     !  Used with ln_balvel_barocl_equ
+balvel_barotr_glowgt  = 1.0                     !  Used with ln_balvel_barotr_equ
+balpsi_tikcof            = 0.0
+balchi_tikcof            = 0.0
+nbalpsi_fil_psi          = 2
+nbalpsi_nitsha_psi       = 5
+bal_dis               = 200.0e3                 !  ln_balsal_coa 
+/ 
+!-----------------------------------------------------------------------
+&namens	!     Ensemble estimation
+!-----------------------------------------------------------------------
+ln_Bmod_ens         = .false.                     ! 
+ln_pseudo_ens       = .false.                     ! 
+ln_bal_ens          = .false.                      ! 
+ln_ens_per_inf_wri  = .false.                     ! 
+ln_ens_per_wri      = .false.                     ! 
+ln_ens_linper_wri   = .false.                     ! 
+ln_ens_per_sca_wri  = .false.                     ! 
+ln_Bens_fil_wri     = .false.                     ! 
+ln_Bens_sca_wri     = .false.                     ! 
+ln_evil             = .false.                     ! 
+ln_evil_dia_itr     = .false.                     ! 
+ln_evil_dia_loc     = .false.                     ! 
+ln_bump_loc         = .false.                     ! 
+ln_bump_hyb         = .false.                     ! 
+nenstot             = 10                          ! 
+nens_member_self    = 0                           ! 
+ncyctot             = 1                           ! 
+ln_clim_ens         = .false.                     ! 
+ndate_cyc           = 20090101,0,0                ! 
+ln_date_check_ens   = .false.                     ! 
+ln_dalrea_ens_only  = .false.                     ! 
+ln_sdvrea_ens_only  = .false.                     ! 
+vallan_wri_ens      = 0.0                         ! 
+nloctyp_ens         = 0                           ! 
+nlctbcs_ens         = 0                           ! 
+nfiltyp_ens         = 1                           ! 
+ndistyp_ens         = 0                           ! 
+nbis_itmax_ens      = 20                          ! 
+bis_tol_ens         = 0.05                        ! 
+scamax_h_ens        = 10.0                        !  in degrees
+scamax_z_ens        = 1.0e3                       ! 
+ndifbcs_z_bump      = 0                           ! 
+ndifit_z_bump       = 2                           ! 
+scagrd_z_Lh_bump(:) = 31*1.0                      ! 
+scagrd_z_Lz_bump(:) = 31*1.0                      ! 
+ln_extra_diags      = .false.                     ! 
+cfile_enslin        = "ensemble_member000_cycle"  ! 
+cfile_rea_mean      = "XXXXXXXXXX"                ! 
+ln_ens_per_wri_stp  = .false.                     ! 
+ln_load_mean        = .false.                     ! 
+ln_ens_avg_linstate = .false.                     ! 
+ln_ens_avg_000state = .false.                     ! 
+ln_file_ens_cyc_num = .true.                      ! 
+cfile_ens_prefix    = "ensemble_member"           ! 
+cfile_ens_suffix    = "_cycle"                    !
+cn_loc_ref_name     = "t"
+/ 
+!-----------------------------------------------------------------------
+&namens_fil	!     Ensemble-estimated parameter filtering (namens_fil)
+!-----------------------------------------------------------------------
+ndifbcs_enf    = 0        ! 
+nmxlten_enf    = 0        ! 
+nrosten_enf    = 0        ! 
+ros_radmin_enf    = 200.0e3  ! in metres
+ros_radmax_enf    = 250.0e3  ! in metres
+ros_phaspd_enf    = 2.7      ! in m/s
+par_scaeq_zon_enf = 2.0
+par_scaeq_mer_enf = 0.5
+par_cutlat_enf    = 15.0
+ros_scaeq_zon_enf = 2.0
+ros_scaeq_mer_enf = 0.75
+ros_cutlat_enf    = 10.0
+scamax_h_enf   = 30.0     !  in degrees
+scamax_z_enf   = 1000.0   !  in metres
+scamin_z_enf   = 0.0      !  in metres
+ln_coa_bnd_enf = .false.  ! 
+ln_mxl_bnd_enf = .false.  ! 
+ln_dep_bnd_enf = .true.   ! 
+depbnd_mxl_enf = 600.0    !  in metres
+depmax_mxl_enf = 600.0    !  in metres
+depfix_mxl_enf = 50.0     !  in metres
+rcoast_msk_enf = 500.0    !  in km
+grdmin_fac_enf = 2.0      ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_fil_sol	! 
+!-----------------------------------------------------------------------
+nsolimp_enf     = 1        ! 
+nsolitmax_enf   = 300      ! 
+soltol_enf      = 1.0e-3   ! 
+ritzminper_enf  = 0.0      ! 
+ritzmaxper_enf  = 0.1      ! 
+ndifsoldia_enf  = 0        ! 
+nn_verbose_enf  = 0        ! 
+ln_diaprc_enf   = .false.  ! 
+nsolstp_enf     = 0        ! 
+nsolfgs_enf     = 1        ! 
+nsym_fgs_enf    = 1        ! 
+nsym_prc_enf    = 0        ! 
+ln_power_enf    = .false.  ! 
+npowitmax_enf   = 300      ! 
+tolpow_enf      = 1.0e-2   ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_scf	!  Scale-dependent filtering
+!-----------------------------------------------------------------------
+ndifbcs_scf    = 0        ! 
+ros_radmin_scf    = 200.0e3  ! in metres
+ros_radmax_scf    = 1000.0e3 ! in metres
+ros_phaspd_scf    = 2.7      ! in m/s
+par_scaeq_zon_scf = 2.0
+par_scaeq_mer_scf = 0.5
+par_cutlat_scf    = 15.0
+ros_scaeq_zon_scf = 2.0
+ros_scaeq_mer_scf = 0.75
+ros_cutlat_scf    = 10.0
+scamax_h_scf   = 30.0     !  in degrees
+scamax_z_scf   = 1000.0   !  in metres
+scamin_z_scf   = 0.0      !  in metres
+ln_coa_bnd_scf = .false.  ! 
+ln_mxl_bnd_scf = .false.  ! 
+ln_dep_bnd_scf = .true.   ! 
+/ 
+!-----------------------------------------------------------------------
+&namens_scf_sol	!  Scale-dependent filtering solver
+!-----------------------------------------------------------------------
+nsolimp_scf      = 5        ! 
+nsolitmax_scf    = 250      ! 
+soltol_scf       = 1.0e-5   ! 
+ritzminper_scf   = 0.0      ! 
+ritzmaxper_scf   = 0.0      ! 
+cgsoltol_scf     = 1.0e-10  ! 
+ln_lanczos_scf   = .false.  ! 
+ln_ritzortho_scf = .false.  ! 
+ln_eigwri_scf    = .false.  ! 
+ndifsoldia_scf   = 1        ! 
+nn_verbose_scf   = 1        ! 
+ln_diaprc_scf    = .false.  ! 
+nsolstp_scf      = 0        ! 
+nsolfgs_scf      = 1        ! 
+nsym_fgs_scf     = 1        ! 
+nsym_prc_scf     = 0        ! 
+ln_power_scf     = .false.  ! 
+npowitmax_scf    = 300      ! 
+tolpow_scf       = 1.0e-2   ! 
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil	!  Parameter filtering
+!-----------------------------------------------------------------------
+ln_Bpar_fil_wri = .false.  ! 
+ndifbcs_paf     = 0        ! 
+nmxlten_paf     = 0        ! 
+nrosten_paf     = 0        ! 
+scamax_h_paf    = 30.0     !  in degrees
+scamax_z_paf    = 1000.0   !  in metres
+scamin_z_paf    = 0.0      !  in metres
+depfix_mxl_paf  = 50.0     !  in metres
+/ 
+!-----------------------------------------------------------------------
+&nampar_fil_sol	! 
+!-----------------------------------------------------------------------
+nsolimp_paf     = 1        ! 
+nsolitmax_paf   = 300      ! 
+soltol_paf      = 1.0e-3   ! 
+ritzminper_paf  = 0.0      ! 
+ritzmaxper_paf  = 0.1      ! 
+ndifsoldia_paf  = 1        ! 
+nn_verbose_paf  = 0        ! 
+ln_diaprc_paf   = .false.  ! 
+ln_eigwri_paf   = .true.   ! 
+nsolstp_paf     = 0        ! 
+nsolfgs_paf     = 1        ! 
+nsym_fgs_paf    = 1        ! 
+nsym_prc_paf    = 0        ! 
+ln_power_paf    = .false.  ! 
+npowitmax_paf   = 300      ! 
+tolpow_paf      = 1.0e-2   ! 
+!ln_solall2d_paf = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+!  OOPS-NEMOVAR namelists
+!  Note: compatiblity with the NEMOVAR namelist is required
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+&namvar_bkg	! 
+!-----------------------------------------------------------------------
+nn_n2d        = 1       ! 
+cn_2d_fldname = 'sshn'  ! 
+nn_n3d        = 2       ! 
+cn_3d_fldname = 'tn', 'sn'    ! 
+/ 
+!-----------------------------------------------------------------------
+&nambkg_mxl	! 
+!-----------------------------------------------------------------------
+rn_avm0     = 1.2e-4   ! 
+rn_avt0     = 1.2e-5   ! 
+ln_kara     = .false.  ! 
+nn_mld_type = 1        ! 
+rn_Tz_ref   = 10.0     ! 
+rn_dT_crit  = 0.2      ! 
+rn_iso_frac = 0.1      ! 
+/ 
+!-----------------------------------------------------------------------
+&namvar_bge	!  Control variables
+!-----------------------------------------------------------------------
+nn_n2d        = 1                ! 
+cn_2d_fldname = 'ssh'            ! 
+nn_n3d        = 2                ! 
+cn_3d_fldname = 't', 's'  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cov	!  background error covariance
+!-----------------------------------------------------------------------
+ln_Bmod          = .true.                                           ! 
+ln_Bens          = .false.                                          ! 
+ln_Beof          = .false.                                          ! 
+nBens_loc_typ    = 2                                                ! 
+ln_system_clock  = .false.                                          ! 
+ncornorpts_3d(:) = 100*1                                            ! 
+ncornorpts_2d(:) = 100*1                                            ! 
+nsdv_h2dint      = 2                                                ! 
+nsdv_z1dint      = 0                                                ! 
+nbge_fil_mld     = 0                                                !  Should be the same as nbal_fil_mld
+nbge_nitsha_mld  = 10                                               !  Should be the same as nbal_nitsha_mld
+nbge_dtdzm       = 1                                                ! 
+nbge_mxl         = 2                                                !  Should be the same as nbal_mxl
+nbge_mxl_uv      = 2                                                ! 
+nbge_mxl_lev     = 1                                                !  Should be the same as nbal_mxl_lev
+ln_prosshinc     = .false.                                          !  Set to .true. ?
+nrancov_dia      = 10                                               ! 
+ln_rancovsam     = .false.                                          ! 
+nrancov_hyb      = 10                                               ! 
+ln_bge_ran_wri   = .false.                                          ! 
+ros_radmin       = 200.0e3                                          !  in metres
+ros_radmax       = 250.0e3                                          !  in metres
+ros_phaspd       = 2.7                                              !  in m/s
+par_scaeq_zon    = 2.0                                              ! 
+par_scaeq_mer    = 0.5                                              ! 
+par_cutlat       = 15.0                                             ! 
+ros_scaeq_zon    = 2.0                                              ! 
+ros_scaeq_mer    = 0.75                                             ! 
+ros_cutlat       = 10.0                                             ! 
+ln_scseed        = .false.                                          ! 
+ln_eig_seed      = .false.                                          ! 
+ln_Mstp_wri      = .false.                                          ! 
+ln_Mstp_rea      = .false.                                          ! 
+ln_cpcort_s_mod  = .false.                                          ! 
+ln_cpcort_uv_mod = .false.                                          ! 
+vallan_wri       = -9999.0                                          !
+ln_bge_masksha_mld = .true.
+ln_rancov(:)     = .false.,.false.,.false.,.true.,.true.,.false.    ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cov_tst	!  background error covariance test parameters
+!-----------------------------------------------------------------------
+ln_bge_covadj_tst = .true.    ! 
+ln_bge_covpts_tst = .true.    ! 
+ln_bge_corpts_tst = .true.    ! 
+ln_bge_locpts_tst = .false.   ! 
+!ln_bge_tst_quick  = .true.    ! 
+nbgecovtstpts(:)     = 13*1,7*0  ! 
+nbgecortstpts(:)     = 13*1,7*0  ! 
+nbgeloctstpts(:)     = 13*1,7*0  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_mod	!  Background error correlation model
+!-----------------------------------------------------------------------
+ln_Bmod_cor_dif_rea  = .false.  ! 
+ln_Bmod_cor_dif_wri  = .false.  ! 
+ln_Bmod_cor_nor_rea  = .false.  ! 
+ln_Bmod_cor_nor_wri  = .false.  ! 
+ln_Bmod_cor_per_rea  = .false.  ! 
+ln_Bmod_cor_per_wri  = .false.  ! 
+nlevnow_mod          = 41       ! 
+ln_ranwri_mod        = .false.  ! 
+ln_ransam_mod        = .false.  ! 
+ln_bcscor_mod        = .true.   ! 
+ln_norreg_mod        = .false.  ! 
+ln_trf_vnormfac_filt = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod	!  Diffusion for the background error covariance model
+!-----------------------------------------------------------------------
+ln_Bmod_dif_wri = .false.  ! 
+ndifbcs_mod     = 0        ! 
+nmxlten_mod     = 0        ! 
+nrosten_mod     = 0        ! 
+scamax_h_mod    = 30.0     !  in degrees
+scamax_z_mod    = 1000.0   !  in metres
+scamin_z_mod    = 0.0      !  in metres
+ln_clo_bnd_mod  = .false.  ! 
+ln_coa_bnd_mod  = .false.  ! 
+ln_mxl_bnd_mod  = .false.  ! 
+ln_dep_bnd_mod  = .true.   ! 
+depbnd_mxl_mod  = 200.0    !  in metres
+depmax_mxl_mod  = 600.0    !  in metres
+depfix_mxl_mod  = 50.0     !  in metres
+ln_ranten_mod   = .false.  ! 
+fraten_h_mod    = 0.2      ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_mod_sol	! 
+!-----------------------------------------------------------------------
+nsolimp_mod        = 3        ! 
+nsolitmax_mod      = 500      ! 
+soltol_mod         = 1.0e-3   ! 
+ritzminper_mod     = 0.0      ! 
+ritzmaxper_mod     = 0.0      ! 
+cgsoltol_mod       = 1.0e-15  ! 
+ln_lanczos_mod     = .true.   ! 
+ln_eigwri_mod      = .true.   ! 
+ln_ritzlmp_mod     = .false.  ! 
+ln_ritzgal_mod     = .false.  ! 
+nritzpair_mod      = 200      ! 
+ndifsoldia_mod     = 1        ! 
+nn_verbose_mod     = 1        ! 
+ln_ritztst_mod     = .false.  ! 
+ln_ritzortho_mod   = .false.  ! 
+ln_diaprc_mod      = .false.  ! 
+nsolstp_mod        = 4        ! 
+nsolfgs_mod        = 1        ! 
+nsym_fgs_mod       = 1        ! 
+nsym_prc_mod       = 0        ! 
+ln_power_mod       = .false.  ! 
+npowitmax_mod      = 300      ! 
+tolpow_mod         = 1.0e-2   ! 
+/
+!-----------------------------------------------------------------------
+&nambge_dif_mod_trf ! Background error diffusion transfer operator
+!-----------------------------------------------------------------------
+ln_samgrd_mod = .false.
+nsamstp_mod   = 1
+/
+!-----------------------------------------------------------------------
+&nambge_sdv_mod	!  Background error standard deviation(nambge_sdv_mod)
+!-----------------------------------------------------------------------
+ln_Bmod_sdv_rea  = .false.  ! 
+ln_Bmod_sdv_wri  = .false.  ! 
+deltaz_t_mod     = 10.0     ! 
+nsdvmin_t_mod    = 0        ! 
+nsdvmxl_t_mod    = 0        ! 
+sdvmax_t_mod     = 1.5      ! 
+sdvmxl_t_mod     = 0.5      ! 
+sdvdpo_t_mod     = 0.07     ! 
+nmxl_s_mod       = 1        ! 
+nsdvmxl_s_mod    = 0        ! 
+depmax_dtdz_mod  = 300.0    ! 
+depmax_mxl_s_mod = 200.0    ! 
+depmax_dsdt_mod  = 200.0    ! 
+sdvmax_s_mod     = 0.25     ! 
+sdvdpo_s_mod     = 0.01     ! 
+nsdvmxl_uv_mod   = 0        ! 
+sdvequ_ssh_mod   = 0.001    ! 
+sdvext_ssh_mod   = 0.01     ! 
+sdvlatc_ssh_mod  = 20.0     ! 
+ln_filsdv_t_mod  = .false.  ! 
+ln_filsdv_s_mod  = .false.  ! 
+ln_ransdv_mod    = .false.  ! 
+frasdv_mod       = 0.2      ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_ens_loc	! 
+!-----------------------------------------------------------------------
+ln_Bens_loc_dif_rea = .false.  ! 
+ln_Bens_loc_dif_wri = .false.  ! 
+ln_Bens_loc_nor_rea = .false.  ! 
+ln_Bens_loc_nor_wri = .false.  ! 
+ln_Bens_hybsdv      = .false.  ! 
+nlevnow_loc         = 41       ! 
+ln_ranwri_loc       = .false.  ! 
+ln_ransam_loc       = .false.  ! 
+ln_bcscor_loc       = .true.   ! 
+ln_norreg_loc       = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_trf	! 
+!-----------------------------------------------------------------------
+ln_samgrd_loc = .false.  ! 
+nsamstp_loc   = 1        ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc	! 
+!-----------------------------------------------------------------------
+ln_Bens_dif_wri = .false.  ! 
+ndifbcs_loc     = 0        ! 
+nmxlten_loc     = 0        ! 
+nrosten_loc     = 0        ! 
+scamax_h_loc    = 60.0     !  in degrees
+scamax_z_loc    = 3000.0   !  in metres
+scamin_z_loc    = 0.0      !  in metres
+ln_clo_bnd_loc  = .false.  ! 
+ln_coa_bnd_loc  = .false.  ! 
+ln_mxl_bnd_loc  = .false.  ! 
+ln_dep_bnd_loc  = .true.   ! 
+depbnd_mxl_loc  = 600.0    !  in metres
+depmax_mxl_loc  = 600.0    !  in metres
+depfix_mxl_loc  = 50.0     !  in metres
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_loc_sol	! 
+!-----------------------------------------------------------------------
+nsolimp_loc        = 3        ! 
+nsolitmax_loc      = 200      ! 
+soltol_loc         = 1.0e-4   ! 
+ritzminper_loc     = 0.0      ! 
+ritzmaxper_loc     = 0.0      ! 
+cgsoltol_loc       = 1.0e-15  ! 
+ln_lanczos_loc     = .true.   ! 
+ln_eigwri_loc      = .true.   ! 
+ln_ritzlmp_loc     = .false.  ! 
+ln_ritzgal_loc     = .false.  ! 
+nritzpair_loc      = 200      ! 
+ndifsoldia_loc     = 2        ! 
+nn_verbose_loc     = 0        ! 
+ln_ritztst_loc     = .false.  ! 
+ln_ritzortho_loc   = .false.  ! 
+ln_diaprc_loc      = .false.  ! 
+nsolstp_loc        = 0        ! 
+nsolfgs_loc        = 1        ! 
+nsym_fgs_loc       = 1        ! 
+nsym_prc_loc       = 0        ! 
+ln_power_loc       = .false.  ! 
+npowitmax_loc      = 300      ! 
+tolpow_loc         = 1.0e-2   ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_cor_tru	! 
+!-----------------------------------------------------------------------
+ln_Btru_cor_dif_rea = .false.  ! 
+ln_Btru_cor_dif_wri = .false.  ! 
+ln_Btru_cor_nor_rea = .false.  ! 
+ln_Btru_cor_nor_wri = .false.  ! 
+ln_Btru_cor_per_rea = .false.  ! 
+ln_Btru_cor_per_wri = .false.  ! 
+nlevnow_tru         = 41       ! 
+ln_ranwri_tru       = .false.  ! 
+ln_ranwriper_tru    = .true.   ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_dif_tru	! 
+!-----------------------------------------------------------------------
+ln_ranten_tru = .false.  ! 
+fraten_h_tru  = 0.2      ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_sdv_tru	! 
+!-----------------------------------------------------------------------
+ln_Btru_sdv_wri = .false.  ! 
+ln_ransdv_tru   = .false.  ! 
+frasdv_tru      = 0.2      ! 
+/ 
+!-----------------------------------------------------------------------
+&namsgl	!   Single observation usage switch
+!-----------------------------------------------------------------------
+ln_inc     = .false.  ! 
+ln_gridded = .false.  ! 
+nn_sob_typ = 1        ! 
+nn_sob_stp = 1        ! 
+rn_sob_lam = -160.0   ! 
+rn_sob_phi = 0.0      ! 
+rn_sob_dep = 25.0     ! 
+rn_sob_val = 1.0      ! 
+/ 
+!-----------------------------------------------------------------------
+&namdfi	!  Digital filter
+!-----------------------------------------------------------------------
+ln_dfi       = .false.  ! 
+ln_dfi_w     = .false.  ! 
+ln_dfi_uvtse = .false.  ! 
+rn_dfiosd    = 1.0      ! 
+rn_tcutdf    = 5.0      ! 
+nn_jcenw     = 1        ! 
+/ 
+!-----------------------------------------------------------------------
+&namcoast	! 
+!-----------------------------------------------------------------------
+ln_coast_interp = .false.  ! 
+/ 
+!-----------------------------------------------------------------------
+&nambge_eof	! 
+!-----------------------------------------------------------------------
+ln_invbal_eof = .false.  ! 
+neoftot       = 55       ! 
+/ 
+!-----------------------------------------------------------------------
+&namtrf	!  Transfer operator
+!-----------------------------------------------------------------------
+ln_trf          = .false.    ! 
+nn_grd_ratio    = 2          ! 
+nn_msk_num      = 3          ! 
+ln_grd_read     = .false.    ! 
+ln_grd_write    = .false.    ! 
+ln_switch_pivot = .false.    ! 
+ln_tst_trf      = .false.    ! 
+cn_mode         = 'GSUM'     ! 
+cn_type_io      = 'BUNDLED'  ! 
+/ 
+!-----------------------------------------------------------------------
+&namvar_mde
+!-----------------------------------------------------------------------
+nn_n3d        = 0
+cn_3d_fldname = ''
+/
+!-----------------------------------------------------------------------
+&nammde_cov ! model error covariance
+!-----------------------------------------------------------------------
+ln_Qmod          = .false.
+ln_Qeof          = .false.
+ln_system_clock  = .false.
+ncornorpts_3d(:) = 100*1
+nsdv_h2dint      = 2
+nsdv_z1dint      = 0
+ros_radmin       = 200.0e3  ! in metres
+ros_radmax       = 250.0e3  ! in metres
+ros_phaspd       = 2.7      ! in m/s
+par_scaeq_zon    = 2.0
+par_scaeq_mer    = 0.5
+par_cutlat       = 15.0
+ros_scaeq_zon    = 2.0
+ros_scaeq_mer    = 0.75
+ros_cutlat       = 10.0
+ln_scseed        = .false.
+ln_eig_seed      = .false.
+ln_Mstp_wri      = .false.
+ln_Mstp_rea      = .false.
+ln_cpcort_s_mod  = .false.
+vallan_wri       = 0.0
+/
+!-----------------------------------------------------------------------
+&nammde_cov_tst ! model error covariance test parameters
+!-----------------------------------------------------------------------
+ln_mde_covadj_tst    = .FALSE.
+ln_mde_covpts_tst    = .FALSE.
+ln_mde_corpts_tst    = .FALSE.
+ln_mde_pts_tst_quick = .FALSE.
+nmdecovtstpts(:)     = 20*1
+nmdecortstpts(:)     = 20*1
+/
+!-----------------------------------------------------------------------
+&nammde_eof
+!-----------------------------------------------------------------------
+neoftot = 0
+/
+!-----------------------------------------------------------------------
+&nammde_cor_mod ! Model error correlation model
+!-----------------------------------------------------------------------
+ln_Qmod_cor_dif_rea  = .false.
+ln_Qmod_cor_dif_wri  = .false.
+ln_Qmod_cor_nor_rea  = .false.
+ln_Qmod_cor_nor_wri  = .false.
+ln_Qmod_cor_per_rea  = .false.
+ln_Qmod_cor_per_wri  = .false.
+nlevnow_mod          = ${NEMO_ZLEV_M1}
+ln_ranwri_mod        = .false.
+ln_ransam_mod        = .false.
+ln_bcscor_mod        = .true.
+ln_norreg_mod        = .false.
+ln_trf_vnormfac_filt = .false.
+/
+!-----------------------------------------------------------------------
+&nammde_dif_mod ! Diffusion for the model error covariance model
+!-----------------------------------------------------------------------
+ln_Qmod_dif_wri = .false.
+ndifbcs_mod     = 0
+nmxlten_mod     = 0
+nrosten_mod     = 0
+scamax_h_mod    = 30.0   ! in degrees
+scamax_z_mod    = 1000.0 ! in metres
+scamin_z_mod    = 0.0    ! in metres
+ln_clo_bnd_mod  = .false.
+ln_coa_bnd_mod  = .false.
+ln_mxl_bnd_mod  = .false.
+ln_dep_bnd_mod  = .true.
+depbnd_mxl_mod  = 200.0 ! in metres
+depmax_mxl_mod  = 600.0  ! in metres
+depfix_mxl_mod  = 50.0   ! in metres
+ln_ranten_mod   = .false.
+fraten_h_mod    = 0.2
+/
+!-----------------------------------------------------------------------
+&nammde_dif_mod_sol
+!-----------------------------------------------------------------------
+nsolimp_mod      = 3
+nsolitmax_mod    = 500
+soltol_mod       = 1.0e-4
+ritzminper_mod   = 0.0
+ritzmaxper_mod   = 0.0
+cgsoltol_mod     = 1.0e-15
+ln_lanczos_mod   = .true.
+ln_eigwri_mod    = .true.
+ln_ritzlmp_mod   = .false.
+ln_ritzgal_mod   = .false.
+nritzpair_mod    = 200
+ndifsoldia_mod   = 2
+nn_verbose_mod   = 1
+ln_ritztst_mod   = .false.
+ln_ritzortho_mod = .false.
+ln_diaprc_mod    = .false.
+nsolstp_mod      = 0
+nsolfgs_mod      = 1
+nsym_fgs_mod     = 1
+nsym_prc_mod     = 0
+ln_power_mod     = .false.
+npowitmax_mod    = 300
+tolpow_mod       = 1.0e-2
+/
+!-----------------------------------------------------------------------
+&nammde_dif_mod_trf
+!-----------------------------------------------------------------------
+ln_samgrd_mod = .false.
+nsamstp_mod   = 1
+/
+!-----------------------------------------------------------------------
+&nammde_sdv_mod
+!-----------------------------------------------------------------------
+ln_Qmod_sdv_rea = .false.
+ln_Qmod_sdv_wri = .false.
+ln_ransdv_mod   = .false.
+frasdv_mod      = 0.2
+/
