@@ -25,13 +25,11 @@ cost function:
         field precision: double
     grid name: ORCA2_T
     number levels: 10
-    extrafields initialisation: true
-    initialise nemovar: true
-    store nemovar: false
+    initialise extra fields: true
   background error:
     covariance model: SABER
     saber central block:
-      saber block name: orca jedi filter
+      saber block name: Nemovar B
       geometry: *Geom
       covtype: Nemovar
 #      covtype: Shapiro
