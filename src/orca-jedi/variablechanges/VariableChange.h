@@ -14,11 +14,6 @@
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/variablechanges/VariableChangeParameters.h"
 
-// Forward declarations
-namespace oops {
-class Variables;
-}
-
 namespace orcamodel {
 
 // -----------------------------------------------------------------------------

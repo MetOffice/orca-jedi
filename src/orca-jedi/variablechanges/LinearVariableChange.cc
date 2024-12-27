@@ -6,6 +6,7 @@
 */
 
 #include <string>
+#include <vector>
 
 #include "eckit/exception/Exceptions.h"
 
