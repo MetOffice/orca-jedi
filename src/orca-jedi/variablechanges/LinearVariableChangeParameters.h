@@ -6,23 +6,16 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include "eckit/exception/Exceptions.h"
-#include "oops/util/DateTime.h"
 #include "oops/base/Variables.h"
-#include "oops/base/LinearVariableChangeParametersBase.h"
-#include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
+#include "oops/base/ParameterTraitsVariables.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/OptionalParameter.h"
 
 
-class LinearVariableChangeParameters :
-    public oops::LinearVariableChangeParametersBase {
-  OOPS_CONCRETE_PARAMETERS(LinearVariableChangeParameters,
-                           oops::LinearVariableChangeParametersBase)
+class LinearVariableChangeParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(LinearVariableChangeParameters, oops::Parameters)
  public:
-  // No linear variable change. No additional parameters
+  oops::OptionalParameter<oops::Variables> inputVariables{"input variables", this};
+  oops::OptionalParameter<oops::Variables> outputVariables{"output variables", this};
 };
 
