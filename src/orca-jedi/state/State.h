@@ -86,7 +86,7 @@ class State : public util::Printable,
   void deserialize(const std::vector<double> &, std::size_t &) override {}
   void transpose(const State & DistState, const eckit::mpi::Comm & global,
      const int ensNum, const int transNum) {
-     throw eckit::NotImplemented("ORCA-JEDI State::transpose not implemented", Here());
+     throw eckit::NotImplemented("orcamodel::State::transpose: not implemented", Here());
   }
 
 /// Utilities
