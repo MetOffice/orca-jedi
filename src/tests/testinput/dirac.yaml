@@ -25,7 +25,7 @@ background error:
         - groups:
           - ice_area_fraction 
           value: 10
-      msvalr: 1e24
+      msvalr: 1e30
   saber outer blocks:
   - saber block name: BUMP_StdDev
     read:
@@ -42,7 +42,7 @@ background error:
         - variables:
           - ice_area_fraction
           value: 1
-      msvalr: 1e24
+      msvalr: 1e30
 
 dirac:
   x indices: [20]

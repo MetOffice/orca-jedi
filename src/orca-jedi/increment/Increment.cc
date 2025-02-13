@@ -38,7 +38,7 @@
 #include "atlas-orca/grid/OrcaGrid.h"
 
 #define INCREMENT_FILL_TOL 1e-6
-#define INCREMENT_FILL_VALUE 1e24
+#define INCREMENT_FILL_VALUE 1e30
 
 namespace orcamodel {
 
@@ -59,8 +59,6 @@ Increment::Increment(const Geometry & geom,
   incrementFields_ = atlas::FieldSet();
 
   setupIncrementFields();
-
-  this->zero();   // may not be needed
 
   oops::Log::debug() << "Increment(ORCA)::Increment created for "<< validTime()
                      << std::endl;
@@ -311,7 +309,8 @@ void Increment::setval(const double & val) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (has_mv) {
-            oops::Log::debug() << j << " " << k << " " << field_view(j, k) << " " << mv(field_view(j, k)) << std::endl;
+            oops::Log::debug() << j << " " << k << " " << field_view(j, k)
+                               << " " << mv(field_view(j, k)) << std::endl;
           }
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
@@ -616,6 +615,15 @@ void Increment::setupIncrementFields() {
       field.metadata().set("missing_value_type", "approximately-equals");
       field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
       incrementFields_.add(field);
+
+      // initialise all data to avoid compiler/machine dependent bugs in missingValues
+      auto field_view = atlas::array::make_view<double, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          field_view(j, k) = 0;
+        }
+      }
+
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
                          << vars_[i].name()
                          << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
