@@ -298,10 +298,11 @@ void Increment::setval(const double & val) {
       geom_->mesh().nodes().ghost());
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::Increment::setval:: field name = " << fieldName
-                       << "value " << val
+    oops::Log::debug() << "orcamodel::Increment::setval:: field name = '" << fieldName
+                       << "' value " << val
                        << std::endl;
 
+    oops::Log::debug() << incrementFields()[fieldName].metadata() << std::endl;
     atlas::field::MissingValue mv(incrementFields()[fieldName]);
     bool has_mv = static_cast<bool>(mv);
 
@@ -309,6 +310,9 @@ void Increment::setval(const double & val) {
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
+          if (has_mv) {
+            oops::Log::debug() << j << " " << k << " " << mv(field_view(j, k)) << std::endl;
+          }
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
           }
