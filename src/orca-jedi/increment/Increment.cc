@@ -311,7 +311,7 @@ void Increment::setval(const double & val) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
           if (has_mv) {
-            oops::Log::debug() << j << " " << k << " " << mv(field_view(j, k)) << std::endl;
+            oops::Log::debug() << j << " " << k << " " << field_view(j, k) << " " << mv(field_view(j, k)) << std::endl;
           }
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
