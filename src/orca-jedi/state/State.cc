@@ -263,6 +263,14 @@ void State::setupStateFields() {
         oops::Log::trace() << "State(ORCA)::setupStateFields : "
                            << vars_[i].name() << "has dtype: "
                            << (*(stateFields_.end()-1)).datatype().str() << std::endl;
+
+        // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
+        auto field_view = atlas::array::make_view<T, 2>(*(stateFields_.end()-1));
+        for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+          for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+            field_view(j, k) = 0;
+          }
+        }
       };
       ApplyForFieldType(addField,
                         geom_->fieldPrecision(vars_[i].name()),

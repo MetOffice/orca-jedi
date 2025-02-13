@@ -300,7 +300,6 @@ void Increment::setval(const double & val) {
                        << "' value " << val
                        << std::endl;
 
-    oops::Log::debug() << incrementFields()[fieldName].metadata() << std::endl;
     atlas::field::MissingValue mv(incrementFields()[fieldName]);
     bool has_mv = static_cast<bool>(mv);
 
@@ -308,10 +307,6 @@ void Increment::setval(const double & val) {
     for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
         if (!ghost(j)) {
-          if (has_mv) {
-            oops::Log::debug() << j << " " << k << " " << field_view(j, k)
-                               << " " << mv(field_view(j, k)) << std::endl;
-          }
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             field_view(j, k) = val;
           }
@@ -616,7 +611,7 @@ void Increment::setupIncrementFields() {
       field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
       incrementFields_.add(field);
 
-      // initialise all data to avoid compiler/machine dependent bugs in missingValues
+      // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
       auto field_view = atlas::array::make_view<double, 2>(field);
       for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
         for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
