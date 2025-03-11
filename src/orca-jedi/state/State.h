@@ -84,6 +84,10 @@ class State : public util::Printable,
   std::size_t serialSize() const override {return 0;}
   void serialize(std::vector<double> &) const override {}
   void deserialize(const std::vector<double> &, std::size_t &) override {}
+  void transpose(const State & DistState, const eckit::mpi::Comm & global,
+     const int ensNum, const int transNum) {
+     throw eckit::NotImplemented("orcamodel::State::transpose: not implemented", Here());
+  }
 
 /// Utilities
   std::shared_ptr<const Geometry> geometry() const {return geom_;}

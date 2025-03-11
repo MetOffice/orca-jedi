@@ -60,8 +60,6 @@ Increment::Increment(const Geometry & geom,
 
   setupIncrementFields();
 
-  this->zero();   // may not be needed
-
   oops::Log::debug() << "Increment(ORCA)::Increment created for "<< validTime()
                      << std::endl;
 }
@@ -298,8 +296,8 @@ void Increment::setval(const double & val) {
       geom_->mesh().nodes().ghost());
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
-    oops::Log::debug() << "orcamodel::Increment::setval:: field name = " << fieldName
-                       << "value " << val
+    oops::Log::debug() << "orcamodel::Increment::setval:: field name = '" << fieldName
+                       << "' value " << val
                        << std::endl;
 
     atlas::field::MissingValue mv(incrementFields()[fieldName]);
@@ -612,6 +610,15 @@ void Increment::setupIncrementFields() {
       field.metadata().set("missing_value_type", "approximately-equals");
       field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
       incrementFields_.add(field);
+
+      // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
+      auto field_view = atlas::array::make_view<double, 2>(field);
+      for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          field_view(j, k) = 0;
+        }
+      }
+
       oops::Log::trace() << "Increment(ORCA)::setupIncrementFields : "
                          << vars_[i].name()
                          << " with shape (" << (*(incrementFields_.end()-1)).shape(0)
