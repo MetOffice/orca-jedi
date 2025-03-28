@@ -21,6 +21,7 @@
 #include "eckit/log/CodeLocation.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/FieldSetOperations.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
@@ -328,6 +329,12 @@ void Increment::ones() {
   oops::Log::trace() << "Increment(ORCA)::ones starting" << std::endl;
   this->setval(1);
   oops::Log::trace() << "Increment(ORCA)::ones done" << std::endl;
+}
+
+void Increment::sqrt() {
+  oops::Log::trace() << "Increment(ORCA)::sqrt starting" << std::endl;
+  util::sqrtFieldSet(incrementFields_);
+  oops::Log::trace() << "Increment(ORCA)::sqrt done" << std::endl;
 }
 
 void Increment::zero(const util::DateTime & vt) {
