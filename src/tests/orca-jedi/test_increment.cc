@@ -84,6 +84,7 @@ CASE("test increment") {
     increment.print(std::cout);
     EXPECT_EQUAL(increment.norm(), 1);
     std::cout << std::endl << "Increment sqrt(ones): " << std::endl;
+    increment.sqrt();
     EXPECT_EQUAL(increment.norm(), 1);
     std::cout << std::endl << "Increment zero: " << std::endl;
     increment.zero();
