@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #pragma once
@@ -32,13 +29,13 @@
 
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace orcamodel {
-  class State;
-  class Geometry;
-  class Increment;
+class State;
+class Geometry;
+class Increment;
 
 atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
     const std::vector<double> & locs);
@@ -61,18 +58,18 @@ class Interpolator : public util::Printable,
              std::vector<double>& result) const;
   void apply(const oops::Variables& vars, const Increment& inc,
              const std::vector<bool> & mask,
-             std::vector<double>& result) const {
-    throw eckit::NotImplemented("Increment interpolation not implemented",
-                                Here());
-  }
-  void applyAD(const oops::Variables& vars, const Increment& inc,
+             std::vector<double>& result) const;
+  void applyAD(const oops::Variables& vars, Increment& inc,
                const std::vector<bool> & mask,
-               const std::vector<double> &) const {
-    throw eckit::NotImplemented("Adjoint interpolation not implemented",
-                                Here());
-  }
+               const std::vector<double> &) const;
 
  private:
+  template<class T> void executeInterpolation(
+      const std::string& gv_varname,
+      size_t var_size,
+      const State& state,
+      const std::vector<bool> & mask,
+      std::vector<double>::iterator& result) const;
   void print(std::ostream &) const override;
   int64_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;

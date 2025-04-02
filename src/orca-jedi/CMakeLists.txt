@@ -1,8 +1,5 @@
 #
-# (C) British Crown Copyright 2020 Met Office
-#
-# This software is licensed under the terms of the Apache Licence Version 2.0
-# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# (C) British Crown Copyright 2024 Met Office
 #
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -24,20 +21,34 @@ model/ModelBiasIncrement.h
 model/Model.h
 state/State.h
 state/State.cc
-state/StateReadUtils.h
-state/StateReadUtils.cc
 nemo_io/NemoFieldReader.h
 nemo_io/NemoFieldReader.cc
+nemo_io/NemoFieldWriter.h
+nemo_io/NemoFieldWriter.cc
+nemo_io/AtlasIndex.h
+nemo_io/ReadServer.h
+nemo_io/ReadServer.cc
+nemo_io/WriteServer.h
+nemo_io/WriteServer.cc
 utilities/OrcaModelTraits.h
+utilities/Types.h
+utilities/Types.cc
+utilities/IOUtils.h
+utilities/IOUtils.cc
+utilities/ModelData.h
+utilities/ModelData.cc
 variablechanges/VariableChangeParameters.h
 variablechanges/VariableChange.h
+variablechanges/LinearVariableChange.h
+variablechanges/LinearVariableChange.cc
+variablechanges/LinearVariableChangeParameters.h
 )
 
 
 
 ecbuild_add_library( TARGET   orcamodel
                      SOURCES  ${oops_orcamodel_src_files}
-                     PUBLIC_LIBS  oops ufo atlas atlas-orca eckit netcdf
+                     PUBLIC_LIBS  oops saber ufo atlas atlas-orca eckit netcdf
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

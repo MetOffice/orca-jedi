@@ -1,0 +1,65 @@
+background error:
+  covariance model: SABER
+  saber central block:
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    read:
+      general:
+        testing: true
+        universe length-scale: 40000.0e3
+      io:
+        data directory: testoutput
+        files prefix: orca2
+      drivers:
+        compute covariance: false
+        compute correlation: false
+        multivariate strategy: univariate
+        compute moments: false
+        write diagnostics: true
+        compute nicas: true
+        write local nicas: true
+        write nicas grids: true
+      model:
+        do not cross mask boundaries: true
+      nicas:
+        explicit length-scales: true
+        resolution: 3.0
+#        resolution: 8.0
+        horizontal length-scale:
+        - groups: 
+          - ice_area_fraction
+          value: 4.0e7
+#          value: 4.0e6
+        vertical length-scale:
+        - groups:
+          - ice_area_fraction 
+          value: 10
+      msvalr: 1e30
+background:
+  date: '2021-06-30T12:00:00Z'
+  state variables: &vars [ ice_area_fraction ]
+  nemo field file: Data/orca2_t_nemo.nc
+  set gmask: true
+
+geometry:
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background variance
+  grid name: ORCA2_T
+  number levels: 10
+  initialise extra fields: true
+
+test:
+  reference filename: testoutput/test_bump_nicas.ref
+  test output filename: testoutput/test_bump_nicas.out

@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2020 MetOffice
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #include "atlas/library/Library.h"
@@ -25,7 +22,7 @@ int main(int argc,  char ** argv) {
   atlas::Library::instance().initialise();
   ufo::instantiateObsFilterFactory();
 #if defined(NEMO_FEEDBACK_EXISTS)
-  nemo_feedback::instantiateObsFilterFactory<ufo::ObsTraits>();
+  nemo_feedback::instantiateObsFilterFactory();
 #endif
   oops::HofX3D<orcamodel::OrcaModelTraits , ufo::ObsTraits> hofx;
   int i = run.execute(hofx);

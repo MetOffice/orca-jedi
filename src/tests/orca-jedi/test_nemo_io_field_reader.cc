@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2020-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -15,6 +12,8 @@
 #include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+
+#include "tests/orca-jedi/OrcaModelTestEnvironment.h"
 
 namespace orcamodel {
 namespace test {
@@ -88,91 +87,15 @@ CASE("test read_var_slice reads vector") {
   eckit::PathName test_data_path("../Data/simple_nemo.nc");
 
   NemoFieldReader field_reader(test_data_path);
-  std::vector<double> data = field_reader.read_var_slice("iiceconc", 1, 0);
+  std::vector<double> data = field_reader.read_var_slice<double>("iiceconc", 1, 0);
 
   EXPECT_EQUAL(data[0], 121);
   EXPECT_EQUAL(data[5], 171);
-}
-
-CASE("test read_surf_var reads field array view") {
-  eckit::PathName test_data_path("../Data/simple_nemo.nc");
-
-  auto array_shape = atlas::array::ArrayShape{6, 1};
-  auto array_datatype = atlas::array::DataType::real64();
-  std::unique_ptr<atlas::array::Array> test_array(
-    atlas::array::Array::create<double>(array_shape) );
-
-  atlas::array::ArrayView<double, 2> arrayView =
-    atlas::array::make_view<double, 2>(*test_array);
-
-  NemoFieldReader field_reader(test_data_path);
-  field_reader.read_surf_var("iiceconc", 2, arrayView);
-
-  EXPECT_EQUAL(arrayView(0, 0), 122);
-  EXPECT_EQUAL(arrayView(5, 0), 172);
-}
-
-CASE("test read_volume_var reads field array view") {
-  eckit::PathName test_data_path("../Data/simple_nemo.nc");
-
-  int nx = 3; int ny = 2; int nz = 2; int nt = 3;
-
-  auto array_shape = atlas::array::ArrayShape{nx*ny, nz};
-  auto array_datatype = atlas::array::DataType::real64();
-  std::unique_ptr<atlas::array::Array> test_array(
-    atlas::array::Array::create<double>(array_shape) );
-
-  atlas::array::ArrayView<double, 2> arrayView =
-    atlas::array::make_view<double, 2>(*test_array);
-
-  NemoFieldReader field_reader(test_data_path);
-  field_reader.read_volume_var("votemper", 1, arrayView);
-
-  for (int i = 0; i < nx; ++i) {
-    for (int j = 0; j < ny; ++j) {
-      for (int k = 0; k < nz; ++k) {
-        double test_val = 2000 + (k + 1)*100 + (j + 1)*10 + i + 1;
-        std::cout << "arrayView(" << j << "+" << i << "*" << ny << ", "
-                  << k << ") ";
-        std::cout << arrayView(i+j*nx, k) << " ~ " << test_val << std::endl;
-        EXPECT_EQUAL(arrayView(i+j*nx, k), test_val);
-      }
-    }
-  }
-}
-
-CASE("test read_vertical_var reads field array view") {
-  eckit::PathName test_data_path("../Data/simple_nemo.nc");
-
-  int nx = 3; int ny = 2; int nz = 2; int nt = 3;
-
-  auto array_shape = atlas::array::ArrayShape{nx*ny, nz};
-  auto array_datatype = atlas::array::DataType::real64();
-  std::unique_ptr<atlas::array::Array> test_array(
-    atlas::array::Array::create<double>(array_shape) );
-
-  atlas::array::ArrayView<double, 2> arrayView =
-    atlas::array::make_view<double, 2>(*test_array);
-
-  NemoFieldReader field_reader(test_data_path);
-  field_reader.read_vertical_var("nav_lev", arrayView);
-
-  for (int i = 0; i < nx; ++i) {
-    for (int j = 0; j < ny; ++j) {
-      for (int k = 0; k < nz; ++k) {
-        double test_val = k*100;
-        std::cout << "arrayView(" << j << "+" << i << "*" << ny << ", "
-                  << k << ") ";
-        std::cout << arrayView(i+j*nx, k) << " ~ " << test_val << std::endl;
-        EXPECT_EQUAL(arrayView(i+j*nx, k), test_val);
-      }
-    }
-  }
 }
 
 }  // namespace test
 }  // namespace orcamodel
 
 int main(int argc, char** argv) {
-    return eckit::testing::run_tests(argc, argv);
+    return orcamodel::test::run(argc, argv);
 }

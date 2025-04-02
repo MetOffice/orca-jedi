@@ -1,0 +1,65 @@
+# (C) British Crown Copyright 2024 Met Office
+
+geometry :
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background error variance
+  grid name: ORCA2_T
+  number levels: 10
+state :
+  date: 2021-06-30T00:00:00Z
+  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  nemo field file: Data/orca2_t_nemo.nc
+  nemo error field file: Data/orca2_t_bkg_var.nc
+time window:
+  begin: 2021-06-29T12:00:00Z
+  length: P1D
+observations:
+  observers:
+  - obs space:
+      name: Sea Ice
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/hofx_sic_ostia_obs.nc
+      obsdataout:
+        engine:
+          type: H5File
+          obsfile: testoutput/test_hofx3d_nc_sic_jopa_out.nc
+      simulated variables: [seaIceFraction]
+    get values:
+      atlas-interpolator:
+        type: "finite-element"
+        non_linear: missing-if-all-missing-real32
+    obs operator:
+      name: Composite
+      components:
+      - name: Identity
+        observation alias file: testinput/test_name_map.yaml
+      - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
+    obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: GrossErrorProbability/seaIceFraction
+        type: float
+        value: 0.04
+    - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
+      filter variables:
+      - name: seaIceFraction
+      prob density bad obs: 1.0
+      PGE threshold: 0.5
+test:
+  reference filename: testoutput/test_hofx3d_nc_sic.ref

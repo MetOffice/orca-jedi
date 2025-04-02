@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #pragma once
@@ -14,6 +11,7 @@
 
 #include "atlas/field/FieldSet.h"
 
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
@@ -23,28 +21,27 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/increment/IncrementParameters.h"
 
 #include "eckit/exception/Exceptions.h"
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class Locations;
+class GeoVaLs;
 }
 
 namespace oops {
-  class Variables;
-  class UnstructuredGrid;
+class Variables;
+class UnstructuredGrid;
 }
 
 namespace orcamodel {
-  class Geometry;
-  class ModelBiasIncrement;
-  class ErrorCovariance;
-  class State;
+class Geometry;
+class ModelBiasIncrement;
+class State;
 
 /// orcaModel Increment Class: Difference between two states
 /*!
@@ -67,31 +64,53 @@ class Increment : public util::Printable,
             const oops::Variables &,
             const util::DateTime &);
   Increment(const Geometry &, const Increment &);
-  Increment(const Increment &, const bool);
-  Increment(const Increment &);
+  Increment(const Increment &, const bool copy = true);
 
 /// Basic operators
-  void diff(const State &, const State &) {}
-  void zero() {}
-  void zero(const util::DateTime &) {}
-  void ones() {}
-  // Increment & operator =(const Increment &);
-  // Increment & operator+=(const Increment &);
-  // Increment & operator-=(const Increment &);
-  // Increment & operator*=(const double &);
-  void axpy(const double &, const Increment &, const bool check = true) {}
-  double dot_product_with(const Increment &) const {return 0.0; }
-  void schur_product_with(const Increment &) {}
-  void random() {}
-  void dirac(const eckit::Configuration &) {}
+  void diff(const State &, const State &);
+  void zero();
+  void zero(const util::DateTime &);
+  void ones();
+  Increment & operator =(const Increment &);
+  Increment & operator+=(const Increment &);
+  Increment & operator-=(const Increment &);
+  Increment & operator*=(const double &);
+  void axpy(const double &, const Increment &, const bool check = true);
+  double dot_product_with(const Increment &) const;
+  void schur_product_with(const Increment &);
+  void random();
+  void dirac(const OrcaDiracParameters &);
+  void dirac(const eckit::Configuration &);
+
+/// ATLAS
+  void toFieldSet(atlas::FieldSet &) const;
+  void toFieldSetAD(const atlas::FieldSet &);
+  void fromFieldSet(const atlas::FieldSet &);
 
 /// I/O and diagnostics
-  void read(const eckit::Configuration &) {}
-  void write(const eckit::Configuration &) const {}
-  double norm() const {return 0.0; }
-  void print(std::ostream & os) const override {os << "Not Implemented";}
+
+  struct stats {
+      int valid_points;
+      double sumx;
+      double sumx2;
+      double min;
+      double max;
+  };
+
+  void read(const eckit::Configuration &);
+  void write(const OrcaIncrementParameters &) const;
+  void write(const eckit::Configuration &) const;
+
+  void print(std::ostream & os) const override;
+  struct stats stats(const std::string & field_name) const;
+  double norm() const;
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
+
+  std::vector<double> rmsByLevel(const std::string &) const {
+    ABORT("rmsByLevel not implemented");
+    return {};
+  }
 
 /// Serialize and deserialize
   std::size_t serialSize() const override {return 0;}
@@ -100,7 +119,6 @@ class Increment : public util::Printable,
 
 /// Other
   void accumul(const double &, const State &) {}
-
 
 /// Utilities
   std::shared_ptr<const Geometry> geometry() const {return geom_;}
@@ -112,17 +130,17 @@ class Increment : public util::Printable,
 
   const atlas::FieldSet & incrementFields() const {return incrementFields_;}
   atlas::FieldSet & incrementFields() {return incrementFields_;}
-
   const oops::Variables & variables() const {return vars_;}
-
 
 /// Data
  private:
-  // void print(std::ostream &) const override;
+  void setupIncrementFields();
+  void setval(const double &);
   std::shared_ptr<const Geometry> geom_;
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet incrementFields_;
+  int seed_ = 7;
 };
 // -----------------------------------------------------------------------------
 

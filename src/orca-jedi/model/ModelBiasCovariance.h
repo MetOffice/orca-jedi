@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #pragma once
@@ -17,9 +14,9 @@
 #include "oops/util/Printable.h"
 
 namespace orcamodel {
-  class ModelBias;
-  class ModelBiasIncrement;
-  class Geometry;
+class ModelBias;
+class ModelBiasIncrement;
+class Geometry;
 
 // -----------------------------------------------------------------------------
 

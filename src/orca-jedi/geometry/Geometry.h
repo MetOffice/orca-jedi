@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #pragma once
@@ -11,10 +8,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
+#include <tuple>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/functionspace/NodeColumns.h"
+#include "atlas/functionspace.h"
 #include "atlas/mesh.h"
 #include "atlas/grid.h"
 #include "atlas/meshgenerator.h"
@@ -22,6 +22,7 @@
 #include "atlas/runtime/Log.h"
 
 #include "eckit/mpi/Comm.h"
+#include "eckit/log/Timer.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -29,12 +30,12 @@
 #include "oops/util/Printable.h"
 
 #include "orca-jedi/geometry/GeometryParameters.h"
+#include "orca-jedi/utilities/Types.h"
 
 namespace atlas {
-  class Field;
-  class FieldSet;
-  class Mesh;
-
+class Field;
+class FieldSet;
+class Mesh;
 }
 
 namespace orcamodel {
@@ -46,8 +47,6 @@ namespace orcamodel {
 
 class Geometry : public util::Printable {
  public:
-  typedef OrcaGeometryParameters Parameters__;
-
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 
@@ -56,29 +55,41 @@ class Geometry : public util::Printable {
       const;
   const eckit::mpi::Comm & getComm() const {return comm_;}
   const oops::Variables & variables() const;
+  void create_extrafields();
   void latlon(std::vector<double> & lats, std::vector<double> & lons,
               const bool halo) const;
+  const atlas::FunctionSpace & functionSpace() const {return funcSpace_;}
+  const atlas::FieldSet & extraFields() const {return extraFields_;}
+  const atlas::FieldSet & fields() const {return extraFields_;}
+  atlas::FieldSet & extraFields() {return extraFields_;}
 
   const atlas::Grid & grid() const {return grid_;}
   const atlas::Mesh & mesh() const {return mesh_;}
-  const atlas::functionspace::NodeColumns & funcSpace() const
-    {return funcSpace_;}
   const std::string nemo_var_name(const std::string std_name) const;
   const bool variable_in_variable_type(std::string variable_name,
     std::string variable_type) const;
   bool levelsAreTopDown() const {return true;}
+  std::string distributionType() const {
+      return params_.partitioner.value();}
+  FieldDType fieldPrecision(std::string variable_name) const;
+  std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
+  void log_status() const;
+  void set_gmask(atlas::Field &) const;
 
  private:
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;
   size_t n_levels_;
-  Parameters__ params_;
+  OrcaGeometryParameters params_;
   atlas::Grid grid_;
   atlas::grid::Partitioner partitioner_;
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
+  std::shared_ptr<eckit::Timer> eckit_timer_;
+  atlas::FieldSet extraFields_;
 };
+
 // -----------------------------------------------------------------------------
 
 }  // namespace orcamodel

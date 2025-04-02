@@ -1,3 +1,5 @@
+# (C) British Crown Copyright 2024 Met Office
+
 geometry :
   nemo variables:
     - name: depth
@@ -9,49 +11,57 @@ geometry :
     - name: sea_water_potential_temperature_background_error
       nemo field name: t_tot_var
       model space: volume
-      variable type: background variance
+      variable type: background error variance
   grid name: ORCA2_T
   number levels: 3
 state :
   date: 2021-06-30T00:00:00Z
   state variables: [ sea_water_potential_temperature, sea_water_potential_temperature_background_error, depth ]
   nemo field file: Data/orca2_t_nemo.nc
-  variance field file: Data/orca2_t_bkg_var.nc
-window begin: 2021-06-29T12:00:00Z
-window length: P1D
+  nemo error field file: Data/orca2_t_bkg_var.nc
+time window:
+  begin: 2021-06-29T12:00:00Z
+  length: P1D
 observations:
   observers:
   - obs space:
       name: Sea Temperature
       obsdatain:
-        obsfile: Data/hofx_potm_obs.nc
+        engine:
+          type: H5File
+          obsfile: Data/hofx_potm_obs.nc
         obsgrouping:
-          group variables: [ "station_id" ]
-          sort variable: depth
+          group variables: [ "stationIdentification" ]
+          sort variable: depthBelowWaterSurface
           sort group: ObsValue
           sort order: descending
       obsdataout:
-        obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
-      simulated variables: [sea_water_potential_temperature]
+        engine:
+          type: H5File
+          obsfile: testoutput/test_hofx3d_nc_potm_jopa_out.nc
+      simulated variables: [waterPotentialTemperature]
     get values:
       atlas-interpolator:
         type: unstructured-bilinear-lonlat
-        non_linear: missing-if-all-missing
+        non_linear: missing-if-all-missing-real32
     obs operator:
       name: VertInterp
       variables:
-      - name: sea_water_potential_temperature
+      - name: waterPotentialTemperature
       vertical coordinate: depth
+      observation vertical coordinate: depthBelowWaterSurface
       observation vertical coordinate group: ObsValue
+      interpolation method: linear
+      observation alias file: testinput/test_name_map.yaml
     obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: sea_water_potential_temperature@GrossErrorProbability
+      - name: GrossErrorProbability/waterPotentialTemperature
         type: float
         value: 0.04
     - filter: Conventional Profile Processing
       filter variables:
-      - name: sea_water_potential_temperature
+      - name: waterPotentialTemperature
       Checks: ["Basic"]
       maxlev: 1000
 test:

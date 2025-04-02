@@ -1,0 +1,171 @@
+# (C) British Crown Copyright 2024 Met Office
+
+forecast length : P3D
+time window:
+  begin: 2021-06-28T23:00:00Z
+  length: P2D
+geometry:
+  nemo variables:
+    - name: ice_area_fraction
+      nemo field name: iiceconc
+      model space: surface
+    - name: sea_surface_foundation_temperature
+      nemo field name: votemper
+      model space: surface
+    - name: sea_water_potential_temperature
+      nemo field name: votemper
+      model space: volume
+    - name: ice_area_fraction_background_error
+      nemo field name: sic_tot_var
+      model space: surface
+      variable type: background error variance
+  grid name: ORCA2_T
+  number levels: 2
+initial condition :
+  date: 2021-06-28T23:00:00Z
+  state variables: [ ice_area_fraction, ice_area_fraction_background_error ]
+  #analytic_init: zeroed state
+  nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+  nemo error field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+model :
+  name: PseudoModel
+  tstep: P1D
+  states:
+    - date: 2021-06-28T23:00:00Z
+      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      nemo error field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      state variables: &state_variables [ ice_area_fraction ]
+    - date: 2021-06-29T23:00:00Z
+      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      nemo error field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      state variables: *state_variables
+    - date: 2021-07-01T23:00:00Z
+      nemo field file: orca-jedi/src/tests/Data/orca2_t_nemo.nc
+      nemo error field file: orca-jedi/src/tests/Data/orca2_t_bkg_var.nc
+      state variables: *state_variables
+observations:
+  observers:
+  - obs space:
+      name: Sea Ice
+      obsdatain:
+        engine:
+          type: ODB
+          obsfile: orca-jedi/src/tests/Data/hofx_sic_ostia_obs.odb
+          mapping file: orca-jedi/src/tests/testinput/odb_sic_mapping.yaml
+          query file: orca-jedi/src/tests/testinput/odb_sic_query.yaml
+      obsdataout:
+        engine:
+          type: H5File
+          obsfile: test_out.nc
+      simulated variables: [seaIceFraction]
+    get values:
+      time interpolation: linear
+      atlas-interpolator:
+        type: unstructured-bilinear-lonlat
+        non_linear: missing-if-all-missing-real32
+        max_fraction_elems_to_try: 0.0
+    obs operator:
+      name: Composite
+      components:
+      - name: Identity
+        observation alias file: testinput/test_name_map.yaml
+      - name: BackgroundErrorIdentity
+        observation alias file: testinput/test_name_map.yaml
+    obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: GrossErrorProbability/seaIceFraction
+        type: float
+        value: 0.04
+    - filter: Create Diagnostic Flags
+      flags:
+      - name: FinalReject
+        initial value: false
+      - name: ObNotDefinedReject
+        initial value: false
+      - name: BgNotDefinedReject
+        initial value: false
+      - name: ObOutOfBoundsReject
+        initial value: false
+      - name: BgOutOfBoundsReject
+        initial value: false
+      - name: BayBgCheckReject
+        initial value: false
+    - filter: Perform Action
+      filter variables:
+      - name: seaIceFraction
+      action:
+        name: assign error
+        error parameter: 0.3162277
+    - filter: RejectList
+      defer to post: true
+      where:
+      - variable:
+          name: ObsValue/seaIceFraction
+        value: is_not_valid
+      actions:
+      - name: set
+        flag: FinalReject
+      - name: set
+        flag: ObNotDefinedReject
+      - name: reject
+    - filter: RejectList
+      defer to post: true
+      where:
+      - variable:
+          name: HofX/seaIceFraction
+        value: is_not_valid
+      actions:
+      - name: set
+        flag: FinalReject
+      - name: set
+        flag: BgNotDefinedReject
+      - name: reject
+    - filter: Bounds Check
+      defer to post: true
+      filter variables:
+      - name: seaIceFraction
+      minvalue: 0.0
+      maxvalue: 1.0
+      actions:
+      - name: set
+        flag: FinalReject
+      - name: set
+        flag: ObOutOfBoundsReject
+      - name: reject
+    - filter: Bounds Check
+      defer to post: true
+      filter variables:
+      - name: HofX/seaIceFraction
+      minvalue: 0.0
+      maxvalue: 1.0
+      actions:
+      - name: set
+        flag: FinalReject
+      - name: set
+        flag: BgOutOfBoundsReject
+      - name: reject
+    - filter: Bayesian Background Check
+      observation alias file: testinput/test_name_map.yaml
+      filter variables:
+      - name: seaIceFraction
+      prob density bad obs: 1.0
+      PGE threshold: 0.5
+      actions:
+      - name: set
+        flag: FinalReject
+      - name: set
+        flag: BayBgCheckReject
+      - name: reject
+    - filter: NEMO Feedback Writer
+      filename: odb_nemo_fdbk_writer_out.nc
+      reference date: 1950-01-01T00:00:00Z
+      variables:
+      - name: seaIceFraction
+        nemo name: ICECONC
+        long name: ice area fraction
+        units: Fraction
+        additional variables:
+          - name: seaIceFraction
+            feedback suffix: Hx
+            ioda group: HofX

@@ -12,14 +12,17 @@ A clear and concise description of what the bug is.
 
 ## Instructions to reproduce the bug
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
+1. build with/ Change configuration to '...'
+2. read job.out/err or log file
 3. Scroll down to '....'
 4. See error
 
 ## Acceptance Criteria (Definition of Done)
 
-What does it mean for this to be finished?
+* ctests pass
+* sith comparisons pass
+
+What else does it mean for this to be finished?
 
 ## Dependencies
 

@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2017-2021 Met Office
- *
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #pragma once
@@ -18,7 +15,9 @@
 #include "orca-jedi/model/ModelBiasIncrement.h"
 #include "orca-jedi/model/ModelBiasCovariance.h"
 #include "orca-jedi/state/State.h"
+#include "orca-jedi/utilities/ModelData.h"
 #include "orca-jedi/variablechanges/VariableChange.h"
+#include "orca-jedi/variablechanges/LinearVariableChange.h"
 
 namespace orcamodel {
 
@@ -38,6 +37,8 @@ struct OrcaModelTraits {
   typedef orcamodel::ModelBiasCovariance       ModelAuxCovariance;
   typedef orcamodel::State                     State;
   typedef orcamodel::VariableChange            VariableChange;
+  typedef orcamodel::LinearVariableChange      LinearVariableChange;
+  typedef orcamodel::ModelData                 ModelData;
 };
 
 }  // namespace orcamodel

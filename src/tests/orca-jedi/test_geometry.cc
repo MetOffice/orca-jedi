@@ -1,8 +1,5 @@
 /*
- * (C) British Crown Copyright 2020-2021 Met Office
- * 
- * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * (C) British Crown Copyright 2024 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -14,6 +11,7 @@
 #include "oops/base/Variables.h"
 
 #include "atlas/library/Library.h"
+#include "atlas/mesh.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
@@ -34,7 +32,7 @@ CASE("test basic geometry") {
   nemo_var_mappings[1].set("name", "sea_ice_area_fraction_error")
     .set("nemo field name", "sic_tot_var")
     .set("model space", "surface")
-    .set("variable type", "background variance");
+    .set("variable type", "background error variance");
   nemo_var_mappings[2].set("name", "sea_surface_foundation_temperature")
     .set("nemo field name", "votemper")
     .set("model space", "surface");
@@ -54,38 +52,34 @@ CASE("test basic geometry") {
     EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction",
                                               "background"));
     EXPECT(geometry.variable_in_variable_type("sea_ice_area_fraction_error",
-                                              "background variance"));
+                                              "background error variance"));
     EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction_error",
                                                "background"));
     EXPECT(!geometry.variable_in_variable_type("sea_ice_area_fraction",
-                                               "background variance"));
+                                               "background error variance"));
   }
 
   SECTION("test geometry variable sizes") {
-    const std::vector<int> channels{};
-    std::vector<std::string> varnames {"sea_ice_area_fraction",
-      "sea_water_potential_temperature"};
-    oops::Variables oops_vars(varnames, channels);
+    oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"},
+                               oops::Variable{"sea_water_potential_temperature"}}};
     auto varsizes = geometry.variableSizes(oops_vars);
     EXPECT_EQUAL(varsizes.size(), 2);
     EXPECT_EQUAL(varsizes[0], 1);
     EXPECT_EQUAL(varsizes[1], 10);
-    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
+    oops::Variables not_vars{{oops::Variable{"NOTAVARIBLE"}}};
     EXPECT_THROWS_AS(geometry.variableSizes(not_vars), eckit::BadValue);
   }
 
   SECTION("test geometry variable NEMO model spaces") {
-    const std::vector<int> channels{};
-    std::vector<std::string> varnames {"sea_ice_area_fraction",
-      "sea_water_potential_temperature", "depth"};
-    oops::Variables oops_vars(varnames, channels);
+    oops::Variables oops_vars{{oops::Variable{"sea_ice_area_fraction"},
+      oops::Variable{"sea_water_potential_temperature"}, oops::Variable{"depth"}}};
     auto varsizes = geometry.variableNemoSpaces(oops_vars);
     EXPECT_EQUAL(varsizes.size(), 3);
     EXPECT_EQUAL(varsizes[0], "surface");
     EXPECT_EQUAL(varsizes[1], "volume");
     EXPECT_EQUAL(varsizes[2], "vertical");
 
-    oops::Variables not_vars({"NOTAVARIBLE"}, channels);
+    oops::Variables not_vars{{oops::Variable{"NOTAVARIBLE"}}};
     EXPECT_THROWS_AS(geometry.variableNemoSpaces(not_vars), eckit::BadValue);
 
     eckit::LocalConfiguration bad_config;
@@ -99,6 +93,79 @@ CASE("test basic geometry") {
     Geometry bad_geometry(bad_config, eckit::mpi::comm());
     EXPECT_THROWS_AS(bad_geometry.variableNemoSpaces(oops_vars),
       eckit::BadValue);
+  }
+
+  SECTION("test geometry lats and lons contain no ghost points") {
+    std::vector<double> lats;
+    std::vector<double> lons;
+    geometry.latlon(lats, lons, false);
+    const auto lonlat = atlas::array::make_view<double, 2>(
+        geometry.functionSpace().lonlat());
+    const auto ghosts = atlas::array::make_view<int32_t, 1>(
+        geometry.mesh().nodes().ghost());
+    // ghost points on orca grids appear more than once in the mesh due to the
+    // "seam" at the periodic boundaries. If these points are present in the
+    // geometry they ought to appear more than once
+    bool ghostsExist = false;
+    std::vector<size_t> appearances(ghosts.size(), 0);
+    for (size_t iElem = 0; iElem < ghosts.size(); ++iElem) {
+      for (size_t iLoc = 0; iLoc < lats.size(); ++iLoc) {
+        // skip 260, 70 as this is special case in the ORCA2_T grid where there
+        // are many points overlapping
+        if (lons[iLoc] - 260 < 1e-6 && lats[iLoc] - 70 < 1e-6)
+          continue;
+        if (lons[iLoc] == lonlat(iElem, 0) && lats[iLoc] == lonlat(iElem, 1)) {
+          appearances[iElem]++;
+          if (appearances[iElem] > 1) {
+            std::cout << "lons[" << iLoc <<"] " << std::setprecision(12)
+                      << lons[iLoc] << " lats[" << iLoc << "] "
+                      << std::setprecision(12) << lats[iLoc]
+                      << " ghosts(" << iElem << ") " << ghosts(iElem)
+                      << " appearances[" << iElem << "] "
+                      << appearances[iElem] << std::endl;
+            ghostsExist = true;
+          }
+        }
+      }
+    }
+    EXPECT(!ghostsExist);
+  }
+
+  SECTION("test geometry extra methods") {
+    EXPECT(geometry.levelsAreTopDown());
+    EXPECT(geometry.distributionType() == "serial");
+  }
+
+  SECTION("test geometry extrafields") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 10);
+    config2.set("initialise extra fields", true);
+    Geometry geometry2(config2, eckit::mpi::comm());
+    atlas::FieldSet extraFields;
+    extraFields = geometry2.extraFields();
+    std::vector<std::string> extraFieldNames {
+        "vunit",
+        "owned",
+        "gmask",
+        "area"};
+    int num_matches = 0;
+    std::cout << "extraField list: ";
+    for (atlas::Field field : extraFields) {
+      std::string fieldname = field.name();
+      std::cout << fieldname << " ";
+      for (std::string fieldnametest : extraFieldNames) {
+        if ( fieldnametest == fieldname ) {
+          num_matches++;
+        }
+      }
+    }
+    std::cout << std::endl;
+    std::cout << "Number of extraFields " << extraFields.size() << std::endl;
+    std::cout << "Number matches to expected names " << num_matches << std::endl;
+    EXPECT(extraFields.size() == num_matches);
+    EXPECT(extraFieldNames.size() == num_matches);
   }
 }
 

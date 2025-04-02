@@ -1,3 +1,4 @@
+# (C) British Crown Copyright 2024 Met Office
 
 ############################################################################################
 # orca-jedi
@@ -5,12 +6,11 @@
 cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
-include( ecbuild_system NO_POLICY_SCOPE )
 
 ################################################################################
 # Initialise project orca-jedi
 
-project( orca-jedi LANGUAGES CXX )
+project( orca-jedi LANGUAGES CXX Fortran )
 ecbuild_declare_project()
 
 set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
@@ -18,27 +18,41 @@ set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
 ################################################################################
 # Required packages
 
-#ecbuild_find_package( NAME NetCDF COMPONENTS CXX)
+## Dependencies
+find_package( jedicmake QUIET )  # Prefer find modules from jedi-cmake
+
 find_package( NetCDF COMPONENTS CXX)
 ecbuild_debug( "   NetCDF_FEATURES: [${NetCDF_FEATURES}]" )
 
-ecbuild_find_package( NAME eckit VERSION 1.18 COMPONENTS LZ4 REQUIRED )
+find_package( eckit 1.18 COMPONENTS LZ4 REQUIRED )
 ecbuild_debug( "   eckit_FEATURES : [${eckit_FEATURES}]" )
 
-ecbuild_find_package( NAME atlas VERSION 0.29 REQUIRED )
+find_package( atlas 0.38.1 REQUIRED )
 ecbuild_debug( "   atlas_FEATURES: [${atlas_FEATURES}]" )
 
-ecbuild_find_package( NAME oops )
+find_package( atlas-orca REQUIRED )
+ecbuild_debug( "   atlas_orca_FEATURES: [${atlas_orca_FEATURES}]" )
+
+find_package( oops REQUIRED )
 ecbuild_debug( "   oops_FEATURES : [${oops_FEATURES}]" )
 
-ecbuild_find_package( NAME ufo )
+find_package( saber REQUIRED)
+ecbuild_debug( "   saber_FEATURES : [${saber_FEATURES}]" )
+
+find_package( ufo REQUIRED)
 ecbuild_debug( "   ufo_FEATURES : [${ufo_FEATURES}]" )
 
-ecbuild_find_package( NAME nemo-feedback )
+find_package( nemo-feedback )
 
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
 
+# check if Doxygen is installed
+find_package(Doxygen)
+ecbuild_add_option( FEATURE ORCA_JEDI_DOCS
+                    DESCRIPTION "orca-jedi documentation"
+                    DEFAULT OFF
+                    REQUIRED_PACKAGES "Doxygen" )
 
 ################################################################################
 # sources
@@ -50,6 +64,8 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/src
                     )
 
 add_subdirectory( src )
+
+add_subdirectory ( docs )
 
 ################################################################################
 # Export and summarize
