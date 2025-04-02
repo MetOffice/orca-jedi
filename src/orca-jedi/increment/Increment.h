@@ -71,6 +71,7 @@ class Increment : public util::Printable,
   void zero();
   void zero(const util::DateTime &);
   void ones();
+  void sqrt();
   Increment & operator =(const Increment &);
   Increment & operator+=(const Increment &);
   Increment & operator-=(const Increment &);
