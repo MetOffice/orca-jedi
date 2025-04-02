@@ -679,7 +679,7 @@ void Increment::print(std::ostream & os) const {
     os << std::string(8, ' ') << fieldName <<
           " num: " << s.valid_points <<
           " mean: " << std::setprecision(5) << s.sumx/s.valid_points <<
-          " rms: " << sqrt(s.sumx2/s.valid_points)  <<
+          " rms: " << std::sqrt(s.sumx2/s.valid_points)  <<
           " min: " << s.min << " max: " << s.max << std::endl;
   }
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
@@ -730,7 +730,7 @@ double Increment::norm() const {
     valid_points_all += s.valid_points;
   }
   // return RMS
-  return sqrt(sumx2all/valid_points_all);
+  return std::sqrt(sumx2all/valid_points_all);
 }
 
 }  // namespace orcamodel
