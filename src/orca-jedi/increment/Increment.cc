@@ -21,6 +21,7 @@
 #include "eckit/log/CodeLocation.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/FieldSetOperations.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
@@ -328,6 +329,12 @@ void Increment::ones() {
   oops::Log::trace() << "Increment(ORCA)::ones starting" << std::endl;
   this->setval(1);
   oops::Log::trace() << "Increment(ORCA)::ones done" << std::endl;
+}
+
+void Increment::sqrt() {
+  oops::Log::trace() << "Increment(ORCA)::sqrt starting" << std::endl;
+  util::sqrtFieldSet(incrementFields_);
+  oops::Log::trace() << "Increment(ORCA)::sqrt done" << std::endl;
 }
 
 void Increment::zero(const util::DateTime & vt) {
@@ -672,7 +679,7 @@ void Increment::print(std::ostream & os) const {
     os << std::string(8, ' ') << fieldName <<
           " num: " << s.valid_points <<
           " mean: " << std::setprecision(5) << s.sumx/s.valid_points <<
-          " rms: " << sqrt(s.sumx2/s.valid_points)  <<
+          " rms: " << std::sqrt(s.sumx2/s.valid_points)  <<
           " min: " << s.min << " max: " << s.max << std::endl;
   }
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
@@ -723,7 +730,7 @@ double Increment::norm() const {
     valid_points_all += s.valid_points;
   }
   // return RMS
-  return sqrt(sumx2all/valid_points_all);
+  return std::sqrt(sumx2all/valid_points_all);
 }
 
 }  // namespace orcamodel
