@@ -30,7 +30,7 @@ cost function:
           - groups:
             - ice_area_fraction 
             value: 10
-      msvalr: 1e30
+      msvalr: 1e27
     saber outer blocks:
     - saber block name: BUMP_StdDev
       read:
@@ -47,7 +47,7 @@ cost function:
           - variables:
             - ice_area_fraction
             value: 1
-      msvalr: 1e30
+      msvalr: 1e27
   geometry: &Geom
     nemo variables:
       - name: ice_area_fraction
@@ -113,7 +113,7 @@ variational:
     algorithm: DRPCG
   iterations:
   - ninner: 1
-    gradient norm reduction: 1e-30
+    gradient norm reduction: 1e-27
     geometry: *Geom
     test: on
     online diagnostics:

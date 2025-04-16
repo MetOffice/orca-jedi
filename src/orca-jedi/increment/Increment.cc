@@ -39,7 +39,7 @@
 #include "atlas-orca/grid/OrcaGrid.h"
 
 #define INCREMENT_FILL_TOL 1e-6
-#define INCREMENT_FILL_VALUE 1e30
+#define INCREMENT_FILL_VALUE 1e27
 
 namespace orcamodel {
 

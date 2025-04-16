@@ -73,7 +73,7 @@ variational:
     algorithm: DRPCG
   iterations:
   - ninner: 1
-    gradient norm reduction: 1e-30
+    gradient norm reduction: 1e-27
     geometry: *Geom
     test: on
     online diagnostics:
