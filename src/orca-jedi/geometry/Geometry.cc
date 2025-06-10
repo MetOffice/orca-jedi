@@ -140,6 +140,7 @@ const std::string Geometry::nemo_var_name(const std::string std_name) const {
 ///        These are area, vunit, hmask, gmask.
 void Geometry::create_extrafields() {
   extraFields_ = atlas::FieldSet();
+  extraFields_.metadata().set("level for 2d variables", "top");
 
   atlas::OrcaGrid orcaGrid = mesh_.grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
