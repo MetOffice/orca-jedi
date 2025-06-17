@@ -54,7 +54,7 @@ Increment::Increment(const Geometry & geom,
 {
   if (geom_->getComm().size() != 1) {
     throw eckit::NotImplemented("orcamodel::Increment::Increment: Cannot construct"
-                               " an Increment with more than one MPI process.");
+                               " an Increment with more than one MPI process.", Here());
   }
 
   incrementFields_ = atlas::FieldSet();
