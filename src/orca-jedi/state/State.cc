@@ -84,7 +84,8 @@ State::State(const Geometry & geom,
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
     if (params_.setGmask.value().value_or(false)) {
-      // Using the mask from a surface variable to set the geometry extrafields gmask as 3D masks are not fully supported.
+      // Using the mask from a surface variable to set the geometry extrafields gmask
+      //  as 3D masks are not fully supported.
       for (auto & field : stateFields_) {
         if (static_cast<size_t>(field.shape(1)) == 1) {
           geom.set_gmask(field);

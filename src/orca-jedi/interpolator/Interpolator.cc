@@ -34,7 +34,7 @@ namespace orcamodel {
 
 atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
     const std::vector<double>& lats, const std::vector<double>& lons) {
-  size_t nlocs = lats.size();
+  const size_t nlocs = lats.size();
 
   // Setup observation functionspace
   oops::Log::trace() << "orcamodel::Interpolator:: creating "
@@ -125,7 +125,7 @@ void Interpolator::apply(const oops::Variables& vars, const State& state,
 /// \param iter Reference to the interator into the output vector.
 template <class T>
 void Interpolator::executeInterpolation(
-    const std::string& gv_varname, size_t var_size, const State& state,
+    const std::string& gv_varname, const size_t var_size, const State& state,
     const std::vector<bool>& mask, std::vector<double>::iterator& iter) const {
   atlas::Field tgt_field = atlasObsFuncSpace_.createField<T>(
       atlas::option::name(gv_varname) | atlas::option::levels(var_size));
@@ -134,24 +134,27 @@ void Interpolator::executeInterpolation(
   atlas::field::MissingValue mv(state.stateFields()[gv_varname]);
   bool has_mv = static_cast<bool>(mv);
   for (std::size_t iloc = 0; iloc < nlocs_; iloc++) {
-    for (std::size_t klev = 0; klev < var_size; ++klev) {
-      if (mask[iloc]) {
+    if (mask[iloc]) {
+      for (std::size_t klev = 0; klev < var_size; ++klev) {
         if (has_mv && mv(field_view(iloc, klev))) {
           *iter = util::missingValue<double>();
         } else {
           *iter = static_cast<double>(field_view(iloc, klev));
         }
+        std::advance(iter, 1);
       }
-      ++iter;
+    } else {
+      // skip past elements not required according to the mask.
+      std::advance(iter, var_size);
     }
   }
 }
 
 template void Interpolator::executeInterpolation<double>(
-    const std::string& gv_varname, size_t var_size, const State& state,
+    const std::string& gv_varname, const size_t var_size, const State& state,
     const std::vector<bool>& mask, std::vector<double>::iterator& iter) const;
 template void Interpolator::executeInterpolation<float>(
-    const std::string& gv_varname, size_t var_size, const State& state,
+    const std::string& gv_varname, const size_t var_size, const State& state,
     const std::vector<bool>& mask, std::vector<double>::iterator& iter) const;
 
 /// \brief Interpolate from model space to observation space
@@ -162,7 +165,6 @@ template void Interpolator::executeInterpolation<float>(
 void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
                          const std::vector<bool>& mask,
                          std::vector<double>& result) const {
-  // input is inc output is result
   const size_t nvars = vars.size();
 
   for (size_t j = 0; j < nvars; ++j) {
@@ -214,8 +216,6 @@ void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
 void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
                            const std::vector<bool>& mask,
                            const std::vector<double>& resultin) const {
-  // input is resultin output is inc
-
   oops::Log::trace() << "orcamodel::Interpolator::applyAD start " << std::endl;
 
   const size_t nvars = vars.size();
