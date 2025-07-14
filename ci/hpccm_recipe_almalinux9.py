@@ -21,7 +21,7 @@ def gitlab_url(repo, vn):
 
 # get versions via --userarg options
 # build hdf5/netcdf with zstd (libzstd from epel)
-atlas_orca_vn = USERARG.get('atlas_orca_vn', '0.4.0')
+atlas_orca_vn = USERARG.get('atlas_orca_vn', '0.4.2')
 atlas_vn = USERARG.get('atlas_vn', '0.40.0')
 blitz_vn = USERARG.get('blitz_vn', '1.0.2')
 boost_vn = USERARG.get('boost_vn', '1.85.0')
@@ -30,24 +30,24 @@ cmake_vn = USERARG.get('cmake_vn', '3.26.5')
 ecbuild_vn = USERARG.get('ecbuild_vn', '3.9.0')
 eccodes_vn = USERARG.get('eccodes_vn', '2.30.1')  # requires AEC (libaec-devel) by default
 eckit_vn = USERARG.get('eckit_vn', '1.28.3')
-ectrans_vn = USERARG.get('ectrans_vn', '1.2.0')
-fckit_vn = USERARG.get('fckit_vn', '0.13.3')
-fiat_vn = USERARG.get('fiat_vn', '1.4.1')
+ectrans_vn = USERARG.get('ectrans_vn', '1.6.1')
+fckit_vn = USERARG.get('fckit_vn', '0.13.4')
+fiat_vn = USERARG.get('fiat_vn', '1.5.1')
 fparser_vn = USERARG.get('fparser_vn', '0.2.0')
 gsl_lite_vn = USERARG.get('gsl_lite_vn', '0.42.0')
 gsw_fortran_vn = USERARG.get('gsw_fortran_vn', '3.08')
-hdf5_vn = USERARG.get('hdf5_vn', '1.14.2')
+hdf5_vn = USERARG.get('hdf5_vn', '1.14.6')
 json_schema_validator_vn = USERARG.get('json_schema_validator_vn', '2.3.0')
 json_vn = USERARG.get('json_vn', '3.11.3')
-lapack_vn = USERARG.get('lapack_vn', '3.11.0')
+lapack_vn = USERARG.get('lapack_vn', '3.12.1')
 nccmp_vn = USERARG.get('nccmp_vn', '1.9.1.0')
-nceplibs_bufr_vn = USERARG.get('nceplibs_bufr_vn', '12.0.1')
+nceplibs_bufr_vn = USERARG.get('nceplibs_bufr_vn', '12.2.0')
 netcdf_vn = USERARG.get('netcdf_vn', '4.9.2')
 netcdfcxx_vn = USERARG.get('netcdfcxx_vn', '4.3.1')
 netcdfftn_vn = USERARG.get('netcdfftn_vn', '4.6.1')
 netcdf4python_vn = USERARG.get('netcdf4python_vn', '1.6.5')
 numpy_vn = USERARG.get('numpy_vn', '1.26.4')
-odc_vn = USERARG.get('odc_vn', '1.5.2')
+odc_vn = USERARG.get('odc_vn', '1.6.1')
 openmpi_vn = USERARG.get('openmpi_vn', '4.1.5')
 pycodestyle_vn = USERARG.get('pycodestyle_vn', '2.10')
 qhull_vn = USERARG.get('qhull_vn', '8.0.2')  # no qhull-devel rpm
@@ -60,6 +60,7 @@ COMMON_PACKAGES = [
     'clang-tools-extra',
     'eigen3-devel',
     'expat-devel',
+    'fftw-devel',
     'flex',
     'gcc-toolset-12',
     'git',
@@ -140,24 +141,21 @@ mpi = openmpi(
 )
 Stage0 += mpi
 
-Stage0 += hdf5(
-    version=hdf5_vn,
+Stage0 += generic_cmake(
     prefix='/usr/local',
-    configure_opts=['--enable-cxx', '--enable-fortran'],
-    enable_build_mode='production',
-    enable_parallel=True,
-    enable_threadsafe=True,
-    enable_unsupported=True,
+    url=github_url('HDFGroup/hdf5', f'hdf5-{hdf5_vn}'),
+    directory=f'hdf5-hdf5-{hdf5_vn}',
+    cmake_opts=[
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DHDF5_ENABLE_PARALLEL=ON',
+        '-DHDF5_BUILD_FORTRAN=ON',
+        '-DHDF5_ENABLE_ZLIB_SUPPORT=ON',
+        '-DHDF5_ENABLE_SZIP_SUPPORT=ON',
+    ],
     toolchain=mpi.toolchain,
-    with_szlib='/usr/local',
-    with_zlib='/usr/local',
 )
-# - Post-process h5pcc to avoid f951: Warning:
-# Nonexistent include directory '/var/tmp/hdf5-1.14.0/src/H5FDsubfiling'
-# sed -i "s|-I${TMPDIR}/hdf5-${hdf5_vn}/src/H5FDsubfiling||g" "/usr/local/bin/h5pcc"
-Stage0 += shell(commands=[
-    f'sed -i "s|-I/var/tmp/hdf5-${hdf5_vn}/src/H5FDsubfiling||g" "/usr/local/bin/h5pcc"'
-])
+
 Stage0 += environment(variables={'H5DIR': '/usr/local', 'LIBS': '-ldl'})
 Stage0 += netcdf(
     version=netcdf_vn,
