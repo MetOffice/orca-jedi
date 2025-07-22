@@ -186,9 +186,9 @@ void Geometry::create_extrafields() {
       << std::endl;
   extraFields_->add(hmask);
 
-  // Create geometry mask or gmask.
+  // Create horizontal geometry mask or gmask.
   atlas::Field gmask = funcSpace_.createField<int32_t>(
-    atlas::option::name("gmask") | atlas::option::levels(n_levels_));
+    atlas::option::name("gmask") | atlas::option::levels(1));
 
   auto field_view2 = atlas::array::make_view<int32_t, 2>(gmask);
   for (atlas::idx_t j = 0; j < field_view2.shape(0); ++j) {
@@ -227,7 +227,7 @@ void Geometry::create_extrafields() {
 }
 
 // -----------------------------------------------------------------------------
-/// \brief Give the number of levels for each provided level - surface variables
+/// \brief Give the number of levels for each provided variable - surface variables
 ///        have 1 level, volumetric variables have "number levels" levels.
 /// \param[in]     vars  variables to check.
 /// \return        vector of number of levels in each variable.
@@ -391,6 +391,18 @@ void Geometry::set_gmask(atlas::Field & field) const {
     using T = decltype(typeVal);
     auto field_viewin = atlas::array::make_view<T, 2>(field);
     auto field_viewgm = atlas::array::make_view<int32_t, 2>(gmask);
+    {
+      std::stringstream ss;
+      ss << "orcamodel::Geometry::set_gmask field and gmask shape dim 0 do not match: "
+         << field_viewin.shape(0) << " != " << field_viewgm.shape(0);
+      ASSERT_MSG(field_viewgm.shape(0) == field_viewin.shape(0), ss.str());
+    }
+    {
+      std::stringstream ss;
+      ss << "orcamodel::Geometry::set_gmask field and gmask shape dim 1 do not match: "
+         << field_viewin.shape(1) << " != " << field_viewgm.shape(1);
+      ASSERT_MSG(field_viewgm.shape(1) == field_viewin.shape(1), ss.str());
+    }
     if (has_mv) {
       for (atlas::idx_t j = 0; j < field_viewgm.shape(0); ++j) {
         for (atlas::idx_t k = 0; k < field_viewgm.shape(1); ++k) {

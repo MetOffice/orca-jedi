@@ -84,8 +84,14 @@ State::State(const Geometry & geom,
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
     if (params_.setGmask.value().value_or(false)) {
-      // Using the mask from the first state field to set geometry extrafields gmask.
-      geom.set_gmask(stateFields_[0]);
+      // Using the mask from a surface variable to set the geometry extrafields gmask
+      //  as 3D masks are not fully supported.
+      for (auto & field : stateFields_) {
+        if (static_cast<size_t>(field.shape(1)) == 1) {
+          geom.set_gmask(field);
+          break;
+        }
+      }
     }
     if (params.errorFieldFile.value()) {
       readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
@@ -138,7 +144,7 @@ State::~State() {
 void State::subsetFieldSet(const oops::Variables & variables) {
   oops::Log::trace() << "State(ORCA)::subsetFieldSet subsetting." << std::endl;
   atlas::FieldSet subset;
-  for (int iVar = 0; iVar < variables.size(); iVar++) {
+  for (size_t iVar = 0; iVar < variables.size(); iVar++) {
     auto variable = variables[iVar].name();
     if (!stateFields_.has(variable)) {
       throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
@@ -149,7 +155,7 @@ void State::subsetFieldSet(const oops::Variables & variables) {
 
   stateFields_.clear();
 
-  for (int iVar = 0; iVar < variables.size(); iVar++) {
+  for (size_t iVar = 0; iVar < variables.size(); iVar++) {
     auto variable = variables[iVar].name();
     stateFields_.add(subset[variable]);
   }
