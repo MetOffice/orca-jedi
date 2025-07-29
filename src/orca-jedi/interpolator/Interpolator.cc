@@ -242,16 +242,25 @@ void Interpolator::applyAD(const oops::Variables& vars, Increment& inc,
         atlas::option::name(gv_varname) |
         atlas::option::levels(varSizes[jvar]));
 
+    // Use the OOPS missing value as the default for increment fields,
+    // however in the future we might need to switch to a value defined in
+    // configuration or read from file, therefore we keep it logically separate
+    // for now.
+    const double inc_default_missing_value = util::missingValue<double>();
+    tgt_field.metadata().set("missing_value", inc_default_missing_value);
+    tgt_field.metadata().set("missing_value_type", "approximately-equals");
+    tgt_field.metadata().set("missing_value_epsilon", 1e-6);
+
     // Copying observation array vector to an atlas observation field
     // (tgt_field)
     auto field_view = atlas::array::make_view<double, 2>(tgt_field);
-    atlas::field::MissingValue mv(inc.incrementFields()[gv_varname]);
+    atlas::field::MissingValue mv(tgt_field);
     bool has_mv = static_cast<bool>(mv);
 
     for (std::size_t iloc = 0; iloc < nlocs_; iloc++) {
       for (std::size_t klev = 0; klev < varSizes[jvar]; ++klev) {
-        if (has_mv && mv(field_view(iloc, klev))) {
-          field_view(iloc, klev) = util::missingValue<double>();
+        if (has_mv && (resultin[out_idx] == util::missingValue<double>())) {
+          field_view(iloc, klev) = inc_default_missing_value;
         } else {
           field_view(iloc, klev) = resultin[out_idx];
         }
