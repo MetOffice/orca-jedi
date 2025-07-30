@@ -616,6 +616,7 @@ void Increment::setupIncrementFields() {
       field.metadata().set("missing_value", INCREMENT_FILL_VALUE);
       field.metadata().set("missing_value_type", "approximately-equals");
       field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
+      field.metadata().set("nearest 3d level", "top");
       incrementFields_.add(field);
 
       // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
