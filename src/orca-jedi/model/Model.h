@@ -58,7 +58,7 @@ class OrcaModelParameters : public oops::Parameters {
 class Model: public util::Printable, private util::ObjectCounter<Model> {
  public:
   static const std::string classname() {return "orcamodel::Model";}
-  static std::vector<std::string> names() {return {"none"};} // is it needed? no-orca-model?
+  static std::vector<std::string> names() {return {"empty-orcaModel"};}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
     : tstep_(conf.getString("tstep")), geom_(geom) {
