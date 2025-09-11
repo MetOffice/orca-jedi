@@ -24,13 +24,13 @@ def gitlab_url(repo, vn):
 atlas_orca_vn = USERARG.get('atlas_orca_vn', '0.4.2')
 atlas_vn = USERARG.get('atlas_vn', '0.40.0')
 blitz_vn = USERARG.get('blitz_vn', '1.0.2')
-boost_vn = USERARG.get('boost_vn', '1.85.0')
+boost_vn = USERARG.get('boost_vn', '1.88.0')
 bufr_query_vn = USERARG.get('bufr_query_vn', '0.0.4')
 cmake_vn = USERARG.get('cmake_vn', '3.26.5')
-ecbuild_vn = USERARG.get('ecbuild_vn', '3.9.0')
+ecbuild_vn = USERARG.get('ecbuild_vn', '3.11.0')
 eccodes_vn = USERARG.get('eccodes_vn', '2.30.1')  # requires AEC (libaec-devel) by default
-eckit_vn = USERARG.get('eckit_vn', '1.28.3')
-ectrans_vn = USERARG.get('ectrans_vn', '1.6.1')
+eckit_vn = USERARG.get('eckit_vn', '1.29.3')
+ectrans_vn = USERARG.get('ectrans_vn', '1.6.2')
 fckit_vn = USERARG.get('fckit_vn', '0.13.4')
 fiat_vn = USERARG.get('fiat_vn', '1.5.1')
 fparser_vn = USERARG.get('fparser_vn', '0.2.0')
@@ -60,8 +60,9 @@ COMMON_PACKAGES = [
     'clang-tools-extra',
     'eigen3-devel',
     'expat-devel',
-    'fftw-devel',
+    'file',
     'flex',
+    'fftw-devel',
     'gcc-toolset-12',
     'git',
     'git-lfs',
