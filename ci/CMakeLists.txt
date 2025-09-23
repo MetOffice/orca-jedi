@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2024 Met Office
+# (C) British Crown Copyright 2025 Met Office
 
 cmake_minimum_required( VERSION 3.18 FATAL_ERROR )
 
