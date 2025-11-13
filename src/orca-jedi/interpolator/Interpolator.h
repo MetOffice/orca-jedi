@@ -57,6 +57,13 @@ class Interpolator : public util::Printable,
   void applyAD(const oops::Variables& vars, Increment& inc,
                const std::vector<bool>& mask, const std::vector<double>&) const;
 
+  static void preprocess(atlas::FieldSet &);
+  static void preprocessAD(atlas::FieldSet &);
+  static void preprocess(State& state) { Interpolator::preprocess(state.stateFields()); }
+  static void preprocessAD(State& state) { Interpolator::preprocessAD(state.stateFields()); }
+  static void preprocess(Increment& inc) { Interpolator::preprocess(inc.incrementFields()); }
+  static void preprocessAD(Increment& inc) { Interpolator::preprocessAD(inc.incrementFields()); }
+
  private:
   template <class T>
   void executeInterpolation(const std::string& gv_varname, size_t var_size,

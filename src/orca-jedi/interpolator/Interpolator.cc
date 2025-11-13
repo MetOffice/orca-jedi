@@ -67,6 +67,19 @@ Interpolator::Interpolator(const eckit::Configuration& conf,
   }
 }
 
+/// \brief Preprocess the data before performing the interpolation.
+/// \param fields the atlas FieldSet collection of fields used in the interpolation.
+void Interpolator::preprocess(atlas::FieldSet & fields) {
+  fields.haloExchange();
+}
+
+/// \brief Preprocess the data before performing the adjoint interpolation.
+/// \param fields the atlas FieldSet collection of fields used in the interpolation.
+void Interpolator::preprocessAD(atlas::FieldSet & fields) {
+  fields.adjointHaloExchange();
+  fields.set_dirty();
+}
+
 void Interpolator::apply(const oops::Variables& vars, const State& state,
                          const std::vector<bool>& mask,
                          std::vector<double>& result) const {

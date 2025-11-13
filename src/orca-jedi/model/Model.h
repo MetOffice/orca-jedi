@@ -107,8 +107,8 @@ class Model: public util::Printable, private util::ObjectCounter<Model> {
     }
   }
   void print(std::ostream &) const {}
-  util::Duration tstep_;
   OrcaModelParameters parameters_;
+  util::Duration tstep_;
   const Geometry geom_;
 };
 // -----------------------------------------------------------------------------
