@@ -60,7 +60,6 @@ class Interpolator : public util::Printable,
   static void preprocess(atlas::FieldSet &);
   static void preprocessAD(atlas::FieldSet &);
   static void preprocess(State& state) { Interpolator::preprocess(state.stateFields()); }
-  static void preprocessAD(State& state) { Interpolator::preprocessAD(state.stateFields()); }
   static void preprocess(Increment& inc) { Interpolator::preprocess(inc.incrementFields()); }
   static void preprocessAD(Increment& inc) { Interpolator::preprocessAD(inc.incrementFields()); }
 
