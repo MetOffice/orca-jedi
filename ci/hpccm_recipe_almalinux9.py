@@ -21,8 +21,8 @@ def gitlab_url(repo, vn):
 
 # get versions via --userarg options
 # build hdf5/netcdf with zstd (libzstd from epel)
-atlas_orca_vn = USERARG.get('atlas_orca_vn', '0.4.2')
-atlas_vn = USERARG.get('atlas_vn', '0.40.0')
+atlas_orca_vn = USERARG.get('atlas_orca_vn', '0.4.3')
+atlas_vn = USERARG.get('atlas_vn', '0.44.1')
 blitz_vn = USERARG.get('blitz_vn', '1.0.2')
 boost_vn = USERARG.get('boost_vn', '1.88.0')
 bufr_query_vn = USERARG.get('bufr_query_vn', '0.0.4')
