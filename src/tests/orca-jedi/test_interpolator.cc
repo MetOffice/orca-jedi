@@ -76,7 +76,7 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].geometry_config.set("nemo variables", nemo_var_mappings);
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
-    interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("non_linear", "missing-if-all-missing");
     interp_conf.set("adjoint", true);
     settings_map["ORCA2_T"].interpolator_config.set("atlas-interpolator", interp_conf);
 
@@ -131,7 +131,7 @@ CASE("test  interpolator") {
     settings_map["AMM1"].geometry_config.set("nemo variables", nemo_var_mappings);
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
-    interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("non_linear", "missing-if-all-missing");
     interp_conf.set("adjoint", true);
     settings_map["AMM1"].interpolator_config.set("atlas-interpolator", interp_conf);
 
