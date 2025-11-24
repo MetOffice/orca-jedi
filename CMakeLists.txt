@@ -56,6 +56,20 @@ if( ENABLE_DOCS OR ENABLE_ORCA_JEDI_DOCS )
 endif()
 
 ################################################################################
+# Project-wide compiler options
+
+message( "   CMAKE_CXX_COMPILER_ID : ${CMAKE_CXX_COMPILER_ID}" )
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Werror")
+endif()
+
+################################################################################
 # sources
 
 #include( atlas_compile_flags )

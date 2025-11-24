@@ -426,7 +426,7 @@ void State::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
-  for (size_t i=0; i < vars_.size(); ++i) {
+  for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
     // copy variable from increments to new field set
     atlas::Field field = stateFields_[i];
     std::string fieldName = field.name();
