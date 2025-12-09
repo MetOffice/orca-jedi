@@ -89,7 +89,7 @@ Increment::Increment(const Increment & other, const bool copy)
   setupIncrementFields();
 
   if (copy) {
-    for (size_t i=0; i < vars_.size(); ++i) {
+    for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
       // copy variable from _Fields to new field set
       atlas::Field field = other.incrementFields_[i];
       oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
@@ -557,7 +557,7 @@ void Increment::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
-  for (size_t i=0; i < vars_.size(); ++i) {
+  for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
     // copy variable from increments to new field set
     atlas::Field fieldinc = incrementFields_[i];
     std::string fieldName = fieldinc.name();
