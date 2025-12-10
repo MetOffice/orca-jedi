@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include <math.h>
@@ -84,8 +84,14 @@ State::State(const Geometry & geom,
          stateFields_);
     nemo_file_name = params.errorFieldFile.value().value_or("");
     if (params_.setGmask.value().value_or(false)) {
-      // Using the mask from the first state field to set geometry extrafields gmask.
-      geom.set_gmask(stateFields_[0]);
+      // Using the mask from a surface variable to set the geometry extrafields gmask
+      //  as 3D masks are not fully supported.
+      for (auto & field : stateFields_) {
+        if (static_cast<size_t>(field.shape(1)) == 1) {
+          geom.set_gmask(field);
+          break;
+        }
+      }
     }
     if (params.errorFieldFile.value()) {
       readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background error standard deviation",
@@ -138,7 +144,7 @@ State::~State() {
 void State::subsetFieldSet(const oops::Variables & variables) {
   oops::Log::trace() << "State(ORCA)::subsetFieldSet subsetting." << std::endl;
   atlas::FieldSet subset;
-  for (int iVar = 0; iVar < variables.size(); iVar++) {
+  for (size_t iVar = 0; iVar < variables.size(); iVar++) {
     auto variable = variables[iVar].name();
     if (!stateFields_.has(variable)) {
       throw eckit::BadValue("State(ORCA)::subsetFieldSet '"
@@ -149,7 +155,7 @@ void State::subsetFieldSet(const oops::Variables & variables) {
 
   stateFields_.clear();
 
-  for (int iVar = 0; iVar < variables.size(); iVar++) {
+  for (size_t iVar = 0; iVar < variables.size(); iVar++) {
     auto variable = variables[iVar].name();
     stateFields_.add(subset[variable]);
   }
@@ -389,7 +395,7 @@ template<class T> double State::norm(const std::string & field_name) const {
     // prevent divide by zero when there are no valid model points on this
     // MPI rank
     if (valid_points) {
-      local_norm = sqrt(squares)/valid_points;
+      local_norm = std::sqrt(squares)/valid_points;
     }
     return local_norm;
   }
@@ -400,7 +406,7 @@ template<class T> double State::norm(const std::string & field_name) const {
   geom_->getComm().allReduceInPlace(valid_points, eckit::mpi::sum());
 
   if (valid_points) {
-    return sqrt(squares)/valid_points;
+    return std::sqrt(squares)/valid_points;
   }
 
   return 0;
@@ -420,7 +426,7 @@ void State::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
-  for (size_t i=0; i < vars_.size(); ++i) {
+  for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
     // copy variable from increments to new field set
     atlas::Field field = stateFields_[i];
     std::string fieldName = field.name();

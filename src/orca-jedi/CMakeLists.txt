@@ -1,5 +1,5 @@
 #
-# (C) British Crown Copyright 2024 Met Office
+# (C) British Crown Copyright 2025 Met Office
 #
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -15,6 +15,7 @@ interpolator/Interpolator.h
 interpolator/Interpolator.cc
 increment/Increment.cc
 increment/Increment.h
+linearmodel/LinearModel.h
 model/ModelBiasCovariance.h
 model/ModelBias.h
 model/ModelBiasIncrement.h

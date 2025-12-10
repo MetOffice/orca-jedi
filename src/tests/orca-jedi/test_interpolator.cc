@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include<sstream>
@@ -76,7 +76,7 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].geometry_config.set("nemo variables", nemo_var_mappings);
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
-    interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("non_linear", "missing-if-all-missing");
     interp_conf.set("adjoint", true);
     settings_map["ORCA2_T"].interpolator_config.set("atlas-interpolator", interp_conf);
 
@@ -106,9 +106,9 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].vol_vars = oops::Variables{
         {oops::Variable{"sea_water_potential_temperature"}}};
     settings_map["ORCA2_T"].vol_values = std::vector<double>{
-        18.4888877869, missing_value, 18.1592998505,
-        18           , missing_value, 17.7500019073,
-        missing_value, missing_value, missing_value};
+        18.4888877869, 18           , missing_value,
+        missing_value, missing_value, missing_value,
+        18.1592998505, 17.7500019073, missing_value};
   }
 
   // AMM1 settings
@@ -131,7 +131,7 @@ CASE("test  interpolator") {
     settings_map["AMM1"].geometry_config.set("nemo variables", nemo_var_mappings);
     eckit::LocalConfiguration interp_conf;
     interp_conf.set("type", "unstructured-bilinear-lonlat");
-    interp_conf.set("non_linear", "missing-if-all-missing-real32");
+    interp_conf.set("non_linear", "missing-if-all-missing");
     interp_conf.set("adjoint", true);
     settings_map["AMM1"].interpolator_config.set("atlas-interpolator", interp_conf);
 
@@ -161,9 +161,9 @@ CASE("test  interpolator") {
     settings_map["AMM1"].vol_vars = oops::Variables{
         {oops::Variable{"sea_water_potential_temperature"}}};
     settings_map["AMM1"].vol_values = std::vector<double>{
-        11.9501609802, 13.9884538651, 10.1916904449,
-        11.9500904083, 13.8567619324, 10.1912517548,
-        11.9499549866, 13.7289009094, 10.1908035278};
+        11.9501609802, 11.9500904083, 11.9499549866,
+        13.9884538651, 13.8567619324, 13.7289009094,
+        10.1916904449, 10.1912517548, 10.1908035278};
   }
 
   for (const auto& [key, settings] : settings_map) {

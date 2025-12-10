@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -169,9 +169,9 @@ CASE("test basic state") {
         gmask_sum = field_sum;
       }
     }
-    // The sum should be equal to the number of ocean points in the orca2 grid
+    // The sum should be equal to the number of horizontal ocean points in the orca2 grid
     // minus ghost points and some additional masked points needed for BUMP to work.
-    EXPECT(gmask_sum == 264600);
+    EXPECT(gmask_sum == 26460);
   }
 }
 

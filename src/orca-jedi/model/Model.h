@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #pragma once
@@ -10,7 +10,6 @@
 #include <sstream>
 
 #include "eckit/exception/Exceptions.h"
-#include "oops/interface/ModelBase.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
@@ -24,7 +23,6 @@
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/StateParameters.h"
-#include "orca-jedi/utilities/OrcaModelTraits.h"
 
 // Forward declarations
 namespace eckit {
@@ -46,8 +44,7 @@ class OrcaModelParameters : public oops::Parameters {
   /// Model variables
   oops::RequiredParameter<std::vector<OrcaStateParameters>> states{
     "states",
-    "List of configuration options used to initialize the" +
-    " model state at each time step",
+    "List of configuration options used to initialize the model state at each time step",
     this};
 };
 
@@ -58,10 +55,10 @@ class OrcaModelParameters : public oops::Parameters {
  *  OrcaModel nonlinear model definition and configuration parameters.
  */
 
-class Model: public oops::interface::ModelBase<OrcaModelTraits>,
-             private util::ObjectCounter<Model> {
+class Model: public util::Printable, private util::ObjectCounter<Model> {
  public:
   static const std::string classname() {return "orcamodel::Model";}
+  static std::vector<std::string> names() {return {"empty-orcaModel"};}
 
   Model(const Geometry & geom, const eckit::Configuration & conf)
     : tstep_(conf.getString("tstep")), geom_(geom) {
@@ -110,8 +107,8 @@ class Model: public oops::interface::ModelBase<OrcaModelTraits>,
     }
   }
   void print(std::ostream &) const {}
-  util::Duration tstep_;
   OrcaModelParameters parameters_;
+  util::Duration tstep_;
   const Geometry geom_;
 };
 // -----------------------------------------------------------------------------

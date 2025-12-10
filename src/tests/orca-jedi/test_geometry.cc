@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -150,7 +150,7 @@ CASE("test basic geometry") {
         "owned",
         "gmask",
         "area"};
-    int num_matches = 0;
+    size_t num_matches = 0;
     std::cout << "extraField list: ";
     for (atlas::Field field : extraFields) {
       std::string fieldname = field.name();
@@ -164,7 +164,7 @@ CASE("test basic geometry") {
     std::cout << std::endl;
     std::cout << "Number of extraFields " << extraFields.size() << std::endl;
     std::cout << "Number matches to expected names " << num_matches << std::endl;
-    EXPECT(extraFields.size() == num_matches);
+    EXPECT(static_cast<size_t>(extraFields.size()) == num_matches);
     EXPECT(extraFieldNames.size() == num_matches);
   }
 }

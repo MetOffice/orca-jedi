@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include "eckit/log/Bytes.h"
@@ -60,12 +60,12 @@ CASE("test parallel serially distributed write field array views") {
   auto ghost = atlas::array::make_view<int32_t, 1>(mesh.nodes().ghost());
 
   std::vector<double> ice_buf, temp_buf;
-  for (size_t i = 0; i < ice_fv.shape(0); ++i) {
+  for (atlas::idx_t i = 0; i < ice_fv.shape(0); ++i) {
     ice_fv(i, 0) = ij(i, 0);
     ice_buf.emplace_back(ij(i, 0));
   }
   temp_buf.resize(3*ice_buf.size());
-  for (size_t i = 0; i < temp_fv.shape(0); ++i) {
+  for (atlas::idx_t i = 0; i < temp_fv.shape(0); ++i) {
     temp_fv(i, 0) = ij(i, 0);
     temp_fv(i, 1) = ij(i, 1) + 100;
     temp_fv(i, 2) = ij(i, 0) + 200;
@@ -85,19 +85,19 @@ CASE("test parallel serially distributed write field array views") {
                                                     mesh.nodes().lonlat())};
         std::vector<double> lons;
         std::vector<double> lats;
-        for (int i_node = 0; i_node < lonlat.shape(0); ++i_node) {
+        for (atlas::idx_t i_node = 0; i_node < lonlat.shape(0); ++i_node) {
           lons.emplace_back(lonlat(i_node, 0));
           lats.emplace_back(lonlat(i_node, 1));
         }
 
         EXPECT(lons.size() == nx*ny);
-        EXPECT(lons.size() == lonlat.shape(0));
+        EXPECT(static_cast<atlas::idx_t>(lons.size()) == lonlat.shape(0));
         EXPECT(lats.size() == nx*ny);
-        EXPECT(lats.size() == lonlat.shape(0));
+        EXPECT(static_cast<atlas::idx_t>(lats.size()) == lonlat.shape(0));
         field_writer.write_dimensions(lats, lons);
         std::cout << "sizes: " << ice_buf.size() << " =! " << nx*ny << std::endl;
         EXPECT(ice_buf.size() == nx*ny);
-        EXPECT(ice_buf.size() == ice_fv.shape(0));
+        EXPECT(static_cast<atlas::idx_t>(ice_buf.size()) == ice_fv.shape(0));
         field_writer.write_surf_var("iiceconc", ice_buf, 0);
         EXPECT(temp_buf.size() == 3*nx*ny);
         EXPECT(temp_buf.size() == temp_fv.size());
@@ -118,7 +118,7 @@ CASE("test parallel serially distributed write field array views") {
       NemoFieldReader field_reader(test_data_path);
       std::vector<double> data = field_reader.read_var_slice<double>("iiceconc", 0, 0);
       EXPECT(data.size() == nx*ny);
-      EXPECT(data.size() == ice_fv.shape(0));
+      EXPECT(static_cast<atlas::idx_t>(data.size()) == ice_fv.shape(0));
       for (atlas::idx_t iNode = 0; iNode < ice_fv.shape(0); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], ice_fv(iNode, 0));
@@ -142,7 +142,7 @@ CASE("test parallel serially distributed write field array views") {
       NemoFieldReader field_reader(test_data_path);
       std::vector<double> data = field_reader.read_var_slice<double>("votemper", 0, 0);
       EXPECT(data.size() == nx*ny);
-      EXPECT(data.size() == temp_fv.shape(0));
+      EXPECT(static_cast<atlas::idx_t>(data.size()) == temp_fv.shape(0));
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 0));
@@ -150,7 +150,7 @@ CASE("test parallel serially distributed write field array views") {
       data.clear();
       data = field_reader.read_var_slice<double>("votemper", 0, 1);
       EXPECT(data.size() == nx*ny);
-      EXPECT(data.size() == temp_fv.shape(0));
+      EXPECT(static_cast<atlas::idx_t>(data.size()) == temp_fv.shape(0));
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 1));
@@ -158,7 +158,7 @@ CASE("test parallel serially distributed write field array views") {
       data.clear();
       data = field_reader.read_var_slice<double>("votemper", 0, 2);
       EXPECT(data.size() == nx*ny);
-      EXPECT(data.size() == temp_fv.shape(0));
+      EXPECT(static_cast<atlas::idx_t>(data.size()) == temp_fv.shape(0));
       for (size_t iNode = 0; iNode < data.size(); ++iNode) {
         if (ghost(iNode)) continue;
         EXPECT_EQUAL(data[iNode], temp_fv(iNode, 2));

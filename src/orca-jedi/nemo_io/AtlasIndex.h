@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #pragma once
@@ -101,9 +101,9 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
   std::pair<int, int> ij(const size_t inode) const {
     auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
     int i = ij(inode, 0) >= 0 ? ij(inode, 0) : nx_ + ij(inode, 0);
-    const int ci = i >= nx_ ? i - nx_ : i;
+    const int ci = i >= static_cast<int>(nx_) ? i - nx_ : i;
     int j = ij(inode, 1) + 1;
-    const int cj = j >= ny_ ? ny_ - 1 : j;
+    const int cj = j >= static_cast<int>(ny_) ? ny_ - 1 : j;
     return std::pair<int, int>{ci, cj};
   }
 };

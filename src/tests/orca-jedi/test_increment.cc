@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include <iostream>
@@ -82,6 +82,9 @@ CASE("test increment") {
     std::cout << std::endl << "Increment ones: " << std::endl;
     increment.ones();
     increment.print(std::cout);
+    EXPECT_EQUAL(increment.norm(), 1);
+    std::cout << std::endl << "Increment sqrt(ones): " << std::endl;
+    increment.sqrt();
     EXPECT_EQUAL(increment.norm(), 1);
     std::cout << std::endl << "Increment zero: " << std::endl;
     increment.zero();

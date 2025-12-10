@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
@@ -431,8 +431,6 @@ template<typename T> std::vector<T> NemoFieldReader::read_vertical_var(
   oops::Log::trace() << "orcamodel::NemoFieldReader::read_vertical_var"
                      << std::endl;
   try {
-    size_t nx = read_dim_size("x");
-    size_t ny = read_dim_size("y");
     size_t nz = read_dim_size(z_dimvar_name_);
 
     if (nlevels > nz) {

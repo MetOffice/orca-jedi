@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #pragma once
@@ -71,6 +71,7 @@ class Increment : public util::Printable,
   void zero();
   void zero(const util::DateTime &);
   void ones();
+  void sqrt();
   Increment & operator =(const Increment &);
   Increment & operator+=(const Increment &);
   Increment & operator-=(const Increment &);

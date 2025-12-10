@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2024 Met Office
+ * (C) British Crown Copyright 2025 Met Office
  */
 
 #include <algorithm>
@@ -21,6 +21,7 @@
 #include "eckit/log/CodeLocation.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/FieldSetOperations.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
@@ -53,7 +54,7 @@ Increment::Increment(const Geometry & geom,
 {
   if (geom_->getComm().size() != 1) {
     throw eckit::NotImplemented("orcamodel::Increment::Increment: Cannot construct"
-                               " an Increment with more than one MPI process.");
+                               " an Increment with more than one MPI process.", Here());
   }
 
   incrementFields_ = atlas::FieldSet();
@@ -88,7 +89,7 @@ Increment::Increment(const Increment & other, const bool copy)
   setupIncrementFields();
 
   if (copy) {
-    for (size_t i=0; i < vars_.size(); ++i) {
+    for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
       // copy variable from _Fields to new field set
       atlas::Field field = other.incrementFields_[i];
       oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
@@ -330,6 +331,12 @@ void Increment::ones() {
   oops::Log::trace() << "Increment(ORCA)::ones done" << std::endl;
 }
 
+void Increment::sqrt() {
+  oops::Log::trace() << "Increment(ORCA)::sqrt starting" << std::endl;
+  util::sqrtFieldSet(incrementFields_);
+  oops::Log::trace() << "Increment(ORCA)::sqrt done" << std::endl;
+}
+
 void Increment::zero(const util::DateTime & vt) {
   time_ = vt;
   oops::Log::debug() << "orcamodel::Increment::zero at time " << vt << std::endl;
@@ -550,7 +557,7 @@ void Increment::toFieldSet(atlas::FieldSet & fset) const {
 
   fset = atlas::FieldSet();
 
-  for (size_t i=0; i < vars_.size(); ++i) {
+  for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
     // copy variable from increments to new field set
     atlas::Field fieldinc = incrementFields_[i];
     std::string fieldName = fieldinc.name();
@@ -609,6 +616,7 @@ void Increment::setupIncrementFields() {
       field.metadata().set("missing_value", INCREMENT_FILL_VALUE);
       field.metadata().set("missing_value_type", "approximately-equals");
       field.metadata().set("missing_value_epsilon", INCREMENT_FILL_TOL);
+      field.metadata().set("nearest 3d level", "top");
       incrementFields_.add(field);
 
       // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
@@ -672,7 +680,7 @@ void Increment::print(std::ostream & os) const {
     os << std::string(8, ' ') << fieldName <<
           " num: " << s.valid_points <<
           " mean: " << std::setprecision(5) << s.sumx/s.valid_points <<
-          " rms: " << sqrt(s.sumx2/s.valid_points)  <<
+          " rms: " << std::sqrt(s.sumx2/s.valid_points)  <<
           " min: " << s.min << " max: " << s.max << std::endl;
   }
   oops::Log::trace() << "Increment(ORCA)::print done" << std::endl;
@@ -723,7 +731,7 @@ double Increment::norm() const {
     valid_points_all += s.valid_points;
   }
   // return RMS
-  return sqrt(sumx2all/valid_points_all);
+  return std::sqrt(sumx2all/valid_points_all);
 }
 
 }  // namespace orcamodel

@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2024 Met Office
+# (C) British Crown Copyright 2025 Met Office
 
 ############################################################################################
 # orca-jedi
@@ -47,12 +47,27 @@ find_package( nemo-feedback )
 ################################################################################
 # Features that can be enabled / disabled with -DENABLE_<FEATURE>
 
-# check if Doxygen is installed
-find_package(Doxygen)
 ecbuild_add_option( FEATURE ORCA_JEDI_DOCS
                     DESCRIPTION "orca-jedi documentation"
                     DEFAULT OFF
                     REQUIRED_PACKAGES "Doxygen" )
+if( ENABLE_DOCS OR ENABLE_ORCA_JEDI_DOCS )
+    add_subdirectory( docs )
+endif()
+
+################################################################################
+# Project-wide compiler options
+
+message( "   CMAKE_CXX_COMPILER_ID : ${CMAKE_CXX_COMPILER_ID}" )
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Werror")
+endif()
 
 ################################################################################
 # sources
@@ -65,12 +80,9 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/src
 
 add_subdirectory( src )
 
-add_subdirectory ( docs )
-
 ################################################################################
 # Export and summarize
 
 ecbuild_install_project( NAME orcamodel )
 
 ecbuild_print_summary()
-
