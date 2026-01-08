@@ -2,7 +2,6 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
-#include <algorithm>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -10,11 +9,11 @@
 #include <sstream>
 #include <limits>
 
-#include "atlas/array/MakeView.h"
+#include "atlas/array/MakeView.h"  // IWYU pragma: keep
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
-#include "atlas/functionspace/StructuredColumns.h"
+#include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/exception/Exceptions.h"
@@ -23,7 +22,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/FieldSetOperations.h"
 #include "oops/util/DateTime.h"
-#include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
@@ -35,7 +33,7 @@
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/increment/IncrementParameters.h"
 
-#include "atlas/mesh.h"
+#include "atlas/mesh.h"  // IWYU pragma: keep
 #include "atlas-orca/grid/OrcaGrid.h"
 
 #define INCREMENT_FILL_TOL 1e-6

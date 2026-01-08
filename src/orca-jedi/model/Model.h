@@ -15,11 +15,9 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "oops/util/DateTime.h"
-#include "oops/base/ParameterTraitsVariables.h"
+#include "oops/util/Logger.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
-#include "oops/util/parameters/OptionalParameter.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/StateParameters.h"

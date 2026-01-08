@@ -17,13 +17,10 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "oops/util/Serializable.h"
-#include "oops/util/dot_product.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/increment/IncrementParameters.h"
-
-#include "eckit/exception/Exceptions.h"
 
 namespace eckit {
 class Configuration;

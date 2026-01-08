@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <experimental/filesystem>
 #include <netcdf>
 
 #include <string>
@@ -16,7 +15,6 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "atlas/runtime/Exception.h"
 #include "atlas/util/Point.h"
 
 namespace orcamodel {

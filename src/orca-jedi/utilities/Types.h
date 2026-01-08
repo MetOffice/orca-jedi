@@ -10,7 +10,7 @@
 
 #include "eckit/exception/Exceptions.h"
 
-#include "atlas/array/DataType.h"
+#include "atlas/array/DataType.h"  // IWYU pragma: keep
 
 namespace orcamodel {
 
@@ -48,7 +48,21 @@ void ApplyForFieldType(const Functor& functor, atlas::DataType datatype,
 
 // create a mapping between C++ types and NetCDF type objects
 template <typename T>
-struct NetCDFTypeMap {
-  static const netCDF::NcType ncType;
+struct NetCDFTypeMap;
+
+template <>
+struct NetCDFTypeMap<float> {
+  inline static const netCDF::NcType ncType = netCDF::ncFloat;
 };
+
+template <>
+struct NetCDFTypeMap<double> {
+  inline static const netCDF::NcType ncType = netCDF::ncDouble;
+};
+
+template <>
+struct NetCDFTypeMap<int> {
+  inline static const netCDF::NcType ncType = netCDF::ncInt;
+};
+
 }  // namespace orcamodel

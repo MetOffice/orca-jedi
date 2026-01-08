@@ -4,22 +4,19 @@
 
 #pragma once
 
-#include <map>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
-#include <tuple>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/functionspace/NodeColumns.h"
-#include "atlas/functionspace.h"
-#include "atlas/mesh.h"
-#include "atlas/grid.h"
-#include "atlas/meshgenerator.h"
-#include "atlas/parallel/mpi/mpi.h"
-#include "atlas/runtime/Log.h"
+#include "atlas/functionspace.h"  // IWYU pragma: keep
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/grid.h"  // IWYU pragma: keep
+#include "atlas/meshgenerator.h"  // IWYU pragma: keep
+#include "atlas/parallel/mpi/mpi.h"  // IWYU pragma: keep
 
 #include "eckit/mpi/Comm.h"
 #include "eckit/log/Timer.h"
@@ -45,8 +42,11 @@ namespace orcamodel {
 
   oops::Variables orcaVariableFactory(const eckit::Configuration & config);
 
-class Geometry : public util::Printable {
+class Geometry : public util::Printable,
+                 private util::ObjectCounter<Geometry>{
  public:
+  static const std::string classname() {return "orcamodel::Geometry";}
+
   Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Geometry();
 

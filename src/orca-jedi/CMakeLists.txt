@@ -33,7 +33,6 @@ nemo_io/WriteServer.h
 nemo_io/WriteServer.cc
 utilities/OrcaModelTraits.h
 utilities/Types.h
-utilities/Types.cc
 utilities/IOUtils.h
 utilities/IOUtils.cc
 utilities/ModelData.h
