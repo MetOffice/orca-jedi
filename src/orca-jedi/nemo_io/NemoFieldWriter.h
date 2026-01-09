@@ -7,7 +7,6 @@
 
 #include <netcdf>
 
-#include <experimental/filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -15,8 +14,6 @@
 #include "eckit/filesystem/PathName.h"
 
 #include "oops/util/DateTime.h"
-
-#include "atlas/runtime/Exception.h"
 
 namespace orcamodel {
 

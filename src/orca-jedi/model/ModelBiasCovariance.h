@@ -13,6 +13,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "ModelBiasIncrement.h"
+
 namespace orcamodel {
 class ModelBias;
 class ModelBiasIncrement;

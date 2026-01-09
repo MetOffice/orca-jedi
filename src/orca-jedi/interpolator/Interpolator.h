@@ -4,29 +4,19 @@
 
 #pragma once
 
-#include <fstream>
-#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include "atlas/functionspace.h"
-#include "atlas/interpolation.h"
+#include "atlas/functionspace.h"  // IWYU pragma: keep
+#include "atlas/interpolation.h"  // IWYU pragma: keep
 #include "eckit/config/Configuration.h"
-#include "eckit/config/LocalConfiguration.h"
-#include "eckit/exception/Exceptions.h"
 #include "eckit/mpi/Comm.h"
-#include "oops/util/DateTime.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "orca-jedi/state/State.h"
-
-namespace eckit {
-class Configuration;
-}
 
 namespace orcamodel {
 class State;

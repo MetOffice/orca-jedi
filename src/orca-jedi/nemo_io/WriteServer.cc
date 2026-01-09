@@ -5,8 +5,9 @@
 #include "orca-jedi/nemo_io/WriteServer.h"
 
 #include<algorithm>
-#include<utility>
 
+#include "eckit/exception/Exceptions.h"
+#include "oops/util/Logger.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
 
@@ -218,8 +219,8 @@ WriteServer::WriteServer(std::shared_ptr<eckit::Timer> eckit_timer,
     bool is_serial) : mesh_(mesh), eckit_timer_(eckit_timer), is_serial_(is_serial),
   n_levels_(depths.size()) {
   oops::Log::trace() << "State(ORCA)::nemo_io::WriteServer::WriteServer" << std::endl;
-  buffer_indices_ = std::move(AtlasIndexToBufferIndexCreator::create_unique(
-          mesh.grid().type(), mesh));
+  buffer_indices_ = AtlasIndexToBufferIndexCreator::create_unique(
+          mesh.grid().type(), mesh);
 
   std::vector<size_t> local_buf_indices;
 

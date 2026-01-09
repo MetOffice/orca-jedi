@@ -5,7 +5,6 @@
 #include "orca-jedi/interpolator/Interpolator.h"
 
 #include <cstddef>
-#include <fstream>
 #include <memory>
 #include <ostream>
 #include <sstream>
@@ -14,8 +13,8 @@
 #include <vector>
 
 #include "atlas/field/MissingValue.h"
-#include "atlas/functionspace.h"
-#include "atlas/interpolation.h"
+#include "atlas/functionspace.h"  // IWYU pragma: keep
+#include "atlas/interpolation.h"  // IWYU pragma: keep
 #include "eckit/config/Configuration.h"
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/exception/Exceptions.h"

@@ -4,23 +4,20 @@
 
 #include <math.h>
 
-#include <algorithm>
 #include <string>
 #include <memory>
 #include <vector>
-#include <functional>
-#include <numeric>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 
-#include "atlas/array/MakeView.h"
+#include "atlas/array/MakeView.h"  // IWYU pragma: keep
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
 #include "atlas/functionspace/NodeColumns.h"
 #include "atlas/grid/Grid.h"
-#include "atlas/parallel/mpi/mpi.h"
+#include "atlas/parallel/mpi/mpi.h"  // IWYU pragma: keep
 #include "atlas/parallel/omp/omp.h"
 
 #include "eckit/config/LocalConfiguration.h"
@@ -30,7 +27,6 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
-#include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"

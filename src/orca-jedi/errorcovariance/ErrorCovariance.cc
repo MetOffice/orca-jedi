@@ -5,9 +5,9 @@
 #include <cmath>
 #include <iostream>
 
-#include "atlas/array/MakeView.h"
-#include "atlas/field/Field.h"
-#include "atlas/field/FieldSet.h"
+#include "atlas/array/MakeView.h"  // IWYU pragma: keep
+#include "atlas/field/Field.h"  // IWYU pragma: keep
+#include "atlas/field/FieldSet.h"  // IWYU pragma: keep
 
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"

@@ -2,18 +2,16 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
-#include <tuple>
-
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/utilities/Types.h"
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
-#include "atlas/functionspace/StructuredColumns.h"
-#include "atlas/mesh.h"
-#include "atlas/meshgenerator.h"
-#include "atlas/parallel/mpi/mpi.h"
+#include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/meshgenerator.h"  // IWYU pragma: keep
+#include "atlas/parallel/mpi/mpi.h"  // IWYU pragma: keep
 
 #include "atlas-orca/grid/OrcaGrid.h"
 
@@ -23,7 +21,6 @@
 #include "eckit/system/ResourceUsage.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 
 namespace {

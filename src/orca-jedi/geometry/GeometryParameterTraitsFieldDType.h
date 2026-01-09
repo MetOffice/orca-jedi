@@ -4,10 +4,6 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include "eckit/exception/Exceptions.h"
 #include "oops/util/parameters/ParameterTraits.h"
 
 #include "orca-jedi/utilities/Types.h"

@@ -8,9 +8,6 @@
 #include <ostream>
 #include <string>
 
-#include "atlas/trans/Trans.h"
-#include "atlas/trans/ifs/TransIFS.h"
-
 #include "eckit/config/Configuration.h"
 #include "eckit/memory/NonCopyable.h"
 

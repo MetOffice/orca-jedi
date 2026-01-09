@@ -7,10 +7,6 @@
 // https://github.com/Unidata/netcdf-cxx4
 #include <netcdf>
 
-#include <algorithm>
-#include <sstream>
-#include <fstream>
-
 #include "orca-jedi/utilities/Types.h"
 
 #include "eckit/exception/Exceptions.h"
@@ -18,9 +14,10 @@
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 
-#include "atlas/runtime/Log.h"
-#include "atlas/field.h"
-#include "atlas/array.h"
+#include "atlas/runtime/Log.h"  // IWYU pragma: keep
+#include "atlas/field.h"  // IWYU pragma: keep
+#include "atlas/array.h"  // IWYU pragma: keep
+#include "atlas/runtime/Exception.h"  // IWYU pragma: keep
 
 namespace orcamodel {
 
