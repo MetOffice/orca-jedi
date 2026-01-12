@@ -51,6 +51,9 @@ ecbuild_add_option( FEATURE ORCA_JEDI_DOCS
                     DESCRIPTION "orca-jedi documentation"
                     DEFAULT OFF
                     REQUIRED_PACKAGES "Doxygen" )
+ecbuild_add_option( FEATURE WARNINGS_TO_ERRORS
+                    DESCRIPTION "Treat compiler warnings as errors"
+                    DEFAULT OFF )
 if( ENABLE_DOCS OR ENABLE_ORCA_JEDI_DOCS )
     add_subdirectory( docs )
 endif()
@@ -58,14 +61,11 @@ endif()
 ################################################################################
 # Project-wide compiler options
 
-message(STATUS "   CMAKE_CXX_COMPILER_ID : ${CMAKE_CXX_COMPILER_ID}" )
-if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+# Add -Werror if using GNU compilers (C, C++, and Fortran) OR if WARNINGS_TO_ERRORS is explicitly enabled
+if( (CMAKE_C_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR ENABLE_WARNINGS_TO_ERRORS )
+  message(STATUS "Forcing -Werror (treating warnings as errors)")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-endif()
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-endif()
-if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Werror")
 endif()
 

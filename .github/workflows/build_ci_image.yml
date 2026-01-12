@@ -1,10 +1,13 @@
 name: Create and publish the CI docker image
 
 # Configures this workflow to run when triggered.
+# Builds on: version tags (v**), manual workflow dispatch, or branch pushes
 on:
   push:
     tags:
       - v**
+    branches:
+      - 'ci/**'
   workflow_dispatch:
 
 # Defines two custom environment variables for the workflow. These are used for
@@ -50,6 +53,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
       - name: Install hpccm
         run: |
           python3 -m pip install hpccm
@@ -71,7 +78,7 @@ jobs:
         with:
           context: .
           cache-from: type=gha
-          cache-to: type=gha,mode=max`
+          cache-to: type=gha,mode=max
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

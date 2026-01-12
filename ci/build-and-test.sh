@@ -41,6 +41,7 @@ atlas_orca_v=$(atlas --info |
 echo "
 -------------------------------
 gcc version $(gcc -dumpversion ||:)
+clang version $(clang -dumpversion ||:)
 $(ecbuild --version ||:)
 atlas version $(atlas --version ||:)
 atlas-orca version ${atlas_orca_v:-:}
@@ -51,6 +52,9 @@ fiat version $(fiat --version ||:)
 odc version $(odc --version ||:)
 -------------------------------
 "
+
+echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+echo PATH=$PATH
 
 rm -f "${HERE}/orca-jedi"
 ln -s '..' "${HERE}/orca-jedi"

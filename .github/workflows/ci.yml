@@ -8,10 +8,23 @@ on:
   workflow_dispatch:
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.9.2
+    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9
+    IMAGE_TAG: v1.9.2
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            cc: gcc
+            cxx: g++
+            fc: gfortran
+          - compiler: clang
+            cc: clang
+            cxx: clang++
+            fc: gfortran
     steps:
       - name: checkout current repo
         uses: actions/checkout@v3
@@ -76,13 +89,38 @@ jobs:
           username: twsearle
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Pull Docker image
-        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Determine image tag to use
+        id: image
+        run: |
+          # Extract branch name, sanitize for docker tag
+          BRANCH_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          BRANCH_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
 
-      - name: build and test
+          # Try branch-specific image first
+          BRANCH_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BRANCH_TAG}"
+          DEFAULT_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
+          echo "Checking for branch-specific image: ${BRANCH_IMAGE}"
+          if docker manifest inspect "${BRANCH_IMAGE}" > /dev/null 2>&1; then
+            echo "✓ Found branch-specific image"
+            echo "tag=${BRANCH_TAG}" >> $GITHUB_OUTPUT
+            echo "image=${BRANCH_IMAGE}" >> $GITHUB_OUTPUT
+          else
+            echo "✗ No branch-specific image, using default: ${{ env.IMAGE_TAG }}"
+            echo "tag=${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+            echo "image=${DEFAULT_IMAGE}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pull Docker image
+        run: docker pull ${{ steps.image.outputs.image }}
+
+      - name: build and test (${{ matrix.compiler }})
         run: |
           docker run --rm \
+            --env CC=${{ matrix.cc }} \
+            --env CXX=${{ matrix.cxx }} \
+            --env FC=${{ matrix.fc }} \
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ steps.image.outputs.image }}

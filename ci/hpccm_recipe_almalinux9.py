@@ -106,13 +106,28 @@ Stage0 += shell(commands=[
     'dnf install -y \'dnf-command(config-manager)\'',
     'dnf config-manager -y --set-enabled crb',
 ])
-Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES)
 
+# Add LLVM packages to the common packages list for AlmaLinux 9
+# Note: Using gfortran from gcc-toolset-12 for Fortran since flang is not available
+LLVM_PACKAGES = [
+    'clang',
+    'clang-tools-extra',
+    'libomp-devel',
+    'llvm',
+]
+
+Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
+
+# Set up compiler paths BEFORE building anything
+# GCC toolset-12 provides: gcc, g++, gfortran
+# System provides: clang, clang++
+# Note: No CC/CXX/FC set here - done at runtime via environment
+# Explicitly include /usr/local/lib for libraries built by this container
 Stage0 += environment(variables={
     'BASH_ENV': '/opt/rh/gcc-toolset-12/enable',
     'ENV': '/opt/rh/gcc-toolset-12/enable',
-    'PATH': '/opt/rh/gcc-toolset-12/root/bin:$PATH',
-    'LD_LIBRARY_PATH': '/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64',
+    'PATH': '/opt/rh/gcc-toolset-12/root/bin:/usr/local/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:$LD_LIBRARY_PATH',
 })
 
 Stage0 += cmake(eula=True, version=cmake_vn)
@@ -285,7 +300,7 @@ Stage0 += pip(pip='pip3', packages=[
     f"netcdf4=={netcdf4python_vn}",
 ])
 Stage1 += baseimage(image='almalinux:9', _distro='rhel')
-Stage1 += comment('JEDI development image with GNU and OpenMPI')
+Stage1 += comment('JEDI development image with GNU, Clang and OpenMPI')
 Stage1 += label(metadata={
     'Maintainer': 'darth@metoffice.gov.uk',
     'Species': 'NextGen',
@@ -294,17 +309,16 @@ Stage1 += shell(commands=[
     'dnf install -y \'dnf-command(config-manager)\'',
     'dnf config-manager -y --set-enabled crb',
 ])
-Stage1 += packages(epel=True, ospackages=COMMON_PACKAGES)
+Stage1 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
 Stage1 += pip(pip='pip3', packages=[
     'cpplint',
 ])
 Stage1 += copy(_from='build', src='/usr/local', dest='/usr/local')
 Stage1 += shell(commands=['ln -sfT python3 /usr/bin/python'])
 Stage1 += environment(variables={
-    'BASH_ENV': '/opt/rh/gcc-toolset-12/enable',
     'ENV': '/opt/rh/gcc-toolset-12/enable',
-    'LD_LIBRARY_PATH': '/usr/local/lib64:/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:/usr/lib64:/usr/lib',
-    'PATH': '/usr/local/bin:/opt/rh/gcc-toolset-12/root/bin:$PATH',
+    'PATH': '/usr/local/bin:/opt/rh/gcc-toolset-12/root/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:$LD_LIBRARY_PATH',
     'VALIDATE_PARAMETERS': '1',
 })
 Stage1 += workdir(directory='/var/tmp')
