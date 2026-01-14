@@ -49,7 +49,7 @@ eckit version $(eckit-version ||:)
 ectrans version $(ectrans --version ||:)
 fckit version $(fckit --version ||:)
 fiat version $(fiat --version ||:)
-odc version $(odc --version ||:)
+odc version$(odc --version | head -n 1 | cut -d : -f 2 ||:)
 -------------------------------
 "
 

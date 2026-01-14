@@ -300,11 +300,11 @@ Stage0 += pip(pip='pip3', packages=[
     f"netcdf4=={netcdf4python_vn}",
 ])
 Stage1 += baseimage(image='almalinux:9', _distro='rhel')
-Stage1 += comment('JEDI development image with GNU, Clang and OpenMPI')
+Stage1 += comment('JEDI development image with GNU GCC-12, Clang and OpenMPI')
 Stage1 += label(metadata={
     'Maintainer': 'darth@metoffice.gov.uk',
-    'Species': 'NextGen',
-    'Version': 'v0.1'})
+    'Species': 'JOPA',
+    'Version': 'v0.2'})
 Stage1 += shell(commands=[
     'dnf install -y \'dnf-command(config-manager)\'',
     'dnf config-manager -y --set-enabled crb',
