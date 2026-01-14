@@ -21,14 +21,10 @@ jobs:
             cc: gcc
             cxx: g++
             fc: gfortran
-            cmake_cxx_flags: ""
-            ldflags: ""
           - compiler: clang
             cc: clang
             cxx: clang++
             fc: gfortran
-            cmake_cxx_flags: "-stdlib=libstdc++"
-            ldflags: "-L/opt/rh/gcc-toolset-12/root/usr/lib64 -L/opt/rh/gcc-toolset-12/root/usr/lib -Wl,-rpath,/opt/rh/gcc-toolset-12/root/usr/lib64 -Wl,-rpath,/opt/rh/gcc-toolset-12/root/usr/lib"
     steps:
       - name: checkout current repo
         uses: actions/checkout@v3
@@ -124,8 +120,6 @@ jobs:
             --env CC=${{ matrix.cc }} \
             --env CXX=${{ matrix.cxx }} \
             --env FC=${{ matrix.fc }} \
-            --env CMAKE_CXX_FLAGS="${{ matrix.cmake_cxx_flags }}" \
-            --env LDFLAGS="${{ matrix.ldflags }}" \
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
