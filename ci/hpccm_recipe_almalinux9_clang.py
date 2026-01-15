@@ -141,8 +141,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
     'PATH': '/usr/local/bin:/usr/bin:$PATH',
     'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
 })
@@ -259,8 +259,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
 })
 
 Stage0 += generic_cmake(
@@ -346,11 +346,14 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DMPI=ON', '-DOMP=ON'],
 )
 
-# yaxt uses autotools - set compilers to GCC and clear flags
+# yaxt uses autotools and requires MPI - use MPI wrapper compilers with GCC backend
 Stage0 += environment(variables={
-    'CC': 'gcc',
-    'CXX': 'g++',
-    'FC': 'gfortran',
+    'CC': 'mpicc',
+    'CXX': 'mpicxx',
+    'FC': 'mpifort',
+    'OMPI_CC': 'gcc',
+    'OMPI_CXX': 'g++',
+    'OMPI_FC': 'gfortran',
     'CFLAGS': '',
     'CXXFLAGS': '',
 })
@@ -369,8 +372,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
 })
 
 Stage0 += pip(pip='pip3', packages=[
