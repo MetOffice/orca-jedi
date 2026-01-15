@@ -172,11 +172,12 @@ Stage0 += boost(
 # Build OpenMPI with GCC (same reason as Boost - avoids Clang linker complexity)
 # ABI compatible with Clang-built code since both use libstdc++
 # Use shell commands to explicitly control the build environment
+# Clear CFLAGS/CXXFLAGS to avoid -fuse-ld conflicts with GCC
 Stage0 += packages(ospackages=['bzip2', 'file', 'hwloc', 'make', 'numactl-devel', 'openssh-clients', 'perl', 'tar', 'wget'])
 Stage0 += shell(commands=[
     f'mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-{openmpi_vn}.tar.bz2',
     f'mkdir -p /var/tmp && tar -x -f /var/tmp/openmpi-{openmpi_vn}.tar.bz2 -C /var/tmp -j',
-    f'cd /var/tmp/openmpi-{openmpi_vn} && CC=gcc CXX=g++ FC=gfortran ./configure --prefix=/usr/local --enable-mpi-cxx --enable-mpi-fortran --without-cuda --without-verbs',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && CC=gcc CXX=g++ FC=gfortran CFLAGS="" CXXFLAGS="" ./configure --prefix=/usr/local --enable-mpi-cxx --enable-mpi-fortran --without-cuda --without-verbs',
     f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc)',
     f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc) install',
     f'rm -rf /var/tmp/openmpi-{openmpi_vn} /var/tmp/openmpi-{openmpi_vn}.tar.bz2',
