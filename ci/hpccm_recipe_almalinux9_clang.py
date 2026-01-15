@@ -66,7 +66,8 @@ COMMON_PACKAGES = [
     'file',
     'flex',
     'fftw-devel',
-    'gcc',  # Minimal GCC for gfortran only
+    'gcc',  # System GCC for linker and runtime support
+    'gcc-c++',  # System G++ for complete C++ toolchain
     'gcc-gfortran',  # For Fortran support (no flang available)
     'git',
     'git-lfs',
@@ -113,7 +114,7 @@ Stage0 += shell(commands=[
 
 # Full LLVM/Clang stack for AlmaLinux 9
 # Using libstdc++ (GCC's standard library) since libc++ packages are not readily available
-# Note: Using system gfortran for Fortran since flang is not available
+# Note: System GCC (gcc, gcc-c++, gfortran) provides linker and runtime needed by Clang
 # Key: ALL dependencies are built with Clang for ABI consistency
 LLVM_PACKAGES = [
     'clang',
@@ -128,9 +129,10 @@ Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
 
 # Set up compiler paths BEFORE building anything
 # System LLVM provides: clang, clang++
-# System GCC provides: gfortran (for Fortran only), libstdc++ (for C++)
+# System GCC provides: gcc, g++, gfortran (gcc-c++ package needed for complete toolchain)
 # Set compilers to clang for the build stage
 # Using libstdc++ (default on AlmaLinux) - all dependencies built with Clang for consistency
+# Note: gcc-c++ provides linker (ld) and standard library support that Clang requires
 # Explicitly include /usr/local/lib for libraries built by this container
 Stage0 += environment(variables={
     'CC': 'clang',
