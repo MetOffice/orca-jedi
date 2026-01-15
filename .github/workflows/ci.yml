@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [develop]
-  pull_request:
-    branches: [develop]
+  ##pull_request:
+  ##  branches: [develop]
   workflow_dispatch:
 env:
     REGISTRY: ghcr.io

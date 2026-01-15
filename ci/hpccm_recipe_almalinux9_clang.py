@@ -171,15 +171,17 @@ Stage0 += boost(
 
 # Build OpenMPI with GCC (same reason as Boost - avoids Clang linker complexity)
 # ABI compatible with Clang-built code since both use libstdc++
-mpi = openmpi(
-    prefix='/usr/local',
-    version=openmpi_vn,
-    cuda=False,
-    infiniband=False,
-    configure_opts=['--enable-mpi-fortran', '--enable-mpi-cxx'],
-    toolchain=hpccm.toolchain(CC='gcc', CXX='g++', FC='gfortran'),
-)
-Stage0 += mpi
+# Use shell commands to explicitly control the build environment
+Stage0 += packages(ospackages=['bzip2', 'file', 'hwloc', 'make', 'numactl-devel', 'openssh-clients', 'perl', 'tar', 'wget'])
+Stage0 += shell(commands=[
+    f'mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-{openmpi_vn}.tar.bz2',
+    f'mkdir -p /var/tmp && tar -x -f /var/tmp/openmpi-{openmpi_vn}.tar.bz2 -C /var/tmp -j',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && CC=gcc CXX=g++ FC=gfortran ./configure --prefix=/usr/local --enable-mpi-cxx --enable-mpi-fortran --without-cuda --without-verbs',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc)',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc) install',
+    f'rm -rf /var/tmp/openmpi-{openmpi_vn} /var/tmp/openmpi-{openmpi_vn}.tar.bz2',
+])
+Stage0 += environment(variables={'LD_LIBRARY_PATH': '/usr/local/lib:$LD_LIBRARY_PATH', 'PATH': '/usr/local/bin:$PATH'})
 
 Stage0 += generic_cmake(
     prefix='/usr/local',
@@ -193,7 +195,6 @@ Stage0 += generic_cmake(
         '-DHDF5_ENABLE_ZLIB_SUPPORT=ON',
         '-DHDF5_ENABLE_SZIP_SUPPORT=ON',
     ],
-    toolchain=mpi.toolchain,
 )
 
 Stage0 += environment(variables={'H5DIR': '/usr/local', 'LIBS': '-ldl'})
@@ -207,7 +208,6 @@ Stage0 += netcdf(
     enable_netcdf_4=True,
     enable_shared=True,
     disable_zstandard_plugin=True,
-    toolchain=mpi.toolchain,
 )
 Stage0 += environment(variables={
     'NETCDF_DIR': '/usr/local',
@@ -216,7 +216,6 @@ Stage0 += generic_cmake(
     prefix='/usr/local',
     url=gitlab_url('remikz/nccmp', nccmp_vn),
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DBUILD_SHARED_LIBS=ON'],
-    toolchain=mpi.toolchain,
 )
 
 Stage0 += generic_autotools(
