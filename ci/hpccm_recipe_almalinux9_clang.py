@@ -59,6 +59,7 @@ yaxt_vn = USERARG.get('yaxt_vn', '528-0.10.0')  # URL has a number and a version
 
 COMMON_PACKAGES = [
     'bison',
+    'binutils',  # System linker and binary tools
     'bzip2',
     'clang-tools-extra',
     'eigen3-devel',
@@ -133,11 +134,15 @@ Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
 # Set compilers to clang for the build stage
 # Using libstdc++ (default on AlmaLinux) - all dependencies built with Clang for consistency
 # Note: gcc-c++ provides linker (ld) and standard library support that Clang requires
+# CRITICAL: Force Clang to use system linker with -fuse-ld=ld (not gcc-toolset paths)
 # Explicitly include /usr/local/lib for libraries built by this container
 Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
+    'CFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+    'LDFLAGS': '-fuse-ld=/usr/bin/ld',
     'PATH': '/usr/local/bin:/usr/bin:$PATH',
     'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
 })
