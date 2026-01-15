@@ -141,8 +141,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
     'PATH': '/usr/local/bin:/usr/bin:$PATH',
     'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
 })
@@ -259,8 +259,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
 })
 
 Stage0 += generic_cmake(
@@ -372,8 +372,8 @@ Stage0 += environment(variables={
     'CC': 'clang',
     'CXX': 'clang++',
     'FC': 'gfortran',
-    'CFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
-    'CXXFLAGS': '-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
 })
 
 Stage0 += pip(pip='pip3', packages=[
