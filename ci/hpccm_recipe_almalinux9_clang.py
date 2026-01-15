@@ -401,5 +401,10 @@ Stage1 += environment(variables={
     'PATH': '/usr/local/bin:/usr/bin:$PATH',
     'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
     'VALIDATE_PARAMETERS': '1',
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
 })
 Stage1 += workdir(directory='/var/tmp')
