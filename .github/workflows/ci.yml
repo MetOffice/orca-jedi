@@ -25,6 +25,7 @@ jobs:
             cc: clang
             cxx: clang++
             fc: gfortran
+            cxxflags: "-stdlib=libstdc++"
     steps:
       - name: checkout current repo
         uses: actions/checkout@v3
@@ -120,6 +121,7 @@ jobs:
             --env CC=${{ matrix.cc }} \
             --env CXX=${{ matrix.cxx }} \
             --env FC=${{ matrix.fc }} \
+            --env CXXFLAGS="${{ matrix.cxxflags }}" \
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \

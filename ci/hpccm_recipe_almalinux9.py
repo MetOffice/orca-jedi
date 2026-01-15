@@ -108,7 +108,7 @@ Stage0 += shell(commands=[
 ])
 
 # Add LLVM packages to the common packages list for AlmaLinux 9
-# Note: Using gfortran from gcc-toolset-12 for Fortran since flang is not available
+# Note: Using gfortran from gcc-toolset for Fortran since flang is not available
 LLVM_PACKAGES = [
     'clang',
     'clang-tools-extra',
