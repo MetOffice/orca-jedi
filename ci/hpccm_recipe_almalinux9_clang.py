@@ -156,23 +156,28 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DBUILD_SHARED_LIBS=ON'],
 )
 
-Stage0 += packages(ospackages=['bzip2', 'bzip2-devel', 'tar', 'wget', 'which'])
 # Build Boost with GCC (simpler than fighting with Clang's linker issues in bootstrap)
 # This is fine because GCC and Clang both use libstdc++ - ABI compatible
-Stage0 += shell(commands=[
-    f'mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://archives.boost.io/release/{boost_vn}/source/boost_1_88_0.tar.bz2',
-    'mkdir -p /var/tmp && tar -x -f /var/tmp/boost_1_88_0.tar.bz2 -C /var/tmp -j',
-    'cd /var/tmp/boost_1_88_0 && ./bootstrap.sh --prefix=/usr/local --with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread --with-toolset=gcc',
-    'cd /var/tmp/boost_1_88_0 && ./b2 toolset=gcc cxxflags="-std=c++17" -j$(nproc) -q install',
-    'rm -rf /var/tmp/boost_1_88_0.tar.bz2 /var/tmp/boost_1_88_0',
-])
+# The toolset=gcc option overrides CC/CXX environment variables
+Stage0 += boost(
+    prefix='/usr/local',
+    version=boost_vn,
+    b2_opts=['toolset=gcc', 'cxxflags="-std=c++17"'],
+    bootstrap_opts=[
+        '--with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread',
+        '--with-toolset=gcc',
+    ],
+)
 
+# Build OpenMPI with GCC (same reason as Boost - avoids Clang linker complexity)
+# ABI compatible with Clang-built code since both use libstdc++
 mpi = openmpi(
     prefix='/usr/local',
     version=openmpi_vn,
     cuda=False,
     infiniband=False,
     configure_opts=['--enable-mpi-fortran', '--enable-mpi-cxx'],
+    toolchain=hpccm.toolchain(CC='gcc', CXX='g++', FC='gfortran'),
 )
 Stage0 += mpi
 
