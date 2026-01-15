@@ -159,10 +159,11 @@ Stage0 += generic_cmake(
 Stage0 += boost(
     prefix='/usr/local',
     version=boost_vn,
-    b2_opts=['toolset=clang', 'cxxflags="-std=c++17"'],
+    b2_opts=['toolset=clang', 'cxxflags="-std=c++17 -fuse-ld=/usr/bin/ld"'],
     bootstrap_opts=[
         '--with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread',
         '--with-toolset=clang',
+        '--cxxflags=-fuse-ld=/usr/bin/ld',
     ],
 )
 
