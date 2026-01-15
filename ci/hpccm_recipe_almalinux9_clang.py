@@ -206,7 +206,14 @@ Stage0 += generic_cmake(
     ],
 )
 
-Stage0 += environment(variables={'H5DIR': '/usr/local', 'LIBS': '-ldl'})
+# Set compilers to GCC for NetCDF (autotools-based)
+Stage0 += environment(variables={
+    'H5DIR': '/usr/local',
+    'LIBS': '-ldl',
+    'CC': 'gcc',
+    'CXX': 'g++',
+    'FC': 'gfortran',
+})
 Stage0 += netcdf(
     version=netcdf_vn,
     version_cxx=netcdfcxx_vn,
@@ -216,10 +223,15 @@ Stage0 += netcdf(
     fortran=True,
     enable_netcdf_4=True,
     enable_shared=True,
-    disable_zstandard_plugin=True,
+    # Note: NetCDF 4.9.2 doesn't have --disable-zstandard-plugin option
+    # This will be handled automatically
 )
 
+# Restore Clang compilers and set NetCDF paths
 Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
     'NETCDF_DIR': '/usr/local',
     'NetCDF_ROOT': '/usr/local'
 })
@@ -234,15 +246,19 @@ Stage0 += generic_cmake(
     ],
 )
 
-# udunits uses autotools - keep flags cleared
+# udunits uses autotools - set compilers to GCC
+Stage0 += environment(variables={'CC': 'gcc', 'CXX': 'g++', 'FC': 'gfortran'})
 Stage0 += generic_autotools(
     prefix='/usr/local',
     url=f'https://downloads.unidata.ucar.edu/udunits/{udunits_vn}/udunits-{udunits_vn}.tar.gz',
     configure_opts=['--enable-shared=yes'],
 )
 
-# Restore Clang-specific flags for CMake-based builds
+# Restore Clang compilers and add linker flags for CMake-based builds
 Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
     'CFLAGS': '-fuse-ld=/usr/bin/ld',
     'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
 })
@@ -330,8 +346,14 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DMPI=ON', '-DOMP=ON'],
 )
 
-# yaxt uses autotools - clear Clang flags temporarily
-Stage0 += environment(variables={'CFLAGS': '', 'CXXFLAGS': ''})
+# yaxt uses autotools - set compilers to GCC and clear flags
+Stage0 += environment(variables={
+    'CC': 'gcc',
+    'CXX': 'g++',
+    'FC': 'gfortran',
+    'CFLAGS': '',
+    'CXXFLAGS': '',
+})
 yaxt_vns = yaxt_vn.split('-', 1)
 Stage0 += generic_autotools(
     prefix='/usr/local',
@@ -342,8 +364,11 @@ Stage0 += generic_autotools(
     configure_opts=['--with-idxtype=long', '--without-regard-for-quality'],
 )
 
-# Restore Clang flags after autotools build
+# Restore Clang compilers and linker flags
 Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
     'CFLAGS': '-fuse-ld=/usr/bin/ld',
     'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
 })

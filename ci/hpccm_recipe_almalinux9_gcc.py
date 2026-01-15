@@ -63,7 +63,7 @@ COMMON_PACKAGES = [
     'file',
     'flex',
     'fftw-devel',
-    'gcc-toolset-14',
+    'gcc-toolset-12',
     'git',
     'git-lfs',
     'gmp-devel',
@@ -115,14 +115,14 @@ LLVM_PACKAGES = []
 Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
 
 # Set up compiler paths BEFORE building anything
-# GCC toolset-14 provides: gcc, g++, gfortran
+# GCC toolset-12 provides: gcc, g++, gfortran
 # Note: No CC/CXX/FC set here - done at runtime via environment
 # Explicitly include /usr/local/lib for libraries built by this container
 Stage0 += environment(variables={
-    'BASH_ENV': '/opt/rh/gcc-toolset-14/enable',
-    'ENV': '/opt/rh/gcc-toolset-14/enable',
-    'PATH': '/opt/rh/gcc-toolset-14/root/bin:/usr/local/bin:/usr/bin:$PATH',
-    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-14/root/lib:/opt/rh/gcc-toolset-14/root/lib64:$LD_LIBRARY_PATH',
+    'BASH_ENV': '/opt/rh/gcc-toolset-12/enable',
+    'ENV': '/opt/rh/gcc-toolset-12/enable',
+    'PATH': '/opt/rh/gcc-toolset-12/root/bin:/usr/local/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:$LD_LIBRARY_PATH',
 })
 
 Stage0 += cmake(eula=True, version=cmake_vn)
@@ -295,7 +295,7 @@ Stage0 += pip(pip='pip3', packages=[
     f"netcdf4=={netcdf4python_vn}",
 ])
 Stage1 += baseimage(image='almalinux:9', _distro='rhel')
-Stage1 += comment('JEDI development image with GNU GCC-14')
+Stage1 += comment('JEDI development image with GNU GCC-12')
 Stage1 += label(metadata={
     'Maintainer': 'darth@metoffice.gov.uk',
     'Species': 'JOPA',
@@ -311,9 +311,9 @@ Stage1 += pip(pip='pip3', packages=[
 Stage1 += copy(_from='build', src='/usr/local', dest='/usr/local')
 Stage1 += shell(commands=['ln -sfT python3 /usr/bin/python'])
 Stage1 += environment(variables={
-    'ENV': '/opt/rh/gcc-toolset-14/enable',
-    'PATH': '/usr/local/bin:/opt/rh/gcc-toolset-14/root/bin:/usr/bin:$PATH',
-    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-14/root/lib:/opt/rh/gcc-toolset-14/root/lib64:$LD_LIBRARY_PATH',
+    'ENV': '/opt/rh/gcc-toolset-12/enable',
+    'PATH': '/usr/local/bin:/opt/rh/gcc-toolset-12/root/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:$LD_LIBRARY_PATH',
     'VALIDATE_PARAMETERS': '1',
 })
 Stage1 += workdir(directory='/var/tmp')
