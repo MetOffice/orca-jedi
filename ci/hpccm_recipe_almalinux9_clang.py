@@ -157,11 +157,13 @@ Stage0 += generic_cmake(
 )
 
 Stage0 += packages(ospackages=['bzip2', 'bzip2-devel', 'tar', 'wget', 'which'])
+# Build Boost with GCC (simpler than fighting with Clang's linker issues in bootstrap)
+# This is fine because GCC and Clang both use libstdc++ - ABI compatible
 Stage0 += shell(commands=[
     f'mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://archives.boost.io/release/{boost_vn}/source/boost_1_88_0.tar.bz2',
     'mkdir -p /var/tmp && tar -x -f /var/tmp/boost_1_88_0.tar.bz2 -C /var/tmp -j',
-    'cd /var/tmp/boost_1_88_0 && ./bootstrap.sh --prefix=/usr/local --with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread --with-toolset=clang --cxx=clang++ --cxxflags="-fuse-ld=/usr/bin/ld"',
-    'cd /var/tmp/boost_1_88_0 && ./b2 toolset=clang cxxflags="-std=c++17 -fuse-ld=/usr/bin/ld" -j$(nproc) -q install',
+    'cd /var/tmp/boost_1_88_0 && ./bootstrap.sh --prefix=/usr/local --with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread --with-toolset=gcc',
+    'cd /var/tmp/boost_1_88_0 && ./b2 toolset=gcc cxxflags="-std=c++17" -j$(nproc) -q install',
     'rm -rf /var/tmp/boost_1_88_0.tar.bz2 /var/tmp/boost_1_88_0',
 ])
 
