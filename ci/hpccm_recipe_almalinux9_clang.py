@@ -184,6 +184,11 @@ Stage0 += shell(commands=[
 ])
 Stage0 += environment(variables={'LD_LIBRARY_PATH': '/usr/local/lib:$LD_LIBRARY_PATH', 'PATH': '/usr/local/bin:$PATH'})
 
+# Build HDF5 and NetCDF with GCC (same approach as Boost and OpenMPI)
+# Clear the Clang-specific CFLAGS/CXXFLAGS temporarily for these builds
+# This avoids linker issues with autotools-based builds
+Stage0 += environment(variables={'CFLAGS': '', 'CXXFLAGS': ''})
+
 Stage0 += generic_cmake(
     prefix='/usr/local',
     url=github_url('HDFGroup/hdf5', f'hdf5-{hdf5_vn}'),
@@ -195,6 +200,9 @@ Stage0 += generic_cmake(
         '-DHDF5_BUILD_FORTRAN=ON',
         '-DHDF5_ENABLE_ZLIB_SUPPORT=ON',
         '-DHDF5_ENABLE_SZIP_SUPPORT=ON',
+        '-DCMAKE_C_COMPILER=gcc',
+        '-DCMAKE_CXX_COMPILER=g++',
+        '-DCMAKE_Fortran_COMPILER=gfortran',
     ],
 )
 
@@ -210,20 +218,34 @@ Stage0 += netcdf(
     enable_shared=True,
     disable_zstandard_plugin=True,
 )
+
 Stage0 += environment(variables={
     'NETCDF_DIR': '/usr/local',
-    'NetCDF_ROOT': '/usr/local'})
+    'NetCDF_ROOT': '/usr/local'
+})
 Stage0 += generic_cmake(
     prefix='/usr/local',
     url=gitlab_url('remikz/nccmp', nccmp_vn),
-    cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DBUILD_SHARED_LIBS=ON'],
+    cmake_opts=[
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DCMAKE_C_COMPILER=gcc',
+        '-DCMAKE_CXX_COMPILER=g++',
+    ],
 )
 
+# udunits uses autotools - keep flags cleared
 Stage0 += generic_autotools(
     prefix='/usr/local',
     url=f'https://downloads.unidata.ucar.edu/udunits/{udunits_vn}/udunits-{udunits_vn}.tar.gz',
     configure_opts=['--enable-shared=yes'],
 )
+
+# Restore Clang-specific flags for CMake-based builds
+Stage0 += environment(variables={
+    'CFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+})
 
 Stage0 += generic_cmake(
     prefix='/usr/local',
@@ -308,6 +330,8 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DMPI=ON', '-DOMP=ON'],
 )
 
+# yaxt uses autotools - clear Clang flags temporarily
+Stage0 += environment(variables={'CFLAGS': '', 'CXXFLAGS': ''})
 yaxt_vns = yaxt_vn.split('-', 1)
 Stage0 += generic_autotools(
     prefix='/usr/local',
@@ -317,6 +341,12 @@ Stage0 += generic_autotools(
     ),
     configure_opts=['--with-idxtype=long', '--without-regard-for-quality'],
 )
+
+# Restore Clang flags after autotools build
+Stage0 += environment(variables={
+    'CFLAGS': '-fuse-ld=/usr/bin/ld',
+    'CXXFLAGS': '-fuse-ld=/usr/bin/ld',
+})
 
 Stage0 += pip(pip='pip3', packages=[
     f"pycodestyle=={pycodestyle_vn}",
