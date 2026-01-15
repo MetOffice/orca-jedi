@@ -11,15 +11,25 @@ on:
   workflow_dispatch:
 
 # Defines two custom environment variables for the workflow. These are used for
-# the Container registry domain, and a name for the Docker image that this
+# the Container registry domain, and a base name for the Docker images that this
 # workflow builds.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9
+  IMAGE_BASE_NAME: twsearle/orca-jedi/ci-almalinux9
 
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            recipe: hpccm_recipe_almalinux9_gcc.py
+            image_suffix: gcc
+          - compiler: clang
+            recipe: hpccm_recipe_almalinux9_clang.py
+            image_suffix: clang
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
       contents: read
@@ -52,7 +62,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-${{ matrix.image_suffix }}
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -62,7 +72,7 @@ jobs:
           python3 -m pip install hpccm
       - name: Recipe to Dockerfile
         run: |
-          hpccm --recipe ./ci/hpccm_recipe_almalinux9.py >./Dockerfile
+          hpccm --recipe ./ci/${{ matrix.recipe }} >./Dockerfile
       # This step uses the `docker/build-push-action` action to build the
       # image, based on your repository's `Dockerfile`. If the build succeeds,
       # it pushes the image to GitHub Packages.  It uses the `context`
@@ -91,6 +101,6 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-${{ matrix.image_suffix }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
