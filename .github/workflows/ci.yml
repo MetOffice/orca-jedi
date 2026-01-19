@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [develop]
-  ##pull_request:
-  ##  branches: [develop]
+  pull_request:
+    branches: [develop]
   workflow_dispatch:
 env:
     REGISTRY: ghcr.io
@@ -29,12 +29,12 @@ jobs:
             image_suffix: clang
     steps:
       - name: checkout current repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
 
       - name: checkout jedicmake
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/jedicmake
           repository: JCSDA-internal/jedi-cmake
@@ -42,42 +42,42 @@ jobs:
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout oops
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout vader
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/vader
           repository: JCSDA-internal/vader
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout saber
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/saber
           repository: JCSDA-internal/saber
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/ioda
           repository: JCSDA-internal/ioda
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ufo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/ufo
           repository: JCSDA-internal/ufo
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout atlas-data
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/atlas-data
           repository: MetOffice/atlas-data

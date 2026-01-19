@@ -24,7 +24,8 @@ jobs:
       - name: Delete old branch-based container images (${{ matrix.image_suffix }})
         uses: actions/delete-package-versions@v5
         with:
-          package-name: 'ci-almalinux9-${{ matrix.image_suffix }}'
+          owner: 'twsearle'
+          package-name: 'orca-jedi/ci-almalinux9-${{ matrix.image_suffix }}'
           package-type: 'container'
           # Keep version tags (v*) forever
           # Delete branch-based tags older than 90 days
