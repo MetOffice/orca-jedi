@@ -1,0 +1,35 @@
+name: Cleanup old container images
+
+# Run monthly on the first day at 2 AM UTC
+on:
+  schedule:
+    - cron: '0 2 1 * *'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE_NAME: twsearle/orca-jedi/ci-almalinux9
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_suffix: [gcc, clang]
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Delete old branch-based container images (${{ matrix.image_suffix }})
+        uses: actions/delete-package-versions@v5
+        with:
+          owner: 'twsearle'
+          package-name: 'orca-jedi/ci-almalinux9-${{ matrix.image_suffix }}'
+          package-type: 'container'
+          # Keep version tags (v*) forever
+          # Delete branch-based tags older than 90 days
+          delete-only-untagged-versions: 'false'
+          ignore-versions: '^v'
+          older-than: 90  # days
+          token: ${{ secrets.GITHUB_TOKEN }}
