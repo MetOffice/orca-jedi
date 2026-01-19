@@ -5,7 +5,13 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
-  workflow_dispatch:
+  workflow_dispatch: {}
+  workflow_run:
+    workflows: ["Create and publish the CI docker image"]
+    types:
+      - completed
+    branches:
+      - 'ci/**'
 env:
     REGISTRY: ghcr.io
     IMAGE_BASE_NAME: twsearle/orca-jedi/ci-almalinux9
@@ -13,6 +19,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Skip if this is a pull_request from a ci/** branch - workflow_run will handle it
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'ci/')
     strategy:
       matrix:
         compiler: [gcc, clang]

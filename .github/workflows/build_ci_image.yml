@@ -22,16 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #compiler: [gcc, clang]
-        #include:
-        #  - compiler: gcc
-        #    recipe: hpccm_recipe_almalinux9_gcc.py
-        #    image_suffix: gcc
-        #  - compiler: clang
-        #    recipe: hpccm_recipe_almalinux9_clang.py
-        #    image_suffix: clang
-        compiler: [clang]
+        compiler: [gcc, clang]
         include:
+          - compiler: gcc
+            recipe: hpccm_recipe_almalinux9_gcc.py
+            image_suffix: gcc
           - compiler: clang
             recipe: hpccm_recipe_almalinux9_clang.py
             image_suffix: clang
