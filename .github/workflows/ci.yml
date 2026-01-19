@@ -9,7 +9,7 @@ on:
 env:
     REGISTRY: ghcr.io
     IMAGE_BASE_NAME: twsearle/orca-jedi/ci-almalinux9
-    IMAGE_TAG: v1.9.2
+    IMAGE_TAG: v1.10.0
 jobs:
   build:
     runs-on: ubuntu-latest
