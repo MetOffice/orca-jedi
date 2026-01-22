@@ -2,20 +2,17 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
-#include<sstream>
 #include<cmath>
 #include <map>
 
-#include "eckit/log/Bytes.h"
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/missingValues.h"
 
-#include "atlas/library/Library.h"
+#include "atlas/library/Library.h"  // IWYU pragma: keep
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
@@ -58,6 +55,7 @@ CASE("test  interpolator") {
     settings_map["ORCA2_T"].nlevs = 3;
     settings_map["ORCA2_T"].geometry_config.set("grid name", "ORCA2_T");
     settings_map["ORCA2_T"].geometry_config.set("number levels", settings_map["ORCA2_T"].nlevs);
+    settings_map["ORCA2_T"].geometry_config.set("initialise extra fields", true);  // for gmask
 
     std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
     nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
@@ -117,6 +115,7 @@ CASE("test  interpolator") {
     settings_map["AMM1"].nlevs = 3;
     settings_map["AMM1"].geometry_config.set("grid name", "../Data/amm1_atlas_grid_spec.yaml");
     settings_map["AMM1"].geometry_config.set("number levels", settings_map["AMM1"].nlevs);
+    settings_map["AMM1"].geometry_config.set("initialise extra fields", true);  // Needed for gmask
 
     std::vector<eckit::LocalConfiguration> nemo_var_mappings(3);
     nemo_var_mappings[0].set("name", "sea_surface_height_anomaly")
@@ -262,6 +261,133 @@ CASE("test  interpolator") {
       interpolator2.applyAD(settings.surf_vars, incrementout, mask, vals);
 
       incrementout.write(incrementParams);
+    }
+
+    if (key == "ORCA2_T") {
+      SECTION("test " + key + " interpolator adjoint consistency test without land mask") {
+        OrcaIncrementParameters incrementParams;
+        incrementParams.validateAndDeserialize(settings.increment_config);
+
+        eckit::LocalConfiguration interp_conf2;
+        interp_conf2.set("type", "unstructured-bilinear-lonlat");
+        interp_conf2.set("adjoint", true);
+        eckit::LocalConfiguration interpolator_config2;
+        interpolator_config2.set("atlas-interpolator", interp_conf2);
+
+        OrcaInterpolatorParameters params;
+        params.validateAndDeserialize(interpolator_config2);
+        Interpolator interpolator2(interpolator_config2,
+                                  geometry, settings.lats, settings.lons);
+
+        // Create two increments with random values
+        Increment increment_x(geometry, settings.surf_vars, incrementParams.date);
+        increment_x.random();
+
+        Increment increment_HtY(geometry, settings.surf_vars, incrementParams.date);
+        increment_HtY.zero();
+
+        // Create observation space vectors
+        size_t nobs = settings.surf_vars.size() * settings.nlocs;
+        std::vector<double> vals_Hx(nobs);
+        std::vector<double> vals_y(nobs);
+        std::vector<bool> mask(settings.nlocs, true);
+
+        // Fill y with random values
+        uint seed = 12345;
+        for (size_t i = 0; i < nobs; ++i) {
+          vals_y[i] = (rand_r(&seed) / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        }
+
+        // Forward: H*x -> vals_Hx
+        interpolator2.apply(settings.surf_vars, increment_x, mask, vals_Hx);
+
+        // Adjoint: H^T*y -> increment_HtY
+        interpolator2.applyAD(settings.surf_vars, increment_HtY, mask, vals_y);
+
+        // Compute dot products
+        // <y, H*x>
+        double dot_y_Hx = 0.0;
+        for (size_t i = 0; i < nobs; ++i) {
+          dot_y_Hx += vals_y[i] * vals_Hx[i];
+        }
+
+        // <H^T*y, x>
+        double dot_HtY_x = increment_HtY.dot_product_with(increment_x);
+
+        std::cout << "Adjoint test for " << key << ":" << std::endl;
+        std::cout << "  <y, H*x>     = " << std::setprecision(16) << dot_y_Hx << std::endl;
+        std::cout << "  <H^T*y, x>   = " << std::setprecision(16) << dot_HtY_x << std::endl;
+        std::cout << "  Relative diff = " << std::abs(dot_y_Hx - dot_HtY_x) /
+                    std::max(std::abs(dot_y_Hx), std::abs(dot_HtY_x)) << std::endl;
+
+        // The adjoint test: <y, H*x> should equal <H^T*y, x> within numerical precision
+        double relative_error = std::abs(dot_y_Hx - dot_HtY_x) /
+                                std::max(std::abs(dot_y_Hx), std::abs(dot_HtY_x));
+        EXPECT(relative_error < 1e-7);
+      }
+
+      SECTION("test " + key + " interpolator adjoint consistency test with land mask") {
+        OrcaIncrementParameters incrementParams;
+        incrementParams.validateAndDeserialize(settings.increment_config);
+
+        eckit::LocalConfiguration interp_conf2;
+        interp_conf2.set("type", "unstructured-bilinear-lonlat");
+        interp_conf2.set("adjoint", true);
+        interp_conf2.set("non_linear", "missing-if-any-missing");
+        eckit::LocalConfiguration interpolator_config2;
+        interpolator_config2.set("atlas-interpolator", interp_conf2);
+
+        OrcaInterpolatorParameters params;
+        params.validateAndDeserialize(interpolator_config2);
+        Interpolator interpolator2(interpolator_config2,
+                                   geometry, settings.lats, settings.lons);
+
+        // Create two increments with random values
+        Increment increment_x(geometry, settings.surf_vars, incrementParams.date);
+        increment_x.random();
+
+        Increment increment_HtY(geometry, settings.surf_vars, incrementParams.date);
+        increment_HtY.zero();
+
+        // Create observation space vectors
+        size_t nobs = settings.surf_vars.size() * settings.nlocs;
+        std::vector<double> vals_Hx(nobs);
+        std::vector<double> vals_y(nobs);
+        std::vector<bool> mask(settings.nlocs, true);
+
+        // Fill y with random values
+        uint seed = 12345;
+        for (size_t i = 0; i < nobs; ++i) {
+          vals_y[i] = (rand_r(&seed) / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        }
+
+        // Forward: H*x -> vals_Hx
+        interpolator2.apply(settings.surf_vars, increment_x, mask, vals_Hx);
+
+        // Adjoint: H^T*y -> increment_HtY
+        interpolator2.applyAD(settings.surf_vars, increment_HtY, mask, vals_y);
+
+        // Compute dot products
+        // <y, H*x>
+        double dot_y_Hx = 0.0;
+        for (size_t i = 0; i < nobs; ++i) {
+          dot_y_Hx += vals_y[i] * vals_Hx[i];
+        }
+
+        // <H^T*y, x>
+        double dot_HtY_x = increment_HtY.dot_product_with(increment_x);
+
+        std::cout << "Adjoint test for " << key << ":" << std::endl;
+        std::cout << "  <y, H*x>     = " << std::setprecision(16) << dot_y_Hx << std::endl;
+        std::cout << "  <H^T*y, x>   = " << std::setprecision(16) << dot_HtY_x << std::endl;
+        std::cout << "  Relative diff = " << std::abs(dot_y_Hx - dot_HtY_x) /
+                     std::max(std::abs(dot_y_Hx), std::abs(dot_HtY_x)) << std::endl;
+
+        // The adjoint test: <y, H*x> should equal <H^T*y, x> within numerical precision,
+        // however with the land mask some information is spread over land points and then
+        //  zeroed out in the adjoint interpolator.
+        EXPECT(std::abs(dot_HtY_x) < std::abs(dot_y_Hx));
+      }
     }
   }
 }

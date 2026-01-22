@@ -61,10 +61,12 @@ class Interpolator : public util::Printable,
   void print(std::ostream&) const override;
   std::size_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
-  atlas::Interpolation interpolator_;
+  atlas::Interpolation interpolator_;          // Forward interpolator (with non-linear)
+  atlas::Interpolation interpolator_adjoint_;  // Adjoint interpolator (always linear)
   // Parameters_ params_;
   OrcaInterpolatorParameters params_;
   const eckit::mpi::Comm& comm_;
+  atlas::Field gmask_;  // Land mask field from geometry (for masking increment)
 };
 
 }  // namespace orcamodel
