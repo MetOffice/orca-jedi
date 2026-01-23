@@ -82,13 +82,14 @@ Interpolator::Interpolator(const eckit::Configuration& conf,
     interpolator_ = atlas::Interpolation(fwd_conf,
                                          geom.functionSpace(), atlasObsFuncSpace_);
 
-    interpolator_adjoint_ = atlas::Interpolation(adjoint_conf,
-                                                  geom.functionSpace(), atlasObsFuncSpace_);
-
     if (fwd_conf.has("non_linear")) {
+      adjoint_conf.remove("non_linear");
       oops::Log::debug() << "orcamodel::Interpolator: Using asymmetric interpolation - "
                         << "forward with non-linear, adjoint without" << std::endl;
     }
+
+    interpolator_adjoint_ = atlas::Interpolation(adjoint_conf,
+                                                  geom.functionSpace(), atlasObsFuncSpace_);
   } else {
     // Adjoint not enabled: single interpolator for forward only
     interpolator_ = atlas::Interpolation(fwd_conf,

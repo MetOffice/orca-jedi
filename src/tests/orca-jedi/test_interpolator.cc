@@ -115,7 +115,6 @@ CASE("test  interpolator") {
     settings_map["AMM1"].nlevs = 3;
     settings_map["AMM1"].geometry_config.set("grid name", "../Data/amm1_atlas_grid_spec.yaml");
     settings_map["AMM1"].geometry_config.set("number levels", settings_map["AMM1"].nlevs);
-    settings_map["AMM1"].geometry_config.set("initialise extra fields", true);  // Needed for gmask
 
     std::vector<eckit::LocalConfiguration> nemo_var_mappings(3);
     nemo_var_mappings[0].set("name", "sea_surface_height_anomaly")
