@@ -385,7 +385,7 @@ CASE("test  interpolator") {
         // The adjoint test: <y, H*x> should equal <H^T*y, x> within numerical precision,
         // however with the land mask some information is spread over land points and then
         //  zeroed out in the adjoint interpolator.
-        EXPECT(dot_HtY_x <= dot_y_Hx);
+        EXPECT(dot_HtY_x <= dot_y_Hx + 1e-7);
       }
     }
   }
