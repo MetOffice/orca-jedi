@@ -24,6 +24,7 @@ _orca-jedi_ includes executables to calculate model values at observation locati
   * [ecmwf/atlas](https://github.com/ecmwf/atlas)
   * [ecmwf/atlas-orca](https://github.com/ecmwf/atlas-orca)
   * [saber](https://github.com/JCSDA/saber)
+  * [vader](https://github.com/JCSDA/vader)
 
 ### Installing
 

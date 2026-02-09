@@ -92,18 +92,23 @@ cost function:
         time interpolation: linear
         atlas-interpolator:
           type: unstructured-bilinear-lonlat
-#          non_linear: missing-if-all-missing
+          non_linear: missing-if-any-missing
           max_fraction_elems_to_try: 0.0
           adjoint: true
       obs operator:
         name: Composite
         components:
         - name: Identity
-      obs filters:
-      - filter: Background Check
-        filter variables:
-        - name: ice_area_fraction
-        absolute threshold: 2.0
+      obs post filters:
+      #- filter: Print Filter Data
+      #  variables:
+      #  - variable: HofX/ice_area_fraction
+      #  - variable: QCflagsData/ice_area_fraction
+      - filter: Domain Check
+        where:
+        - variable:
+            name: HofX/ice_area_fraction
+        value: is_valid
         action:
           name: reject
       obs error:
