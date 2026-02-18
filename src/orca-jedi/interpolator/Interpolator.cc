@@ -103,7 +103,7 @@ Interpolator::Interpolator(const eckit::Configuration& conf,
     oops::Log::debug() << "orcamodel::Interpolator: Stored gmask field from geometry" << std::endl;
     oops::Log::debug() << "  gmask shape: (" << gmask_view.shape(0) << ", "
                        << gmask_view.shape(1) << ")" << std::endl;
-  } else {
+  } else if (comm_.rank() == 0) {
     oops::Log::warning() << "orcamodel::Interpolator: gmask field not found in geometry"
                          << " and land masking will not be applied" << std::endl;
   }
@@ -300,8 +300,10 @@ void Interpolator::apply(const oops::Variables& vars, const Increment& inc,
     } else {
       // No mask available, use increment field directly
       src_field = inc.incrementFields()[gv_varname];
-      oops::Log::warning() << "orcamodel::Interpolator::apply(increment): No gmask available for "
-                          << gv_varname << std::endl;
+      if (comm_.rank() == 0) {
+        oops::Log::warning() << "orcamodel::Interpolator::apply(increment): No gmask available for "
+                             << gv_varname << std::endl;
+      }
     }
 
     atlas::Field tgt_field = atlasObsFuncSpace_.createField<double>(
