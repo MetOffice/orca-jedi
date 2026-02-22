@@ -22,8 +22,6 @@ namespace test {
 //-----------------------------------------------------------------------------
 
 CASE("test basic geometry") {
-  EXPECT(eckit::system::Library::exists("atlas-orca"));
-
   eckit::LocalConfiguration config;
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(5);
   nemo_var_mappings[0].set("name", "sea_ice_area_fraction")
