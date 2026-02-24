@@ -9,6 +9,7 @@
 #include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/system/LibraryManager.h"
 
 #include "oops/base/Variables.h"
 
@@ -26,7 +27,7 @@ namespace test {
 //-----------------------------------------------------------------------------
 
 CASE("test increment") {
-  EXPECT(eckit::system::Library::exists("atlas-orca"));
+  EXPECT(eckit::system::LibraryManager::exists("atlas-orca"));
 
   eckit::LocalConfiguration config;
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
