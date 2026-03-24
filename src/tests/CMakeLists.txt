@@ -38,7 +38,7 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_checkerboard
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
                   OMP 1
                   MPI 2
-                  ARGS testinput/hofx_nc_ssh_eorca025.yaml
+                  ARGS testinput/hofx_nc_ssh_parallel_eorca025.yaml
                   COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
@@ -74,7 +74,7 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_ssh_amm1r
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_serial
                   OMP 1
                   MPI 2
-                  ARGS testinput/hofx_nc_ssh.yaml
+                  ARGS testinput/hofx_nc_ssh_parallel.yaml
                   COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh
