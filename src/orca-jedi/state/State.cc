@@ -263,7 +263,7 @@ void State::setupStateFields() {
              atlas::option::name(vars_[i].name()) |
              atlas::option::levels(varSizes[i])));
         oops::Log::trace() << "State(ORCA)::setupStateFields : "
-                           << vars_[i].name() << "has dtype: "
+                           << vars_[i].name() << " has dtype: "
                            << (*(stateFields_.end()-1)).datatype().str() << std::endl;
 
         // initialise all data to avoid potential compiler/machine dependent bugs in missingValues
@@ -391,7 +391,7 @@ template<class T> double State::norm(const std::string & field_name) const {
     // prevent divide by zero when there are no valid model points on this
     // MPI rank
     if (valid_points) {
-      local_norm = std::sqrt(squares)/valid_points;
+      local_norm = std::sqrt(squares/valid_points);
     }
     return local_norm;
   }
@@ -402,7 +402,7 @@ template<class T> double State::norm(const std::string & field_name) const {
   geom_->getComm().allReduceInPlace(valid_points, eckit::mpi::sum());
 
   if (valid_points) {
-    return std::sqrt(squares)/valid_points;
+    return std::sqrt(squares/valid_points);
   }
 
   return 0;
