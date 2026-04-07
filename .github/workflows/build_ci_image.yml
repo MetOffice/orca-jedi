@@ -67,6 +67,16 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha
+      - name: Set up Artifactory connection
+        uses: MetOffice/action-setup-artifactory@v1
+        with:
+          username: ${{ secrets.ART_USER }}
+          api-key: ${{ secrets.ART_KEY }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ">=3.14"
+          check-latest: true
       - name: Install hpccm
         run: |
           python3 -m pip install hpccm
