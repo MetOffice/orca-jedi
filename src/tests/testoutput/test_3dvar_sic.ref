@@ -11,13 +11,13 @@ CostJo   : Nonlinear Jo(Sea Ice) = 1.4687500000000000e+00, nobs = 47, Jo/n = 3.1
              Level   1 ~>  0.100E+01 vert. coord.
 CostJb   : Nonlinear Jb = 0.0000000000000000e+00
 CostFunction: Nonlinear J = 1.4687500000000000e+00
-DRPCGMinimizer: reduction in residual norm = 1.4155891817936023e+02
+DRPCGMinimizer: reduction in residual norm = 6.3970226812739249e-04
 CostFunction::addIncrement: Analysis: 
  Model state valid at time: 2021-06-29T12:00:00Z
     1 variables: ice_area_fraction
     atlas field norms:
-        ice_area_fraction: 3.16815e-03
+        ice_area_fraction: 3.18249e-03
 
-CostJo   : Nonlinear Jo(Sea Ice) = 7.87621e-01, nobs = 47, Jo/n = 1.67579e-02, err = 2.00000e+00
+CostJo   : Nonlinear Jo(Sea Ice) = 9.14840e-01, nobs = 47, Jo/n = 1.94647e-02, err = 2.00000e+00
 CostJb   : Nonlinear Jb = 0.00000e+00
-CostFunction: Nonlinear J = 7.87621e-01
+CostFunction: Nonlinear J = 9.14840e-01

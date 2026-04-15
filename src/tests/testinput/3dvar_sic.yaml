@@ -117,7 +117,7 @@ variational:
   minimizer:
     algorithm: DRPCG
   iterations:
-  - ninner: 1
+  - ninner: 2
     gradient norm reduction: 1e-30
     geometry: *Geom
     test: on
