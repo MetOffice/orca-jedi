@@ -637,15 +637,11 @@ void Increment::setupIncrementFields() {
 void Increment::copyIncFieldSet(const atlas::FieldSet & source, atlas::FieldSet & dest) {
   for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
     // copy variable from source to dest field set
-    atlas::Field field = source[i];
-    oops::Log::debug() << "Copying increment field " << field.name() << std::endl;
+    oops::Log::debug() << "Copying increment field " << source[i].name() << std::endl;
     auto field_view_dest = atlas::array::make_view<double, 2>(dest[i]);
-    auto field_view_source = atlas::array::make_view<double, 2>(field);
-    for (atlas::idx_t j = 0; j < field_view_source.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < field_view_source.shape(1); ++k) {
-        field_view_dest(j, k) = field_view_source(j, k);
-      }
-    }
+    auto field_view_source = atlas::array::make_view<double, 2>(source[i]);
+    field_view_dest.assign(field_view_source);
+    dest[i].metadata() = source[i].metadata();
   }
 }
 
