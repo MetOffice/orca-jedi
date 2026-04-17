@@ -82,12 +82,11 @@ Increment::Increment(const Increment & other, const bool copy)
 {
   oops::Log::debug() << "Increment(ORCA)::Increment copy " << copy << std::endl;
 
-  incrementFields_ = atlas::FieldSet();
-
-  setupIncrementFields();
-
   if (copy) {
-    copyIncFieldSet(other.incrementFields_, incrementFields_);
+    incrementFields_ = other.incrementFields_.clone();
+  } else {
+    incrementFields_ = atlas::FieldSet();
+    setupIncrementFields();
   }
 
   oops::Log::debug() << "Increment(ORCA)::Increment copied." << std::endl;
@@ -106,12 +105,7 @@ Increment & Increment::operator=(const Increment & other) {
   vars_ = other.vars_;
   geom_.reset();
   geom_ = other.geom_;
-
-  incrementFields_ = atlas::FieldSet();
-
-  setupIncrementFields();
-
-  copyIncFieldSet(other.incrementFields_, incrementFields_);
+  incrementFields_ = other.incrementFields_.clone();
 
   oops::Log::debug() << "Increment(ORCA)::= copy ended" << std::endl;
   return *this;
@@ -628,20 +622,6 @@ void Increment::setupIncrementFields() {
                          << std::endl;
       geom_->log_status();
     }
-  }
-}
-
-/// \brief Copy one increment fieldset to another fieldset.
-/// \param Source Atlas fieldset.
-/// \param Destination Atlas fieldset.
-void Increment::copyIncFieldSet(const atlas::FieldSet & source, atlas::FieldSet & dest) {
-  for (atlas::idx_t i=0; i < static_cast<atlas::idx_t>(vars_.size()); ++i) {
-    // copy variable from source to dest field set
-    oops::Log::debug() << "Copying increment field " << source[i].name() << std::endl;
-    auto field_view_dest = atlas::array::make_view<double, 2>(dest[i]);
-    auto field_view_source = atlas::array::make_view<double, 2>(source[i]);
-    field_view_dest.assign(field_view_source);
-    dest[i].metadata() = source[i].metadata();
   }
 }
 

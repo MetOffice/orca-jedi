@@ -133,7 +133,6 @@ class Increment : public util::Printable,
 /// Data
  private:
   void setupIncrementFields();
-  void copyIncFieldSet(const atlas::FieldSet &, atlas::FieldSet &);
   void setval(const double &);
   std::shared_ptr<const Geometry> geom_;
   oops::Variables vars_;
