@@ -96,6 +96,18 @@ CASE("test increment") {
     increment.print(std::cout);
   }
 
+  SECTION("test copy") {
+    Increment increment1(geometry, oops_vars2, datetime);
+    Increment increment2(geometry, oops_vars2, datetime);
+    increment1.ones();
+    increment2 = increment1;
+    // Make sure copies are independent
+    // i.e. changing one version won't change the other
+    increment1 *= 3;
+    increment2.print(std::cout);
+    EXPECT_EQUAL(increment2.norm(), 1);
+  }
+
   SECTION("test dirac") {
     eckit::LocalConfiguration dirac_config;
     std::vector<int> ix = {20, 30};
