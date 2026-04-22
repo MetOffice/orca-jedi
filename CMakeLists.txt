@@ -65,7 +65,7 @@ endif()
 if( (CMAKE_C_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR ENABLE_WARNINGS_TO_ERRORS )
   message(STATUS "Forcing -Werror (treating warnings as errors)")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-deprecated-declarations")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Werror")
 endif()
 
