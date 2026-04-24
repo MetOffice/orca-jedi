@@ -1,4 +1,4 @@
-geometry: &geom
+geometry: &Geom
   nemo variables:
     - name: ice_area_fraction
       nemo field name: iiceconc
@@ -25,7 +25,6 @@ background error:
   covariance model: SABER
   saber central block:
     saber block name: Nemovar B
-    geometry: *geom
     covtype: Nemovar
 #    covtype: Shapiro
 

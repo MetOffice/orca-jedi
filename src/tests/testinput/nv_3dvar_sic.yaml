@@ -30,7 +30,6 @@ cost function:
     covariance model: SABER
     saber central block:
       saber block name: Nemovar B
-      geometry: *Geom
       covtype: Nemovar
 #      covtype: Shapiro
 
