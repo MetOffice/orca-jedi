@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 
@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <utility>
 
 #include "oops/util/Logger.h"
 #include "atlas/parallel/omp/omp.h"
@@ -21,8 +20,8 @@ ReadServer::ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
   const eckit::PathName& file_path, const atlas::Mesh& mesh) :
   mesh_(mesh),
   eckit_timer_(eckit_timer) {
-  buffer_indices_ = std::move(AtlasIndexToBufferIndexCreator::create_unique(
-          mesh.grid().type(), mesh));
+  buffer_indices_ = AtlasIndexToBufferIndexCreator::create_unique(
+          mesh.grid().type(), mesh);
 
   if (myrank == mpiroot) {
     reader_ = std::make_unique<NemoFieldReader>(file_path);

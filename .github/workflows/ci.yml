@@ -5,21 +5,36 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop]
-  workflow_dispatch:
+  workflow_dispatch: {}
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: twsearle/orca-jedi/ci-almalinux9:v1.9.2
+    IMAGE_BASE_NAME: twsearle/orca-jedi/ci-almalinux9
+    IMAGE_TAG: v1.10.0
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            cc: gcc
+            cxx: g++
+            fc: gfortran
+            image_suffix: gcc
+          - compiler: clang
+            cc: clang
+            cxx: clang++
+            fc: gfortran
+            image_suffix: clang
     steps:
       - name: checkout current repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
 
       - name: checkout jedicmake
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/jedicmake
           repository: JCSDA-internal/jedi-cmake
@@ -27,42 +42,42 @@ jobs:
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout oops
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/oops
           repository: JCSDA-internal/oops
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout vader
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/vader
           repository: JCSDA-internal/vader
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout saber
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/saber
           repository: JCSDA-internal/saber
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ioda
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/ioda
           repository: JCSDA-internal/ioda
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout ufo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/ufo
           repository: JCSDA-internal/ufo
           token: ${{ secrets.GHCR_PAT }}
 
       - name: checkout atlas-data
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ci/atlas-data
           repository: MetOffice/atlas-data
@@ -76,13 +91,39 @@ jobs:
           username: twsearle
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Pull Docker image
-        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Determine image tag to use
+        id: image
+        run: |
+          # Extract branch name, sanitize for docker tag
+          BRANCH_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          BRANCH_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
 
-      - name: build and test
+          # Construct image names with compiler suffix
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-${{ matrix.image_suffix }}"
+          BRANCH_IMAGE="${IMAGE_NAME}:${BRANCH_TAG}"
+          DEFAULT_IMAGE="${IMAGE_NAME}:${{ env.IMAGE_TAG }}"
+
+          echo "Checking for branch-specific image: ${BRANCH_IMAGE}"
+          if docker manifest inspect "${BRANCH_IMAGE}" > /dev/null 2>&1; then
+            echo "✓ Found branch-specific image"
+            echo "tag=${BRANCH_TAG}" >> $GITHUB_OUTPUT
+            echo "image=${BRANCH_IMAGE}" >> $GITHUB_OUTPUT
+          else
+            echo "✗ No branch-specific image, using default: ${{ env.IMAGE_TAG }}"
+            echo "tag=${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+            echo "image=${DEFAULT_IMAGE}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pull Docker image
+        run: docker pull ${{ steps.image.outputs.image }}
+
+      - name: build and test (${{ matrix.compiler }})
         run: |
           docker run --rm \
+            --env CC=${{ matrix.cc }} \
+            --env CXX=${{ matrix.cxx }} \
+            --env FC=${{ matrix.fc }} \
             --entrypoint=/usr/local/src/orca-jedi/ci/build-and-test.sh \
             --workdir=/usr/local/src/orca-jedi/ci \
             --volume $PWD:/usr/local/src/orca-jedi \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ steps.image.outputs.image }}

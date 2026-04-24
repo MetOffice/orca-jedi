@@ -1,7 +1,7 @@
 ![CI](https://github.com/MetOffice/orca-jedi/actions/workflows/ci.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-&copy; British Crown Copyright 2025 Met Office. All rights reserved.
+&copy; British Crown Copyright 2026 Met Office. All rights reserved.
 
 # orca-jedi
 
@@ -24,6 +24,7 @@ _orca-jedi_ includes executables to calculate model values at observation locati
   * [ecmwf/atlas](https://github.com/ecmwf/atlas)
   * [ecmwf/atlas-orca](https://github.com/ecmwf/atlas-orca)
   * [saber](https://github.com/JCSDA/saber)
+  * [vader](https://github.com/JCSDA/vader)
 
 ### Installing
 

@@ -35,11 +35,11 @@ ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_checkerboard
                   COMMAND orcamodel_hofx.x )
 
 # Requires atlas-orca halos > 0 change (https://github.com/ecmwf/atlas-orca/pull/20)
-#ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
-#                  OMP 1
-#                  MPI 2
-#                  ARGS testinput/hofx_nc_ssh_eorca025.yaml
-#                  COMMAND orcamodel_hofx.x )
+ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_eorca025
+                  OMP 1
+                  MPI 2
+                  ARGS testinput/hofx_nc_ssh_parallel_eorca025.yaml
+                  COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_eorca025
                   OMP 1
@@ -74,7 +74,7 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_ssh_amm1r
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh_parallel_serial
                   OMP 1
                   MPI 2
-                  ARGS testinput/hofx_nc_ssh.yaml
+                  ARGS testinput/hofx_nc_ssh_parallel.yaml
                   COMMAND orcamodel_hofx.x )
 
 ecbuild_add_test( TARGET test_orcamodel_hofx_ssh
@@ -91,11 +91,10 @@ ecbuild_add_test( TARGET test_orcamodel_hofx3D_prof_2var
                   ARGS testinput/hofx3d_nc_prof_2vars.yaml
                   COMMAND orcamodel_hofx3D.x )
 
-# Not run until we resolve invalid cost function detected in oops#3054
-#ecbuild_add_test( TARGET test_orcamodel_3DVar_sic
-#                  OMP 1
-#                  ARGS testinput/3dvar_sic.yaml
-#                  COMMAND orcamodel_3DVar.x )
+ecbuild_add_test( TARGET test_orcamodel_3DVar_sic
+                  OMP 1
+                  ARGS testinput/3dvar_sic.yaml
+                  COMMAND orcamodel_3DVar.x )
 
 ecbuild_add_test( TARGET test_orcamodel_3DVar_sic_identity
                   OMP 1

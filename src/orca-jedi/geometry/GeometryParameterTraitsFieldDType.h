@@ -1,13 +1,9 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include "eckit/exception/Exceptions.h"
 #include "oops/util/parameters/ParameterTraits.h"
 
 #include "orca-jedi/utilities/Types.h"

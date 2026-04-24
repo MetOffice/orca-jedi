@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
@@ -9,16 +9,16 @@
 #include <memory>
 
 #include "oops/util/DateTime.h"
+#include "oops/util/Logger.h"
 #include "atlas/parallel/mpi/mpi.h"
-#include "atlas/array.h"
-#include "atlas/mesh.h"
-#include "atlas/grid.h"
-#include "atlas-orca/grid/OrcaGrid.h"
+#include "atlas/array.h"  // IWYU pragma: keep
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/grid.h"  // IWYU pragma: keep
+#include "atlas-orca/grid/OrcaGrid.h"  // IWYU pragma: keep
 
 #include "orca-jedi/nemo_io/AtlasIndex.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
 
-#include "eckit/exception/Exceptions.h"
 #include "eckit/log/Timer.h"
 #include "eckit/system/ResourceUsage.h"
 
@@ -29,9 +29,9 @@ class ReadServer {
       const eckit::PathName& file_path,
       const atlas::Mesh& mesh);
   ReadServer(ReadServer &&) = default;
-  ReadServer(const ReadServer &) = default;
-  ReadServer &operator=(ReadServer &&) = default;
-  ReadServer &operator=(const ReadServer &) = default;
+  ReadServer(const ReadServer &) = delete;
+  ReadServer &operator=(ReadServer &&) = delete;
+  ReadServer &operator=(const ReadServer &) = delete;
   template<class T> void read_var(const std::string& var_name,
       const size_t t_index,
       atlas::array::ArrayView<T, 2>& field_view);

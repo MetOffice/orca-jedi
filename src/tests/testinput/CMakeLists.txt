@@ -1,12 +1,14 @@
-# (C) British Crown Copyright 2025 Met Office
+# (C) British Crown Copyright 2026 Met Office
 
 list( APPEND orcajedi_test_input
   hofx_odb_sic.yaml
   hofx_nc_sic.yaml
   hofx_nc_sst.yaml
   hofx_nc_ssh.yaml
+  hofx_nc_ssh_parallel.yaml
   hofx_nc_ssh_checkerboard.yaml
   hofx_nc_ssh_eorca025.yaml
+  hofx_nc_ssh_parallel_eorca025.yaml
   hofx_nc_ssh_amm1.yaml
   hofx_nc_potm_amm1r.yaml
   hofx3d_nc_sic.yaml 

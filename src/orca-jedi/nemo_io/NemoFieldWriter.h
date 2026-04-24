@@ -1,13 +1,12 @@
 
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
 
 #include <netcdf>
 
-#include <experimental/filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -15,8 +14,6 @@
 #include "eckit/filesystem/PathName.h"
 
 #include "oops/util/DateTime.h"
-
-#include "atlas/runtime/Exception.h"
 
 namespace orcamodel {
 

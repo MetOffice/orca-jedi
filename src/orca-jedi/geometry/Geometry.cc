@@ -1,8 +1,6 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
-
-#include <tuple>
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/utilities/Types.h"
@@ -10,10 +8,10 @@
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
-#include "atlas/functionspace/StructuredColumns.h"
-#include "atlas/mesh.h"
-#include "atlas/meshgenerator.h"
-#include "atlas/parallel/mpi/mpi.h"
+#include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/meshgenerator.h"  // IWYU pragma: keep
+#include "atlas/parallel/mpi/mpi.h"  // IWYU pragma: keep
 
 #include "atlas-orca/grid/OrcaGrid.h"
 
@@ -23,7 +21,6 @@
 #include "eckit/system/ResourceUsage.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 
 namespace {
@@ -141,11 +138,15 @@ const std::string Geometry::nemo_var_name(const std::string std_name) const {
 void Geometry::create_extrafields() {
   extraFields_ = atlas::FieldSet();
 
+  if (params_.gridName.value().find("ORCA") == std::string::npos) {
+    std::string err_message =
+        "orcamodel::Geometry:: extra fields not implemented for non-ORCA grids";
+    throw eckit::NotImplemented(err_message, Here());
+  }
   atlas::OrcaGrid orcaGrid = mesh_.grid();
   int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   int ny = orcaGrid.ny() + orcaGrid.haloNorth();
-  oops::Log::debug() << "orcagrid nx " << nx << " ny " << ny
-                     << std::endl;
+  oops::Log::debug() << "orcagrid nx " << nx << " ny " << ny << std::endl;
 
   // Create vertical unit field - the value used is not tuned.
   atlas::Field vunit = funcSpace_.createField<double>(

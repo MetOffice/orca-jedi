@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
@@ -7,9 +7,6 @@
 #include <memory>
 #include <ostream>
 #include <string>
-
-#include "atlas/trans/Trans.h"
-#include "atlas/trans/ifs/TransIFS.h"
 
 #include "eckit/config/Configuration.h"
 #include "eckit/memory/NonCopyable.h"

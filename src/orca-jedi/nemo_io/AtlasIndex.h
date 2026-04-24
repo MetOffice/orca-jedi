@@ -1,24 +1,17 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
 
-#include <algorithm>
-#include <sstream>
-#include <limits>
 #include <map>
 #include <utility>
 #include <string>
 #include <memory>
 #include <vector>
 
-#include "eckit/exception/Exceptions.h"
-
-#include "oops/util/Logger.h"
-
-#include "atlas/mesh.h"
-#include "atlas/grid.h"
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/grid.h"  // IWYU pragma: keep
 #include "atlas/parallel/omp/omp.h"
 #include "atlas-orca/grid/OrcaGrid.h"
 
@@ -184,7 +177,7 @@ class AtlasIndexToBufferIndexCreator {
   static std::unique_ptr<AtlasIndexToBufferIndex> create_unique(std::string name,
       const atlas::Mesh& mesh) {
     std::unique_ptr<AtlasIndexToBufferIndex> AtlasIndexToBufferIndex =
-      std::move(get_factory()[name]->create_unique(mesh));
+      get_factory()[name]->create_unique(mesh);
     return AtlasIndexToBufferIndex;
   }
   static std::map<std::string, AtlasIndexToBufferIndexCreator*> &get_factory() {

@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
@@ -8,16 +8,14 @@
 #include <string>
 #include <vector>
 
+#include "eckit/exception/Exceptions.h"
+#include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
 // Forward declarations
 namespace eckit {
 class Configuration;
-}
-
-namespace util {
-class Duration;
 }
 
 namespace orcamodel {
@@ -41,7 +39,9 @@ class LinearModel: public util::Printable,
   static std::vector<std::string> names() {return {"empty-orcaLinearModel"};}
 
   LinearModel(const Geometry &, const eckit::Configuration &) {
-    ABORT("LinearModel not implemented");
+    std::string err_message =
+        "orcamodel::LinearModel not implemented";
+    throw eckit::NotImplemented(err_message, Here());
   }
   ~LinearModel() {}
 

@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
@@ -12,6 +12,8 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
+#include "ModelBiasIncrement.h"
 
 namespace orcamodel {
 class ModelBias;

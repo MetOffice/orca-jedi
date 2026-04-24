@@ -1,32 +1,22 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
 
-#include <fstream>
-#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include "atlas/functionspace.h"
-#include "atlas/interpolation.h"
+#include "atlas/functionspace.h"  // IWYU pragma: keep
+#include "atlas/interpolation.h"  // IWYU pragma: keep
 #include "eckit/config/Configuration.h"
-#include "eckit/config/LocalConfiguration.h"
-#include "eckit/exception/Exceptions.h"
 #include "eckit/mpi/Comm.h"
-#include "oops/util/DateTime.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "orca-jedi/state/State.h"
-
-namespace eckit {
-class Configuration;
-}
 
 namespace orcamodel {
 class State;
@@ -71,10 +61,12 @@ class Interpolator : public util::Printable,
   void print(std::ostream&) const override;
   std::size_t nlocs_;
   atlas::functionspace::PointCloud atlasObsFuncSpace_;
-  atlas::Interpolation interpolator_;
+  atlas::Interpolation interpolator_;          // Forward interpolator (with non-linear)
+  atlas::Interpolation interpolator_adjoint_;  // Adjoint interpolator (always linear)
   // Parameters_ params_;
   OrcaInterpolatorParameters params_;
   const eckit::mpi::Comm& comm_;
+  atlas::Field gmask_;  // Land mask field from geometry (for masking increment)
 };
 
 }  // namespace orcamodel

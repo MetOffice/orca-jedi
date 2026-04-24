@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #pragma once
@@ -9,18 +9,18 @@
 #include <memory>
 
 #include "oops/util/DateTime.h"
+#include "oops/util/Logger.h"
 #include "atlas/parallel/mpi/mpi.h"
-#include "atlas/array.h"
-#include "atlas/mesh.h"
+#include "atlas/array.h"  // IWYU pragma: keep
+#include "atlas/mesh.h"  // IWYU pragma: keep
 #include "atlas/field/MissingValue.h"
-#include "atlas-orca/grid/OrcaGrid.h"
+#include "atlas-orca/grid/OrcaGrid.h"  // IWYU pragma: keep
 
 #include "orca-jedi/nemo_io/AtlasIndex.h"
 #include "orca-jedi/nemo_io/NemoFieldWriter.h"
 
-#include "eckit/exception/Exceptions.h"
 #include "eckit/log/Timer.h"
-#include "eckit/system/ResourceUsage.h"
+#include "eckit/system/ResourceUsage.h"  // IWYU pragma: keep
 
 namespace orcamodel {
 class WriteServer {
@@ -31,9 +31,9 @@ class WriteServer {
       const std::vector<util::DateTime> datetimes,
       const std::vector<double> depths, bool is_serial);
   WriteServer(WriteServer &&) = default;
-  WriteServer(const WriteServer &) = default;
-  WriteServer &operator=(WriteServer &&) = default;
-  WriteServer &operator=(const WriteServer &) = default;
+  WriteServer(const WriteServer &) = delete;
+  WriteServer &operator=(WriteServer &&) = delete;
+  WriteServer &operator=(const WriteServer &) = delete;
 
   template<class T> void write_vol_var(const std::string& var_name,
       const size_t t_index,

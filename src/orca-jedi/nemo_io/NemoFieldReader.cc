@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
@@ -13,14 +13,10 @@
 #include <limits>
 #include <map>
 
-#include "atlas/parallel/omp/omp.h"
-
 #include "eckit/exception/Exceptions.h"
 
 #include "oops/util/Logger.h"
 #include "oops/util/Duration.h"
-
-#include "orca-jedi/nemo_io/AtlasIndex.h"
 
 namespace orcamodel {
 

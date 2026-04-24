@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2025 Met Office
+ * (C) British Crown Copyright 2026 Met Office
  */
 
 #include <iostream>
@@ -9,6 +9,7 @@
 #include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/system/LibraryManager.h"
 
 #include "oops/base/Variables.h"
 
@@ -26,7 +27,7 @@ namespace test {
 //-----------------------------------------------------------------------------
 
 CASE("test increment") {
-  EXPECT(eckit::system::Library::exists("atlas-orca"));
+  EXPECT(eckit::system::LibraryManager::exists("atlas-orca"));
 
   eckit::LocalConfiguration config;
   std::vector<eckit::LocalConfiguration> nemo_var_mappings(4);
@@ -93,6 +94,18 @@ CASE("test increment") {
     std::cout << std::endl << "Increment random: " << std::endl;
     increment.random();
     increment.print(std::cout);
+  }
+
+  SECTION("test copy") {
+    Increment increment1(geometry, oops_vars2, datetime);
+    Increment increment2(geometry, oops_vars2, datetime);
+    increment1.ones();
+    increment2 = increment1;
+    // Make sure copies are independent
+    // i.e. changing one version won't change the other
+    increment1 *= 3;
+    increment2.print(std::cout);
+    EXPECT_EQUAL(increment2.norm(), 1);
   }
 
   SECTION("test dirac") {

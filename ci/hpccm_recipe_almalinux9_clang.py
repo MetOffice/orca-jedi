@@ -1,9 +1,12 @@
-# © Copyright 2021 Met Office
+# (C) British Crown Copyright 2026 Met Office
 # This software is licensed under the terms of the Apache Licence Version 2.0 which can be obtained at
 # http://www.apache.org/licenses/LICENSE-2.0.
 #
 
-"""JOPA development container (simplified)
+"""JOPA development container with LLVM Clang
+
+This container provides a full LLVM/Clang toolchain. All dependencies are built
+with Clang for ABI consistency, avoiding mixed GCC/Clang builds.
 
 Usage:
 hpccm --recipe THIS-FILE [options] > DEST
@@ -56,6 +59,7 @@ yaxt_vn = USERARG.get('yaxt_vn', '528-0.10.0')  # URL has a number and a version
 
 COMMON_PACKAGES = [
     'bison',
+    'binutils',  # System linker and binary tools
     'bzip2',
     'clang-tools-extra',
     'eigen3-devel',
@@ -63,7 +67,9 @@ COMMON_PACKAGES = [
     'file',
     'flex',
     'fftw-devel',
-    'gcc-toolset-12',
+    'gcc',  # System GCC for linker and runtime support
+    'gcc-c++',  # System G++ for complete C++ toolchain
+    'gcc-gfortran',  # For Fortran support (no flang available)
     'git',
     'git-lfs',
     'gmp-devel',
@@ -106,13 +112,39 @@ Stage0 += shell(commands=[
     'dnf install -y \'dnf-command(config-manager)\'',
     'dnf config-manager -y --set-enabled crb',
 ])
-Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES)
 
+# Full LLVM/Clang stack for AlmaLinux 9
+# Using libstdc++ (GCC's standard library) since libc++ packages are not readily available
+# Note: System GCC (gcc, gcc-c++, gfortran) provides linker and runtime needed by Clang
+# Key: ALL dependencies are built with Clang for ABI consistency
+LLVM_PACKAGES = [
+    'clang',
+    'clang-tools-extra',
+    'libomp-devel',
+    'llvm',
+    'compiler-rt',  # LLVM compiler runtime
+    'libstdc++-devel',  # GCC standard library for C++
+]
+
+Stage0 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
+
+# Set up compiler paths BEFORE building anything
+# System LLVM provides: clang, clang++
+# System GCC provides: gcc, g++, gfortran (gcc-c++ package needed for complete toolchain)
+# Set compilers to clang for the build stage
+# Using libstdc++ (default on AlmaLinux) - all dependencies built with Clang for consistency
+# Note: gcc-c++ provides linker (ld) and standard library support that Clang requires
+# CRITICAL: Force Clang to use system linker with -fuse-ld=/usr/bin/ld (not gcc-toolset paths)
+# Only set for C/C++ - gfortran doesn't understand this flag
+# Explicitly include /usr/local/lib for libraries built by this container
 Stage0 += environment(variables={
-    'BASH_ENV': '/opt/rh/gcc-toolset-12/enable',
-    'ENV': '/opt/rh/gcc-toolset-12/enable',
-    'PATH': '/opt/rh/gcc-toolset-12/root/bin:$PATH',
-    'LD_LIBRARY_PATH': '/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64',
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'PATH': '/usr/local/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
 })
 
 Stage0 += cmake(eula=True, version=cmake_vn)
@@ -124,23 +156,38 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DBUILD_SHARED_LIBS=ON'],
 )
 
+# Build Boost with GCC (simpler than fighting with Clang's linker issues in bootstrap)
+# This is fine because GCC and Clang both use libstdc++ - ABI compatible
+# The toolset=gcc option overrides CC/CXX environment variables
 Stage0 += boost(
     prefix='/usr/local',
     version=boost_vn,
     b2_opts=['toolset=gcc', 'cxxflags="-std=c++17"'],
     bootstrap_opts=[
         '--with-libraries=chrono,date_time,filesystem,program_options,regex,serialization,system,thread',
+        '--with-toolset=gcc',
     ],
 )
 
-mpi = openmpi(
-    prefix='/usr/local',
-    version=openmpi_vn,
-    cuda=False,
-    infiniband=False,
-    configure_opts=['--enable-mpi-fortran', '--enable-mpi-cxx'],
-)
-Stage0 += mpi
+# Build OpenMPI with GCC (same reason as Boost - avoids Clang linker complexity)
+# ABI compatible with Clang-built code since both use libstdc++
+# Use shell commands to explicitly control the build environment
+# Clear CFLAGS/CXXFLAGS to avoid -fuse-ld conflicts with GCC
+Stage0 += packages(ospackages=['bzip2', 'file', 'hwloc', 'make', 'numactl-devel', 'openssh-clients', 'perl', 'tar', 'wget'])
+Stage0 += shell(commands=[
+    f'mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-{openmpi_vn}.tar.bz2',
+    f'mkdir -p /var/tmp && tar -x -f /var/tmp/openmpi-{openmpi_vn}.tar.bz2 -C /var/tmp -j',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && CC=gcc CXX=g++ FC=gfortran CFLAGS="" CXXFLAGS="" ./configure --prefix=/usr/local --enable-mpi-cxx --enable-mpi-fortran --without-cuda --without-verbs',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc)',
+    f'cd /var/tmp/openmpi-{openmpi_vn} && make -j$(nproc) install',
+    f'rm -rf /var/tmp/openmpi-{openmpi_vn} /var/tmp/openmpi-{openmpi_vn}.tar.bz2',
+])
+Stage0 += environment(variables={'LD_LIBRARY_PATH': '/usr/local/lib:$LD_LIBRARY_PATH', 'PATH': '/usr/local/bin:$PATH'})
+
+# Build HDF5 and NetCDF with GCC (same approach as Boost and OpenMPI)
+# Clear the Clang-specific CFLAGS/CXXFLAGS temporarily for these builds
+# This avoids linker issues with autotools-based builds
+Stage0 += environment(variables={'CFLAGS': '', 'CXXFLAGS': ''})
 
 Stage0 += generic_cmake(
     prefix='/usr/local',
@@ -153,11 +200,20 @@ Stage0 += generic_cmake(
         '-DHDF5_BUILD_FORTRAN=ON',
         '-DHDF5_ENABLE_ZLIB_SUPPORT=ON',
         '-DHDF5_ENABLE_SZIP_SUPPORT=ON',
+        '-DCMAKE_C_COMPILER=gcc',
+        '-DCMAKE_CXX_COMPILER=g++',
+        '-DCMAKE_Fortran_COMPILER=gfortran',
     ],
-    toolchain=mpi.toolchain,
 )
 
-Stage0 += environment(variables={'H5DIR': '/usr/local', 'LIBS': '-ldl'})
+# Set compilers to GCC for NetCDF (autotools-based)
+Stage0 += environment(variables={
+    'H5DIR': '/usr/local',
+    'LIBS': '-ldl',
+    'CC': 'gcc',
+    'CXX': 'g++',
+    'FC': 'gfortran',
+})
 Stage0 += netcdf(
     version=netcdf_vn,
     version_cxx=netcdfcxx_vn,
@@ -167,24 +223,45 @@ Stage0 += netcdf(
     fortran=True,
     enable_netcdf_4=True,
     enable_shared=True,
-    disable_zstandard_plugin=True,
-    toolchain=mpi.toolchain,
+    # Note: NetCDF 4.9.2 doesn't have --disable-zstandard-plugin option
+    # This will be handled automatically
 )
+
+# Restore Clang compilers and set NetCDF paths
 Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
     'NETCDF_DIR': '/usr/local',
-    'NetCDF_ROOT': '/usr/local'})
+    'NetCDF_ROOT': '/usr/local'
+})
 Stage0 += generic_cmake(
     prefix='/usr/local',
     url=gitlab_url('remikz/nccmp', nccmp_vn),
-    cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DBUILD_SHARED_LIBS=ON'],
-    toolchain=mpi.toolchain,
+    cmake_opts=[
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DCMAKE_C_COMPILER=gcc',
+        '-DCMAKE_CXX_COMPILER=g++',
+    ],
 )
 
+# udunits uses autotools - set compilers to GCC
+Stage0 += environment(variables={'CC': 'gcc', 'CXX': 'g++', 'FC': 'gfortran'})
 Stage0 += generic_autotools(
     prefix='/usr/local',
     url=f'https://downloads.unidata.ucar.edu/udunits/{udunits_vn}/udunits-{udunits_vn}.tar.gz',
     configure_opts=['--enable-shared=yes'],
 )
+
+# Restore Clang compilers and add linker flags for CMake-based builds
+Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+})
 
 Stage0 += generic_cmake(
     prefix='/usr/local',
@@ -269,6 +346,17 @@ Stage0 += generic_cmake(
     cmake_opts=['-DCMAKE_BUILD_TYPE=Release', '-DMPI=ON', '-DOMP=ON'],
 )
 
+# yaxt uses autotools and requires MPI - use MPI wrapper compilers with GCC backend
+Stage0 += environment(variables={
+    'CC': 'mpicc',
+    'CXX': 'mpicxx',
+    'FC': 'mpifort',
+    'OMPI_CC': 'gcc',
+    'OMPI_CXX': 'g++',
+    'OMPI_FC': 'gfortran',
+    'CFLAGS': '',
+    'CXXFLAGS': '',
+})
 yaxt_vns = yaxt_vn.split('-', 1)
 Stage0 += generic_autotools(
     prefix='/usr/local',
@@ -279,32 +367,44 @@ Stage0 += generic_autotools(
     configure_opts=['--with-idxtype=long', '--without-regard-for-quality'],
 )
 
+# Restore Clang compilers and linker flags
+Stage0 += environment(variables={
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+})
+
 Stage0 += pip(pip='pip3', packages=[
     f"pycodestyle=={pycodestyle_vn}",
     f"numpy=={numpy_vn}",
     f"netcdf4=={netcdf4python_vn}",
 ])
 Stage1 += baseimage(image='almalinux:9', _distro='rhel')
-Stage1 += comment('JEDI development image with GNU and OpenMPI')
+Stage1 += comment('JEDI development image with LLVM Clang and OpenMPI')
 Stage1 += label(metadata={
     'Maintainer': 'darth@metoffice.gov.uk',
-    'Species': 'NextGen',
-    'Version': 'v0.1'})
+    'Species': 'JOPA',
+    'Version': 'v0.2'})
 Stage1 += shell(commands=[
     'dnf install -y \'dnf-command(config-manager)\'',
     'dnf config-manager -y --set-enabled crb',
 ])
-Stage1 += packages(epel=True, ospackages=COMMON_PACKAGES)
+Stage1 += packages(epel=True, ospackages=COMMON_PACKAGES + LLVM_PACKAGES)
 Stage1 += pip(pip='pip3', packages=[
     'cpplint',
 ])
 Stage1 += copy(_from='build', src='/usr/local', dest='/usr/local')
 Stage1 += shell(commands=['ln -sfT python3 /usr/bin/python'])
 Stage1 += environment(variables={
-    'BASH_ENV': '/opt/rh/gcc-toolset-12/enable',
-    'ENV': '/opt/rh/gcc-toolset-12/enable',
-    'LD_LIBRARY_PATH': '/usr/local/lib64:/usr/local/lib:/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:/usr/lib64:/usr/lib',
-    'PATH': '/usr/local/bin:/opt/rh/gcc-toolset-12/root/bin:$PATH',
+    'PATH': '/usr/local/bin:/usr/bin:$PATH',
+    'LD_LIBRARY_PATH': '/usr/local/lib:/usr/lib64:$LD_LIBRARY_PATH',
     'VALIDATE_PARAMETERS': '1',
+    'CC': 'clang',
+    'CXX': 'clang++',
+    'FC': 'gfortran',
+    'CFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
+    'CXXFLAGS': '"-fuse-ld=/usr/bin/ld -Wno-unused-command-line-argument"',
 })
 Stage1 += workdir(directory='/var/tmp')

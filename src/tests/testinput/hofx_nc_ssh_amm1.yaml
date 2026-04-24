@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2025 Met Office
+# (C) British Crown Copyright 2026 Met Office
 
 forecast length : P2D
 time window:
@@ -47,7 +47,7 @@ observations:
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/hofx_nc_ssh_jopa.nc
+          obsfile: testoutput/hofx_nc_ssh_jopa_amm1.nc
       simulated variables: [seaSurfaceHeightAnomaly]
     get values:
       atlas-interpolator:

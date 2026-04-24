@@ -10,30 +10,31 @@ geometry :
       nemo field name: sossheig
       model space: surface
     - name: sea_surface_height_anomaly_background_error
-      nemo field name: ssh_tot_std
+      nemo field name: sossheig
       model space: surface
       variable type: background error standard deviation
-  grid name: ORCA2_T
+  grid name: eORCA025_T
   number levels: 1
-  partitioner: serial
+  partitioner: checkerboard
+  source mesh halo: 1
 initial condition :
   date: 2021-06-28T23:00:00Z
   state variables:
     - sea_surface_height_anomaly
     - sea_surface_height_anomaly_background_error
-  nemo field file: Data/orca2_t_nemo.nc
-  nemo error field file: Data/orca2_t_bkg_var.nc
+  nemo field file: Data/eorca025_t_nemo.nc
+  nemo error field file: Data/eorca025_t_nemo.nc
 model :
   name: PseudoModel
   tstep: P1D
   states:
     - date: 2021-06-29T23:00:00Z
-      nemo field file: Data/orca2_t_nemo.nc
-      nemo error field file: Data/orca2_t_bkg_var.nc
+      nemo field file: Data/eorca025_t_nemo.nc
+      nemo error field file: Data/eorca025_t_bkg_var.nc
       state variables: &state_variables [ sea_surface_height_anomaly ]
     - date: 2021-06-30T23:00:00Z
-      nemo field file: Data/orca2_t_nemo.nc
-      nemo error field file: Data/orca2_t_bkg_var.nc
+      nemo field file: Data/eorca025_t_nemo.nc
+      nemo error field file: Data/eorca025_t_nemo.nc
       state variables: *state_variables
 observations:
   observers:
@@ -46,7 +47,7 @@ observations:
       obsdataout:
         engine:
           type: H5File
-          obsfile: testoutput/hofx_nc_ssh_jopa.nc
+          obsfile: testoutput/hofx_nc_ssh_jopa_parallel_eorca025.nc
       simulated variables: [seaSurfaceHeightAnomaly]
     get values:
       atlas-interpolator:
@@ -72,5 +73,5 @@ observations:
       prob density bad obs: 1.0
       PGE threshold: 0.5
 test:
-  reference filename: testoutput/test_hofx_nc_ssh.ref
+  reference filename: testoutput/test_hofx_nc_ssh_eorca025.ref
   float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
