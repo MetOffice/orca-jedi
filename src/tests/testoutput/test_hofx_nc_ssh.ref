@@ -2,15 +2,15 @@ Test     : Initial state:
 Test     :  Model state valid at time: 2021-06-28T23:00:00Z
 Test     :     2 variables: sea_surface_height_anomaly, sea_surface_height_anomaly_background_error
 Test     :     atlas field norms:
-Test     :         sea_surface_height_anomaly: 1.36263e-03
-Test     :         sea_surface_height_anomaly_background_error: 6.13705e-04
+Test     :         sea_surface_height_anomaly: 1.77864e-01
+Test     :         sea_surface_height_anomaly_background_error: 1.00000e-01
 
 Test     : Final state:
 Test     :  Model state valid at time: 2021-06-30T23:00:00Z
 Test     :     2 variables: sea_surface_height_anomaly, sea_surface_height_anomaly_background_error
 Test     :     atlas field norms:
-Test     :         sea_surface_height_anomaly: 1.40693e-03
-Test     :         sea_surface_height_anomaly_background_error: 6.13705e-04
+Test     :         sea_surface_height_anomaly: 1.83647e-01
+Test     :         sea_surface_height_anomaly_background_error: 1.00000e-01
 
 Test     : H(x):
 Test     : Sea Surface Height nobs= 19 Min=1.65922e-01, Max=2.00264e-01, RMS=1.88765e-01
