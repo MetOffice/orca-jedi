@@ -908,14 +908,14 @@ ln_balvel_coa         = .true.                  !
 ln_balvel_dep         = .false.                 ! 
 ln_balvel_barocl_equ  = .false.                 !  New baroclinic weighting near equator
 ln_balvel_barotr_equ  = .false.                 !  New barotropic weighting near equator
-ln_balvel_masksha_dpdy   = .false.
+!!ln_balvel_masksha_dpdy   = .false.        ! DJL
 ln_bal_masksha_mld       = .true.
 ln_unbal_inc_wri      = .false.                 ! 
 ln_bal_par_wri        = .false.                  ! 
 ln_balvel_dia_wri        = .false.
-ln_balpsi_sol_pro        = .true.
-ln_balchi_sol_pro        = .true.
-ln_balpsi_masksha_psi    = .true.
+!!ln_balpsi_sol_pro        = .true.        ! DJL
+!!ln_balchi_sol_pro        = .true.        ! DJL
+!!ln_balpsi_masksha_psi    = .true.        ! DJL
 ln_psi_chi_inv_tst       = .false.
 nbalsal_fil_kst       = 0                       ! 
 nbalsal_nitsha_kst    = 1                       !  Used with nbalsal_fil_kst 
@@ -929,13 +929,13 @@ nbalssh_fil_wtst      = 0                       !  Used with ln_balssh_tst
 nbalssh_nitsha_wtst   = 1                       !  Used with ln_balssh_tst
 nbalvel               = 0                       ! 
 nbalvel_equ           = 1                       !  MetO 
-nbalvel_fil_dpdy      = 2                       !  Used with nbalvel_equ 
-nbalvel_nitsha_dpdy   = 10                      !  Used with nbalvel_equ 
+!!nbalvel_fil_dpdy      = 2                       !  Used with nbalvel_equ ! DJL
+!!nbalvel_nitsha_dpdy   = 10                      !  Used with nbalvel_equ ! DJL
 nbal_mxl              = 2                       !  MetO 
 nbal_mxl_lev          = 1                       !  Should be the same as nbge_mxl_lev
 nbal_fil_mld          = 0                       !  Should be the same as nbge_fil_mld
 nbal_nitsha_mld       = 10                      !  Used with nbal_fil_mld 
-nbal_psi_chi_inv         = 1
+!!nbal_psi_chi_inv         = 1              ! DJL
 balsal_dsdtmax        = 1.0                     !  Sensitivity? Revisit?
 balsal_dtdzmin        = 1.0e-3                  !  Used with nbalden_cutoff 
 balsal_dsdzmin        = 3.0e-3                  !  Used with nbalden_cutoff 
@@ -960,8 +960,8 @@ balvel_barocl_glowgt  = 1.0                     !  Used with ln_balvel_barocl_eq
 balvel_barotr_glowgt  = 1.0                     !  Used with ln_balvel_barotr_equ
 balpsi_tikcof            = 0.0
 balchi_tikcof            = 0.0
-nbalpsi_fil_psi          = 2
-nbalpsi_nitsha_psi       = 5
+!!nbalpsi_fil_psi          = 2  ! DJL
+!!nbalpsi_nitsha_psi       = 5  ! DJL
 bal_dis               = 200.0e3                 !  ln_balsal_coa 
 / 
 !-----------------------------------------------------------------------
@@ -1013,7 +1013,11 @@ ln_file_ens_cyc_num = .true.                      !
 cfile_ens_prefix    = "ensemble_member"           ! 
 cfile_ens_suffix    = "_cycle"                    !
 cn_loc_ref_name     = "t"
-/ 
+/
+!-----------------------------------------------------------------------
+&namens_bge
+!-----------------------------------------------------------------------
+/
 !-----------------------------------------------------------------------
 &namens_fil	!     Ensemble-estimated parameter filtering (namens_fil)
 !-----------------------------------------------------------------------
@@ -1040,6 +1044,22 @@ depmax_mxl_enf = 600.0    !  in metres
 depfix_mxl_enf = 50.0     !  in metres
 rcoast_msk_enf = 500.0    !  in km
 grdmin_fac_enf = 2.0      ! 
+/
+!-----------------------------------------------------------------------
+&namens_bge_fil
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namens_bge_fil_sol
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namens_bge_scf
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namens_bge_scf_sol
+!-----------------------------------------------------------------------
 / 
 !-----------------------------------------------------------------------
 &namens_fil_sol	! 
@@ -1235,7 +1255,7 @@ ln_ranwri_mod        = .false.  !
 ln_ransam_mod        = .false.  ! 
 ln_bcscor_mod        = .true.   ! 
 ln_norreg_mod        = .false.  ! 
-ln_trf_vnormfac_filt = .false.  ! 
+!!ln_trf_vnormfac_filt = .false.  ! DJL
 / 
 !-----------------------------------------------------------------------
 &nambge_dif_mod	!  Diffusion for the background error covariance model
