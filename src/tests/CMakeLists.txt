@@ -104,6 +104,7 @@ ecbuild_add_test( TARGET test_orcamodel_3DVar_sic_identity
 
 ecbuild_add_test( TARGET test_orcamodel_nv_3DVar_sic
                   OMP 1
+                  ENVIRONMENT "NEMOVAR_NAMELIST_PREFIX=testinput/"
                   ARGS testinput/nv_3dvar_sic.yaml
                   COMMAND orcamodel_3DVar.x )
 
@@ -114,6 +115,7 @@ ecbuild_add_test( TARGET test_orcamodel_Dirac
 
 ecbuild_add_test( TARGET test_orcamodel_nv_Dirac
                   OMP 1
+                  ENVIRONMENT "NEMOVAR_NAMELIST_PREFIX=testinput/"
                   ARGS testinput/nv_dirac.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
                   
