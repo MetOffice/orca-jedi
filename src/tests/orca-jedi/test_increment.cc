@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <vector>
 
 #include "eckit/log/Bytes.h"
 #include "eckit/config/LocalConfiguration.h"

@@ -3,6 +3,11 @@
  */
 
 #include <fstream>
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "eckit/log/Bytes.h"
 #include "eckit/testing/Test.h"

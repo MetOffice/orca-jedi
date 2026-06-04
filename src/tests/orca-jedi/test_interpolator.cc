@@ -2,8 +2,12 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
-#include<cmath>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"

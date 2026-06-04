@@ -12,6 +12,9 @@
 #include <sstream>
 #include <limits>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "eckit/exception/Exceptions.h"
 
@@ -204,8 +207,7 @@ void NemoFieldReader::read_datetimes() {
     for (size_t i=0; i < n_times; ++i) {
       datetimes_[i] = epoch + util::Duration(timestamps[i]);
     }
-  } catch(netCDF::exceptions::NcException& e)
-  {
+  } catch(netCDF::exceptions::NcException& e) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_datetimes NetCDF exception "
                << time_dimvar_name_ << ": " << std::endl;
@@ -333,8 +335,7 @@ std::vector<atlas::PointXY> NemoFieldReader::read_locs() const {
     }
 
     return locations;
-  } catch(netCDF::exceptions::NcException& e)
-  {
+  } catch(netCDF::exceptions::NcException& e) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_locs NetCDF exception: "
                << std::endl;
@@ -404,8 +405,7 @@ template<typename T> std::vector<T> NemoFieldReader::read_var_slice(const std::s
     }
 
     return var_data;
-  } catch(netCDF::exceptions::NcException& e)
-  {
+  } catch(netCDF::exceptions::NcException& e) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_var_slice varname: "
                << varname << " NetCDF exception: " << std::endl << e.what();
@@ -474,8 +474,7 @@ template<typename T> std::vector<T> NemoFieldReader::read_vertical_var(
     }
 
     return buffer;
-  } catch(netCDF::exceptions::NcException& e)
-  {
+  } catch(netCDF::exceptions::NcException& e) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_vertical_var varname: "
                << varname << " NetCDF exception: " << std::endl << e.what();
