@@ -23,7 +23,7 @@ namespace orcamodel {
 
 class CalcDiagonalNorm {
  public:
-  static const std::string classname() {return "lfricjedi::CalcDiagonalNorm";}
+  static const std::string classname() {return "orcamodel::CalcDiagonalNorm";}
 
   // Perform calculation in constructor
   CalcDiagonalNorm(const orcamodel::State &,
