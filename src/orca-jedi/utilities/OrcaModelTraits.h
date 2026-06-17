@@ -11,6 +11,7 @@
 #include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/increment/Increment.h"
 
+#include "orca-jedi/linearmodel/CalcDiagonalNorm.h"
 #include "orca-jedi/linearmodel/LinearModel.h"
 #include "orca-jedi/model/Model.h"
 #include "orca-jedi/model/ModelBias.h"
@@ -43,6 +44,8 @@ struct OrcaModelTraits {
   typedef orcamodel::VariableChange            VariableChange;
   typedef orcamodel::LinearVariableChange      LinearVariableChange;
   typedef orcamodel::ModelData                 ModelData;
+
+  typedef orcamodel::CalcDiagonalNorm          CalcDiagonalNorm;
 };
 
 }  // namespace orcamodel
