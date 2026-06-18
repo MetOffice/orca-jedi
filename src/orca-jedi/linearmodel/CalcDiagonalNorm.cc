@@ -11,16 +11,16 @@
 
 namespace orcamodel {
 
-CalcDiagonalNormOJ::CalcDiagonalNormOJ(const orcamodel::State & xx,
-                                       const orcamodel::Geometry & tlresol,
-                                       const std::string & normMethod,
-                                       orcamodel::Increment & invDiagNormMat,
-                                       orcamodel::Increment & diagNormMat,
-                                       const eckit::LocalConfiguration & conf) {
-  oops::Log::error() << "CalcDiagonalNormOJ::CalcDiagonalNormOJ not yet implemented" << std::endl;
+CalcDiagonalNorm::CalcDiagonalNorm(const orcamodel::State & xx,
+                                   const orcamodel::Geometry & tlresol,
+                                   const std::string & normMethod,
+                                   orcamodel::Increment & invDiagNormMat,
+                                   orcamodel::Increment & diagNormMat,
+                                   const eckit::LocalConfiguration & conf) {
+  oops::Log::error() << "CalcDiagonalNorm::CalcDiagonalNorm not yet implemented" << std::endl;
 }
 
-CalcDiagonalNormOJ::~CalcDiagonalNormOJ() {}
+CalcDiagonalNorm::~CalcDiagonalNorm() {}
 
 }  // namespace orcamodel
 
