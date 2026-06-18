@@ -5,8 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#if defined(USE_JELF)
-
 #include "orca-jedi/linearmodel/CalcDiagonalNorm.h"
 
 namespace orcamodel {
@@ -23,5 +21,3 @@ CalcDiagonalNorm::CalcDiagonalNorm(const orcamodel::State & xx,
 CalcDiagonalNorm::~CalcDiagonalNorm() {}
 
 }  // namespace orcamodel
-
-#endif  // if defined(USE_JELF)

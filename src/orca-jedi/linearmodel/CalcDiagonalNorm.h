@@ -5,8 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#if defined(USE_JELF)
-
 #pragma once
 
 #include <string>
@@ -36,4 +34,3 @@ class CalcDiagonalNorm {
 };
 
 }  // namespace orcamodel
-#endif  // if defined(USE_JELF)

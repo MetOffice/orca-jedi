@@ -10,7 +10,6 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/increment/Increment.h"
-
 #include "orca-jedi/linearmodel/CalcDiagonalNorm.h"
 #include "orca-jedi/linearmodel/LinearModel.h"
 #include "orca-jedi/model/Model.h"
@@ -21,6 +20,7 @@
 #include "orca-jedi/utilities/ModelData.h"
 #include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/variablechanges/LinearVariableChange.h"
+
 
 namespace orcamodel {
 
