@@ -45,7 +45,7 @@ struct OrcaModelTraits {
   typedef orcamodel::LinearVariableChange      LinearVariableChange;
   typedef orcamodel::ModelData                 ModelData;
 
-  typedef orcamodel::CalcDiagonalNorm          CalcDiagonalNorm;
+  typedef orcamodel::CalcDiagonalNormOJ        CalcDiagonalNorm;
 };
 
 }  // namespace orcamodel

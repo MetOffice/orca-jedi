@@ -21,18 +21,18 @@
 
 namespace orcamodel {
 
-class CalcDiagonalNorm {
+class CalcDiagonalNormOJ {
  public:
-  static const std::string classname() {return "orcamodel::CalcDiagonalNorm";}
+  static const std::string classname() {return "orcamodel::CalcDiagonalNormOJ";}
 
   // Perform calculation in constructor
-  CalcDiagonalNorm(const orcamodel::State &,
-                   const orcamodel::Geometry &,
-                   const std::string &,
-                   orcamodel::Increment &,
-                   orcamodel::Increment &,
-                   const eckit::LocalConfiguration &);
-  ~CalcDiagonalNorm();
+  CalcDiagonalNormOJ(const orcamodel::State &,
+                     const orcamodel::Geometry &,
+                     const std::string &,
+                     orcamodel::Increment &,
+                     orcamodel::Increment &,
+                     const eckit::LocalConfiguration &);
+  ~CalcDiagonalNormOJ();
 };
 
 }  // namespace orcamodel
