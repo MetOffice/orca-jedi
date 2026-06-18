@@ -15,6 +15,8 @@ interpolator/Interpolator.h
 interpolator/Interpolator.cc
 increment/Increment.cc
 increment/Increment.h
+linearmodel/CalcDiagonalNorm.cc
+linearmodel/CalcDiagonalNorm.h
 linearmodel/LinearModel.h
 model/ModelBiasCovariance.h
 model/ModelBias.h
