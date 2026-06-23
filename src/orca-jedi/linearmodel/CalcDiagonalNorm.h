@@ -26,7 +26,6 @@ class CalcDiagonalNorm {
   // Perform calculation in constructor
   CalcDiagonalNorm(const orcamodel::State &,
                    const orcamodel::Geometry &,
-                   const std::string &,
                    orcamodel::Increment &,
                    orcamodel::Increment &,
                    const eckit::LocalConfiguration &);

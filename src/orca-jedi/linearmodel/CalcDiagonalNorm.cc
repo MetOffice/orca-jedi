@@ -11,7 +11,6 @@ namespace orcamodel {
 
 CalcDiagonalNorm::CalcDiagonalNorm(const orcamodel::State & xx,
                                    const orcamodel::Geometry & tlresol,
-                                   const std::string & normMethod,
                                    orcamodel::Increment & invDiagNormMat,
                                    orcamodel::Increment & diagNormMat,
                                    const eckit::LocalConfiguration & conf) {
