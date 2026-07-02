@@ -42,6 +42,8 @@ variablechanges/VariableChange.h
 variablechanges/LinearVariableChange.h
 variablechanges/LinearVariableChange.cc
 variablechanges/LinearVariableChangeParameters.h
+regridder/Regridder.h
+regridder/Regridder.cc
 )
 
 

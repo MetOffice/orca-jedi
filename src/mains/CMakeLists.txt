@@ -39,3 +39,8 @@ ecbuild_add_executable( TARGET  orcamodel_ErrorCovarianceToolbox.x
                         SOURCES orcamodelErrorCovarianceToolbox.cc
                         LIBS    orcamodel
                       )
+
+ecbuild_add_executable( TARGET  orcamodel_regrid.x
+                        SOURCES orcamodelRegrid.cc
+                        LIBS    orcamodel
+                      )
