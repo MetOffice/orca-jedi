@@ -99,25 +99,13 @@ cost function:
         name: Composite
         components:
         - name: Identity
-      obs post filters:
-      #- filter: Print Filter Data
-      #  variables:
-      #  - variable: HofX/ice_area_fraction
-      #  - variable: QCflagsData/ice_area_fraction
-      - filter: Domain Check
-        where:
-        - variable:
-            name: HofX/ice_area_fraction
-        value: is_valid
-        action:
-          name: reject
       obs error:
         covariance model: diagonal
 variational:
   minimizer:
     algorithm: DRPCG
   iterations:
-  - ninner: 1
+  - ninner: 2
     gradient norm reduction: 1e-30
     geometry: *Geom
     test: on
