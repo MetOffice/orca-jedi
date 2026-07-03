@@ -79,7 +79,7 @@ jobs:
           check-latest: true
       - name: Install hpccm
         run: |
-          python3 -m pip install hpccm
+          python3 -m pip install "hpccm==26.1.0"
       - name: Recipe to Dockerfile
         run: |
           hpccm --recipe ./ci/${{ matrix.recipe }} >./Dockerfile
