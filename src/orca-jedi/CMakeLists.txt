@@ -44,6 +44,8 @@ variablechanges/LinearVariableChange.cc
 variablechanges/LinearVariableChangeParameters.h
 regridder/Regridder.h
 regridder/Regridder.cc
+regridder/SourceExtender.h
+regridder/SourceExtender.cc
 )
 
 

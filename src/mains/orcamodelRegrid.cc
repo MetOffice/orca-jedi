@@ -18,6 +18,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/regridder/Regridder.h"
+#include "orca-jedi/regridder/SourceExtender.h"
 #include "orca-jedi/utilities/IOUtils.h"
 
 /// \brief Application to regrid ORCA model data to a target grid.
@@ -26,15 +27,23 @@
 /// (e.g. regular lon-lat, rotated pole, or another ORCA grid), and performs
 /// interpolation/regridding using the Atlas library.
 ///
+/// An optional source extension step can flood-fill missing-value (land) cells
+/// on the source grid before interpolation. This prevents target ocean points
+/// from receiving missing values when their entire interpolation stencil falls
+/// on source land. The approach is analogous to NEMOVAR's sim_ext module
+/// (VAR_SRC/SIM/sim_ext.F90), which iteratively fills coastal land cells with
+/// distance-weighted neighbour averages, then smooths the result.
+///
 /// Configuration is read from a YAML file specifying:
 /// - geometry: source ORCA grid configuration
 /// - state: source state to regrid
 /// - target geometry: target ORCA grid configuration (for ORCA-to-ORCA)
 ///   OR target grid: atlas grid spec (for ORCA to structured grid)
 /// - interpolation method: atlas interpolation configuration
+/// - source extension (optional): flood-fill and smoothing parameters
 /// - output: output file path
 ///
-/// Example YAML (ORCA-to-ORCA):
+/// Example YAML (ORCA-to-ORCA with source extension):
 /// \code{.yaml}
 /// geometry:
 ///   grid name: ORCA1_T
@@ -55,11 +64,16 @@
 /// interpolation method:
 ///   type: unstructured-bilinear-lonlat
 ///   non_linear: missing-if-all-missing
+/// source extension:
+///   flood iterations: 2          # cells deep to flood into land (default: 2)
+///   smooth iterations: 50        # smoothing passes on flooded cells (default: 50)
+///   smooth weight self: 0.35     # self-weight in smoothing (default: 0.35)
+///   adjacency: cell-based        # "cell-based" (default) or "edge-based"
 /// output:
 ///   filepath: path/to/output.nc
 /// \endcode
 ///
-/// Example YAML (ORCA to structured grid):
+/// Example YAML (ORCA to structured grid, no source extension):
 /// \code{.yaml}
 /// geometry:
 ///   grid name: ORCA2_T
@@ -76,6 +90,18 @@
 ///   type: finite-element
 ///   non_linear: missing-if-all-missing
 /// \endcode
+///
+/// \note The "source extension" section is optional. Without it, regridding
+///   relies solely on Atlas's non_linear missing-value handling, which may
+///   leave missing values on target ocean points near coastlines.
+///
+/// \note Two adjacency types are supported:
+///   - "cell-based" (default): neighbours are all nodes sharing a mesh cell.
+///     On a quad mesh this gives 8 neighbours (4 edge + 4 corner), matching
+///     the stencil used by NEMOVAR's sim_ext.
+///   - "edge-based": neighbours are nodes connected by a mesh edge only.
+///     Typically 4–6 neighbours; a sparser but more geometrically principled
+///     stencil on unstructured meshes.
 
 class OrcaModelRegrid : public oops::Application {
  public:
@@ -120,19 +146,45 @@ class OrcaModelRegrid : public oops::Application {
           Here());
     }
 
-    // 3. Build regridder
+    // 3. Optionally extend source fields into land (flood-fill)
+    atlas::FieldSet sourceFields;
+    for (atlas::idx_t i = 0; i < state.stateFields().size(); ++i) {
+      sourceFields.add(state.stateFields()[i].clone());
+    }
+
+    if (conf.has("source extension")) {
+      const eckit::LocalConfiguration extConf(conf, "source extension");
+      int nFlood = extConf.getInt("flood iterations", 2);
+      int nSmooth = extConf.getInt("smooth iterations", 50);
+      double selfWeight = extConf.getDouble("smooth weight self", 0.35);
+      std::string adjStr = extConf.getString("adjacency", "cell-based");
+      orcamodel::AdjacencyType adjType =
+          (adjStr == "edge-based") ? orcamodel::AdjacencyType::EdgeBased
+                                   : orcamodel::AdjacencyType::CellBased;
+
+      orcamodel::SourceExtender extender(
+          geom.mesh(), geom.functionSpace(),
+          nFlood, nSmooth, selfWeight, adjType);
+      extender.extend(sourceFields);
+
+      oops::Log::info() << "Source extension applied: " << nFlood
+                        << " flood + " << nSmooth << " smooth iterations ("
+                        << adjStr << " adjacency)" << std::endl;
+    }
+
+    // 4. Build regridder
     const eckit::LocalConfiguration interpConf(conf, "interpolation method");
     orcamodel::Regridder regridder(interpConf,
                                    geom.functionSpace(),
                                    targetFunctionSpace);
 
-    // 4. Execute regridding
-    atlas::FieldSet result = regridder.execute(state.stateFields());
+    // 5. Execute regridding
+    atlas::FieldSet result = regridder.execute(sourceFields);
 
     oops::Log::info() << "Regridding complete. Output fields: "
                       << result.size() << std::endl;
 
-    // 5. Write output
+    // 6. Write output
     if (conf.has("output")) {
       const eckit::LocalConfiguration outputConf(conf, "output");
       const std::string outputPath = outputConf.getString("filepath");
@@ -157,6 +209,71 @@ class OrcaModelRegrid : public oops::Application {
 };
 
 int main(int argc, char** argv) {
+  // Custom help: intercept --help before oops::Run
+  for (int i = 1; i < argc; ++i) {
+    std::string arg(argv[i]);
+    if (arg == "-h" || arg == "--help") {
+      std::cout <<
+R"(OrcaModelRegrid — regrid ORCA model data to a target grid.
+
+Usage:
+  orcamodel_regrid.x <config.yaml> [output-file]
+  orcamodel_regrid.x --help
+
+The YAML configuration file specifies the source geometry, state, target grid,
+interpolation method, optional source extension (flood-fill), and output path.
+
+Configuration sections:
+
+  geometry:                        # Source ORCA grid
+    grid name: ORCA1_T
+    number levels: 3
+    nemo variables:
+    - {name: sea_water_potential_temperature, nemo field name: votemper,
+       model space: volume}
+
+  state:                           # Source state to regrid
+    date: 2021-06-30T00:00:00Z
+    state variables: [sea_water_potential_temperature]
+    nemo field file: /path/to/input.nc
+
+  target geometry:                 # Target ORCA grid (ORCA-to-ORCA)
+    grid name: ORCA2_T
+    number levels: 3
+    nemo variables:
+    - {name: sea_water_potential_temperature, nemo field name: votemper,
+       model space: volume}
+
+  # OR use 'target grid' for ORCA-to-structured:
+  # target grid:
+  #   name: L90
+
+  interpolation method:            # Atlas interpolation configuration
+    type: unstructured-bilinear-lonlat
+    non_linear: missing-if-all-missing
+
+  source extension:                # Optional: flood-fill land cells before regridding
+    flood iterations: 2            #   Number of cells to flood into land (default: 2)
+    smooth iterations: 50          #   Smoothing passes on flooded cells (default: 50)
+    smooth weight self: 0.35       #   Self-weight in smoothing, 0-1 (default: 0.35)
+    adjacency: cell-based          #   "cell-based" (default, 8-neighbour, NEMOVAR-like)
+                                   #   or "edge-based" (sparser, edge-connected only)
+
+  output:
+    filepath: /path/to/output.nc
+
+Notes:
+  - 'target geometry' (ORCA target) or 'target grid' (structured) must be specified.
+  - Source extension floods missing-value (land) cells on the source grid with
+    neighbour-averaged values before interpolation, preventing missing values on
+    target ocean points whose interpolation stencil falls entirely on source land.
+    This is analogous to NEMOVAR's sim_ext module.
+  - Output writing is currently only supported for ORCA target grids.
+)" << std::endl;
+      return 0;
+    }
+  }
+
   oops::Run run(argc, argv);
   atlas::Library::instance().initialise();
   OrcaModelRegrid regrid;

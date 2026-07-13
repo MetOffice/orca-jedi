@@ -35,6 +35,7 @@
 #include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/regridder/Regridder.h"
+#include "orca-jedi/regridder/SourceExtender.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/utilities/IOUtils.h"
 #include "orca-jedi/utilities/Types.h"
@@ -119,6 +120,20 @@ State::State(const Geometry & resol, const State & other)
                        << " copied as there is no change" << std::endl;
   } else {
     // Different grid: regrid from other's geometry to the new geometry
+
+    // 1. Clone source fields so we can extend without modifying the original
+    atlas::FieldSet extendedSource;
+    for (atlas::idx_t i = 0; i < other.stateFields_.size(); ++i) {
+      atlas::Field clone = other.stateFields_[i].clone();
+      extendedSource.add(clone);
+    }
+
+    // 2. Flood-fill source fields to extend data into masked regions
+    SourceExtender extender(other.geom_->mesh(),
+                            other.geom_->functionSpace());
+    extender.extend(extendedSource);
+
+    // 3. Regrid the extended source to the target geometry
     eckit::LocalConfiguration interpConf;
     interpConf.set("type", "unstructured-bilinear-lonlat");
     interpConf.set("non_linear", "missing-if-all-missing");
@@ -127,7 +142,7 @@ State::State(const Geometry & resol, const State & other)
                         other.geom_->functionSpace(),
                         resol.functionSpace());
 
-    stateFields_ = regridder.execute(other.stateFields_);
+    stateFields_ = regridder.execute(extendedSource);
 
     oops::Log::trace() << "State(ORCA)::State resolution change: "
                        << "regridded from " << other.geom_->grid().name()

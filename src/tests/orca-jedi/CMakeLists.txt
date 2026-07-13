@@ -56,3 +56,8 @@ ecbuild_add_test( TARGET  orcajedi_regridder.x
                   SOURCES test_regridder.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
+
+ecbuild_add_test( TARGET  orcajedi_source_extender.x
+                  SOURCES test_source_extender.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  LIBS    orcamodel )
