@@ -366,7 +366,11 @@ FieldDType Geometry::fieldPrecision(std::string variable_name) const {
 }
 
 void Geometry::print(std::ostream & os) const {
-  os << "Not Implemented";
+  os << "Geometry[grid=" << grid_.name()
+     << ", nodes=" << funcSpace_.size()
+     << ", levels=" << n_levels_
+     << ", partitioner=" << params_.partitioner.value()
+     << "]";
 }
 
 void Geometry::log_status() const {

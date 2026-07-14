@@ -71,6 +71,10 @@ class SourceExtender {
   void extend(atlas::Field& field) const;
 
  private:
+  /// Templated implementation of extend for a specific scalar type.
+  template <typename T>
+  void extendTyped(atlas::Field& field) const;
+
   /// Pre-computed node-to-node adjacency list.
   std::vector<std::vector<atlas::idx_t>> adjacency_;
 

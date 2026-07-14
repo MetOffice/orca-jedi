@@ -10,6 +10,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/filesystem/PathName.h"
 
 #include "oops/runs/Application.h"
 #include "oops/runs/Run.h"
@@ -120,6 +121,17 @@ class OrcaModelRegrid : public oops::Application {
 
     oops::Log::info() << "Source state read: " << state << std::endl;
 
+    // Diagnostics: source fields
+    oops::Log::info() << "=== Source field diagnostics ===" << std::endl;
+    for (atlas::idx_t i = 0; i < state.stateFields().size(); ++i) {
+      const auto& f = state.stateFields()[i];
+      oops::Log::info() << "  [" << i << "] name=" << f.name()
+                        << " shape=(" << f.shape(0) << "," << f.shape(1) << ")"
+                        << " levels=" << f.levels()
+                        << " rank=" << f.rank()
+                        << " datatype=" << f.datatype().str() << std::endl;
+    }
+
     // 2. Build target function space
     atlas::FunctionSpace targetFunctionSpace;
     std::unique_ptr<orcamodel::Geometry> targetGeomPtr;
@@ -165,7 +177,9 @@ class OrcaModelRegrid : public oops::Application {
       orcamodel::SourceExtender extender(
           geom.mesh(), geom.functionSpace(),
           nFlood, nSmooth, selfWeight, adjType);
+      geom.log_status();
       extender.extend(sourceFields);
+      geom.log_status();
 
       oops::Log::info() << "Source extension applied: " << nFlood
                         << " flood + " << nSmooth << " smooth iterations ("
@@ -177,12 +191,25 @@ class OrcaModelRegrid : public oops::Application {
     orcamodel::Regridder regridder(interpConf,
                                    geom.functionSpace(),
                                    targetFunctionSpace);
+    geom.log_status();
 
     // 5. Execute regridding
     atlas::FieldSet result = regridder.execute(sourceFields);
+    geom.log_status();
 
     oops::Log::info() << "Regridding complete. Output fields: "
                       << result.size() << std::endl;
+
+    // Diagnostics: regridded result fields
+    oops::Log::info() << "=== Regridded result field diagnostics ===" << std::endl;
+    for (atlas::idx_t i = 0; i < result.size(); ++i) {
+      const auto& f = result[i];
+      oops::Log::info() << "  [" << i << "] name=" << f.name()
+                        << " shape=(" << f.shape(0) << "," << f.shape(1) << ")"
+                        << " levels=" << f.levels()
+                        << " rank=" << f.rank()
+                        << " datatype=" << f.datatype().str() << std::endl;
+    }
 
     // 6. Write output
     if (conf.has("output")) {
@@ -192,6 +219,12 @@ class OrcaModelRegrid : public oops::Application {
       if (targetGeomPtr) {
         // ORCA target: use existing writeFieldsToFile infrastructure
         const util::DateTime validDate(stateConf.getString("date"));
+        eckit::PathName outPath(outputPath);
+        if (outPath.exists()) {
+          oops::Log::info() << "Removing existing output file: "
+                            << outputPath << std::endl;
+          outPath.unlink();
+        }
         orcamodel::writeFieldsToFile(outputPath, *targetGeomPtr, validDate, result);
         oops::Log::info() << "Output written to: " << outputPath << std::endl;
       } else {

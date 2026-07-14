@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "atlas/array/MakeView.h"
+#include "atlas/array/DataType.h"
 #include "atlas/field/MissingValue.h"
 #include "atlas/mesh/Connectivity.h"
 #include "atlas/mesh/Nodes.h"
@@ -129,10 +130,28 @@ void SourceExtender::extend(atlas::Field& field) const {
     return;
   }
 
+  // Dispatch based on field datatype
+  if (field.datatype() == atlas::array::DataType::real64()) {
+    extendTyped<double>(field);
+  } else if (field.datatype() == atlas::array::DataType::real32()) {
+    extendTyped<float>(field);
+  } else {
+    oops::Log::warning()
+        << "SourceExtender::extend: field '" << field.name()
+        << "' has unsupported datatype (kind="
+        << field.datatype().kind() << "), skipping" << std::endl;
+    return;
+  }
+}
+
+template <typename T>
+void SourceExtender::extendTyped(atlas::Field& field) const {
+  atlas::field::MissingValue mv(field);
+
   const atlas::idx_t nNodes = field.shape(0);
   const atlas::idx_t nLevels = field.levels() > 0 ? field.levels() : 1;
 
-  auto view = atlas::array::make_view<double, 2>(field);
+  auto view = atlas::array::make_view<T, 2>(field);
 
   // Track which nodes were originally missing (per level).
   // These are the nodes eligible for flooding and smoothing.
@@ -179,7 +198,7 @@ void SourceExtender::extend(atlas::Field& field) const {
 
         if (totalWeight > 0.0) {
           // At least one valid neighbour: fill this cell
-          view(j, k) = weightedSum / totalWeight;
+          view(j, k) = static_cast<T>(weightedSum / totalWeight);
           isValid[k][j] = true;
           wasFlooded[k][j] = true;
         }
@@ -193,7 +212,7 @@ void SourceExtender::extend(atlas::Field& field) const {
   // --- Smoothing on flooded cells only ---
   if (nSmoothIterations_ > 0) {
     const double neighbourWeight = 1.0 - smoothWeightSelf_;
-    std::vector<double> tmp(nNodes);
+    std::vector<T> tmp(nNodes);
 
     for (int iter = 0; iter < nSmoothIterations_; ++iter) {
       for (atlas::idx_t k = 0; k < nLevels; ++k) {
@@ -209,8 +228,8 @@ void SourceExtender::extend(atlas::Field& field) const {
           }
 
           if (neighbourCount > 0) {
-            tmp[j] = smoothWeightSelf_ * view(j, k)
-                   + neighbourWeight * neighbourSum / neighbourCount;
+            tmp[j] = static_cast<T>(smoothWeightSelf_ * view(j, k)
+                   + neighbourWeight * neighbourSum / neighbourCount);
           } else {
             tmp[j] = view(j, k);
           }
