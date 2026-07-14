@@ -223,6 +223,7 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
           int neighbourCount = 0;
           for (atlas::idx_t neighbour : adjacency_[j]) {
             if (neighbour >= nNodes) continue;
+            if (!isValid[k][neighbour]) continue;  // skip still-missing cells
             neighbourSum += view(neighbour, k);
             ++neighbourCount;
           }
