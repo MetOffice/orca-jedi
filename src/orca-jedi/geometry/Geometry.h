@@ -75,6 +75,7 @@ class Geometry : public util::Printable,
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
   void set_gmask(atlas::Field &) const;
+  void set_vol_mask(atlas::Field &) const;
 
  private:
   void print(std::ostream &) const;

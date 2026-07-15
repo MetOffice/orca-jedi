@@ -20,7 +20,9 @@
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/regridder/Regridder.h"
 #include "orca-jedi/regridder/SourceExtender.h"
+#include "orca-jedi/nemo_io/ReadServer.h"
 #include "orca-jedi/utilities/IOUtils.h"
+#include "orca-jedi/utilities/MaskUtils.h"
 
 /// \brief Application to regrid ORCA model data to a target grid.
 ///
@@ -211,6 +213,39 @@ class OrcaModelRegrid : public oops::Application {
                         << " datatype=" << f.datatype().str() << std::endl;
     }
 
+    // 5b. Optionally apply target land-sea mask
+    if (conf.has("target mask") && targetGeomPtr) {
+      const eckit::LocalConfiguration maskConf(conf, "target mask");
+      const std::string maskFile = maskConf.getString("filepath");
+      const std::string maskVar = maskConf.getString("variable");
+      oops::Log::info() << "Applying target mask from '" << maskFile
+                        << "' variable '" << maskVar << "'" << std::endl;
+
+      // Read the mask-defining field on the target geometry (all levels)
+      const atlas::idx_t nLevels =
+          targetGeomPtr->extraFields().field("vol_mask").shape(1);
+      atlas::Field maskField = targetGeomPtr->functionSpace().createField<float>(
+          atlas::option::name(maskVar) | atlas::option::levels(nLevels));
+      {
+        orcamodel::ReadServer reader(targetGeomPtr->timer(),
+                                     eckit::PathName(maskFile),
+                                     targetGeomPtr->mesh());
+        auto field_view = atlas::array::make_view<float, 2>(maskField);
+        reader.read_var<float>(maskVar, 0, field_view);
+        float fill = reader.read_fillvalue<float>(maskVar);
+        maskField.metadata().set("missing_value", fill);
+        maskField.metadata().set("missing_value_type", "approximately-equals");
+        maskField.metadata().set("missing_value_epsilon", 1e-6);
+      }
+
+      // Derive vol_mask from the mask field's missing values
+      targetGeomPtr->set_vol_mask(maskField);
+
+      // Apply vol_mask to regridded result
+      orcamodel::applyMaskToFields(
+          targetGeomPtr->extraFields().field("vol_mask"), result);
+    }
+
     // 6. Write output
     if (conf.has("output")) {
       const eckit::LocalConfiguration outputConf(conf, "output");
@@ -250,7 +285,7 @@ int main(int argc, char** argv) {
 R"(OrcaModelRegrid — regrid ORCA model data to a target grid.
 
 Usage:
-  orcamodel_regrid.x <config.yaml> [output-file]
+  orcamodel_regrid.x <config.yaml> [output-log-file]
   orcamodel_regrid.x --help
 
 The YAML configuration file specifies the source geometry, state, target grid,

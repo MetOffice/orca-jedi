@@ -3,11 +3,13 @@
  */
 
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/utilities/Types.h"
+
+#include <algorithm>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
+#include "atlas/array/DataType.h"
 #include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
 #include "atlas/mesh.h"  // IWYU pragma: keep
 #include "atlas/meshgenerator.h"  // IWYU pragma: keep
@@ -22,6 +24,8 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+
+#include "orca-jedi/utilities/Types.h"
 
 namespace {
 /// \brief Construct an atlas grid given a string containing either a grid name
@@ -207,6 +211,26 @@ void Geometry::create_extrafields() {
   oops::Log::debug() << "orcamodel::Geometry: adding gmask (set to all ocean except halo)."
                      << std::endl;
   extraFields_->add(gmask);
+
+  // Create volumetric land-sea mask (nNodes, nLevels).
+  // Initialised to all-ocean (1) except ghost/edge nodes (0).
+  // Refined later via set_vol_mask() using a volumetric field's missing values.
+  atlas::Field vol_mask = funcSpace_.createField<int32_t>(
+    atlas::option::name("vol_mask") | atlas::option::levels(n_levels_));
+  auto vol_mask_view = atlas::array::make_view<int32_t, 2>(vol_mask);
+  for (atlas::idx_t j = 0; j < vol_mask_view.shape(0); ++j) {
+    int x = ij(j, 0) + 1;
+    int y = ij(j, 1) + 1;
+    int32_t val = (ghost(j) || x >= nx - 1 || y >= ny - 1) ? 0 : 1;
+    for (atlas::idx_t k = 0; k < vol_mask_view.shape(1); ++k) {
+      vol_mask_view(j, k) = val;
+    }
+  }
+  oops::Log::debug() << "orcamodel::Geometry: adding vol_mask "
+                     << "(set to all ocean except halo, "
+                     << vol_mask_view.shape(0) << " nodes, "
+                     << vol_mask_view.shape(1) << " levels)." << std::endl;
+  extraFields_->add(vol_mask);
 
   // Create grid cell area field /m^2 - the value used is not tuned.
   // Curerently ~= area of 2 degree square grid cell at the equator.
@@ -424,6 +448,60 @@ void Geometry::set_gmask(atlas::Field & field) const {
                     fieldPrecision(field.name()),
                     std::string("orcamodel::Geometry::set_gmask ")
                     + field.name() + "' field type not recognised");
+  log_status();
+}
+
+/// \brief Set vol_mask extra field from a volumetric field's missing values.
+///
+/// Where the input field has missing values, the corresponding (node, level)
+/// entry in vol_mask is set to 0 (masked). Only entries currently marked as
+/// ocean (1) can be masked; already-masked entries are never unmasked.
+///
+/// \param[in] field  A volumetric atlas::Field on the same function space.
+///                   Must have missing_value metadata set.
+void Geometry::set_vol_mask(atlas::Field & field) const {
+  oops::Log::debug() << "orcamodel::Geometry setting vol_mask from field "
+                     << field.name() << " missing values" << std::endl;
+
+  atlas::Field vol_mask = extraFields_.field("vol_mask");
+  auto mask_view = atlas::array::make_view<int32_t, 2>(vol_mask);
+
+  atlas::field::MissingValue mv(field);
+  if (!mv) {
+    oops::Log::warning() << "orcamodel::Geometry::set_vol_mask: field '"
+                         << field.name()
+                         << "' has no missing_value metadata, skipping"
+                         << std::endl;
+    return;
+  }
+
+  const auto setMask = [&](auto typeVal) {
+    using T = decltype(typeVal);
+    auto field_view = atlas::array::make_view<T, 2>(field);
+    // Handle shape mismatch: if field has fewer levels than vol_mask,
+    // only mask the levels that exist in the field.
+    const atlas::idx_t nLevels = std::min(field_view.shape(1),
+                                          mask_view.shape(1));
+    ASSERT(field_view.shape(0) == mask_view.shape(0));
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < nLevels; ++k) {
+        if (mask_view(j, k) == 1 && mv(field_view(j, k))) {
+          mask_view(j, k) = 0;
+        }
+      }
+    }
+  };
+
+  if (field.datatype() == atlas::array::DataType::real64()) {
+    setMask(double{});
+  } else if (field.datatype() == atlas::array::DataType::real32()) {
+    setMask(float{});
+  } else {
+    oops::Log::warning() << "orcamodel::Geometry::set_vol_mask: field '"
+                         << field.name()
+                         << "' has unsupported datatype, skipping"
+                         << std::endl;
+  }
   log_status();
 }
 

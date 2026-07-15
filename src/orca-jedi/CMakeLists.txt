@@ -35,6 +35,8 @@ utilities/OrcaModelTraits.h
 utilities/Types.h
 utilities/IOUtils.h
 utilities/IOUtils.cc
+utilities/MaskUtils.h
+utilities/MaskUtils.cc
 utilities/ModelData.h
 utilities/ModelData.cc
 variablechanges/VariableChangeParameters.h

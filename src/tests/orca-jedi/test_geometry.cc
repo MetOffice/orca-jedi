@@ -150,6 +150,7 @@ CASE("test basic geometry") {
         "vunit",
         "owned",
         "gmask",
+        "vol_mask",
         "area"};
     size_t num_matches = 0;
     std::cout << "extraField list: ";

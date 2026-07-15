@@ -14,6 +14,8 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/util/Logger.h"
+
 namespace orcamodel {
 
 Regridder::Regridder(const eckit::Configuration& conf,
@@ -36,6 +38,8 @@ atlas::Field Regridder::execute(const atlas::Field& source) const {
       atlas::option::name(source.name()) |
       atlas::option::levels(source.levels()) |
       atlas::option::datatype(source.datatype()));
+  oops::Log::trace() << "orcamodel::Regridder::execute field '"
+      << source.name() << "'" << std::endl;
   interpolation_.execute(source, target);
   return target;
 }

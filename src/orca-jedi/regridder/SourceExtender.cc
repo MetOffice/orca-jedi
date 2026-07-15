@@ -92,6 +92,7 @@ SourceExtender::SourceExtender(const atlas::Mesh& mesh,
       nFloodIterations_(nFloodIterations),
       nSmoothIterations_(nSmoothIterations),
       smoothWeightSelf_(smoothWeightSelf) {
+  oops::Log::trace() << "orcamodel::SourceExtender constructor starting" << std::endl;
   ASSERT(nFloodIterations >= 0);
   ASSERT(nSmoothIterations >= 0);
   ASSERT(smoothWeightSelf >= 0.0 && smoothWeightSelf <= 1.0);
@@ -110,16 +111,25 @@ SourceExtender::SourceExtender(const atlas::Mesh& mesh,
   }
   oops::Log::info() << "SourceExtender: adjacency built for "
                     << adjacency_.size() << " nodes" << std::endl;
+  oops::Log::trace() << "orcamodel::SourceExtender constructor finished" << std::endl;
 }
 
 void SourceExtender::extend(atlas::FieldSet& fields) const {
+  oops::Log::trace() << "orcamodel::SourceExtender extend fieldset starting" << std::endl;
   for (atlas::idx_t i = 0; i < fields.size(); ++i) {
     extend(fields[i]);
   }
+  oops::Log::trace() << "orcamodel::SourceExtender extend fieldset finished" << std::endl;
 }
 
 void SourceExtender::extend(atlas::Field& field) const {
-  if (nFloodIterations_ == 0) return;
+  oops::Log::trace() << "orcamodel::SourceExtender extend field '"
+      << field.name() << "' starting" << std::endl;
+  if (nFloodIterations_ == 0) {
+    oops::Log::trace() << "orcamodel::SourceExtender extend field '"
+        << field.name() << "' finished (no flooding)" << std::endl;
+    return;
+  }
 
   // Determine missing value from field metadata
   atlas::field::MissingValue mv(field);
@@ -127,6 +137,8 @@ void SourceExtender::extend(atlas::Field& field) const {
     oops::Log::warning()
         << "SourceExtender::extend: field '" << field.name()
         << "' has no missing_value metadata, skipping" << std::endl;
+    oops::Log::trace() << "orcamodel::SourceExtender extend field '"
+        << field.name() << "' finished (no missing values)" << std::endl;
     return;
   }
 
@@ -140,8 +152,12 @@ void SourceExtender::extend(atlas::Field& field) const {
         << "SourceExtender::extend: field '" << field.name()
         << "' has unsupported datatype (kind="
         << field.datatype().kind() << "), skipping" << std::endl;
+    oops::Log::trace() << "orcamodel::SourceExtender extend field '"
+        << field.name() << "' finished (unsupported datatype)" << std::endl;
     return;
   }
+  oops::Log::trace() << "orcamodel::SourceExtender extend field '"
+      << field.name() << "' finished" << std::endl;
 }
 
 template <typename T>
@@ -177,6 +193,9 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
       nLevels, std::vector<bool>(nNodes, false));
 
   // --- Flood-fill iterations ---
+  oops::Log::debug() << "SourceExtender::extend: flooding field '"
+                     << field.name() << "' with " << nFloodIterations_
+                     << " flood iterations" << std::endl;
   for (int iter = 0; iter < nFloodIterations_; ++iter) {
     // Snapshot the current validity for this iteration
     auto validSnapshot = isValid;
@@ -213,6 +232,9 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
   if (nSmoothIterations_ > 0) {
     const double neighbourWeight = 1.0 - smoothWeightSelf_;
     std::vector<T> tmp(nNodes);
+    oops::Log::debug() << "SourceExtender::extend: smoothing field '"
+                       << field.name() << "' with " << nSmoothIterations_
+                       << " smooth iterations" << std::endl;
 
     for (int iter = 0; iter < nSmoothIterations_; ++iter) {
       for (atlas::idx_t k = 0; k < nLevels; ++k) {

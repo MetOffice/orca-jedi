@@ -38,6 +38,7 @@
 #include "orca-jedi/regridder/SourceExtender.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/utilities/IOUtils.h"
+#include "orca-jedi/utilities/MaskUtils.h"
 #include "orca-jedi/utilities/Types.h"
 
 
@@ -143,6 +144,11 @@ State::State(const Geometry & resol, const State & other)
                         resol.functionSpace());
 
     stateFields_ = regridder.execute(extendedSource);
+
+    // 4. Re-mask with target geometry's land-sea mask
+    if (resol.extraFields().has("vol_mask")) {
+      applyMaskToFields(resol.extraFields().field("vol_mask"), stateFields_);
+    }
 
     oops::Log::trace() << "State(ORCA)::State resolution change: "
                        << "regridded from " << other.geom_->grid().name()
