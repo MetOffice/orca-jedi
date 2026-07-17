@@ -7,8 +7,8 @@
 #include <set>
 #include <vector>
 
-#include "atlas/array/MakeView.h"
-#include "atlas/array/DataType.h"
+#include "atlas/array/MakeView.h"  // IWYU pragma: keep
+#include "atlas/array/DataType.h"  // IWYU pragma: keep
 #include "atlas/field/MissingValue.h"
 #include "atlas/mesh/Connectivity.h"
 #include "atlas/mesh/Nodes.h"
@@ -168,6 +168,8 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
   const atlas::idx_t nLevels = field.levels() > 0 ? field.levels() : 1;
 
   auto view = atlas::array::make_view<T, 2>(field);
+  auto ghost = atlas::array::make_view<int32_t, 1>(
+      funcSpace_.ghost());
 
   // Track which nodes were originally missing (per level).
   // These are the nodes eligible for flooding and smoothing.
@@ -202,6 +204,7 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
 
     for (atlas::idx_t k = 0; k < nLevels; ++k) {
       for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        if (ghost(j)) continue;  // ghost nodes filled via haloExchange
         if (validSnapshot[k][j]) continue;  // already valid
 
         // Check neighbours for valid values
@@ -226,6 +229,19 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
 
     // Halo exchange after each flood iteration
     funcSpace_.haloExchange(field);
+
+    // Re-sync isValid for ghost nodes from the actual field values,
+    // since haloExchange may have updated ghost values.
+    for (atlas::idx_t k = 0; k < nLevels; ++k) {
+      for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        if (!ghost(j)) continue;
+        bool nowValid = !mv(view(j, k));
+        isValid[k][j] = nowValid;
+        if (nowValid && originallyMissing[k][j]) {
+          wasFlooded[k][j] = true;
+        }
+      }
+    }
   }
 
   // --- Smoothing on flooded cells only ---
@@ -239,6 +255,7 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
     for (int iter = 0; iter < nSmoothIterations_; ++iter) {
       for (atlas::idx_t k = 0; k < nLevels; ++k) {
         for (atlas::idx_t j = 0; j < nNodes; ++j) {
+          if (ghost(j)) continue;             // ghost nodes via haloExchange
           if (!wasFlooded[k][j]) continue;  // only smooth flooded cells
 
           double neighbourSum = 0.0;

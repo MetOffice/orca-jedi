@@ -151,7 +151,6 @@ CASE("test basic geometry") {
         "vunit",
         "owned",
         "gmask",
-        "vol_mask",
         "area"};
     size_t num_matches = 0;
     std::cout << "extraField list: ";
@@ -173,7 +172,7 @@ CASE("test basic geometry") {
     EXPECT(extraFieldNames.size() == num_matches);
   }
 
-  SECTION("test vol_mask initialised and has correct shape") {
+  SECTION("test vol_mask not created without land sea mask config") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
@@ -181,29 +180,19 @@ CASE("test basic geometry") {
     config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
     const atlas::FieldSet& ef = geometry2.extraFields();
-    EXPECT(ef.has("vol_mask"));
-
-    const atlas::Field& vm = ef.field("vol_mask");
-    EXPECT(vm.rank() == 2);
-    EXPECT(vm.shape(1) == 10);
-    EXPECT(vm.datatype() == atlas::array::DataType::int32());
-
-    // All values should be 0 or 1
-    auto view = atlas::array::make_view<int32_t, 2>(vm);
-    for (atlas::idx_t j = 0; j < view.shape(0); ++j) {
-      for (atlas::idx_t k = 0; k < view.shape(1); ++k) {
-        EXPECT(view(j, k) == 0 || view(j, k) == 1);
-      }
-    }
+    EXPECT(!ef.has("vol_mask"));
   }
 
-  SECTION("test set_vol_mask marks missing values") {
+  SECTION("test set_vol_mask creates and populates vol_mask") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
     config2.set("number levels", 3);
     config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
+
+    // vol_mask should not exist yet
+    EXPECT(!geometry2.extraFields().has("vol_mask"));
 
     // Create a field with missing values at certain (node,level) entries
     atlas::Field field =
@@ -231,21 +220,19 @@ CASE("test basic geometry") {
     EXPECT(testNode >= 0);
     fview(testNode, 1) = fill;  // mark level 1 as missing
 
-    // Check vol_mask is initially 1 at this point
-    auto vmBefore = atlas::array::make_view<int32_t, 2>(
-        geometry2.extraFields().field("vol_mask"));
-    EXPECT(vmBefore(testNode, 0) == 1);
-    EXPECT(vmBefore(testNode, 1) == 1);
-    EXPECT(vmBefore(testNode, 2) == 1);
-
+    // set_vol_mask should create and populate the field
     geometry2.set_vol_mask(field);
 
-    // After set_vol_mask: level 1 should now be masked (0)
-    auto vmAfter = atlas::array::make_view<int32_t, 2>(
+    // vol_mask should now exist
+    EXPECT(geometry2.extraFields().has("vol_mask"));
+    auto vm = atlas::array::make_view<int32_t, 2>(
         geometry2.extraFields().field("vol_mask"));
-    EXPECT(vmAfter(testNode, 0) == 1);
-    EXPECT(vmAfter(testNode, 1) == 0);
-    EXPECT(vmAfter(testNode, 2) == 1);
+    EXPECT(vm.shape(1) == 3);
+
+    // testNode: levels 0,2 should be ocean (1), level 1 masked (0)
+    EXPECT(vm(testNode, 0) == 1);
+    EXPECT(vm(testNode, 1) == 0);
+    EXPECT(vm(testNode, 2) == 1);
   }
 }
 

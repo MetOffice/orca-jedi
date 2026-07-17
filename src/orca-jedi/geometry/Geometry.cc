@@ -9,7 +9,7 @@
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
-#include "atlas/array/DataType.h"
+#include "atlas/array/DataType.h"  // IWYU pragma: keep
 #include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
 #include "atlas/mesh.h"  // IWYU pragma: keep
 #include "atlas/meshgenerator.h"  // IWYU pragma: keep
@@ -20,11 +20,13 @@
 #include "eckit/mpi/Comm.h"
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/filesystem/PathName.h"
 #include "eckit/system/ResourceUsage.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
+#include "orca-jedi/nemo_io/ReadServer.h"
 #include "orca-jedi/utilities/Types.h"
 
 namespace {
@@ -121,6 +123,37 @@ Geometry::Geometry(const eckit::Configuration & config,
       // Fill extra geometry fields for BUMP / SABER
       create_extrafields();
     }
+
+    // If a land-sea mask ancillary is configured, create and populate vol_mask
+    if (params_.landSeaMask.value()) {
+      if (!params_.extraFieldsInit.value().value_or(false)) {
+        create_extrafields();
+      }
+      const auto& lsm = *params_.landSeaMask.value();
+      const std::string maskFile = lsm.filepath.value();
+      const std::string maskVar = lsm.variable.value();
+      oops::Log::info() << "Geometry: reading land-sea mask from '"
+                        << maskFile << "' variable '" << maskVar
+                        << "'" << std::endl;
+
+      atlas::Field maskField = funcSpace_.createField<float>(
+          atlas::option::name(maskVar)
+          | atlas::option::levels(n_levels_));
+      {
+        ReadServer reader(eckit_timer_,
+                          eckit::PathName(maskFile), mesh_);
+        auto field_view = atlas::array::make_view<float, 2>(maskField);
+        reader.read_var<float>(maskVar, 0, field_view);
+        float fill = reader.read_fillvalue<float>(maskVar);
+        maskField.metadata().set("missing_value", fill);
+        maskField.metadata().set("missing_value_type",
+                                 "approximately-equals");
+        maskField.metadata().set("missing_value_epsilon", 1e-6);
+      }
+      set_vol_mask(maskField);
+      oops::Log::info() << "Geometry: vol_mask derived from '"
+                        << maskVar << "'" << std::endl;
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -211,26 +244,6 @@ void Geometry::create_extrafields() {
   oops::Log::debug() << "orcamodel::Geometry: adding gmask (set to all ocean except halo)."
                      << std::endl;
   extraFields_->add(gmask);
-
-  // Create volumetric land-sea mask (nNodes, nLevels).
-  // Initialised to all-ocean (1) except ghost/edge nodes (0).
-  // Refined later via set_vol_mask() using a volumetric field's missing values.
-  atlas::Field vol_mask = funcSpace_.createField<int32_t>(
-    atlas::option::name("vol_mask") | atlas::option::levels(n_levels_));
-  auto vol_mask_view = atlas::array::make_view<int32_t, 2>(vol_mask);
-  for (atlas::idx_t j = 0; j < vol_mask_view.shape(0); ++j) {
-    int x = ij(j, 0) + 1;
-    int y = ij(j, 1) + 1;
-    int32_t val = (ghost(j) || x >= nx - 1 || y >= ny - 1) ? 0 : 1;
-    for (atlas::idx_t k = 0; k < vol_mask_view.shape(1); ++k) {
-      vol_mask_view(j, k) = val;
-    }
-  }
-  oops::Log::debug() << "orcamodel::Geometry: adding vol_mask "
-                     << "(set to all ocean except halo, "
-                     << vol_mask_view.shape(0) << " nodes, "
-                     << vol_mask_view.shape(1) << " levels)." << std::endl;
-  extraFields_->add(vol_mask);
 
   // Create grid cell area field /m^2 - the value used is not tuned.
   // Curerently ~= area of 2 degree square grid cell at the equator.
@@ -451,17 +464,48 @@ void Geometry::set_gmask(atlas::Field & field) const {
   log_status();
 }
 
-/// \brief Set vol_mask extra field from a volumetric field's missing values.
+/// \brief Create or update the vol_mask extra field from a volumetric field's
+///        missing values.
 ///
-/// Where the input field has missing values, the corresponding (node, level)
-/// entry in vol_mask is set to 0 (masked). Only entries currently marked as
-/// ocean (1) can be masked; already-masked entries are never unmasked.
+/// If vol_mask does not yet exist in extraFields, it is created with shape
+/// (nNodes, nLevels) and initialised to 1 (ocean) for owned nodes and 0 for
+/// ghost/edge nodes.  Then, wherever the input field has a missing value, the
+/// corresponding (node, level) entry is set to 0 (masked).
 ///
 /// \param[in] field  A volumetric atlas::Field on the same function space.
 ///                   Must have missing_value metadata set.
-void Geometry::set_vol_mask(atlas::Field & field) const {
+void Geometry::set_vol_mask(atlas::Field & field) {
   oops::Log::debug() << "orcamodel::Geometry setting vol_mask from field "
                      << field.name() << " missing values" << std::endl;
+
+  // Create vol_mask if it doesn't exist yet
+  if (!extraFields_.has("vol_mask")) {
+    atlas::OrcaGrid orcaGrid = mesh_.grid();
+    int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+    int ny = orcaGrid.ny() + orcaGrid.haloNorth();
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        mesh_.nodes().ghost());
+    auto ij = atlas::array::make_view<int32_t, 2>(
+        mesh_.nodes().field("ij"));
+
+    atlas::Field vol_mask = funcSpace_.createField<int32_t>(
+        atlas::option::name("vol_mask")
+        | atlas::option::levels(n_levels_));
+    auto vm = atlas::array::make_view<int32_t, 2>(vol_mask);
+    for (atlas::idx_t j = 0; j < vm.shape(0); ++j) {
+      int x = ij(j, 0) + 1;
+      int y = ij(j, 1) + 1;
+      int32_t val =
+          (ghost(j) || x >= nx - 1 || y >= ny - 1) ? 0 : 1;
+      for (atlas::idx_t k = 0; k < vm.shape(1); ++k) {
+        vm(j, k) = val;
+      }
+    }
+    extraFields_->add(vol_mask);
+    oops::Log::debug() << "orcamodel::Geometry: created vol_mask ("
+                       << vm.shape(0) << " nodes, "
+                       << vm.shape(1) << " levels)." << std::endl;
+  }
 
   atlas::Field vol_mask = extraFields_.field("vol_mask");
   auto mask_view = atlas::array::make_view<int32_t, 2>(vol_mask);
@@ -478,8 +522,6 @@ void Geometry::set_vol_mask(atlas::Field & field) const {
   const auto setMask = [&](auto typeVal) {
     using T = decltype(typeVal);
     auto field_view = atlas::array::make_view<T, 2>(field);
-    // Handle shape mismatch: if field has fewer levels than vol_mask,
-    // only mask the levels that exist in the field.
     const atlas::idx_t nLevels = std::min(field_view.shape(1),
                                           mask_view.shape(1));
     ASSERT(field_view.shape(0) == mask_view.shape(0));
