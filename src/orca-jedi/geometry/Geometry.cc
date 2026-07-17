@@ -274,8 +274,8 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
     }
     if (varSizes[i] == 0) {
       std::stringstream err_stream;
-      err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
-      err_stream << "\" " << vars[i].name() << " not recognised. " << std::endl;
+      err_stream << "orcamodel::Geometry::variableSizes variable name \"";
+      err_stream << vars[i].name() << "\" not recognised. " << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
   }
