@@ -44,9 +44,11 @@
 ///   OR target grid: atlas grid spec (for ORCA to structured grid)
 /// - interpolation method: atlas interpolation configuration
 /// - source extension (optional): flood-fill and smoothing parameters
+/// - target mask (optional): re-mask regridded fields using a volumetric
+///   ancillary field on the target grid (builds a 3D vol_mask)
 /// - output: output file path
 ///
-/// Example YAML (ORCA-to-ORCA with source extension):
+/// Example YAML (ORCA-to-ORCA with source extension and target mask):
 /// \code{.yaml}
 /// geometry:
 ///   grid name: ORCA1_T
@@ -72,6 +74,9 @@
 ///   smooth iterations: 50        # smoothing passes on flooded cells (default: 50)
 ///   smooth weight self: 0.35     # self-weight in smoothing (default: 0.35)
 ///   adjacency: cell-based        # "cell-based" (default) or "edge-based"
+/// target mask:                   # optional: re-mask regridded fields on target grid
+///   filepath: path/to/target_ancillary.nc
+///   variable: votemper           # volumetric field whose missing values define land
 /// output:
 ///   filepath: path/to/output.nc
 /// \endcode
@@ -97,6 +102,13 @@
 /// \note The "source extension" section is optional. Without it, regridding
 ///   relies solely on Atlas's non_linear missing-value handling, which may
 ///   leave missing values on target ocean points near coastlines.
+///
+/// \note The "target mask" section is optional (requires "target geometry").
+///   It reads a volumetric field from a NetCDF ancillary on the target grid,
+///   derives a 3D land-sea mask (vol_mask) from that field's missing values,
+///   and applies it to the regridded result. This ensures that regridded
+///   ocean points that should be land on the target grid are correctly set
+///   to missing_value at each depth level.
 ///
 /// \note Two adjacency types are supported:
 ///   - "cell-based" (default): neighbours are all nodes sharing a mesh cell.
@@ -213,7 +225,10 @@ class OrcaModelRegrid : public oops::Application {
                         << " datatype=" << f.datatype().str() << std::endl;
     }
 
-    // 5b. Optionally apply target land-sea mask
+    // 5b. Optionally apply target 3D land-sea mask (vol_mask).
+    //     Reads a volumetric field from an ancillary on the target grid,
+    //     derives a per-level mask from its missing values, and sets
+    //     regridded result to missing where the target grid is land.
     if (conf.has("target mask") && targetGeomPtr) {
       const eckit::LocalConfiguration maskConf(conf, "target mask");
       const std::string maskFile = maskConf.getString("filepath");
@@ -327,6 +342,11 @@ Configuration sections:
     adjacency: cell-based          #   "cell-based" (default, 8-neighbour, NEMOVAR-like)
                                    #   or "edge-based" (sparser, edge-connected only)
 
+  target mask:                     # Optional: re-mask regridded result on target grid
+    filepath: /path/to/target_ancillary.nc  # NetCDF file on the target grid
+    variable: votemper             #   Volumetric field whose missing values define land
+                                   #   (read at all target levels to build 3D vol_mask)
+
   output:
     filepath: /path/to/output.nc
 
@@ -336,6 +356,11 @@ Notes:
     neighbour-averaged values before interpolation, preventing missing values on
     target ocean points whose interpolation stencil falls entirely on source land.
     This is analogous to NEMOVAR's sim_ext module.
+  - Target mask reads a volumetric field from an ancillary file on the target grid
+    and derives a 3D land-sea mask (vol_mask). Where the field has missing values,
+    the corresponding (node, level) position is masked. This is applied per-level
+    to the regridded result, correctly handling bathymetry differences between grids.
+    Requires 'target geometry' (not supported with 'target grid').
   - Output writing is currently only supported for ORCA target grids.
 )" << std::endl;
       return 0;
