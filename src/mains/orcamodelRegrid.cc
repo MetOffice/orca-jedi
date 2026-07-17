@@ -2,6 +2,10 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <iostream>
+#include <memory>
+#include <string>
+
 #include "atlas/grid.h"
 #include "atlas/functionspace.h"
 #include "atlas/mesh.h"

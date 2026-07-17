@@ -38,6 +38,10 @@ atlas::Field Regridder::execute(const atlas::Field& source) const {
       atlas::option::name(source.name()) |
       atlas::option::levels(source.levels()) |
       atlas::option::datatype(source.datatype()));
+
+  // Preserve metadata (e.g. missing_value) for downstream masking/IO.
+  target.metadata() = source.metadata();
+
   oops::Log::trace() << "orcamodel::Regridder::execute field '"
       << source.name() << "'" << std::endl;
   interpolation_.execute(source, target);

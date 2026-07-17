@@ -2,10 +2,14 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <vector>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
