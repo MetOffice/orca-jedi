@@ -61,3 +61,8 @@ ecbuild_add_test( TARGET  orcajedi_source_extender.x
                   SOURCES test_source_extender.cc
                   ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
                   LIBS    orcamodel )
+
+ecbuild_add_test( TARGET  orcajedi_mask_utils.x
+                  SOURCES test_mask_utils.cc
+                  ENVIRONMENT ${ATLAS_TEST_ENVIRONMENT}
+                  LIBS    orcamodel )

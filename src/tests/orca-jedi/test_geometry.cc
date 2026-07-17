@@ -11,6 +11,7 @@
 
 #include "oops/base/Variables.h"
 
+#include "atlas/array.h"
 #include "atlas/library/Library.h"
 #include "atlas/mesh.h"
 
@@ -164,10 +165,87 @@ CASE("test basic geometry") {
       }
     }
     std::cout << std::endl;
-    std::cout << "Number of extraFields " << extraFields.size() << std::endl;
-    std::cout << "Number matches to expected names " << num_matches << std::endl;
+    std::cout << "Number of extraFields " << extraFields.size()
+              << std::endl;
+    std::cout << "Number matches to expected names " << num_matches
+              << std::endl;
     EXPECT(static_cast<size_t>(extraFields.size()) == num_matches);
     EXPECT(extraFieldNames.size() == num_matches);
+  }
+
+  SECTION("test vol_mask initialised and has correct shape") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 10);
+    config2.set("initialise extra fields", true);
+    Geometry geometry2(config2, eckit::mpi::comm());
+    const atlas::FieldSet& ef = geometry2.extraFields();
+    EXPECT(ef.has("vol_mask"));
+
+    const atlas::Field& vm = ef.field("vol_mask");
+    EXPECT(vm.rank() == 2);
+    EXPECT(vm.shape(1) == 10);
+    EXPECT(vm.datatype() == atlas::array::DataType::int32());
+
+    // All values should be 0 or 1
+    auto view = atlas::array::make_view<int32_t, 2>(vm);
+    for (atlas::idx_t j = 0; j < view.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < view.shape(1); ++k) {
+        EXPECT(view(j, k) == 0 || view(j, k) == 1);
+      }
+    }
+  }
+
+  SECTION("test set_vol_mask marks missing values") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    config2.set("initialise extra fields", true);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    // Create a field with missing values at certain (node,level) entries
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("test_field")
+            | atlas::option::levels(3));
+    const double fill = -999.0;
+    field.metadata().set("missing_value", fill);
+    field.metadata().set("missing_value_type", "equals");
+
+    auto fview = atlas::array::make_view<double, 2>(field);
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) {
+        fview(j, k) = 1.0;  // valid everywhere initially
+      }
+    }
+
+    // Find a non-ghost node to mark as missing at level 1
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    atlas::idx_t testNode = -1;
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      if (ghost(j) == 0) { testNode = j; break; }
+    }
+    EXPECT(testNode >= 0);
+    fview(testNode, 1) = fill;  // mark level 1 as missing
+
+    // Check vol_mask is initially 1 at this point
+    auto vmBefore = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("vol_mask"));
+    EXPECT(vmBefore(testNode, 0) == 1);
+    EXPECT(vmBefore(testNode, 1) == 1);
+    EXPECT(vmBefore(testNode, 2) == 1);
+
+    geometry2.set_vol_mask(field);
+
+    // After set_vol_mask: level 1 should now be masked (0)
+    auto vmAfter = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("vol_mask"));
+    EXPECT(vmAfter(testNode, 0) == 1);
+    EXPECT(vmAfter(testNode, 1) == 0);
+    EXPECT(vmAfter(testNode, 2) == 1);
   }
 }
 
