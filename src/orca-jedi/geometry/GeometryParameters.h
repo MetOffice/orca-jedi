@@ -73,6 +73,32 @@ class OrcaGeometryParameters : public oops::Parameters {
       "initialise extra fields", this};
   oops::OptionalParameter<LandSeaMaskParameters> landSeaMask{
       "land sea mask", this};
+  oops::OptionalParameter<bool> extraFieldsInit{"initialise extra fields", this};
+
+  oops::Parameter<bool> parallelOutput{"parallel output",
+    "Write NEMO output files using the parallel (MPI + parallel-netCDF) I/O path"
+      " instead of gathering every field onto the root rank. Requires an MPI run."
+      " The default is false (gather-on-root).",
+    false,
+    this};
+  oops::Parameter<int> outputIoRanks{"output io ranks",
+    "Number of ranks to use for parallel output when 'parallel output' is true."
+      " A value of 0 (the default) uses every rank in the communicator. This"
+      " should typically be tuned towards the number of filesystem stripes.",
+    0,
+    this};
+  oops::Parameter<bool> parallelInput{"parallel input",
+    "Read NEMO input files using the parallel (MPI + parallel-netCDF) I/O path"
+      " instead of reading on the root rank and broadcasting. Requires an MPI"
+      " run and a netCDF-4 (HDF5) input file. The default is false"
+      " (read-on-root).",
+    false,
+    this};
+  oops::Parameter<int> inputIoRanks{"input io ranks",
+    "Number of ranks to use for parallel input when 'parallel input' is true."
+      " A value of 0 (the default) uses every rank in the communicator.",
+    0,
+    this};
 };
 
 }  //  namespace orcamodel
