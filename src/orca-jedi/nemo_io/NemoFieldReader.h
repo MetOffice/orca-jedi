@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include <netcdf>
+#include <netcdf.h>
 
 #include <string>
-#include <memory>
 #include <vector>
 
 #include "eckit/filesystem/PathName.h"
@@ -25,6 +24,11 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
   static const std::string classname() {return "orcamodel::NemoFieldReader";}
 
   explicit NemoFieldReader(const eckit::PathName& filename);
+  ~NemoFieldReader();
+  NemoFieldReader(NemoFieldReader&& other) noexcept;
+  NemoFieldReader& operator=(NemoFieldReader&& other) noexcept;
+  NemoFieldReader(const NemoFieldReader&) = delete;
+  NemoFieldReader& operator=(const NemoFieldReader&) = delete;
 
   void read_datetimes();
   std::vector<atlas::PointXY> read_locs() const;
@@ -37,8 +41,8 @@ class NemoFieldReader : private util::ObjectCounter<NemoFieldReader> {
       const size_t nlevels) const;
 
  private:
-  NemoFieldReader() : ncFile() {}
-  std::unique_ptr<netCDF::NcFile> ncFile;
+  NemoFieldReader() = default;
+  int ncid_ = -1;
   std::vector<util::DateTime> datetimes_;
   std::string time_dimvar_name_;
   std::string z_dimvar_name_;

@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include <netcdf>
+#include <netcdf.h>
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,6 +25,9 @@ class NemoFieldWriter {
                     const std::vector<util::DateTime>& datetimes,
                     size_t nx, size_t ny,
                     const std::vector<double>& depths);
+    ~NemoFieldWriter();
+    NemoFieldWriter(const NemoFieldWriter&) = delete;
+    NemoFieldWriter& operator=(const NemoFieldWriter&) = delete;
     void write_dimensions(const std::vector<double>& lats,
                           const std::vector<double>& lons);
     template <typename T> void write_surf_var(std::string varname,
@@ -35,8 +37,8 @@ class NemoFieldWriter {
 
  private:
     void setup_dimensions();
-    NemoFieldWriter(): ncFile() {}
-    std::unique_ptr<netCDF::NcFile> ncFile = nullptr;
+    NemoFieldWriter() = default;
+    int ncid_ = -1;
     std::vector<util::DateTime> datetimes_;
     std::vector<double> depths_;
     size_t nLevels_{1};

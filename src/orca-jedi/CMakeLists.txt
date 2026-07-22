@@ -67,6 +67,6 @@ ecbuild_add_library( TARGET   orcamodel
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
                   #target_link_libraries( orcamodel PUBLIC MPI::MPI_Fortran MPI::MPI_CXX )
-target_link_libraries( orcamodel PUBLIC NetCDF::NetCDF_CXX NetCDF::NetCDF_C MPI::MPI_CXX)
+target_link_libraries( orcamodel PUBLIC NetCDF::NetCDF_C MPI::MPI_CXX)
 target_include_directories(orcamodel PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
                                             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
