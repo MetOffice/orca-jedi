@@ -73,7 +73,6 @@ class OrcaGeometryParameters : public oops::Parameters {
       "initialise extra fields", this};
   oops::OptionalParameter<LandSeaMaskParameters> landSeaMask{
       "land sea mask", this};
-  oops::OptionalParameter<bool> extraFieldsInit{"initialise extra fields", this};
 
   oops::Parameter<bool> parallelOutput{"parallel output",
     "Write NEMO output files using the parallel (MPI + parallel-netCDF) I/O path"

@@ -21,7 +21,7 @@ set( CMAKE_DIRECTORY_LABELS "orca-jedi" )
 ## Dependencies
 find_package( jedicmake QUIET )  # Prefer find modules from jedi-cmake
 
-find_package( NetCDF COMPONENTS C CXX)
+find_package( NetCDF COMPONENTS C)
 ecbuild_debug( "   NetCDF_FEATURES: [${NetCDF_FEATURES}]" )
 
 find_package( MPI REQUIRED COMPONENTS CXX )
