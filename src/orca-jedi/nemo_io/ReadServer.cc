@@ -14,17 +14,28 @@
 #include "atlas/parallel/omp/omp.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "orca-jedi/nemo_io/ParallelNetCDFBackend.h"
+
 namespace orcamodel {
 
 ReadServer::ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
-  const eckit::PathName& file_path, const atlas::Mesh& mesh) :
+  const eckit::PathName& file_path, const atlas::Mesh& mesh,
+  bool parallel_io, size_t n_io_ranks) :
   mesh_(mesh),
-  eckit_timer_(eckit_timer) {
+  eckit_timer_(eckit_timer),
+  parallel_(parallel_io) {
   buffer_indices_ = AtlasIndexToBufferIndexCreator::create_unique(
           mesh.grid().type(), mesh);
 
+  // The root rank always keeps a serial reader for cheap metadata reads
+  // (datetime index, fill value) and small 1-D vertical variables. Only the
+  // large gridded field reads are routed through the parallel pool.
   if (myrank == mpiroot) {
     reader_ = std::make_unique<NemoFieldReader>(file_path);
+  }
+
+  if (parallel_) {
+    this->setup_parallel(file_path, n_io_ranks);
   }
 }
 
@@ -146,6 +157,11 @@ template<class T> void ReadServer::read_var(const std::string& var_name,
   oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::read_var "
     << var_name << std::endl;
 
+  if (parallel_) {
+    this->read_var_parallel<T>(var_name, t_index, field_view);
+    return;
+  }
+
   size_t n_levels = field_view.shape(1);
   size_t size = buffer_indices_->nx() * buffer_indices_->ny();
 
@@ -173,6 +189,69 @@ template void ReadServer::read_var<float>(
     const std::string& var_name,
     const size_t t_index,
     atlas::array::ArrayView<float, 2>& field_view);
+
+// -----------------------------------------------------------------------------
+// Parallel (I/O pool + redistributor + parallel-netCDF backend) read path.
+// -----------------------------------------------------------------------------
+
+void ReadServer::setup_parallel(const eckit::PathName& file_path,
+    size_t n_io_ranks) {
+  oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::setup_parallel" << std::endl;
+  const size_t nx = buffer_indices_->nx();
+  const size_t ny = buffer_indices_->ny();
+
+  // Every local node (including ghost nodes) participates so the scatter fills
+  // the ORCA halo cells that are only reachable through ghost nodes.
+  std::vector<size_t> node_index;
+  std::vector<size_t> global_index;
+  node_index.reserve(mesh_.nodes().size());
+  global_index.reserve(mesh_.nodes().size());
+  for (atlas::idx_t i_node = 0; i_node < mesh_.nodes().size(); ++i_node) {
+    node_index.emplace_back(static_cast<size_t>(i_node));
+    global_index.emplace_back((*buffer_indices_)(i_node));
+  }
+
+  const eckit::mpi::Comm& comm = atlas::mpi::comm();
+  const size_t requested = n_io_ranks == 0 ? comm.size() : n_io_ranks;
+  pool_ = std::make_unique<IoPool>(comm, requested, nx, ny, "orca_read_pool");
+  redist_ = std::make_unique<Redistributor>(comm, *pool_, node_index, global_index);
+
+  if (pool_->is_io_rank()) {
+    backend_ = std::make_unique<ParallelNetCDFReadBackend>(pool_->io_comm(), file_path);
+  }
+}
+
+/// \brief Read a variable one level at a time through the I/O pool and scatter
+///        each level onto the field view. Unlike the root-broadcast path this
+///        also fills ghost nodes (a superset of what the caller needs; the
+///        subsequent halo exchange is a no-op on those points).
+template<class T> void ReadServer::read_var_parallel(const std::string& var_name,
+    const size_t t_index, atlas::array::ArrayView<T, 2>& field_view) {
+  oops::Log::trace() << "State(ORCA)::nemo_io::ReadServer::read_var_parallel "
+    << var_name << std::endl;
+  const bool is_io = pool_->is_io_rank();
+  const Hyperslab slab = is_io ? pool_->decomposition().slab(pool_->io_rank())
+                               : Hyperslab{};
+  const size_t n_levels = field_view.shape(1);
+  const size_t num_nodes = field_view.shape(0);
+
+  std::vector<T> local(num_nodes);
+  for (size_t iLev = 0; iLev < n_levels; ++iLev) {
+    std::vector<T> slab_data;
+    if (is_io) {
+      backend_->read_slab(var_name, t_index, iLev, slab, slab_data);
+    }
+    redist_->from_io<T>(slab_data, local);
+    for (size_t inode = 0; inode < num_nodes; ++inode) {
+      field_view(inode, iLev) = local[inode];
+    }
+    log_status();
+  }
+}
+template void ReadServer::read_var_parallel<double>(const std::string& var_name,
+    const size_t t_index, atlas::array::ArrayView<double, 2>& field_view);
+template void ReadServer::read_var_parallel<float>(const std::string& var_name,
+    const size_t t_index, atlas::array::ArrayView<float, 2>& field_view);
 
 /// \brief Read a vertical variable into an atlas field.
 /// \param var_name The netCDF name of the variable to read.
