@@ -35,6 +35,8 @@ utilities/OrcaModelTraits.h
 utilities/Types.h
 utilities/IOUtils.h
 utilities/IOUtils.cc
+utilities/MaskUtils.h
+utilities/MaskUtils.cc
 utilities/ModelData.h
 utilities/ModelData.cc
 variablechanges/VariableChangeParameters.h
@@ -42,6 +44,10 @@ variablechanges/VariableChange.h
 variablechanges/LinearVariableChange.h
 variablechanges/LinearVariableChange.cc
 variablechanges/LinearVariableChangeParameters.h
+regridder/Regridder.h
+regridder/Regridder.cc
+regridder/SourceExtender.h
+regridder/SourceExtender.cc
 )
 
 
