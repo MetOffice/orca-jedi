@@ -1,0 +1,37 @@
+geometry:
+  grid name: ORCA1_T
+  number levels: 3
+  nemo variables:
+  - name: sea_surface_temperature
+    nemo field name: votemper
+    model space: volume
+
+state:
+  date: 2021-06-30T00:00:00Z
+  state variables: [sea_surface_temperature]
+  nemo field file: regrid_orca1_input.nc
+
+target geometry:
+  grid name: eORCA025_T
+  number levels: 3
+  nemo variables:
+  - name: sea_surface_temperature
+    nemo field name: votemper
+    model space: volume
+  land sea mask:
+    filepath: regrid_eorca025_mask_source.nc
+    variable: t_tot_var
+
+interpolation method:
+  type: unstructured-bilinear-lonlat
+  non_linear: missing-if-all-missing
+
+source extension:
+  flood iterations: 2
+  smooth iterations: 50
+  smooth weight self: 0.35
+  adjacency: cell-based
+  output filepath: regrid_extended_source_diagnostic.nc
+
+output:
+  filepath: regrid_eorca025_output.nc

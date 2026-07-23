@@ -34,8 +34,11 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/variablechanges/VariableChange.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/regridder/Regridder.h"
+#include "orca-jedi/regridder/SourceExtender.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/utilities/IOUtils.h"
+#include "orca-jedi/utilities/MaskUtils.h"
 #include "orca-jedi/utilities/Types.h"
 
 
@@ -110,10 +113,47 @@ State::State(const Geometry & resol, const State & other)
     , params_(other.params_)
     , vars_(other.vars_)
     , time_(other.time_)
-    , stateFields_(other.stateFields_) {
-  ASSERT(other.geom_->grid().uid() == resol.grid().uid());
-  oops::Log::trace() << "State(ORCA)::State resolution change: "
-                     << " copied as there is no change" << std::endl;
+    , stateFields_() {
+  if (other.geom_->grid().uid() == resol.grid().uid()) {
+    // Same grid: just copy fields
+    stateFields_ = other.stateFields_;
+    oops::Log::trace() << "State(ORCA)::State resolution change: "
+                       << " copied as there is no change" << std::endl;
+  } else {
+    // Different grid: regrid from other's geometry to the new geometry
+
+    // 1. Clone source fields so we can extend without modifying the original
+    atlas::FieldSet extendedSource;
+    for (atlas::idx_t i = 0; i < other.stateFields_.size(); ++i) {
+      atlas::Field clone = other.stateFields_[i].clone();
+      extendedSource.add(clone);
+    }
+
+    // 2. Flood-fill source fields to extend data into masked regions
+    SourceExtender extender(other.geom_->mesh(),
+                            other.geom_->functionSpace());
+    extender.extend(extendedSource);
+
+    // 3. Regrid the extended source to the target geometry
+    eckit::LocalConfiguration interpConf;
+    interpConf.set("type", "unstructured-bilinear-lonlat");
+    interpConf.set("non_linear", "missing-if-all-missing");
+
+    Regridder regridder(interpConf,
+                        other.geom_->functionSpace(),
+                        resol.functionSpace());
+
+    stateFields_ = regridder.execute(extendedSource);
+
+    // 4. Re-mask with target geometry's land-sea mask
+    if (resol.extraFields().has("vol_mask")) {
+      applyMaskToFields(resol.extraFields().field("vol_mask"), stateFields_);
+    }
+
+    oops::Log::trace() << "State(ORCA)::State resolution change: "
+                       << "regridded from " << other.geom_->grid().name()
+                       << " to " << resol.grid().name() << std::endl;
+  }
 }
 
 State::State(const oops::Variables & variables, const State & other)

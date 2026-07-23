@@ -35,6 +35,20 @@ class NemoFieldParameters : public oops::Parameters {
     this};
 };
 
+/// \brief Optional parameters for reading a land-sea mask ancillary.
+///
+/// When specified in the geometry configuration, a volumetric field is read
+/// from the given NetCDF file and its missing values are used to populate
+/// the 3D vol_mask extra field. This makes the mask available to any code
+/// that uses the geometry (e.g. State resolution-change constructor).
+class LandSeaMaskParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(LandSeaMaskParameters, oops::Parameters)
+
+ public:
+  oops::RequiredParameter<std::string> filepath {"filepath", this};
+  oops::RequiredParameter<std::string> variable {"variable", this};
+};
+
 class OrcaGeometryParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(OrcaGeometryParameters, oops::Parameters)
 
@@ -55,7 +69,10 @@ class OrcaGeometryParameters : public oops::Parameters {
         " The default will not distribute the data ('serial').",
       "serial",
       this};
-  oops::OptionalParameter<bool> extraFieldsInit{"initialise extra fields", this};
+  oops::OptionalParameter<bool> extraFieldsInit{
+      "initialise extra fields", this};
+  oops::OptionalParameter<LandSeaMaskParameters> landSeaMask{
+      "land sea mask", this};
 };
 
 }  //  namespace orcamodel
