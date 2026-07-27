@@ -83,6 +83,8 @@ class ParallelNetCDFWriteBackend : public FieldWriteBackend {
   size_t ny_ = 0;
   size_t n_levels_ = 1;
   size_t n_times_ = 1;
+  size_t n_io_ranks_ = 1;  ///< Number of I/O ranks (size of the I/O comm).
+  size_t chunk_y_ = 1;     ///< Chunk extent along y (= ceil(ny / n_io_ranks)).
 };
 
 /// \brief FieldReadBackend that reads NEMO-layout netCDF files in parallel.

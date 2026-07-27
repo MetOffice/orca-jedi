@@ -8,6 +8,7 @@
 #include <netcdf.h>
 #include <netcdf_par.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -51,9 +52,20 @@ ParallelNetCDFWriteBackend::ParallelNetCDFWriteBackend(
     size_t nx, size_t ny,
     const std::vector<util::DateTime>& datetimes,
     const std::vector<double>& depths)
-    : nx_(nx), ny_(ny), n_levels_(depths.size()), n_times_(datetimes.size()) {
+    : nx_(nx), ny_(ny), n_levels_(depths.size()), n_times_(datetimes.size()),
+      n_io_ranks_(io_comm.size()) {
   oops::Log::trace() << "orcamodel::ParallelNetCDFWriteBackend::ctor "
                      << path.fullName().asString() << std::endl;
+
+  // Pick the chunk y-extent to match the y-band decomposition: the number of
+  // I/O ranks is clamped to at most ny (a rank cannot own less than one row),
+  // and the tallest band is ceil(ny / ranks). Choosing that as the chunk height
+  // means each "fat" rank writes exactly one whole chunk row per (t, z) slice,
+  // giving contiguous, non-overlapping collective writes that map cleanly onto
+  // Lustre stripes. Rows never split, so chunks always span the full x extent.
+  const size_t p_eff = std::max<size_t>(1,
+      std::min(n_io_ranks_, ny_ == 0 ? size_t{1} : ny_));
+  chunk_y_ = std::max<size_t>(1, (ny_ + p_eff - 1) / p_eff);
 
   // eckit hands out the communicator as a Fortran handle; translate to the C
   // MPI_Comm required by nc_create_par.
@@ -82,6 +94,13 @@ ParallelNetCDFWriteBackend::ParallelNetCDFWriteBackend(
   nc_check(nc_def_var(ncid_, "t", NC_INT, 1, &dim_t_, &t_id), "nc_def_var t");
   nc_check(nc_def_var(ncid_, "z", NC_DOUBLE, 1, &dim_z_, &z_id), "nc_def_var z");
 
+  // Chunk the 2-D coordinate fields on the same y-band as the data variables.
+  size_t coord_chunk[2] = {chunk_y_, nx_};
+  nc_check(nc_def_var_chunking(ncid_, nav_lat_id, NC_CHUNKED, coord_chunk),
+           "nc_def_var_chunking nav_lat");
+  nc_check(nc_def_var_chunking(ncid_, nav_lon_id, NC_CHUNKED, coord_chunk),
+           "nc_def_var_chunking nav_lon");
+
   // Time units attribute (identical string/format to NemoFieldWriter).
   const std::string seconds_since = "seconds since ";
   std::string units_string = "seconds since 1970-01-01 00:00:00";
@@ -108,6 +127,28 @@ ParallelNetCDFWriteBackend::ParallelNetCDFWriteBackend(
     }
     nc_check(nc_put_var_int(ncid_, t_id, t_values.data()), "nc_put_var t");
     nc_check(nc_put_var_double(ncid_, z_id, depths.data()), "nc_put_var z");
+
+    // Report the chunk geometry so it can be matched to Lustre striping. The
+    // horizontal footprint (chunk_y * nx) is identical for surface and volume
+    // variables because volume levels are written one at a time (z chunk = 1).
+    const size_t chunk_elems = chunk_y_ * nx_;
+    const size_t f64_bytes = chunk_elems * sizeof(double);
+    const size_t f32_bytes = chunk_elems * sizeof(float);
+    // Lustre stripe size must be a multiple of 64 KiB; round the f64 chunk up
+    // to the next whole MiB for a safe, ready-to-use suggestion.
+    const size_t stripe_mib = (f64_bytes + (size_t{1} << 20) - 1) >> 20;
+    oops::Log::info()
+        << "orcamodel::ParallelNetCDFWriteBackend: parallel output chunking\n"
+        << "  output file        : " << path.fullName().asString() << "\n"
+        << "  I/O ranks          : " << n_io_ranks_ << "\n"
+        << "  global grid (ny,nx): (" << ny_ << ", " << nx_ << ")\n"
+        << "  surface chunk shape: {t=1, y=" << chunk_y_ << ", x=" << nx_ << "}\n"
+        << "  volume chunk shape : {t=1, z=1, y=" << chunk_y_ << ", x=" << nx_
+        << "}\n"
+        << "  chunk footprint    : " << chunk_elems << " elements = "
+        << f64_bytes << " B (f64) / " << f32_bytes << " B (f32)\n"
+        << "  suggested striping : lfs setstripe -c " << n_io_ranks_
+        << " -S " << stripe_mib << "M <output-dir>" << std::endl;
   }
 }
 
@@ -130,6 +171,9 @@ int ParallelNetCDFWriteBackend::ensure_surf_var(const std::string& var_name,
   nc_check(nc_redef(ncid_), "ensure_surf_var redef " + var_name);
   nc_check(nc_def_var(ncid_, var_name.c_str(), nc_type, 3, dims, &varid),
            "ensure_surf_var def " + var_name);
+  size_t chunk[3] = {1, chunk_y_, nx_};
+  nc_check(nc_def_var_chunking(ncid_, varid, NC_CHUNKED, chunk),
+           "ensure_surf_var chunking " + var_name);
   set_fill(ncid_, varid, nc_type);
   nc_check(nc_enddef(ncid_), "ensure_surf_var enddef " + var_name);
   nc_check(nc_var_par_access(ncid_, varid, NC_COLLECTIVE),
@@ -149,6 +193,9 @@ int ParallelNetCDFWriteBackend::ensure_vol_var(const std::string& var_name,
   nc_check(nc_redef(ncid_), "ensure_vol_var redef " + var_name);
   nc_check(nc_def_var(ncid_, var_name.c_str(), nc_type, 4, dims, &varid),
            "ensure_vol_var def " + var_name);
+  size_t chunk[4] = {1, 1, chunk_y_, nx_};
+  nc_check(nc_def_var_chunking(ncid_, varid, NC_CHUNKED, chunk),
+           "ensure_vol_var chunking " + var_name);
   set_fill(ncid_, varid, nc_type);
   nc_check(nc_enddef(ncid_), "ensure_vol_var enddef " + var_name);
   nc_check(nc_var_par_access(ncid_, varid, NC_COLLECTIVE),
