@@ -27,9 +27,18 @@ namespace orcamodel {
 /// interpolation method:
 ///   type: finite-element
 ///   non_linear: missing-if-all-missing
+///   cache path: /scratch/regrid/orca025_to_L90   # optional; see below
 /// target grid:
 ///   name: L90
 /// \endcode
+///
+/// \note If "cache path" is set, the interpolation matrix is written to disk on
+///   first construction and reloaded on subsequent runs, skipping the (often
+///   dominant) matrix-build cost. The stored file is keyed by MPI size and rank
+///   because the matrix maps the local source partition to the local target
+///   partition, so a cache is only reused for a matching decomposition. Only
+///   matrix-based interpolation methods (e.g. finite-element,
+///   unstructured-bilinear-lonlat) can be cached.
 class Regridder {
  public:
   /// \brief Construct a Regridder from source/target FunctionSpaces and config.
@@ -54,6 +63,16 @@ class Regridder {
   const atlas::Interpolation& interpolation() const { return interpolation_; }
 
  private:
+  /// \brief Build the interpolation object for the given function spaces.
+  ///
+  /// When the configuration contains a "cache path", the interpolation matrix
+  /// is loaded from disk if a matching (per MPI size/rank) cache file exists,
+  /// otherwise it is built and written to disk for reuse on later runs.
+  static atlas::Interpolation makeInterpolation(
+      const eckit::Configuration& conf,
+      const atlas::FunctionSpace& source,
+      const atlas::FunctionSpace& target);
+
   atlas::FunctionSpace sourceFunctionSpace_;
   atlas::FunctionSpace targetFunctionSpace_;
   atlas::Interpolation interpolation_;

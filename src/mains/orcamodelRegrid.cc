@@ -224,13 +224,16 @@ class OrcaModelRegrid : public oops::Application {
 
     // 4. Build regridder
     const eckit::LocalConfiguration interpConf(conf, "interpolation method");
+    geom.log_phase("regrid_setup");   // flush pre-regrid (setup/extension) time
     orcamodel::Regridder regridder(interpConf,
                                    geom.functionSpace(),
                                    targetFunctionSpace);
+    geom.log_phase("regrid_build");   // interpolant construction
     geom.log_status();
 
     // 5. Execute regridding
     atlas::FieldSet result = regridder.execute(sourceFields);
+    geom.log_phase("regrid_apply");   // interpolant application
     geom.log_status();
 
     oops::Log::info() << "Regridding complete. Output fields: "
