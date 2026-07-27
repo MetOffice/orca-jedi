@@ -74,6 +74,13 @@ class ParallelNetCDFWriteBackend : public FieldWriteBackend {
   int ensure_surf_var(const std::string& var_name, int nc_type);
   int ensure_vol_var(const std::string& var_name, int nc_type);
 
+  /// \brief After the file has been closed, reopen it read-only on the I/O
+  ///        communicator and log the MPI-IO hints the library actually applied
+  ///        (notably the real Lustre stripe layout). Lets the requested
+  ///        striping be compared against what the file ended up with. Never
+  ///        throws (called from the destructor); silently skips on any error.
+  void report_effective_hints();
+
   int ncid_ = -1;
   int dim_x_ = -1;
   int dim_y_ = -1;
@@ -85,6 +92,9 @@ class ParallelNetCDFWriteBackend : public FieldWriteBackend {
   size_t n_times_ = 1;
   size_t n_io_ranks_ = 1;  ///< Number of I/O ranks (size of the I/O comm).
   size_t chunk_y_ = 1;     ///< Chunk extent along y (= ceil(ny / n_io_ranks)).
+  size_t requested_stripe_bytes_ = 0;  ///< striping_unit hint requested (bytes).
+  const eckit::mpi::Comm* io_comm_ = nullptr;  ///< I/O comm (for hint readback).
+  eckit::PathName path_;   ///< Output path (for post-write hint readback).
 };
 
 /// \brief FieldReadBackend that reads NEMO-layout netCDF files in parallel.
