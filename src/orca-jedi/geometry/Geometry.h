@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 #include <algorithm>
 
 #include "atlas/field/Field.h"
@@ -81,6 +82,22 @@ class Geometry : public util::Printable,
   FieldDType fieldPrecision(std::string variable_name) const;
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
+  /// \brief Record the wall time since the previous phase checkpoint (or since
+  ///        the Geometry was constructed) against the named phase and log it to
+  ///        oops::Log::info(). Call at the END of a phase; the label names the
+  ///        phase that has just completed. Repeated calls with the same label
+  ///        accumulate, so read/interp/write totals build up across many field
+  ///        reads and writes.
+  void log_phase(const std::string & phase) const;
+  /// \brief Dump the accumulated per-phase wall times (from log_phase), the
+  ///        total elapsed time and the peak resident memory to oops::Log::info().
+  void log_phase_summary() const;
+  /// \brief As log_phase_summary, but reduce each phase's wall time across the
+  ///        supplied communicator with a max (the slowest rank gates collective
+  ///        I/O, so the max is the meaningful figure). This call is COLLECTIVE:
+  ///        every rank in comm must reach it. Call it at a guaranteed-collective
+  ///        point, not from the destructor.
+  void log_phase_summary_reduced(const eckit::mpi::Comm & comm) const;
   void set_gmask(atlas::Field &) const;
   void set_vol_mask(atlas::Field &);
 
@@ -95,6 +112,9 @@ class Geometry : public util::Printable,
   atlas::Mesh mesh_;
   atlas::functionspace::NodeColumns funcSpace_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
+  bool phase_timing_ = false;  ///< Whether per-phase timing/logging is active this run.
+  mutable double phase_mark_ = 0.0;  ///< Elapsed time (s) at the last log_phase checkpoint.
+  mutable std::map<std::string, double> phase_times_;  ///< Accumulated wall time (s) per phase.
   atlas::FieldSet extraFields_;
 };
 

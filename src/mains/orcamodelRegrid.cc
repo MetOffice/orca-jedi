@@ -279,6 +279,13 @@ class OrcaModelRegrid : public oops::Application {
       }
     }
 
+    // Collective per-phase timing summary (max over ranks). Safe here: every
+    // rank reaches the end of execute() together, so the reduction cannot hang.
+    // Source geometry holds the read/setup buckets; the target geometry (when
+    // an ORCA target is used) holds the write/interp buckets, so summarise both.
+    geom.log_phase_summary_reduced(getComm());
+    if (targetGeomPtr) targetGeomPtr->log_phase_summary_reduced(getComm());
+
     return 0;
   }
 

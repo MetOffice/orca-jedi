@@ -40,6 +40,9 @@ void readFieldsFromFile(
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
+    // Attribute any work since the previous checkpoint (setup / interpolation /
+    // other application logic) to the "other" bucket before timing the read.
+    geom.log_phase("other");
     ReadServer nemo_reader(geom.timer(), nemo_field_path, geom.mesh(),
         geom.parallelInput(), geom.inputIoRanks());
 
@@ -83,6 +86,7 @@ void readFieldsFromFile(
       }
     }
 
+    geom.log_phase("read");
     oops::Log::trace() << "orcamodel::readFieldsFromFile:: readFieldsFromFile "
                        << "done" << std::endl;
 }
@@ -160,6 +164,9 @@ void writeFieldsToFile(
     std::vector<double> levels((*fs.begin()).shape(1), 0);
     for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
 
+    // Attribute any work since the previous checkpoint (setup / interpolation /
+    // other application logic) to the "other" bucket before timing the write.
+    geom.log_phase("other");
     WriteServer writer(geom.timer(), nemo_field_path, geom.mesh(), datetimes, levels,
                        geom.distributionType() == "serial",
                        geom.parallelOutput(), geom.outputIoRanks());
@@ -184,6 +191,7 @@ void writeFieldsToFile(
                         std::string("orcamodel::writeFieldsToFile '")
                           + nemoName + "' field data type not recognised.");
     }
+    geom.log_phase("write");
 }
 
 }  // namespace orcamodel

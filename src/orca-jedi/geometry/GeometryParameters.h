@@ -98,6 +98,12 @@ class OrcaGeometryParameters : public oops::Parameters {
       " A value of 0 (the default) uses every rank in the communicator.",
     0,
     this};
+  oops::OptionalParameter<bool> logPhaseTiming{"log phase timing",
+    "Accumulate and log per-phase (read / write / other) wall times to the info"
+      " channel. When left unset, phase timing turns on automatically if"
+      " OOPS_TRACE or OOPS_DEBUG is set and stays off otherwise, so optimised"
+      " runs pay no cost.",
+    this};
 };
 
 }  //  namespace orcamodel

@@ -5,6 +5,8 @@
 #include "orca-jedi/geometry/Geometry.h"
 
 #include <algorithm>
+#include <cstdlib>
+#include <string>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
@@ -30,6 +32,18 @@
 #include "orca-jedi/utilities/Types.h"
 
 namespace {
+/// \brief True when the named environment variable is set to a non-zero value,
+///        mirroring how oops enables its OOPS_TRACE / OOPS_DEBUG channels.
+bool env_flag_enabled(const char * name) {
+  const char * value = ::getenv(name);
+  if (value == nullptr || value[0] == '\0') return false;
+  try {
+    return std::stoi(value) != 0;
+  } catch (const std::exception &) {
+    return true;  // set to a non-numeric, non-empty value -> treat as enabled
+  }
+}
+
 /// \brief Construct an atlas grid given a string containing either a grid name
 ///        or a path to a grid specification yaml configuration file.
 /// \param[in]     grid_specification  string containing the path/name.
@@ -92,6 +106,12 @@ Geometry::Geometry(const eckit::Configuration & config,
     eckit_timer_->start();
     log_status();
     params_.validateAndDeserialize(config);
+
+    // Phase timing follows an explicit config flag if given, otherwise turns on
+    // only when the user already opted into verbose logging via OOPS_TRACE /
+    // OOPS_DEBUG, so optimised runs pay no cost.
+    phase_timing_ = params_.logPhaseTiming.value().value_or(
+        env_flag_enabled("OOPS_TRACE") || env_flag_enabled("OOPS_DEBUG"));
 
     grid_ = construct_grid_from_name(params_.gridName.value());
 
@@ -157,7 +177,11 @@ Geometry::Geometry(const eckit::Configuration & config,
 }
 
 // -----------------------------------------------------------------------------
-Geometry::~Geometry() {}
+Geometry::~Geometry() {
+  // Emit the accumulated read / write / other phase breakdown once per run,
+  // for whichever executable created this Geometry.
+  if (!phase_times_.empty()) log_phase_summary();
+}
 
 const std::string Geometry::nemo_var_name(const std::string std_name) const {
   for (const auto & nemoField : params_.nemoFields.value()) {
@@ -414,6 +438,59 @@ void Geometry::log_status() const {
   oops::Log::trace() << "orcamodel::log_status " << eckit_timer_->elapsed() << " "
       << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
       << " Gb" << std::endl;
+}
+
+void Geometry::log_phase(const std::string & phase) const {
+  if (!phase_timing_) return;
+  const double now = eckit_timer_->elapsed();
+  const double delta = now - phase_mark_;
+  phase_mark_ = now;
+  phase_times_[phase] += delta;
+  oops::Log::info() << "orcamodel::phase '" << phase << "' " << delta
+      << " s (cumulative " << phase_times_[phase] << " s), total " << now << " s, "
+      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
+      << " Gb" << std::endl;
+}
+
+void Geometry::log_phase_summary() const {
+  if (!phase_timing_) return;
+  oops::Log::info() << "orcamodel::phase summary (total " << eckit_timer_->elapsed()
+      << " s, peak "
+      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
+      << " Gb):" << std::endl;
+  for (const auto & phase : phase_times_) {
+    oops::Log::info() << "orcamodel::phase   " << phase.first << " : "
+                      << phase.second << " s" << std::endl;
+  }
+}
+
+void Geometry::log_phase_summary_reduced(const eckit::mpi::Comm & comm) const {
+  if (!phase_timing_) return;
+  // Reduce each phase's accumulated wall time across the communicator with a
+  // max: for collective I/O the slowest rank gates the operation, so the max is
+  // the figure that matters. Every rank runs the same read/write call sequence,
+  // so the phase maps share the same keys in the same (sorted) order and the
+  // element-wise reduction lines up. Collective - all ranks in comm must reach
+  // this point.
+  std::vector<std::string> names;
+  std::vector<double> times;
+  names.reserve(phase_times_.size());
+  times.reserve(phase_times_.size());
+  for (const auto & phase : phase_times_) {
+    names.push_back(phase.first);
+    times.push_back(phase.second);
+  }
+  if (!times.empty()) {
+    comm.allReduceInPlace(times.data(), times.size(), eckit::mpi::max());
+  }
+  oops::Log::info() << "orcamodel::phase summary (max over " << comm.size()
+      << " ranks; local total " << eckit_timer_->elapsed() << " s, local peak "
+      << static_cast<double>(eckit::system::ResourceUsage().maxResidentSetSize()) / 1.0e+9
+      << " Gb):" << std::endl;
+  for (size_t i = 0; i < names.size(); ++i) {
+    oops::Log::info() << "orcamodel::phase   " << names[i] << " : "
+                      << times[i] << " s (max)" << std::endl;
+  }
 }
 
 /// \brief Set gmask extra variable in geometry based on input field missing values.
