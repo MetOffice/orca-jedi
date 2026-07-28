@@ -238,15 +238,19 @@ void WriteServer::setup_parallel(const eckit::PathName& file_path,
   const size_t nx = buffer_indices_->nx();
   const size_t ny = buffer_indices_->ny();
 
-  // Every local node (including ghost nodes) contributes its global buffer index
-  // so that the ORCA halo cells reachable only through ghosts are covered.
+  // Every local node that maps onto the buffer (including in-buffer ghost
+  // nodes) contributes its global buffer index so that the ORCA halo cells
+  // reachable only through ghosts are covered. Out-of-buffer nodes (the
+  // north-fold pivot ghost row) have no file cell and must not write one.
   std::vector<size_t> node_index;
   std::vector<size_t> global_index;
   node_index.reserve(mesh_.nodes().size());
   global_index.reserve(mesh_.nodes().size());
   for (atlas::idx_t i_node = 0; i_node < mesh_.nodes().size(); ++i_node) {
-    node_index.emplace_back(static_cast<size_t>(i_node));
-    global_index.emplace_back((*buffer_indices_)(i_node));
+    const size_t inode = static_cast<size_t>(i_node);
+    if (!buffer_indices_->maps_to_buffer(inode)) continue;
+    node_index.emplace_back(inode);
+    global_index.emplace_back((*buffer_indices_)(inode));
   }
 
   const eckit::mpi::Comm& comm = atlas::mpi::comm();
