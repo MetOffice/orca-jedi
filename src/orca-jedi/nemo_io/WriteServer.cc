@@ -4,7 +4,7 @@
 
 #include "orca-jedi/nemo_io/WriteServer.h"
 
-#include<algorithm>
+#include <algorithm>
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/Logger.h"

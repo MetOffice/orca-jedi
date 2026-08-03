@@ -30,9 +30,9 @@ class NemoFieldWriter {
     NemoFieldWriter& operator=(const NemoFieldWriter&) = delete;
     void write_dimensions(const std::vector<double>& lats,
                           const std::vector<double>& lons);
-    template <typename T> void write_surf_var(std::string varname,
+    template <typename T> void write_surf_var(const std::string& varname,
         const std::vector<T>& var_data, size_t iTime);
-    template <typename T> void write_vol_var(std::string varname,
+    template <typename T> void write_vol_var(const std::string& varname,
         const std::vector<T>& var_data, size_t iTime);
 
  private:
