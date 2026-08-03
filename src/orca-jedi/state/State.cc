@@ -210,7 +210,8 @@ State & State::operator=(const State & rhs) {
   vars_ = rhs.vars_;
   geom_.reset();
   geom_ = rhs.geom_;
-  invalidatePrintCache();
+  printCacheValid_ = rhs.printCacheValid_;
+  printCache_ = rhs.printCache_;
   return *this;
 }
 
