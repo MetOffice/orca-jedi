@@ -37,7 +37,7 @@ class ParallelNetCDFWriteBackend : public FieldWriteBackend {
   /// \param nx, ny     Global grid extents.
   /// \param datetimes  Time coordinate values (defines the t dimension).
   /// \param depths     Depth/level coordinate values (defines the z dimension).
-  ParallelNetCDFWriteBackend(const eckit::mpi::Comm& io_comm,
+  explicit ParallelNetCDFWriteBackend(const eckit::mpi::Comm& io_comm,
                              const eckit::PathName& path,
                              size_t nx, size_t ny,
                              const std::vector<util::DateTime>& datetimes,
@@ -109,7 +109,7 @@ class ParallelNetCDFReadBackend : public FieldReadBackend {
  public:
   /// \param io_comm I/O sub-communicator (from IoPool::io_comm()).
   /// \param path    Input file path (must be a netCDF-4 / HDF5 file).
-  ParallelNetCDFReadBackend(const eckit::mpi::Comm& io_comm,
+  explicit ParallelNetCDFReadBackend(const eckit::mpi::Comm& io_comm,
                             const eckit::PathName& path);
 
   ~ParallelNetCDFReadBackend() override;

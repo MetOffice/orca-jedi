@@ -181,7 +181,7 @@ void NemoFieldWriter::write_dimensions(const std::vector<double>& lats,
     dimension_variables_present_ = true;
 }
 
-template <typename T> void NemoFieldWriter::write_surf_var(std::string varname,
+template <typename T> void NemoFieldWriter::write_surf_var(const std::string& varname,
     const std::vector<T>& var_data, size_t iTime) {
     oops::Log::trace() << "orcamodel::NemoFieldWriter::write_surf_var" << std::endl;
     if (!dimension_variables_present_) {
@@ -208,12 +208,12 @@ template <typename T> void NemoFieldWriter::write_surf_var(std::string varname,
         "write_surf_var put " + varname);
 }
 
-template void NemoFieldWriter::write_surf_var<double>(std::string varname,
+template void NemoFieldWriter::write_surf_var<double>(const std::string& varname,
     const std::vector<double>& var_data, size_t iTime);
-template void NemoFieldWriter::write_surf_var<float>(std::string varname,
+template void NemoFieldWriter::write_surf_var<float>(const std::string& varname,
     const std::vector<float>& var_data, size_t iTime);
 
-template <typename T> void NemoFieldWriter::write_vol_var(std::string varname,
+template <typename T> void NemoFieldWriter::write_vol_var(const std::string& varname,
     const std::vector<T>& var_data, size_t iTime) {
     oops::Log::trace() << "orcamodel::NemoFieldWriter::write_vol_var" << std::endl;
     if (!dimension_variables_present_) {
@@ -240,8 +240,8 @@ template <typename T> void NemoFieldWriter::write_vol_var(std::string varname,
         "write_vol_var put " + varname);
 }
 
-template void NemoFieldWriter::write_vol_var<double>(std::string varname,
+template void NemoFieldWriter::write_vol_var<double>(const std::string& varname,
     const std::vector<double>& var_data, size_t iTime);
-template void NemoFieldWriter::write_vol_var<float>(std::string varname,
+template void NemoFieldWriter::write_vol_var<float>(const std::string& varname,
     const std::vector<float>& var_data, size_t iTime);
 }  // namespace orcamodel
