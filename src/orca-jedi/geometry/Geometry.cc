@@ -139,6 +139,36 @@ Geometry::Geometry(const eckit::Configuration & config,
         mesh_, atlas::option::halo(halo));
     log_status();
 
+    // Per-rank mesh-point breakdown for load-balance / partition-weight tuning.
+    // Split by rank via oops::Log::debug() so a debug run yields, for every
+    // rank, the owned / ghost(halo) / total node counts that drive the
+    // mesh-proportional costs (field read, interpolator construction, memory).
+    // Fit  cost_rank ~= a * owned_nodes + b * obs_nodes  from these plus the
+    // per-rank obs counts logged by orcamodel::Interpolator.
+    {
+      const auto node_ghost =
+          atlas::array::make_view<int32_t, 1>(mesh_.nodes().ghost());
+      const atlas::idx_t nb_nodes = mesh_.nodes().size();
+      std::size_t owned = 0;
+      std::size_t ghost = 0;
+      for (atlas::idx_t jnode = 0; jnode < nb_nodes; ++jnode) {
+        if (node_ghost(jnode)) {
+          ++ghost;
+        } else {
+          ++owned;
+        }
+      }
+      oops::Log::debug() << "[" << comm_.rank() << "] orcamodel::Geometry"
+                         << " partitioner=" << partitioner_name
+                         << " levels=" << n_levels_
+                         << " owned_nodes=" << owned
+                         << " ghost_nodes=" << ghost
+                         << " total_nodes=" << static_cast<std::size_t>(nb_nodes)
+                         << " owned_columns=" << owned
+                         << " owned_gridpoints=" << owned * n_levels_
+                         << std::endl;
+    }
+
     if (params_.extraFieldsInit.value().value_or(false)) {
       // Fill extra geometry fields for BUMP / SABER
       create_extrafields();

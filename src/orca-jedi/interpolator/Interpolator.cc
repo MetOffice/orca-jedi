@@ -5,6 +5,7 @@
 #include "orca-jedi/interpolator/Interpolator.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <ostream>
@@ -107,6 +108,29 @@ Interpolator::Interpolator(const eckit::Configuration& conf,
     oops::Log::debug() << "orcamodel::Interpolator: gmask field not found in geometry"
                        << " and land masking will not be applied" << std::endl;
   }
+
+  // Per-rank observation load for load-balance / partition-weight tuning.
+  // nlocs_ is the number of observation locations LOCAL TO THIS PARTITION IN
+  // SPACE: oops::GetValues assigns each RoundRobin ob to the task whose model
+  // partition contains it (geom.closestTask) and all-to-alls the coordinates,
+  // so this interpolator only ever sees spatially-local obs. It drives
+  // LocalInterpolator::apply, NOT the RoundRobin obs-space ownership count.
+  //
+  // CAVEAT for the offline fit: oops builds ONE interpolator per obs-owning
+  // SOURCE task (GetValues.h: interp_ot_sm_[jtask][jsm]), so this line fires
+  // MULTIPLE times per rank and each nlocs_ is a PARTIAL count (the obs this
+  // rank spatially owns that originated on source task jtask). To get a rank's
+  // total spatial obs load, SUM obs_nlocs over all lines sharing the same
+  // leading [rank] tag. That per-rank sum is the b-term regressor; pair it with
+  // the owned_nodes count from orcamodel::Geometry to fit
+  // cost_rank ~= a * owned_nodes + b * sum(obs_nlocs). Its mean across ranks
+  // equals the RoundRobin count (N_obs/nranks), so max/mean of the per-rank sum
+  // is the interpolation load imbalance directly. Emitted per rank via debug()
+  // with no reduction, to avoid adding a collective that would perturb timing.
+  oops::Log::debug() << "[" << comm_.rank() << "] orcamodel::Interpolator"
+                     << " obs_nlocs=" << nlocs_
+                     << " nranks=" << comm_.size()
+                     << std::endl;
 }
 
 /// \brief Preprocess the data before performing the interpolation.
@@ -128,6 +152,15 @@ void Interpolator::apply(const oops::Variables& vars, const State& state,
   oops::Log::trace() << "[" << comm_.rank()
                      << "] orcamodel::Interpolator::apply starting "
                      << std::endl;
+
+  // Wall-clock the pure interpolation compute for this (spatially-local) obs
+  // subset. This isolates the SPATIAL interpolation cost from the RoundRobin
+  // <-> spatial redistribution comms, which live in oops::GetValues around the
+  // all-to-alls. Summed per rank (over the multiple interpolators oops builds
+  // per source task) and paired with sum(obs_nlocs), this gives the per-rank
+  // interpolation compute vs load, i.e. the interpolation imbalance; the
+  // redistribution price is then (GetValues phase time - sum of these).
+  const auto apply_t0 = std::chrono::steady_clock::now();
 
   const size_t nvars = vars.size();
 
@@ -169,6 +202,15 @@ void Interpolator::apply(const oops::Variables& vars, const State& state,
                           vars[jvar].name() + "' field type not recognised");
   }
   ASSERT(result.size() == nvals);
+
+  const auto apply_t1 = std::chrono::steady_clock::now();
+  const double apply_ms =
+      std::chrono::duration<double, std::milli>(apply_t1 - apply_t0).count();
+  oops::Log::debug() << "[" << comm_.rank() << "] orcamodel::Interpolator::apply"
+                     << " obs_nlocs=" << nlocs_
+                     << " nvars=" << nvars
+                     << " compute_ms=" << apply_ms
+                     << std::endl;
   oops::Log::trace() << "orcamodel::Interpolator::apply done " << std::endl;
 }
 
