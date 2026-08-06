@@ -7,6 +7,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -103,11 +104,10 @@ class State : public util::Printable,
     , stateFields_(fs) {}
 
   const atlas::FieldSet & stateFields() const {return stateFields_;}
-  atlas::FieldSet & stateFields() {return stateFields_;}
+  atlas::FieldSet & stateFields() {invalidatePrintCache(); return stateFields_;}
   void subsetFieldSet(const oops::Variables & variables);
 
   const oops::Variables & variables() const {return vars_;}
-  oops::Variables & variables() {return vars_;}
 
   atlas::Field getField(int) const;
   void toFieldSet(atlas::FieldSet &) const;
@@ -117,11 +117,21 @@ class State : public util::Printable,
  private:
   void setupStateFields();
   void print(std::ostream &) const override;
+  /// \brief Invalidate the cached print() field norms. Must be called whenever
+  ///        the field contents change so that print() recomputes the norms.
+  void invalidatePrintCache() const {printCacheValid_ = false;}
   std::shared_ptr<const Geometry> geom_;
   OrcaStateParameters params_;
   oops::Variables vars_;
   util::DateTime time_;
   atlas::FieldSet stateFields_;
+  /// \brief Cache of the last print() field norms and whether it is still valid.
+  ///        Only the (expensive) field norm values are cached; they are
+  ///        formatted and streamed live on every call so the output inherits
+  ///        the format state of the output stream. The valid time and variables
+  ///        header lines are cheap and are likewise printed live on every call.
+  mutable bool printCacheValid_ = false;
+  mutable std::vector<std::pair<std::string, double>> printCacheNorms_;
 };
 // -----------------------------------------------------------------------------
 
