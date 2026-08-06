@@ -359,8 +359,9 @@ void State::print(std::ostream & os) const {
     for (atlas::Field field : stateFields_) {
       std::string fieldName = field.name();
       double norm_val = 0;
-      oops::Log::trace() << "State(ORCA)::print '" << fieldName << "' type "
-                         << field.datatype().str() << std::endl;
+      oops::Log::trace() << "State(ORCA)::print calculating norm for '"
+                         << fieldName << "' with type " << field.datatype().str()
+                         << std::endl;
 
       const auto addField = [&](auto typeVal) {
         using T = decltype(typeVal);
