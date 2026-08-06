@@ -4,6 +4,7 @@
 
 #include <math.h>
 
+#include <cmath>
 #include <string>
 #include <memory>
 #include <vector>
@@ -196,6 +197,7 @@ void State::subsetFieldSet(const oops::Variables & variables) {
     stateFields_.add(subset[variable]);
   }
   vars_ = variables;
+  invalidatePrintCache();
   oops::Log::trace() << "State(ORCA)::subsetFieldSet complete" << std::endl;
 }
 
@@ -208,6 +210,8 @@ State & State::operator=(const State & rhs) {
   vars_ = rhs.vars_;
   geom_.reset();
   geom_ = rhs.geom_;
+  printCacheValid_ = rhs.printCacheValid_;
+  printCacheNorms_ = rhs.printCacheNorms_;
   return *this;
 }
 
@@ -256,6 +260,7 @@ State & State::operator+=(const Increment & dx) {
   }
 
   oops::Log::trace() << "State(ORCA)::add increment done" << std::endl;
+  invalidatePrintCache();
   return *this;
 }
 
@@ -278,6 +283,7 @@ void State::read(const OrcaStateParameters & params) {
   std::string nemo_file_name = params.nemoFieldFile.value();
   readFieldsFromFile(nemo_file_name, *geom_, validTime(), "background",
       stateFields_);
+  invalidatePrintCache();
   oops::Log::trace() << "State(ORCA)::read done" << std::endl;
 }
 
@@ -320,6 +326,7 @@ void State::setupStateFields() {
       geom_->log_status();
     }
   }
+  invalidatePrintCache();
 }
 
 void State::write(const OrcaStateParameters & params) const {
@@ -336,27 +343,44 @@ void State::print(std::ostream & os) const {
   oops::Log::trace() << "State(ORCA)::print starting" << std::endl;
   geom_->log_status();
 
+  // The valid time and variables lines are cheap, so print them live to always
+  // reflect the current time (which may be mutated via the non-const accessors).
   os << std::endl << " Model state valid at time: " << validTime() << std::endl;
   os << std::string(4, ' ') << vars_ <<  std::endl;
   os << std::string(4, ' ') << "atlas field norms:" << std::endl;
-  for (atlas::Field field : stateFields_) {
-    std::string fieldName = field.name();
-    double norm_val = 0;
-    oops::Log::trace() << "State(ORCA)::print '" << fieldName << "' type "
-                       << field.datatype().str() << std::endl;
 
-    const auto addField = [&](auto typeVal) {
-      using T = decltype(typeVal);
-      norm_val = norm<T>(fieldName);
-    };
+  // The field norms require (potentially MPI-reduced) computation over every
+  // field, so cache the values and only recompute them when the field contents
+  // change.
+  if (!printCacheValid_) {
+    std::vector<std::pair<std::string, double>> norms;
+    norms.reserve(stateFields_.size());
+    for (atlas::Field field : stateFields_) {
+      std::string fieldName = field.name();
+      double norm_val = 0;
+      oops::Log::trace() << "State(ORCA)::print calculating norm for '"
+                         << fieldName << "' with type " << field.datatype().str()
+                         << std::endl;
 
-    ApplyForFieldType(addField,
-                      geom_->fieldPrecision(fieldName),
-                      std::string("State(ORCA)::print '")
-                      + fieldName + "' field type not recognised");
+      const auto addField = [&](auto typeVal) {
+        using T = decltype(typeVal);
+        norm_val = norm<T>(fieldName);
+      };
 
-    os << std::string(8, ' ') << fieldName << ": " << std::setprecision(5)
-       << norm_val << std::endl;
+      ApplyForFieldType(addField,
+                        geom_->fieldPrecision(fieldName),
+                        std::string("State(ORCA)::print '")
+                        + fieldName + "' field type not recognised");
+
+      norms.emplace_back(std::move(fieldName), norm_val);
+    }
+    printCacheNorms_ = std::move(norms);
+    printCacheValid_ = true;
+  }
+
+  for (const auto & fieldNorm : printCacheNorms_) {
+    os << std::string(8, ' ') << fieldNorm.first << ": " << std::setprecision(5)
+       << fieldNorm.second << std::endl;
   }
 
   oops::Log::trace() << "State(ORCA)::print done" << std::endl;
@@ -390,6 +414,7 @@ void State::zero() {
                       + fieldName + "' field type not recognised");
   }
 
+  invalidatePrintCache();
   oops::Log::trace() << "State(ORCA)::zero done" << std::endl;
 }
 
@@ -400,18 +425,32 @@ template<class T> double State::norm(const std::string & field_name) const {
       geom_->mesh().nodes().ghost());
   double squares = 0;
   double valid_points = 0;
+  double masked_points = 0;
+  double nonfinite_points = 0;
+  double total_points = 0;
   atlas_omp_parallel {
     atlas::field::MissingValue mv(stateFields_[field_name]);
     bool has_mv = static_cast<bool>(mv);
     double squares_TP = 0;
     size_t valid_points_TP = 0;
+    size_t masked_points_TP = 0;
+    size_t nonfinite_points_TP = 0;
+    size_t total_points_TP = 0;
     atlas::idx_t num_h_locs = field_view.shape(0);
     atlas::idx_t num_levels = field_view.shape(1);
     atlas_omp_for(atlas::idx_t j = 0; j < num_h_locs; ++j) {
       if (!ghost(j)) {
         for (atlas::idx_t k = 0; k < num_levels; ++k) {
+          ++total_points_TP;
           T pointValue = field_view(j, k);
-          if (!has_mv || (has_mv && !mv(pointValue))) {
+          if (has_mv && mv(pointValue)) {
+            // Point flagged as missing by atlas: exclude from the norm.
+            ++masked_points_TP;
+          } else if (!std::isfinite(pointValue)) {
+            // A non-finite value that is not flagged as missing indicates
+            // corrupt input data; count it here and abort after the reduction.
+            ++nonfinite_points_TP;
+          } else {
             squares_TP += pointValue*pointValue;
             ++valid_points_TP;
           }
@@ -421,25 +460,53 @@ template<class T> double State::norm(const std::string & field_name) const {
     atlas_omp_critical {
         squares += squares_TP;
         valid_points += valid_points_TP;
+        masked_points += masked_points_TP;
+        nonfinite_points += nonfinite_points_TP;
+        total_points += total_points_TP;
     }
   }
 
-  // serial distributions have the entire model grid on each MPI rank
-  if (geom_->distributionType() == "serial") {
-    double local_norm = 0;
-    // prevent divide by zero when there are no valid model points on this
-    // MPI rank
-    if (valid_points) {
-      local_norm = std::sqrt(squares/valid_points);
-    }
-    return local_norm;
+  // Serial distributions have the entire model grid on each MPI rank, so no
+  // reduction is required. For other distributions accumulate the counts and
+  // sum of squares across all ranks.
+  const bool serial = (geom_->distributionType() == "serial");
+  if (!serial) {
+    geom_->getComm().allReduceInPlace(squares, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(valid_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(masked_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(nonfinite_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(total_points, eckit::mpi::sum());
   }
 
+  // Abort on any non-finite (NaN/Inf) data that is not flagged as missing: this
+  // is considered an error in the input. The check is performed *after* the
+  // collective reduction so that every MPI rank throws together and no rank is
+  // left waiting in a subsequent collective call.
+  if (nonfinite_points > 0) {
+    std::ostringstream msg;
+    msg << classname() << "::norm '" << field_name << "' contains "
+        << static_cast<size_t>(nonfinite_points)
+        << " non-finite (NaN or Inf) value(s) that are not flagged as missing;"
+        << " this indicates corrupt input data. Point counts (non-ghost):"
+        << " valid = " << static_cast<size_t>(valid_points)
+        << ", masked (missing) = " << static_cast<size_t>(masked_points)
+        << ", non-finite = " << static_cast<size_t>(nonfinite_points)
+        << ", total = " << static_cast<size_t>(total_points) << ".";
+    throw eckit::UserError(msg.str(), Here());
+  }
 
-  // Accumulate values across MPI ranks.
-  geom_->getComm().allReduceInPlace(squares, eckit::mpi::sum());
-  geom_->getComm().allReduceInPlace(valid_points, eckit::mpi::sum());
+  // Sanity check: every non-ghost point must be accounted for as exactly one of
+  // valid, masked (missing) or non-finite.
+  ASSERT(valid_points + masked_points + nonfinite_points == total_points);
 
+  oops::Log::debug() << classname() << "::norm '" << field_name
+                     << "': valid = " << static_cast<size_t>(valid_points)
+                     << ", masked (missing) = "
+                     << static_cast<size_t>(masked_points)
+                     << ", total (non-ghost) = "
+                     << static_cast<size_t>(total_points) << std::endl;
+
+  // Prevent divide by zero when there are no valid model points.
   if (valid_points) {
     return std::sqrt(squares/valid_points);
   }
