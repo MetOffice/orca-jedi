@@ -304,6 +304,82 @@ CASE("test basic geometry") {
     EXPECT(allOcean);
   }
 
+  SECTION("test set_volume_mask_from_bitmask marks land by value") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    // Explicit bitmask field: 1 = ocean, 0 = land (NEMO tmask convention).
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("tmask")
+            | atlas::option::levels(3));
+    auto fview = atlas::array::make_view<double, 2>(field);
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    atlas::idx_t oceanNode = -1;
+    atlas::idx_t landNode = -1;
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      const bool isGhost = ghost(j) != 0;
+      // Make even owned nodes ocean, odd owned nodes land at level 0.
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 1.0; }
+      if (!isGhost && (j % 2 == 1)) {
+        fview(j, 0) = 0.0;  // land at surface
+        if (landNode < 0) landNode = j;
+      } else if (!isGhost && oceanNode < 0) {
+        oceanNode = j;
+      }
+    }
+    EXPECT(oceanNode >= 0);
+    EXPECT(landNode >= 0);
+
+    // land value defaults to 0.
+    geometry2.set_volume_mask_from_bitmask(field);
+
+    EXPECT(geometry2.extraFields().has("volume_mask"));
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    EXPECT(vm(oceanNode, 0) == 1);
+    EXPECT(vm(landNode, 0) == 0);
+    EXPECT(vm(landNode, 1) == 1);  // only surface flagged land
+  }
+
+  SECTION("test set_volume_mask_from_bitmask honours land value") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    // Inverted convention: 1 = land, 2 = ocean. land value = 1.
+    atlas::Field field =
+        geometry2.functionSpace().createField<float>(
+            atlas::option::name("mask")
+            | atlas::option::levels(3));
+    auto fview = atlas::array::make_view<float, 2>(field);
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    atlas::idx_t landNode = -1;
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 2.0f; }  // ocean
+      if (ghost(j) == 0 && landNode < 0) {
+        landNode = j;
+        fview(j, 2) = 1.0f;  // land at deepest level
+      }
+    }
+    EXPECT(landNode >= 0);
+
+    geometry2.set_volume_mask_from_bitmask(field, 1.0);
+
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    EXPECT(vm(landNode, 0) == 1);
+    EXPECT(vm(landNode, 1) == 1);
+    EXPECT(vm(landNode, 2) == 0);  // masked where value == land value (1)
+  }
+
   SECTION("test volume_mask halo exchange propagates to ghost nodes") {
     // Mask every owned node at level 0. After the internal haloExchange, every
     // node (including ghost/halo nodes, which mirror owned nodes) must be

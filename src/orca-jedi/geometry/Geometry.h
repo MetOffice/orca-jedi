@@ -76,8 +76,10 @@ class Geometry : public util::Printable,
   void log_status() const;
   void set_gmask(atlas::Field &) const;
   void set_volume_mask(atlas::Field &);
+  void set_volume_mask_from_bitmask(atlas::Field &, double landValue = 0.0);
 
  private:
+  atlas::Field ensure_volume_mask();
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;

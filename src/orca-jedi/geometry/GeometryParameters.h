@@ -37,16 +37,30 @@ class NemoFieldParameters : public oops::Parameters {
 
 /// \brief Optional parameters for reading a land-sea mask ancillary.
 ///
-/// When specified in the geometry configuration, a volumetric field is read
-/// from the given NetCDF file and its missing values are used to populate
-/// the 3D volume_mask extra field. This makes the mask available to any code
-/// that uses the geometry (e.g. State resolution-change constructor).
+/// When specified in the geometry configuration, a field is read from the
+/// given NetCDF file and used to populate the 3D volume_mask extra field. Two
+/// modes are supported via "type":
+///   - "missing value" (default): the field is a data field and its missing
+///     values define the land points.
+///   - "bitmask": the field is an explicit land-sea mask; entries approximately
+///     equal to "land value" (default 0) are land, all others are ocean.
+/// This makes the mask available to any code that uses the geometry
+/// (e.g. State resolution-change constructor).
 class LandSeaMaskParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(LandSeaMaskParameters, oops::Parameters)
 
  public:
   oops::RequiredParameter<std::string> filepath {"filepath", this};
   oops::RequiredParameter<std::string> variable {"variable", this};
+  oops::Parameter<std::string> type {"type",
+    "How to derive the mask from the variable: 'missing value' (mask where the"
+    " field is missing, the default) or 'bitmask' (use the field values"
+    " directly).",
+    "missing value", this};
+  oops::Parameter<double> landValue {"land value",
+    "For type 'bitmask', field values approximately equal to this are treated"
+    " as land (masked). Default 0.",
+    0.0, this};
 };
 
 class OrcaGeometryParameters : public oops::Parameters {
