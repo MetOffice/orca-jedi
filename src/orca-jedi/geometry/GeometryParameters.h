@@ -39,7 +39,7 @@ class NemoFieldParameters : public oops::Parameters {
 ///
 /// When specified in the geometry configuration, a volumetric field is read
 /// from the given NetCDF file and its missing values are used to populate
-/// the 3D vol_mask extra field. This makes the mask available to any code
+/// the 3D volume_mask extra field. This makes the mask available to any code
 /// that uses the geometry (e.g. State resolution-change constructor).
 class LandSeaMaskParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(LandSeaMaskParameters, oops::Parameters)
