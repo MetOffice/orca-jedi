@@ -92,21 +92,25 @@ ecbuild_add_test( TARGET orcajedi_hofx3D_prof_2var
                   COMMAND orcamodel_hofx3D.x )
 
 ecbuild_add_test( TARGET orcajedi_3DVar_sic
+                  MPI 2
                   OMP 1
                   ARGS testinput/3dvar_sic.yaml
                   COMMAND orcamodel_3DVar.x )
 
 ecbuild_add_test( TARGET orcajedi_3DVar_sic_identity
+                  MPI 2
                   OMP 1
                   ARGS testinput/3dvar_sic_identity.yaml
                   COMMAND orcamodel_3DVar.x )
 
 ecbuild_add_test( TARGET orcajedi_Dirac
+                  MPI 2
                   OMP 1
                   ARGS testinput/dirac.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
                   
 ecbuild_add_test( TARGET orcajedi_bump_nicas_setup
+                  MPI 2
                   OMP 1
                   ARGS testinput/bump_nicas_setup.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )

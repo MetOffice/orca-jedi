@@ -15,6 +15,7 @@ cost function:
           data directory: Data
           files prefix: dirac_bump_nicas/orca2
           overriding nicas file: orca2_nicas
+          parallel netcdf: true
         drivers:
           multivariate strategy: univariate
           read local nicas: true
@@ -55,7 +56,7 @@ cost function:
         model space: surface
         field precision: double
       - name: sea_surface_temperature
-        nemo field name: votemper
+        nemo field name: votemperh
         model space: surface
         field precision: double
       - name: sea_water_potential_temperature
@@ -70,6 +71,7 @@ cost function:
     grid name: ORCA2_T
     number levels: 10
     initialise extra fields: true
+    partitioner: checkerboard 
   background:
     date: 2021-06-29T12:00:00Z
     state variables: [ ice_area_fraction ]

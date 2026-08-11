@@ -30,6 +30,7 @@ cost function:
     grid name: ORCA2_T
     number levels: 10
     initialise extra fields: true
+    partitioner: checkerboard
   background:
     date: 2021-06-29T12:00:00Z
     state variables: [ ice_area_fraction ]

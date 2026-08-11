@@ -10,6 +10,7 @@ background error:
       io:
         data directory: testoutput
         files prefix: orca2
+        parallel netcdf: true
       drivers:
         compute covariance: false
         compute correlation: false
@@ -59,6 +60,7 @@ geometry:
   grid name: ORCA2_T
   number levels: 10
   initialise extra fields: true
+  partitioner: checkerboard
 
 test:
   reference filename: testoutput/test_bump_nicas.ref
