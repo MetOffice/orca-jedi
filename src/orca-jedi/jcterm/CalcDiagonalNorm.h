@@ -5,7 +5,7 @@
 #pragma once
 
 #include "eckit/config/Configuration.h"
-#include "oops/util/abor1_cpp.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
@@ -20,7 +20,7 @@ class CalcDiagonalNorm {
                    Increment &,
                    Increment &,
                    const eckit::Configuration &) {
-    ABORT("CalcDiagonalNorm::CalcDiagonalNorm not implemented.");
+    throw eckit::NotImplemented(Here());
   }
 };
 
