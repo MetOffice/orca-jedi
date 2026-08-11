@@ -9,6 +9,7 @@
 #include "atlas/array/MakeView.h"
 #include "atlas/array/DataType.h"
 #include "atlas/field/MissingValue.h"
+#include "atlas/parallel/omp/omp.h"
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/Logger.h"
@@ -53,8 +54,9 @@ void applyMaskToFields(
       ASSERT(field_view.shape(0) == mask_view.shape(0));
 
       if (maskLevels == 1) {
-        // Surface mask: broadcast level 0 to all field levels
-        for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        // Surface mask: broadcast level 0 to all field levels.
+        // Each j writes distinct field_view(j, k); mask is read-only.
+        atlas_omp_parallel_for(atlas::idx_t j = 0; j < nNodes; ++j) {
           if (mask_view(j, 0) == 0) {
             for (atlas::idx_t k = 0; k < nLevels; ++k) {
               field_view(j, k) = fill;
@@ -62,9 +64,9 @@ void applyMaskToFields(
           }
         }
       } else {
-        // Volumetric mask: apply per-level
+        // Volumetric mask: apply per-level.
         const atlas::idx_t levelsToMask = std::min(nLevels, maskLevels);
-        for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        atlas_omp_parallel_for(atlas::idx_t j = 0; j < nNodes; ++j) {
           for (atlas::idx_t k = 0; k < levelsToMask; ++k) {
             if (mask_view(j, k) == 0) {
               field_view(j, k) = fill;

@@ -14,6 +14,7 @@
 #include "atlas/mesh/Nodes.h"
 #include "atlas/mesh/actions/BuildEdges.h"
 #include "atlas/mesh/actions/BuildNode2CellConnectivity.h"
+#include "atlas/parallel/omp/omp.h"
 
 #include "eckit/exception/Exceptions.h"
 
@@ -34,7 +35,9 @@ std::vector<std::vector<atlas::idx_t>> buildCellBasedAdjacency(
   const atlas::idx_t nNodes = mesh.nodes().size();
 
   std::vector<std::vector<atlas::idx_t>> adj(nNodes);
-  for (atlas::idx_t jnode = 0; jnode < nNodes; ++jnode) {
+  // Each iteration builds an independent, pre-allocated adj[jnode] from a
+  // thread-local set, reading only const connectivity: safe to parallelise.
+  atlas_omp_parallel_for(atlas::idx_t jnode = 0; jnode < nNodes; ++jnode) {
     std::set<atlas::idx_t> neighbours;
     for (atlas::idx_t jc = 0; jc < node2cell.cols(jnode); ++jc) {
       atlas::idx_t icell = node2cell(jnode, jc);
@@ -63,7 +66,9 @@ std::vector<std::vector<atlas::idx_t>> buildEdgeBasedAdjacency(
   const atlas::idx_t nNodes = mesh.nodes().size();
 
   std::vector<std::vector<atlas::idx_t>> adj(nNodes);
-  for (atlas::idx_t jnode = 0; jnode < nNodes; ++jnode) {
+  // Each iteration builds an independent, pre-allocated adj[jnode] from a
+  // thread-local set, reading only const connectivity: safe to parallelise.
+  atlas_omp_parallel_for(atlas::idx_t jnode = 0; jnode < nNodes; ++jnode) {
     std::set<atlas::idx_t> neighbours;
     for (atlas::idx_t je = 0; je < node2edge.cols(jnode); ++je) {
       atlas::idx_t iedge = node2edge(jnode, je);
@@ -254,7 +259,10 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
 
     for (int iter = 0; iter < nSmoothIterations_; ++iter) {
       for (atlas::idx_t k = 0; k < nLevels; ++k) {
-        for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        // Compute pass writes only tmp[j] (distinct per j); all reads of the
+        // field view and the bool masks are read-only, so this is safe to
+        // parallelise over nodes.
+        atlas_omp_parallel_for(atlas::idx_t j = 0; j < nNodes; ++j) {
           if (ghost(j)) continue;             // ghost nodes via haloExchange
           if (!wasFlooded[k][j]) continue;  // only smooth flooded cells
 
@@ -274,8 +282,8 @@ void SourceExtender::extendTyped(atlas::Field& field) const {
             tmp[j] = view(j, k);
           }
         }
-        // Apply smoothed values
-        for (atlas::idx_t j = 0; j < nNodes; ++j) {
+        // Apply smoothed values: each j writes a distinct view(j, k).
+        atlas_omp_parallel_for(atlas::idx_t j = 0; j < nNodes; ++j) {
           if (wasFlooded[k][j]) {
             view(j, k) = tmp[j];
           }
