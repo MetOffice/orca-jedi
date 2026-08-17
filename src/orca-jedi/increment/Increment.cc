@@ -3,6 +3,7 @@
  */
 
 #include <cstddef>
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -531,8 +532,11 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   /// Get the ORCA grid and compute total width (including halos); prepare storage for flattened node indices.
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
 
-  const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-  const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
+  // const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+  // const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
+
+  const int nx = orcaGrid.nx();
+  const int ny = orcaGrid.ny() ;
 
   // Global bounds checks (not local field.shape(0) for distributed meshes)
   std::cout << "Global bounds: nx=" << nx << ", ny=" << ny << std::endl;
@@ -595,21 +599,44 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   }
 
   for (int i = 0; i < ndir; ++i) {
-  int found_global = found_local[i];
-  std::cout << "dirac target " << i << " found_local = " << found_local[i] << std::endl;
-  geom_->getComm().allReduceInPlace(found_global, eckit::mpi::sum());
-  std::cout << "dirac target after allReduce(sum) " << i << " found_global = " << found_global << std::endl;
-  if (found_global != 1) {
-    std::ostringstream err;
-    err << classname() << "::dirac target " << i
-        << " resolved to " << found_global
-        << " owner nodes (expected 1). Check global-index convention.";
-    throw eckit::BadValue(err.str(), Here());
-  }
+    int found_global = found_local[i];
+    std::cout << "dirac target " << i << " found_local = " << found_local[i] << std::endl;
+    geom_->getComm().allReduceInPlace(found_global, eckit::mpi::sum());
+    std::cout << "dirac target after allReduce(sum) " << i << " found_global = " << found_global << std::endl;
+    if (found_global != 1) {
+      std::ostringstream err;
+      err << classname() << "::dirac target " << i
+          << " resolved to " << found_global
+          << " owner nodes (expected 1). Check global-index convention.";
+      throw eckit::BadValue(err.str(), Here());
+    }
   }
 
-  // Synchronize ghost copies after owner writes.
+  // Synchronize ghost copies after owner writes. - this fills in missing values at edges of domain with one of the MPI ranks (ghost nodes)
   // incrementFields_.haloExchange();
+
+  // Optional: write out debug file showing which rank owns which nodes - for Dirac test
+  atlas::FieldSet rank_debug = incrementFields_.clone();
+  const int rank = geom_->getComm().rank();
+  
+  std::cout << "Rank " << rank << std::endl;
+  
+  for (atlas::Field field : rank_debug) {
+    auto view = atlas::array::make_view<double, 2>(field);
+    for (atlas::idx_t jnode = 0; jnode < field.shape(0); ++jnode) {
+      for (atlas::idx_t level = 0; level < field.shape(1); ++level) {
+        if (ghost(jnode)) {
+          view(jnode, level) = -1.0;
+        } else {
+          view(jnode, level) = static_cast<double>(rank);
+        }
+      }
+    }
+    field.set_dirty();
+  }
+
+  std::cout << "Increment::write rank to filename 'testoutput/rank_debug.nc' " << std::endl;
+  writeFieldsToFile("testoutput/rank_debug.nc", *geom_, time_, rank_debug);
 }
 
 // -----------------------------------------------------------------------------
