@@ -2,6 +2,7 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -395,7 +396,7 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
 /// \brief Dot product self increment object with another increment object
 /// \param dx Other increment object.
 double Increment::dot_product_with(const Increment & dx) const {
-  double zz = 0;
+  double local_dot = 0;
   
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
@@ -423,16 +424,22 @@ double Increment::dot_product_with(const Increment & dx) const {
         if (!ghost(j)) {
           if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
             if (!has_mv2 || (has_mv2 && !mv2(field_view_dx(j, k)))) {
-              zz += field_view(j, k) * field_view_dx(j, k);
+              local_dot += field_view(j, k) * field_view_dx(j, k);
             }
           }
         }
       }
     }
   }
-  std::cout << "orcamodel::Increment::dot_product_with ended :: zz = " << zz << std::endl;
 
-  return zz;
+  double global_dot = local_dot;
+  const bool serial = (geom_->distributionType() == "serial");
+  if (!serial) {
+    std::cout << "orcamodel::Increment::dot_product_with:: before allReduce local_dot = " << global_dot << std::endl;
+    geom_->getComm().allReduceInPlace(global_dot, eckit::mpi::sum());
+    std::cout << "orcamodel::Increment::dot_product_with:: after allReduce global_dot = " << global_dot << std::endl;
+  }
+  return global_dot;
 }
 
 /// \brief Schur product self increment object with another increment object
@@ -524,53 +531,86 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   /// Get the ORCA grid and compute total width (including halos); prepare storage for flattened node indices.
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
 
-  int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-  std::vector<int> jpt;
+  const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+  const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
 
-  // Validate each requested point is within field bounds. 
-  for (atlas::Field field : incrementFields_) {
-    for (int i = 0; i < ndir; i++) {
-      if ( (iydir[i]*nx + ixdir[i] >= field.shape(0)) || (izdir[i] >= field.shape(1)) ) {
-        std::ostringstream err_stream;
-        err_stream << orcamodel::Increment::classname()
-                   << " field shape and delta function location configuration mismatch,"
-                   << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", "
-                   << izdir[i] << ") for field with shape " << field.shape();
-        throw eckit::BadValue(err_stream.str(), Here());
-      }
+  // Global bounds checks (not local field.shape(0) for distributed meshes)
+  std::cout << "Global bounds: nx=" << nx << ", ny=" << ny << std::endl;
+
+  for (int i = 0; i < ndir; ++i) {
+    if (ixdir[i] < 0 || ixdir[i] >= nx || iydir[i] < 0 || iydir[i] >= ny) {
+      std::ostringstream err;
+      err << classname() << "::dirac invalid horizontal index at entry " << i
+          << ": ix=" << ixdir[i] << ", iy=" << iydir[i]
+          << ", valid ix=[0," << (nx-1) << "], iy=[0," << (ny-1) << "]";
+      throw eckit::BadValue(err.str(), Here());
     }
   }
-  /// Convert 2D (iy, ix) to 1D flattened node index; store and log.
-  for (int i = 0; i < ndir; i++) {
-    jpt.push_back(iydir[i]*nx + ixdir[i]);
-    std::cout << "orcamodel::Increment::dirac:: delta function " << i
-              << " at jpt = " << jpt[i]
-              << " kpt = " << izdir[i] << std::endl;
+  
+  // Keep local linearized targets. Atlas global_index is assumed 1-based.
+  std::cout << "Local linearized targets:" << std::endl;
+  std::vector<atlas::gidx_t> target_gidx(ndir);
+  for (int i = 0; i < ndir; ++i) {
+    const atlas::gidx_t lin0 = static_cast<atlas::gidx_t>(iydir[i] * nx + ixdir[i]);
+    target_gidx[i] = lin0 + 1;  // 1-based Atlas global index
+    std::cout << "  target_gidx[" << i << "] = " << target_gidx[i] << std::endl;
   }
 
   /// Get ghost mask
-  auto ghost = atlas::array::make_view<int32_t, 1>(
-      geom_->mesh().nodes().ghost());
+  auto ghost = atlas::array::make_view<int32_t, 1>(geom_->mesh().nodes().ghost());
+  auto gidx  = atlas::array::make_view<atlas::gidx_t, 1>(geom_->mesh().nodes().global_index());
 
   /// zero all fields.
   this->zero();
 
   /// Loop over fields and requested points; set value to 1 only at owned (non-ghost) nodes, leaving others at 0.
 
+  std::vector<int> found_local(ndir, 0);
+  
   for (atlas::Field field : incrementFields_) {
-    std::string fieldName = field.name();
-    std::cout << "orcamodel::Increment::dirac:: field name = " << fieldName
-              << std::endl;
-
     auto field_view = atlas::array::make_view<double, 2>(field);
-    for (int i = 0; i < ndir; i++) {
-      if (!ghost(jpt[i])) {
-        field_view(jpt[i], izdir[i]) = 1;
+
+    // vertical bounds for this field
+    for (int i = 0; i < ndir; ++i) {
+      if (izdir[i] < 0 || izdir[i] >= static_cast<int>(field_view.shape(1))) {
+        std::ostringstream err;
+        err << classname() << "::dirac invalid vertical index at entry " << i
+            << ": iz=" << izdir[i] << ", field '" << field.name()
+            << "' levels=" << field_view.shape(1);
+        throw eckit::BadValue(err.str(), Here());
+      }
+    }
+
+
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      if (ghost(j)) continue;  // only owner writes
+      for (int i = 0; i < ndir; ++i) {
+        if (gidx(j) == target_gidx[i]) {
+          std::cout << "  writing dirac target i = " << i << " at global_index = " << gidx(j) << std::endl;
+          field_view(j, izdir[i]) = 1.0;
+          found_local[i] = 1;
+        }
       }
     }
   }
-}
 
+  for (int i = 0; i < ndir; ++i) {
+  int found_global = found_local[i];
+  std::cout << "dirac target " << i << " found_local = " << found_local[i] << std::endl;
+  geom_->getComm().allReduceInPlace(found_global, eckit::mpi::sum());
+  std::cout << "dirac target after allReduce(sum) " << i << " found_global = " << found_global << std::endl;
+  if (found_global != 1) {
+    std::ostringstream err;
+    err << classname() << "::dirac target " << i
+        << " resolved to " << found_global
+        << " owner nodes (expected 1). Check global-index convention.";
+    throw eckit::BadValue(err.str(), Here());
+  }
+  }
+
+  // Synchronize ghost copies after owner writes.
+  // incrementFields_.haloExchange();
+}
 
 // -----------------------------------------------------------------------------
 /// FieldSet operations
@@ -720,8 +760,12 @@ void Increment::print(std::ostream & os) const {
 /// \brief Calculate some basic statistics of a field in the increment object.
 /// \param fieldName Name of the field to use.
 struct Increment::stats Increment::stats(const std::string & fieldName) const {
+  
   struct Increment::stats s;
   s.valid_points = 0;
+  s.masked_points = 0;
+  s.nonfinite_points = 0;
+  s.total_points = 0;
   s.sumx = 0;
   s.sumx2 = 0;
   s.min = std::numeric_limits<double>::max();
@@ -732,39 +776,112 @@ struct Increment::stats Increment::stats(const std::string & fieldName) const {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  atlas::field::MissingValue mv(incrementFields()[fieldName]);
-  
-  bool has_mv = static_cast<bool>(mv);
-  
-  for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
-    for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+
+  atlas_omp_parallel {
+    atlas::field::MissingValue mv(incrementFields_[fieldName]);
+    bool has_mv = static_cast<bool>(mv);
+    double sumx_TP = 0;
+    double sumx2_TP = 0;
+    double min_TP = std::numeric_limits<double>::max();
+    double max_TP = std::numeric_limits<double>::lowest();
+    size_t valid_points_TP = 0;
+    size_t masked_points_TP = 0;
+    size_t nonfinite_points_TP = 0;
+    size_t total_points_TP = 0;
+    atlas_omp_for(atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
       if (!ghost(j)) {
-        if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-          if (field_view(j, k) > s.max) { s.max=field_view(j, k); }
-          if (field_view(j, k) < s.min) { s.min=field_view(j, k); }
-          s.sumx += field_view(j, k);
-          s.sumx2 += field_view(j, k)*field_view(j, k);
-          ++s.valid_points;
+        for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
+          ++total_points_TP;
+          double pointValue = field_view(j, k);
+          if (has_mv && mv(pointValue)) {
+            // Point flagged as missing by atlas: exclude from the norm.
+            ++masked_points_TP;
+          } else if (!std::isfinite(pointValue)) {
+            // A non-finite value that is not flagged as missing indicates
+            // corrupt input data; count it here and abort after the reduction.
+            ++nonfinite_points_TP;
+          } else {
+            sumx_TP += pointValue;
+            sumx2_TP += pointValue*pointValue;
+            if (pointValue > max_TP) { max_TP = pointValue; }
+            if (pointValue < min_TP) { min_TP = pointValue; }
+            ++valid_points_TP;
+          }
         }
       }
     }
-  }
-  return s;
-}
 
+  atlas_omp_critical {
+      s.sumx += sumx_TP;
+      s.sumx2 += sumx2_TP;
+      s.min = std::min(s.min, min_TP);
+      s.max = std::max(s.max, max_TP);
+      s.valid_points += valid_points_TP;
+      s.masked_points += masked_points_TP;
+      s.nonfinite_points += nonfinite_points_TP;
+      s.total_points += total_points_TP;
+    }
+  }
+
+  // Serial distributions have the entire model grid on each MPI rank, so no
+  // reduction is required. For other distributions accumulate the counts and
+  // sum of squares across all ranks.
+  const bool serial = (geom_->distributionType() == "serial");
+  if (!serial) {
+    geom_->getComm().allReduceInPlace(s.sumx, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(s.sumx2, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(s.min, eckit::mpi::min());
+    geom_->getComm().allReduceInPlace(s.max, eckit::mpi::max());
+    geom_->getComm().allReduceInPlace(s.valid_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(s.masked_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(s.nonfinite_points, eckit::mpi::sum());
+    geom_->getComm().allReduceInPlace(s.total_points, eckit::mpi::sum());
+  }
+
+  // Abort on any non-finite (NaN/Inf) data that is not flagged as missing: this
+  // is considered an error in the input. The check is performed *after* the
+  // collective reduction so that every MPI rank throws together and no rank is
+  // left waiting in a subsequent collective call.
+  if (s.nonfinite_points > 0) {
+    std::ostringstream msg;
+    msg << classname() << "::norm '" << fieldName << "' contains "
+        << static_cast<size_t>(s.nonfinite_points)
+        << " non-finite (NaN or Inf) value(s) that are not flagged as missing;"
+        << " this indicates corrupt input data. Point counts (non-ghost):"
+        << " valid = " << static_cast<size_t>(s.valid_points)
+        << ", masked (missing) = " << static_cast<size_t>(s.masked_points)
+        << ", non-finite = " << static_cast<size_t>(s.nonfinite_points)
+        << ", total = " << static_cast<size_t>(s.total_points) << ".";
+    throw eckit::UserError(msg.str(), Here());
+  }
+
+  // Sanity check: every non-ghost point must be accounted for as exactly one of
+  // valid, masked (missing) or non-finite.
+  ASSERT(s.valid_points + s.masked_points + s.nonfinite_points == s.total_points);
+
+  std::cout << classname() << "::norm '" << fieldName
+                     << "': valid = " << static_cast<size_t>(s.valid_points)
+                     << ", masked (missing) = "
+                     << static_cast<size_t>(s.masked_points)
+                     << ", total (non-ghost) = "
+                     << static_cast<size_t>(s.total_points) << std::endl;
+
+    return s;
+}
+     
 /// \brief Output norm (RMS) of the self increment fields.
 double Increment::norm() const {
-  int valid_points_all = 0;
-  double sumx2all = 0;
+  int valid_points_all_fields = 0;
+  double sumx2_all_fields = 0;
 
   for (atlas::Field field : incrementFields_) {
     std::string fieldName = field.name();
     struct Increment::stats s = Increment::stats(fieldName);
-    sumx2all += s.sumx2;
-    valid_points_all += s.valid_points;
+    sumx2_all_fields += s.sumx2;
+    valid_points_all_fields += s.valid_points;
   }
   // return RMS
-  return std::sqrt(sumx2all/valid_points_all);
+  return std::sqrt(sumx2_all_fields/valid_points_all_fields);
 }
 
 }  // namespace orcamodel

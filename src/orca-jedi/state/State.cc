@@ -227,6 +227,7 @@ State & State::operator+=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
+
   for (int i = 0; i< stateFields_.size(); i++)
   {
     atlas::Field field = stateFields_[i];
@@ -394,6 +395,7 @@ void State::zero() {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
+      
   for (atlas::Field field : stateFields_) {
     std::string fieldName = field.name();
     oops::Log::debug() << "orcamodel::State::zero:: field name = " << fieldName

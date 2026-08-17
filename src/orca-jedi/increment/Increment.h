@@ -89,6 +89,9 @@ class Increment : public util::Printable,
 
   struct stats {
       int valid_points;
+      int masked_points;
+      int nonfinite_points;
+      int total_points;
       double sumx;
       double sumx2;
       double min;
