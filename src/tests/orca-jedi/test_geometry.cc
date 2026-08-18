@@ -304,14 +304,14 @@ CASE("test basic geometry") {
     EXPECT(allOcean);
   }
 
-  SECTION("test set_volume_mask_from_bitmask marks land by value") {
+  SECTION("test set_volume_mask_from_mask_field marks land by value") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
     config2.set("number levels", 3);
     Geometry geometry2(config2, eckit::mpi::comm());
 
-    // Explicit bitmask field: 1 = ocean, 0 = land (NEMO tmask convention).
+    // Explicit mask_field field: 1 = ocean, 0 = land (NEMO tmask convention).
     atlas::Field field =
         geometry2.functionSpace().createField<double>(
             atlas::option::name("tmask")
@@ -336,7 +336,7 @@ CASE("test basic geometry") {
     EXPECT(landNode >= 0);
 
     // land value defaults to 0.
-    geometry2.set_volume_mask_from_bitmask(field);
+    geometry2.set_volume_mask_from_mask_field(field);
 
     EXPECT(geometry2.extraFields().has("volume_mask"));
     auto vm = atlas::array::make_view<int32_t, 2>(
@@ -346,7 +346,7 @@ CASE("test basic geometry") {
     EXPECT(vm(landNode, 1) == 1);  // only surface flagged land
   }
 
-  SECTION("test set_volume_mask_from_bitmask honours land value") {
+  SECTION("test set_volume_mask_from_mask_field honours land value") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
@@ -371,7 +371,7 @@ CASE("test basic geometry") {
     }
     EXPECT(landNode >= 0);
 
-    geometry2.set_volume_mask_from_bitmask(field, 1.0);
+    geometry2.set_volume_mask_from_mask_field(field, 1.0);
 
     auto vm = atlas::array::make_view<int32_t, 2>(
         geometry2.extraFields().field("volume_mask"));

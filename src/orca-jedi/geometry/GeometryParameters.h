@@ -42,7 +42,7 @@ class NemoFieldParameters : public oops::Parameters {
 /// modes are supported via "type":
 ///   - "missing value" (default): the field is a data field and its missing
 ///     values define the land points.
-///   - "bitmask": the field is an explicit land-sea mask; entries approximately
+///   - "mask_field": the field is an explicit land-sea mask; entries approximately
 ///     equal to "land value" (default 0) are land, all others are ocean.
 /// This makes the mask available to any code that uses the geometry
 /// (e.g. State resolution-change constructor).
@@ -54,11 +54,11 @@ class LandSeaMaskParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> variable {"variable", this};
   oops::Parameter<std::string> type {"type",
     "How to derive the mask from the variable: 'missing value' (mask where the"
-    " field is missing, the default) or 'bitmask' (use the field values"
+    " field is missing, the default) or 'mask_field' (use the field values"
     " directly).",
     "missing value", this};
   oops::Parameter<double> landValue {"land value",
-    "For type 'bitmask', field values approximately equal to this are treated"
+    "For type 'mask_field', field values approximately equal to this are treated"
     " as land (masked). Default 0.",
     0.0, this};
 };

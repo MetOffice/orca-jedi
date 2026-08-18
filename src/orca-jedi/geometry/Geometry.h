@@ -76,7 +76,7 @@ class Geometry : public util::Printable,
   void log_status() const;
   void set_gmask(atlas::Field &) const;
   void set_volume_mask(atlas::Field &);
-  void set_volume_mask_from_bitmask(atlas::Field &, double landValue = 0.0);
+  void set_volume_mask_from_mask_field(atlas::Field &, double landValue = 0.0);
 
  private:
   atlas::Field ensure_volume_mask();

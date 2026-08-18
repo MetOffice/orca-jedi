@@ -154,14 +154,14 @@ Geometry::Geometry(const eckit::Configuration & config,
           maskField.metadata().set("missing_value_epsilon", 1e-6);
         }
       }
-      if (maskType == "bitmask") {
-        set_volume_mask_from_bitmask(maskField, lsm.landValue.value());
+      if (maskType == "mask_field") {
+        set_volume_mask_from_mask_field(maskField, lsm.landValue.value());
       } else if (maskType == "missing value") {
         set_volume_mask(maskField);
       } else {
         throw eckit::BadValue(
             "orcamodel::Geometry: unknown 'land sea mask' type '" + maskType
-            + "', expected 'missing value' or 'bitmask'", Here());
+            + "', expected 'missing value' or 'mask_field'", Here());
       }
       oops::Log::info() << "Geometry: volume_mask derived from '"
                         << maskVar << "'" << std::endl;
@@ -569,7 +569,7 @@ void Geometry::set_volume_mask(atlas::Field & field) {
 }
 
 /// \brief Create or update the volume_mask extra field directly from an
-///        explicit land-sea bitmask field.
+///        explicit land-sea mask_field field.
 ///
 /// Unlike set_volume_mask (which derives land from missing values), this reads
 /// the field's values directly: owned (node, level) entries whose value is
@@ -581,9 +581,9 @@ void Geometry::set_volume_mask(atlas::Field & field) {
 /// \param[in] field      A land-sea mask atlas::Field on the same function
 ///                       space (real32 or real64).
 /// \param[in] landValue  The field value that denotes land (default 0).
-void Geometry::set_volume_mask_from_bitmask(atlas::Field & field,
+void Geometry::set_volume_mask_from_mask_field(atlas::Field & field,
                                             double landValue) {
-  oops::Log::debug() << "orcamodel::Geometry setting volume_mask from bitmask "
+  oops::Log::debug() << "orcamodel::Geometry setting volume_mask from mask_field "
                      << "field " << field.name() << " (land value "
                      << landValue << ")" << std::endl;
 
@@ -618,7 +618,7 @@ void Geometry::set_volume_mask_from_bitmask(atlas::Field & field,
     setMask(float{});
   } else {
     oops::Log::warning()
-        << "orcamodel::Geometry::set_volume_mask_from_bitmask: field '"
+        << "orcamodel::Geometry::set_volume_mask_from_mask_field: field '"
         << field.name() << "' has unsupported datatype, skipping" << std::endl;
     return;
   }
