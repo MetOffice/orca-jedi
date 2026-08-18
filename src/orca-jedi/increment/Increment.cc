@@ -527,16 +527,32 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   const std::vector<int> & izdir = params.izdir;
 
   ASSERT(ixdir.size() == iydir.size() && ixdir.size() == izdir.size());
+  std::cout << "orcamodel::Increment::dirac:: delta function ixdir points = " << ixdir.size() << std::endl;
   int ndir = ixdir.size();
+
+  // Validate vertical indices for every field (fields may have different levels)
+  for (atlas::Field field : incrementFields_) {
+    for (int i = 0; i < ndir; ++i) {
+      if (izdir[i] < 0 || izdir[i] >= static_cast<int>(field.shape(1))) {
+        std::ostringstream err;
+        err << classname()
+            << " vertical level and delta function location configuration mismatch,"
+            << " requested izdir[" << i << "]=" << izdir[i]
+            << " for field '" << field.name() << "' with levels=" << field.shape(1);
+        throw eckit::BadValue(err.str(), Here());
+      }
+    }
+  }
 
   /// Get the ORCA grid and compute total width (including halos); prepare storage for flattened node indices.
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
+ 
+  // - this fills in missing values at edges of domain with one of the MPI ranks (ghost nodes)
+  const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
+  const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
 
-  // const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
-  // const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
-
-  const int nx = orcaGrid.nx();
-  const int ny = orcaGrid.ny() ;
+  // const int nx = orcaGrid.nx();
+  // const int ny = orcaGrid.ny() ;
 
   // Global bounds checks (not local field.shape(0) for distributed meshes)
   std::cout << "Global bounds: nx=" << nx << ", ny=" << ny << std::endl;
@@ -544,20 +560,27 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   for (int i = 0; i < ndir; ++i) {
     if (ixdir[i] < 0 || ixdir[i] >= nx || iydir[i] < 0 || iydir[i] >= ny) {
       std::ostringstream err;
-      err << classname() << "::dirac invalid horizontal index at entry " << i
-          << ": ix=" << ixdir[i] << ", iy=" << iydir[i]
-          << ", valid ix=[0," << (nx-1) << "], iy=[0," << (ny-1) << "]";
+      err << classname() 
+          << " global domain and delta function location configuration mismatch,"
+          << " requested point is out of bounds at: (" << iydir[i]*nx + ixdir[i] << ", "
+          << izdir[i] << "), valid ix=[0," << (nx-1) << "], iy=[0," << (ny-1) << "]";
       throw eckit::BadValue(err.str(), Here());
     }
   }
   
-  // Keep local linearized targets. Atlas global_index is assumed 1-based.
-  std::cout << "Local linearized targets:" << std::endl;
+  // Convert 2D (iy, ix) to 1D flattened node index. Atlas global_index is assumed to start at 1 not 0.
+  std::cout << "Local targets:" << std::endl;
   std::vector<atlas::gidx_t> target_gidx(ndir);
+  std::vector<atlas::gidx_t> jpt;
+  jpt.reserve(ndir);
+
   for (int i = 0; i < ndir; ++i) {
-    const atlas::gidx_t lin0 = static_cast<atlas::gidx_t>(iydir[i] * nx + ixdir[i]);
-    target_gidx[i] = lin0 + 1;  // 1-based Atlas global index
+    jpt.push_back(iydir[i]*nx + ixdir[i]);
+    target_gidx[i] = jpt[i] + 1;  // global index
     std::cout << "  target_gidx[" << i << "] = " << target_gidx[i] << std::endl;
+    std::cout << "orcamodel::Increment::dirac:: delta function " << i
+          << " at jpt +1 (global index) = " << jpt[i] + 1  // global index
+          << " kpt = " << izdir[i] << std::endl;
   }
 
   /// Get ghost mask
@@ -568,52 +591,46 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   this->zero();
 
   /// Loop over fields and requested points; set value to 1 only at owned (non-ghost) nodes, leaving others at 0.
+  const bool serial = (geom_->distributionType() == "serial");
 
-  std::vector<int> found_local(ndir, 0);
-  
   for (atlas::Field field : incrementFields_) {
     auto field_view = atlas::array::make_view<double, 2>(field);
-
-    // vertical bounds for this field
-    for (int i = 0; i < ndir; ++i) {
-      if (izdir[i] < 0 || izdir[i] >= static_cast<int>(field_view.shape(1))) {
-        std::ostringstream err;
-        err << classname() << "::dirac invalid vertical index at entry " << i
-            << ": iz=" << izdir[i] << ", field '" << field.name()
-            << "' levels=" << field_view.shape(1);
-        throw eckit::BadValue(err.str(), Here());
-      }
-    }
-
-
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+    std::vector<int> found_local(ndir, 0);
+  
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) { // looop over local j nodes
       if (ghost(j)) continue;  // only owner writes
       for (int i = 0; i < ndir; ++i) {
-        if (gidx(j) == target_gidx[i]) {
-          std::cout << "  writing dirac target i = " << i << " at global_index = " << gidx(j) << std::endl;
-          field_view(j, izdir[i]) = 1.0;
+        if (gidx(j) == target_gidx[i]) { // match local node global index (gidx) to requested target global index (target_gidx)
+          std::cout << "  writing dirac target i = " << i << " at local node global_index = " << gidx(j) << std::endl;
+          field_view(j, izdir[i]) = 1.0; // write local index j
           found_local[i] = 1;
         }
       }
     }
-  }
+    field.set_dirty();
 
-  for (int i = 0; i < ndir; ++i) {
-    int found_global = found_local[i];
-    std::cout << "dirac target " << i << " found_local = " << found_local[i] << std::endl;
-    geom_->getComm().allReduceInPlace(found_global, eckit::mpi::sum());
-    std::cout << "dirac target after allReduce(sum) " << i << " found_global = " << found_global << std::endl;
-    if (found_global != 1) {
-      std::ostringstream err;
-      err << classname() << "::dirac target " << i
-          << " resolved to " << found_global
-          << " owner nodes (expected 1). Check global-index convention.";
-      throw eckit::BadValue(err.str(), Here());
+    // Validate each target is owned exactly once globally.
+    for (int i = 0; i < ndir; ++i) {
+      int found_global = found_local[i];
+      geom_->getComm().allReduceInPlace(found_global, eckit::mpi::sum());
+
+      if (found_global != 1) {
+        std::ostringstream err;
+        err << classname() << "::dirac target " << i
+            << " for field '" << field.name()
+            << "' resolved to " << found_global
+            << " owner nodes, expected 1";
+        throw eckit::BadValue(err.str(), Here());
+      }
     }
   }
 
-  // Synchronize ghost copies after owner writes. - this fills in missing values at edges of domain with one of the MPI ranks (ghost nodes)
-  // incrementFields_.haloExchange();
+  // Synchronize ghost copies after owner writes. 
+  incrementFields_.haloExchange();
+  
+  std::cout << "Increment::write in Dirac function incrementFields_ to filename 'testoutput/dirac_incrementFields.nc' " << std::endl;
+  writeFieldsToFile("testoutput/dirac_incrementFields.nc", *geom_, time_, incrementFields_);
+
 
   // Optional: write out debug file showing which rank owns which nodes - for Dirac test
   atlas::FieldSet rank_debug = incrementFields_.clone();
@@ -634,6 +651,8 @@ void Increment::dirac(const OrcaDiracParameters & params) {
     }
     field.set_dirty();
   }
+
+  rank_debug.haloExchange();
 
   std::cout << "Increment::write rank to filename 'testoutput/rank_debug.nc' " << std::endl;
   writeFieldsToFile("testoutput/rank_debug.nc", *geom_, time_, rank_debug);
