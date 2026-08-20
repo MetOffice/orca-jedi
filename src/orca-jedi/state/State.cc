@@ -227,8 +227,7 @@ State & State::operator+=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< stateFields_.size(); i++)
-  {
+  for (int i = 0; i< stateFields_.size(); i++) {
     atlas::Field field = stateFields_[i];
     atlas::field::MissingValue mv(field);
     bool has_mv = static_cast<bool>(mv);
