@@ -79,13 +79,23 @@ wgtten_h_tru(:) = 1.0  !  Array of values depending on value of ncovtru
 !-----------------------------------------------------------------------
 &nambge_sdv_mod	!  Background error standard deviation(nambge_sdv_mod)
 !-----------------------------------------------------------------------
-nsdv_mod       = 1        ! 
+nsdv_mod       = 0        ! 
 nsdvwgt_mod    = 0        ! 
 nsdvsca_mod    = 0        ! 
-sdv_mod        = 0.01     ! 
+wgt_Bmod(:)    = 1.0
 wgtcst_mod(:)  = 1.0      !  Array of values depending on value of ncovmod
+!sdv_mod        = 0.01     ! 
+sdv_mod         = 1.0
+wgt_mod_var_mod(:) = 1.0   ! 
+wgt_ens_var_mod(:) = 0.0   ! 
+hfac_max_sdv_mod   = 10.0     !  1/K
+rsdv_hyb_parm_mod  = 1.0      ! 
+rsdv_hyb_clim_mod  = 1.0      ! 
 ln_wgtramp_mod = .false.  ! 
 ln_sdvsca_mod  = .false.  ! 
+ln_sdv_hyb_mod     = .false.  ! 
+ln_sdv_sca_hyb_mod = .false.  ! 
+nhybvar_mod        = 0        ! 
 rcoast_mod(:)      = 100.0    ! in km 
 / 
 !-----------------------------------------------------------------------
@@ -101,7 +111,7 @@ rcoast_tru(:)  = 100.0  ! in km
 !-----------------------------------------------------------------------
 &nam_asminc	!    assimilation increments
 !-----------------------------------------------------------------------
-ln_inc = .false.  ! 
+ln_inc = .true.  ! 
 / 
 !-----------------------------------------------------------------------
 &nampar_fil	!  Parameter filtering
@@ -142,6 +152,13 @@ rcoast_loc = 100.0    !  in km
 !-----------------------------------------------------------------------
 &nambge_dif_loc_trf	! 
 !-----------------------------------------------------------------------
+/ 
+!-----------------------------------------------------------------------
+&nambge_eof	! 
+!-----------------------------------------------------------------------
+ln_eof      = .false.
+wgt_Beof    = 0.0      ! 
+ln_read_eof = .false.  ! 
 / 
 !-----------------------------------------------------------------------
 &namens	!     Ensemble estimation
