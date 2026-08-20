@@ -176,7 +176,7 @@ CASE("test basic geometry") {
     EXPECT(extraFieldNames.size() == num_matches);
   }
 
-  SECTION("test vol_mask not created without land sea mask config") {
+  SECTION("test volume_mask not created without land sea mask config") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
@@ -184,10 +184,38 @@ CASE("test basic geometry") {
     config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
     const atlas::FieldSet& ef = geometry2.extraFields();
-    EXPECT(!ef.has("vol_mask"));
+    EXPECT(!ef.has("volume_mask"));
   }
 
-  SECTION("test set_vol_mask creates and populates vol_mask") {
+  SECTION("test volume_mask is independent of BUMP extra fields") {
+    // No "initialise extra fields": BUMP fields (gmask etc.) are not built,
+    // but set_volume_mask must still be able to create volume_mask.
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("test_field")
+            | atlas::option::levels(3));
+    const double fill = -999.0;
+    field.metadata().set("missing_value", fill);
+    field.metadata().set("missing_value_type", "equals");
+    auto fview = atlas::array::make_view<double, 2>(field);
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 1.0; }
+    }
+
+    geometry2.set_volume_mask(field);
+
+    const atlas::FieldSet& ef = geometry2.extraFields();
+    EXPECT(ef.has("volume_mask"));
+    EXPECT(!ef.has("gmask"));
+  }
+
+  SECTION("test set_volume_mask creates and populates volume_mask") {
     eckit::LocalConfiguration config2;
     config2.set("nemo variables", nemo_var_mappings);
     config2.set("grid name", "ORCA2_T");
@@ -195,8 +223,8 @@ CASE("test basic geometry") {
     config2.set("initialise extra fields", true);
     Geometry geometry2(config2, eckit::mpi::comm());
 
-    // vol_mask should not exist yet
-    EXPECT(!geometry2.extraFields().has("vol_mask"));
+    // volume_mask should not exist yet
+    EXPECT(!geometry2.extraFields().has("volume_mask"));
 
     // Create a field with missing values at certain (node,level) entries
     atlas::Field field =
@@ -224,19 +252,176 @@ CASE("test basic geometry") {
     EXPECT(testNode >= 0);
     fview(testNode, 1) = fill;  // mark level 1 as missing
 
-    // set_vol_mask should create and populate the field
-    geometry2.set_vol_mask(field);
+    // set_volume_mask should create and populate the field
+    geometry2.set_volume_mask(field);
 
-    // vol_mask should now exist
-    EXPECT(geometry2.extraFields().has("vol_mask"));
+    // volume_mask should now exist
+    EXPECT(geometry2.extraFields().has("volume_mask"));
     auto vm = atlas::array::make_view<int32_t, 2>(
-        geometry2.extraFields().field("vol_mask"));
+        geometry2.extraFields().field("volume_mask"));
     EXPECT(vm.shape(1) == 3);
 
     // testNode: levels 0,2 should be ocean (1), level 1 masked (0)
     EXPECT(vm(testNode, 0) == 1);
     EXPECT(vm(testNode, 1) == 0);
     EXPECT(vm(testNode, 2) == 1);
+  }
+
+  SECTION("test volume_mask is ocean on ghost nodes when unmasked") {
+    // Halo-aware: with no missing values, every node - including ghost/halo
+    // nodes - must be ocean (1). The old implementation force-zeroed ghost
+    // and edge nodes; the hardened implementation must not.
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("test_field")
+            | atlas::option::levels(3));
+    const double fill = -999.0;
+    field.metadata().set("missing_value", fill);
+    field.metadata().set("missing_value_type", "equals");
+    auto fview = atlas::array::make_view<double, 2>(field);
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 1.0; }
+    }
+
+    geometry2.set_volume_mask(field);
+
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    // Every node ocean, and at least one ghost node exists to exercise the halo.
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    bool sawGhost = false;
+    bool allOcean = true;
+    for (atlas::idx_t j = 0; j < vm.shape(0); ++j) {
+      if (ghost(j)) sawGhost = true;
+      for (atlas::idx_t k = 0; k < vm.shape(1); ++k) {
+        if (vm(j, k) != 1) allOcean = false;
+      }
+    }
+    EXPECT(sawGhost);
+    EXPECT(allOcean);
+  }
+
+  SECTION("test set_volume_mask_from_mask_field marks land by value") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    // Explicit mask_field field: 1 = ocean, 0 = land (NEMO tmask convention).
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("tmask")
+            | atlas::option::levels(3));
+    auto fview = atlas::array::make_view<double, 2>(field);
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    atlas::idx_t oceanNode = -1;
+    atlas::idx_t landNode = -1;
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      const bool isGhost = ghost(j) != 0;
+      // Make even owned nodes ocean, odd owned nodes land at level 0.
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 1.0; }
+      if (!isGhost && (j % 2 == 1)) {
+        fview(j, 0) = 0.0;  // land at surface
+        if (landNode < 0) landNode = j;
+      } else if (!isGhost && oceanNode < 0) {
+        oceanNode = j;
+      }
+    }
+    EXPECT(oceanNode >= 0);
+    EXPECT(landNode >= 0);
+
+    // land value defaults to 0.
+    geometry2.set_volume_mask_from_mask_field(field);
+
+    EXPECT(geometry2.extraFields().has("volume_mask"));
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    EXPECT(vm(oceanNode, 0) == 1);
+    EXPECT(vm(landNode, 0) == 0);
+    EXPECT(vm(landNode, 1) == 1);  // only surface flagged land
+  }
+
+  SECTION("test set_volume_mask_from_mask_field honours land value") {
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    // Inverted convention: 1 = land, 2 = ocean. land value = 1.
+    atlas::Field field =
+        geometry2.functionSpace().createField<float>(
+            atlas::option::name("mask")
+            | atlas::option::levels(3));
+    auto fview = atlas::array::make_view<float, 2>(field);
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    atlas::idx_t landNode = -1;
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) { fview(j, k) = 2.0f; }  // ocean
+      if (ghost(j) == 0 && landNode < 0) {
+        landNode = j;
+        fview(j, 2) = 1.0f;  // land at deepest level
+      }
+    }
+    EXPECT(landNode >= 0);
+
+    geometry2.set_volume_mask_from_mask_field(field, 1.0);
+
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    EXPECT(vm(landNode, 0) == 1);
+    EXPECT(vm(landNode, 1) == 1);
+    EXPECT(vm(landNode, 2) == 0);  // masked where value == land value (1)
+  }
+
+  SECTION("test volume_mask halo exchange propagates to ghost nodes") {
+    // Mask every owned node at level 0. After the internal haloExchange, every
+    // node (including ghost/halo nodes, which mirror owned nodes) must be
+    // masked at level 0.
+    eckit::LocalConfiguration config2;
+    config2.set("nemo variables", nemo_var_mappings);
+    config2.set("grid name", "ORCA2_T");
+    config2.set("number levels", 3);
+    Geometry geometry2(config2, eckit::mpi::comm());
+
+    atlas::Field field =
+        geometry2.functionSpace().createField<double>(
+            atlas::option::name("test_field")
+            | atlas::option::levels(3));
+    const double fill = -999.0;
+    field.metadata().set("missing_value", fill);
+    field.metadata().set("missing_value_type", "equals");
+    auto fview = atlas::array::make_view<double, 2>(field);
+    auto ghost = atlas::array::make_view<int32_t, 1>(
+        geometry2.mesh().nodes().ghost());
+    for (atlas::idx_t j = 0; j < fview.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < 3; ++k) {
+        // Missing at level 0 on owned nodes; ocean elsewhere. Ghost node
+        // field values are intentionally left as-is to prove the mask on
+        // ghosts comes from haloExchange, not from the ghost field values.
+        fview(j, k) = (k == 0 && ghost(j) == 0) ? fill : 1.0;
+      }
+    }
+
+    geometry2.set_volume_mask(field);
+
+    auto vm = atlas::array::make_view<int32_t, 2>(
+        geometry2.extraFields().field("volume_mask"));
+    for (atlas::idx_t j = 0; j < vm.shape(0); ++j) {
+      EXPECT(vm(j, 0) == 0);  // masked on all nodes, incl. ghosts, via halo
+      EXPECT(vm(j, 1) == 1);
+      EXPECT(vm(j, 2) == 1);
+    }
   }
 }
 
