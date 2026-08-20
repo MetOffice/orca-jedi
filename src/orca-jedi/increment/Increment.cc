@@ -547,12 +547,9 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   /// Get the ORCA grid and compute total width (including halos); prepare storage for flattened node indices.
   atlas::OrcaGrid orcaGrid = geom_->mesh().grid();
  
-  // - this fills in missing values at edges of domain with one of the MPI ranks (ghost nodes)
+  // - this wraps the edges of domain 
   const int nx = orcaGrid.nx() + orcaGrid.haloWest() + orcaGrid.haloEast();
   const int ny = orcaGrid.ny() + orcaGrid.haloSouth() + orcaGrid.haloNorth();
-
-  // const int nx = orcaGrid.nx();
-  // const int ny = orcaGrid.ny() ;
 
   // Global bounds checks (not local field.shape(0) for distributed meshes)
   std::cout << "Global bounds: nx=" << nx << ", ny=" << ny << std::endl;
@@ -597,7 +594,7 @@ void Increment::dirac(const OrcaDiracParameters & params) {
     auto field_view = atlas::array::make_view<double, 2>(field);
     std::vector<int> found_local(ndir, 0);
   
-    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) { // looop over local j nodes
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) { // loop over local j nodes
       if (ghost(j)) continue;  // only owner writes
       for (int i = 0; i < ndir; ++i) {
         if (gidx(j) == target_gidx[i]) { // match local node global index (gidx) to requested target global index (target_gidx)
@@ -628,8 +625,9 @@ void Increment::dirac(const OrcaDiracParameters & params) {
   // Synchronize ghost copies after owner writes. 
   incrementFields_.haloExchange();
   
-  std::cout << "Increment::write in Dirac function incrementFields_ to filename 'testoutput/dirac_incrementFields.nc' " << std::endl;
-  writeFieldsToFile("testoutput/dirac_incrementFields.nc", *geom_, time_, incrementFields_);
+
+  // std::cout << "Increment::write in Dirac function incrementFields_ to filename 'testoutput/dirac_incrementFields.nc' " << std::endl;
+  // writeFieldsToFile("testoutput/dirac_incrementFields.nc", *geom_, time_, incrementFields_);
 
 
   // Optional: write out debug file showing which rank owns which nodes - for Dirac test
@@ -649,13 +647,13 @@ void Increment::dirac(const OrcaDiracParameters & params) {
         }
       }
     }
-    field.set_dirty();
+    field.set_dirty(); // marks the field as modified so that haloExchange will work correctly
   }
 
   rank_debug.haloExchange();
 
-  std::cout << "Increment::write rank to filename 'testoutput/rank_debug.nc' " << std::endl;
-  writeFieldsToFile("testoutput/rank_debug.nc", *geom_, time_, rank_debug);
+  // std::cout << "Increment::write rank to filename 'testoutput/rank_debug.nc' " << std::endl;
+  // writeFieldsToFile("testoutput/rank_debug.nc", *geom_, time_, rank_debug);
 }
 
 // -----------------------------------------------------------------------------
