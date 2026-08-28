@@ -75,8 +75,11 @@ class Geometry : public util::Printable,
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
   void set_gmask(atlas::Field &) const;
+  void set_volume_mask(atlas::Field &);
+  void set_volume_mask_from_mask_field(atlas::Field &, double landValue = 0.0);
 
  private:
+  atlas::Field ensure_volume_mask();
   void print(std::ostream &) const;
   const eckit::mpi::Comm & comm_;
   oops::Variables vars_;

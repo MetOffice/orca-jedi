@@ -3,11 +3,14 @@
  */
 
 #include "orca-jedi/geometry/Geometry.h"
-#include "orca-jedi/utilities/Types.h"
+
+#include <algorithm>
+#include <cmath>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
 #include "atlas/field/MissingValue.h"
+#include "atlas/array/DataType.h"  // IWYU pragma: keep
 #include "atlas/functionspace/StructuredColumns.h"  // IWYU pragma: keep
 #include "atlas/mesh.h"  // IWYU pragma: keep
 #include "atlas/meshgenerator.h"  // IWYU pragma: keep
@@ -18,10 +21,14 @@
 #include "eckit/mpi/Comm.h"
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/filesystem/PathName.h"
 #include "eckit/system/ResourceUsage.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+
+#include "orca-jedi/nemo_io/ReadServer.h"
+#include "orca-jedi/utilities/Types.h"
 
 namespace {
 /// \brief Construct an atlas grid given a string containing either a grid name
@@ -116,6 +123,48 @@ Geometry::Geometry(const eckit::Configuration & config,
     if (params_.extraFieldsInit.value().value_or(false)) {
       // Fill extra geometry fields for BUMP / SABER
       create_extrafields();
+    }
+
+    // If a land-sea mask ancillary is configured, create and populate
+    // volume_mask.  This is independent of the BUMP/SABER extra fields: the
+    // mask is added directly to extraFields_ and does not require (nor trigger)
+    // create_extrafields().
+    if (params_.landSeaMask.value()) {
+      const auto& lsm = *params_.landSeaMask.value();
+      const std::string maskFile = lsm.filepath.value();
+      const std::string maskVar = lsm.variable.value();
+      const std::string maskType = lsm.type.value();
+      oops::Log::info() << "Geometry: reading land-sea mask from '"
+                        << maskFile << "' variable '" << maskVar
+                        << "' (type '" << maskType << "')" << std::endl;
+
+      atlas::Field maskField = funcSpace_.createField<float>(
+          atlas::option::name(maskVar)
+          | atlas::option::levels(n_levels_));
+      {
+        ReadServer reader(eckit_timer_,
+                          eckit::PathName(maskFile), mesh_);
+        auto field_view = atlas::array::make_view<float, 2>(maskField);
+        reader.read_var<float>(maskVar, 0, field_view);
+        if (maskType == "missing value") {
+          float fill = reader.read_fillvalue<float>(maskVar);
+          maskField.metadata().set("missing_value", fill);
+          maskField.metadata().set("missing_value_type",
+                                   "approximately-equals");
+          maskField.metadata().set("missing_value_epsilon", 1e-6);
+        }
+      }
+      if (maskType == "mask_field") {
+        set_volume_mask_from_mask_field(maskField, lsm.landValue.value());
+      } else if (maskType == "missing value") {
+        set_volume_mask(maskField);
+      } else {
+        throw eckit::BadValue(
+            "orcamodel::Geometry: unknown 'land sea mask' type '" + maskType
+            + "', expected 'missing value' or 'mask_field'", Here());
+      }
+      oops::Log::info() << "Geometry: volume_mask derived from '"
+                        << maskVar << "'" << std::endl;
     }
 }
 
@@ -250,8 +299,8 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
     }
     if (varSizes[i] == 0) {
       std::stringstream err_stream;
-      err_stream << "orcamodel::Geometry::variableSizes variable name \" ";
-      err_stream << "\" " << vars[i].name() << " not recognised. " << std::endl;
+      err_stream << "orcamodel::Geometry::variableSizes variable name \"";
+      err_stream << vars[i].name() << "\" not recognised. " << std::endl;
       throw eckit::BadValue(err_stream.str(), Here());
     }
   }
@@ -366,7 +415,11 @@ FieldDType Geometry::fieldPrecision(std::string variable_name) const {
 }
 
 void Geometry::print(std::ostream & os) const {
-  os << "Not Implemented";
+  os << "Geometry[grid=" << grid_.name()
+     << ", nodes=" << funcSpace_.size()
+     << ", levels=" << n_levels_
+     << ", partitioner=" << params_.partitioner.value()
+     << "]";
 }
 
 void Geometry::log_status() const {
@@ -420,6 +473,158 @@ void Geometry::set_gmask(atlas::Field & field) const {
                     fieldPrecision(field.name()),
                     std::string("orcamodel::Geometry::set_gmask ")
                     + field.name() + "' field type not recognised");
+  log_status();
+}
+
+/// \brief Lazily create the volume_mask extra field, initialised to ocean (1)
+///        everywhere (including ghost/halo nodes), and return it.
+///
+/// The field has shape (nNodes, nLevels). Ghost/halo nodes are populated to
+/// the correct bathymetry by the haloExchange performed by the callers that
+/// set the mask.
+atlas::Field Geometry::ensure_volume_mask() {
+  if (!extraFields_.has("volume_mask")) {
+    atlas::Field volume_mask = funcSpace_.createField<int32_t>(
+        atlas::option::name("volume_mask")
+        | atlas::option::levels(n_levels_));
+    auto vm = atlas::array::make_view<int32_t, 2>(volume_mask);
+    for (atlas::idx_t j = 0; j < vm.shape(0); ++j) {
+      for (atlas::idx_t k = 0; k < vm.shape(1); ++k) {
+        vm(j, k) = 1;
+      }
+    }
+    extraFields_->add(volume_mask);
+    oops::Log::debug() << "orcamodel::Geometry: created volume_mask ("
+                       << vm.shape(0) << " nodes, "
+                       << vm.shape(1) << " levels)." << std::endl;
+  }
+  return extraFields_.field("volume_mask");
+}
+
+/// \brief Create or update the volume_mask extra field from a volumetric
+///        field's missing values.
+///
+/// volume_mask is created lazily and initialised to 1 (ocean) everywhere -
+/// including ghost/halo nodes.  Then, wherever the input field has a missing
+/// value on an owned node, the corresponding (node, level) entry is set to 0
+/// (masked).  Finally a haloExchange synchronises ghost/halo nodes from their
+/// owning rank so the mask reflects the true bathymetry across MPI halos
+/// (required for interpolation stencils that reach into the halo).  Repeated
+/// calls accumulate masking (the union of land across fields); they never
+/// un-mask a node.
+///
+/// \param[in] field  A volumetric atlas::Field on the same function space.
+///                   Must have missing_value metadata set.
+void Geometry::set_volume_mask(atlas::Field & field) {
+  oops::Log::debug() << "orcamodel::Geometry setting volume_mask from field "
+                     << field.name() << " missing values" << std::endl;
+
+  atlas::Field volume_mask = ensure_volume_mask();
+  auto mask_view = atlas::array::make_view<int32_t, 2>(volume_mask);
+
+  atlas::field::MissingValue mv(field);
+  if (!mv) {
+    oops::Log::warning() << "orcamodel::Geometry::set_volume_mask: field '"
+                         << field.name()
+                         << "' has no missing_value metadata, skipping"
+                         << std::endl;
+    return;
+  }
+
+  const auto ghost = atlas::array::make_view<int32_t, 1>(
+      mesh_.nodes().ghost());
+
+  const auto setMask = [&](auto typeVal) {
+    using T = decltype(typeVal);
+    auto field_view = atlas::array::make_view<T, 2>(field);
+    const atlas::idx_t nLevels = std::min(field_view.shape(1),
+                                          mask_view.shape(1));
+    ASSERT(field_view.shape(0) == mask_view.shape(0));
+    // Only mask owned nodes; ghost nodes are synchronised via haloExchange.
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      if (ghost(j)) continue;
+      for (atlas::idx_t k = 0; k < nLevels; ++k) {
+        if (mv(field_view(j, k))) {
+          mask_view(j, k) = 0;
+        }
+      }
+    }
+  };
+
+  if (field.datatype() == atlas::array::DataType::real64()) {
+    setMask(double{});
+  } else if (field.datatype() == atlas::array::DataType::real32()) {
+    setMask(float{});
+  } else {
+    oops::Log::warning() << "orcamodel::Geometry::set_volume_mask: field '"
+                         << field.name()
+                         << "' has unsupported datatype, skipping"
+                         << std::endl;
+    return;
+  }
+
+  // Synchronise ghost/halo nodes so the mask is halo-consistent.
+  funcSpace_.haloExchange(volume_mask);
+  log_status();
+}
+
+/// \brief Create or update the volume_mask extra field directly from an
+///        explicit land-sea mask_field field.
+///
+/// Unlike set_volume_mask (which derives land from missing values), this reads
+/// the field's values directly: owned (node, level) entries whose value is
+/// approximately equal to \p landValue are treated as land (mask 0); all
+/// others are ocean (mask 1).  As with set_volume_mask, volume_mask is created
+/// lazily, ghost/halo nodes are synchronised via haloExchange, and repeated
+/// calls accumulate masking and never un-mask a node.
+///
+/// \param[in] field      A land-sea mask atlas::Field on the same function
+///                       space (real32 or real64).
+/// \param[in] landValue  The field value that denotes land (default 0).
+void Geometry::set_volume_mask_from_mask_field(atlas::Field & field,
+                                            double landValue) {
+  oops::Log::debug() << "orcamodel::Geometry setting volume_mask from mask_field "
+                     << "field " << field.name() << " (land value "
+                     << landValue << ")" << std::endl;
+
+  atlas::Field volume_mask = ensure_volume_mask();
+  auto mask_view = atlas::array::make_view<int32_t, 2>(volume_mask);
+
+  const auto ghost = atlas::array::make_view<int32_t, 1>(
+      mesh_.nodes().ghost());
+
+  const auto setMask = [&](auto typeVal) {
+    using T = decltype(typeVal);
+    auto field_view = atlas::array::make_view<T, 2>(field);
+    const atlas::idx_t nLevels = std::min(field_view.shape(1),
+                                          mask_view.shape(1));
+    ASSERT(field_view.shape(0) == mask_view.shape(0));
+    const T land = static_cast<T>(landValue);
+    const T half = static_cast<T>(0.5);
+    // Only mask owned nodes; ghost nodes are synchronised via haloExchange.
+    for (atlas::idx_t j = 0; j < field_view.shape(0); ++j) {
+      if (ghost(j)) continue;
+      for (atlas::idx_t k = 0; k < nLevels; ++k) {
+        if (std::abs(field_view(j, k) - land) < half) {
+          mask_view(j, k) = 0;
+        }
+      }
+    }
+  };
+
+  if (field.datatype() == atlas::array::DataType::real64()) {
+    setMask(double{});
+  } else if (field.datatype() == atlas::array::DataType::real32()) {
+    setMask(float{});
+  } else {
+    oops::Log::warning()
+        << "orcamodel::Geometry::set_volume_mask_from_mask_field: field '"
+        << field.name() << "' has unsupported datatype, skipping" << std::endl;
+    return;
+  }
+
+  // Synchronise ghost/halo nodes so the mask is halo-consistent.
+  funcSpace_.haloExchange(volume_mask);
   log_status();
 }
 

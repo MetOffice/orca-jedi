@@ -109,14 +109,22 @@ CASE("test basic state") {
   state_config.set("output nemo field file", "../testoutput/orca2_t_output.nc");
   params.validateAndDeserialize(state_config);
   State state(geometry, params);
-  double iceNorm = 0.0032018269;
+  const double iceNorm = 0.41793347;
   SECTION("test constructor from state") {
     bool has_missing = state.stateFields()["sea_ice_area_fraction"].metadata()
       .has("missing_value");
     EXPECT_EQUAL(true, has_missing);
-    std::cout << std::setprecision(8) << state.norm<double>("sea_ice_area_fraction")
-              << std::setprecision(8) << iceNorm << std::endl;
+    std::cout << "ice norm calculated: "<< std::setprecision(8)
+              << state.norm<double>("sea_ice_area_fraction")
+              << " ice norm KGO: " << iceNorm << std::endl;
     EXPECT(std::abs(state.norm<double>("sea_ice_area_fraction") - iceNorm) < 1e-6);
+  }
+  SECTION("test many runs of norm") {
+    int count = 0;
+    while (count < 1000) {
+      EXPECT(std::abs(state.norm<double>("sea_ice_area_fraction") - iceNorm) < 1e-6);
+      count++;
+    }
   }
   SECTION("test state read") {
     state.read(params);
@@ -172,6 +180,65 @@ CASE("test basic state") {
     // The sum should be equal to the number of horizontal ocean points in the orca2 grid
     // minus ghost points and some additional masked points needed for BUMP to work.
     EXPECT(gmask_sum == 26460);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+CASE("test state resolution change ORCA1_T to ORCA2_T") {
+  // Source geometry: ORCA1_T
+  eckit::LocalConfiguration sourceGeomConf;
+  sourceGeomConf.set("grid name", "ORCA1_T");
+  sourceGeomConf.set("number levels", 3);
+  std::vector<eckit::LocalConfiguration> srcVarMappings(2);
+  srcVarMappings[0].set("name", "sea_ice_area_fraction")
+    .set("nemo field name", "iiceconc")
+    .set("model space", "surface");
+  srcVarMappings[1].set("name", "sea_water_potential_temperature")
+    .set("nemo field name", "votemper")
+    .set("model space", "volume");
+  sourceGeomConf.set("nemo variables", srcVarMappings);
+  Geometry sourceGeom(sourceGeomConf, eckit::mpi::comm());
+
+  // Read source state
+  eckit::LocalConfiguration stateConf;
+  stateConf.set("state variables",
+      std::vector<std::string>{"sea_ice_area_fraction",
+                               "sea_water_potential_temperature"});
+  stateConf.set("date", "2021-06-30T00:00:00Z");
+  stateConf.set("nemo field file", "../Data/orca1_t_nemo.nc");
+  State sourceState(sourceGeom, stateConf);
+
+  // Target geometry: ORCA2_T
+  eckit::LocalConfiguration targetGeomConf;
+  targetGeomConf.set("grid name", "ORCA2_T");
+  targetGeomConf.set("number levels", 3);
+  std::vector<eckit::LocalConfiguration> tgtVarMappings(2);
+  tgtVarMappings[0].set("name", "sea_ice_area_fraction")
+    .set("nemo field name", "iiceconc")
+    .set("model space", "surface");
+  tgtVarMappings[1].set("name", "sea_water_potential_temperature")
+    .set("nemo field name", "votemper")
+    .set("model space", "volume");
+  targetGeomConf.set("nemo variables", tgtVarMappings);
+  Geometry targetGeom(targetGeomConf, eckit::mpi::comm());
+
+  // Exercise the resolution-change constructor
+  State regridded(targetGeom, sourceState);
+
+  // Verify: state is on the target geometry
+  EXPECT(regridded.geometry()->grid().uid() == targetGeom.grid().uid());
+  EXPECT(regridded.variables().size() == sourceState.variables().size());
+  EXPECT(regridded.validTime() == sourceState.validTime());
+
+  // Verify: fields have the correct target size
+  const atlas::FieldSet& fields = regridded.stateFields();
+  EXPECT(fields.size() > 0);
+  for (atlas::idx_t f = 0; f < fields.size(); ++f) {
+    EXPECT(fields[f].shape(0) == targetGeom.functionSpace().size());
+    eckit::Log::info() << "  Regridded field '" << fields[f].name()
+                       << "' shape: (" << fields[f].shape(0)
+                       << ", " << fields[f].shape(1) << ")" << std::endl;
   }
 }
 

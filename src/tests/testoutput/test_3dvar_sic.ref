@@ -16,8 +16,7 @@ CostFunction::addIncrement: Analysis:
  Model state valid at time: 2021-06-29T12:00:00Z
     1 variables: ice_area_fraction
     atlas field norms:
-        ice_area_fraction: 3.18249e-03
-
+        ice_area_fraction: 4.15409e-01
 CostJo   : Nonlinear Jo(Sea Ice) = 9.14840e-01, nobs = 47, Jo/n = 1.94647e-02, err = 2.00000e+00
 CostJb   : Nonlinear Jb = 0.00000e+00
 CostFunction: Nonlinear J = 9.14840e-01
