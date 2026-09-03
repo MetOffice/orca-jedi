@@ -17,10 +17,9 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/interpolator/InterpolatorParameters.h"
 #include "orca-jedi/state/State.h"
+#include "oops/generic/SourceProximityPartitioner.h"
 
 namespace orcamodel {
-class State;
-class Geometry;
 class Increment;
 
 atlas::functionspace::PointCloud atlasObsFuncSpaceFactory(
@@ -52,6 +51,10 @@ class Interpolator : public util::Printable,
   static void preprocess(State& state) { Interpolator::preprocess(state.stateFields()); }
   static void preprocess(Increment& inc) { Interpolator::preprocess(inc.incrementFields()); }
   static void preprocessAD(Increment& inc) { Interpolator::preprocessAD(inc.incrementFields()); }
+
+  static oops::SourceProximityPartitioner makeTargetPartitioner(const Geometry& geom) {
+    return oops::makeSourceProximityPartitioner(geom.functionSpace(), geom.getComm());
+  }
 
  private:
   template <class T>
