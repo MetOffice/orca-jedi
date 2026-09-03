@@ -8,12 +8,13 @@ background error:
         testing: true
       io:
         data directory: Data
-        files prefix: dirac_bump_nicas/orca2
-        overriding nicas file: orca2_nicas
+        files prefix: dirac_my_bump_nicas/orca2
+        overriding nicas file: orca2_my_bump_files_nicas
         parallel netcdf: true
       drivers:
         multivariate strategy: univariate
-        read local nicas: true
+        read global nicas: true
+        #read universe radius: true  # Read calibrated MPI communication lengths
       model:
         do not cross mask boundaries: true
       nicas:
@@ -21,7 +22,9 @@ background error:
         horizontal length-scale:
         - groups: 
           - ice_area_fraction
-          value: 2.0e6
+          # value: 2.0e6
+          value: 1000.0e+3 #works
+          # value: 4000.0e+3 #too large
         vertical length-scale:
         - groups:
           - ice_area_fraction 

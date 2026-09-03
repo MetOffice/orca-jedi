@@ -13,12 +13,12 @@ cost function:
           testing: true
         io:
           data directory: Data
-          files prefix: dirac_bump_nicas/orca2
-          overriding nicas file: orca2_nicas
+          files prefix: dirac_my_bump_nicas/orca2
+          overriding nicas file: orca2_my_bump_files_nicas
           parallel netcdf: true
         drivers:
           multivariate strategy: univariate
-          read local nicas: true
+          read global nicas: true
         model:
           do not cross mask boundaries: true
         nicas:
@@ -26,7 +26,9 @@ cost function:
           horizontal length-scale:
           - groups: 
             - ice_area_fraction
-            value: 2.0e6
+            # value: 2.0e6
+            # value: 4000.0e+3  #too large
+            value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
           vertical length-scale:
           - groups:
             - ice_area_fraction 

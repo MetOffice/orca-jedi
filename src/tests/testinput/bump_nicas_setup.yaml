@@ -3,34 +3,38 @@ background error:
   saber central block:
 #    saber block name: ID
     saber block name: BUMP_NICAS
-    read:
+    calibration:
       general:
         testing: true
-        universe length-scale: 40000.0e3
+        # universe length-scale: 40000.0e3
       io:
         data directory: testoutput
-        files prefix: orca2
-        parallel netcdf: true
+        files prefix: orca2_my_bump_files
       drivers:
         compute covariance: false
         compute correlation: false
-        multivariate strategy: univariate
         compute moments: false
+        multivariate strategy: univariate
         write diagnostics: true
         compute nicas: true
-        write local nicas: true
-        write nicas grids: true
+        write global nicas: true 
+        write local nicas: false #can be removed for 2 MPI tasks     
+        write nicas grids: false #can be removed for 2 MPI tasks         
+        # write universe radius: true #a model file containing length-scales (in m) defining the size of the “known universe” for each MPI task in the domain decomposition
       model:
         do not cross mask boundaries: true
       nicas:
         explicit length-scales: true
-        resolution: 3.0
-#        resolution: 8.0
+        # resolution: 3.0
+        resolution: 8.0 #unitless real number, and it can be understood as the number of points that would be used in a 1D case to discretize the 
+        # Gaspari-Cohn function from its origin to the limit of its support. The function representation is more precise with a larger resolution
         horizontal length-scale:
         - groups: 
           - ice_area_fraction
-          value: 4.0e7
-#          value: 4.0e6
+          # Horizontal lengthscale (in m), single value for var_1, decreasing this slows down the test
+          # value: 4.0e7 #too coarse with 2 MPI tasks, but works with 1 MPI task
+          # value: 4000.0e+3 # lower res grid than 1000.0e+3, length scales are too large
+          value: 1000.0e+3 #works
         vertical length-scale:
         - groups:
           - ice_area_fraction 
