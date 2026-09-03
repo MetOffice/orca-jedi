@@ -10,6 +10,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/interpolator/Interpolator.h"
 #include "orca-jedi/increment/Increment.h"
+#include "orca-jedi/jcterm/CalcDiagonalNorm.h"
 
 #include "orca-jedi/linearmodel/LinearModel.h"
 #include "orca-jedi/model/Model.h"
@@ -28,6 +29,7 @@ struct OrcaModelTraits {
   static std::string nameCovar() {return "ORCAstatic";}
   static std::string nameCovar4D() {return "ORCAstatic";}
 
+  typedef orcamodel::CalcDiagonalNorm          CalcDiagonalNorm;
   typedef orcamodel::ErrorCovariance           Covariance;
   typedef orcamodel::Geometry                  Geometry;
 
