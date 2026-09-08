@@ -27,6 +27,14 @@ nemo_io/NemoFieldReader.cc
 nemo_io/NemoFieldWriter.h
 nemo_io/NemoFieldWriter.cc
 nemo_io/AtlasIndex.h
+nemo_io/SlabDecomposition.h
+nemo_io/IoBackend.h
+nemo_io/IoPool.h
+nemo_io/IoPool.cc
+nemo_io/Redistributor.h
+nemo_io/Redistributor.cc
+nemo_io/ParallelNetCDFBackend.h
+nemo_io/ParallelNetCDFBackend.cc
 nemo_io/ReadServer.h
 nemo_io/ReadServer.cc
 nemo_io/WriteServer.h
@@ -59,6 +67,6 @@ ecbuild_add_library( TARGET   orcamodel
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
                   #target_link_libraries( orcamodel PUBLIC MPI::MPI_Fortran MPI::MPI_CXX )
-target_link_libraries( orcamodel PUBLIC NetCDF::NetCDF_CXX)
+target_link_libraries( orcamodel PUBLIC NetCDF::NetCDF_C MPI::MPI_CXX)
 target_include_directories(orcamodel PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
                                             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
