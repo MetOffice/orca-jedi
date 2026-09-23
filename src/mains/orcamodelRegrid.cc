@@ -68,7 +68,7 @@
 ///   nemo variables:
 ///   - {name: sea_ice_area_fraction, nemo field name: iiceconc, model space: surface}
 ///   - {name: sea_water_potential_temperature, nemo field name: votemper, model space: volume}
-///   land sea mask:                # optional: build 3D vol_mask from ancillary
+///   land sea mask:                # optional: build 3D volume_mask from ancillary
 ///     filepath: path/to/target_ancillary.nc
 ///     variable: votemper          # field whose missing values define land
 /// interpolation method:
@@ -108,7 +108,7 @@
 ///
 /// \note The "land sea mask" section is optional within a geometry config.
 ///   It reads a volumetric field from a NetCDF ancillary on the grid,
-///   derives a 3D land-sea mask (vol_mask) from that field's missing values,
+///   derives a 3D land-sea mask (volume_mask) from that field's missing values,
 ///   and stores it in the geometry's extra fields. When present on the
 ///   target geometry, regridded results are automatically re-masked per
 ///   depth level. This also works in the State resolution-change constructor.
@@ -156,7 +156,7 @@ class OrcaModelRegrid : public oops::Application {
     if (conf.has("target geometry")) {
       // ORCA target: build full geometry (enables writing via NemoFieldWriter)
       // If the target geometry config contains a "land sea mask" section,
-      // the Geometry constructor reads the ancillary and populates vol_mask.
+      // the Geometry constructor reads the ancillary and populates volume_mask.
       eckit::LocalConfiguration targetGeomConf(conf, "target geometry");
       targetGeomPtr = std::make_unique<orcamodel::Geometry>(
           targetGeomConf, getComm());
@@ -247,13 +247,13 @@ class OrcaModelRegrid : public oops::Application {
                         << " datatype=" << f.datatype().str() << std::endl;
     }
 
-    // 5b. Apply target vol_mask if the target geometry has one configured.
-    //     The Geometry constructor reads the ancillary and populates vol_mask
+    // 5b. Apply target volume_mask if the target geometry has one configured.
+    //     The Geometry constructor reads the ancillary and populates volume_mask
     //     when a "land sea mask" section is present in the geometry config.
     if (targetGeomPtr
-        && targetGeomPtr->extraFields().has("vol_mask")) {
+        && targetGeomPtr->extraFields().has("volume_mask")) {
       orcamodel::applyMaskToFields(
-          targetGeomPtr->extraFields().field("vol_mask"), result);
+          targetGeomPtr->extraFields().field("volume_mask"), result);
     }
 
     // 6. Write output
@@ -321,7 +321,7 @@ Configuration sections:
     nemo variables:
     - {name: sea_water_potential_temperature, nemo field name: votemper,
        model space: volume}
-    land sea mask:                 #   Optional: build 3D vol_mask from ancillary
+    land sea mask:                 #   Optional: build 3D volume_mask from ancillary
       filepath: /path/to/ancillary.nc  # NetCDF file on this grid
       variable: votemper           #   Field whose missing values define land
 
@@ -351,7 +351,7 @@ Notes:
     target ocean points whose interpolation stencil falls entirely on source land.
     This is analogous to NEMOVAR's sim_ext module.
   - The 'land sea mask' section can be added to any geometry configuration. It reads
-    a volumetric field from an ancillary file and derives a 3D land-sea mask (vol_mask)
+    a volumetric field from an ancillary file and derives a 3D land-sea mask (volume_mask)
     from its missing values. When present on a target geometry, regridded results are
     automatically re-masked per depth level. This also applies in the State
     resolution-change constructor for JEDI DA workflows.

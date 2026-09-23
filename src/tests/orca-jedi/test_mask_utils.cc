@@ -85,7 +85,7 @@ CASE("test applyMaskToFields volumetric mask per-level") {
   // Create a volumetric mask (nNodes, 3):
   // level 0: all ocean (1), level 1: mask odd nodes, level 2: all masked (0)
   atlas::Field mask = funcSpace.createField<int32_t>(
-      atlas::option::name("vol_mask") | atlas::option::levels(nLevels));
+      atlas::option::name("volume_mask") | atlas::option::levels(nLevels));
   auto mask_view = atlas::array::make_view<int32_t, 2>(mask);
   for (atlas::idx_t j = 0; j < nNodes; ++j) {
     mask_view(j, 0) = 1;                         // level 0: all ocean
@@ -199,7 +199,7 @@ CASE("test applyMaskToFields vol mask with fewer field levels") {
 
   // Volumetric mask with 5 levels
   atlas::Field mask = funcSpace.createField<int32_t>(
-      atlas::option::name("vol_mask") | atlas::option::levels(5));
+      atlas::option::name("volume_mask") | atlas::option::levels(5));
   auto mask_view = atlas::array::make_view<int32_t, 2>(mask);
   for (atlas::idx_t j = 0; j < nNodes; ++j) {
     for (atlas::idx_t k = 0; k < 5; ++k) {

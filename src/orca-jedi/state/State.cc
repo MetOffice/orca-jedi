@@ -147,8 +147,8 @@ State::State(const Geometry & resol, const State & other)
     stateFields_ = regridder.execute(extendedSource);
 
     // 4. Re-mask with target geometry's land-sea mask
-    if (resol.extraFields().has("vol_mask")) {
-      applyMaskToFields(resol.extraFields().field("vol_mask"), stateFields_);
+    if (resol.extraFields().has("volume_mask")) {
+      applyMaskToFields(resol.extraFields().field("volume_mask"), stateFields_);
     }
 
     oops::Log::trace() << "State(ORCA)::State resolution change: "
