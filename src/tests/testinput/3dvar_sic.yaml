@@ -19,6 +19,7 @@ cost function:
         drivers:
           multivariate strategy: univariate
           read global nicas: true
+          # read local nicas: true
         model:
           do not cross mask boundaries: true
         nicas:

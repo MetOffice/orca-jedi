@@ -14,7 +14,7 @@ background error:
       drivers:
         multivariate strategy: univariate
         read global nicas: true
-        #read universe radius: true  # Read calibrated MPI communication lengths
+        # read local nicas: true
       model:
         do not cross mask boundaries: true
       nicas:

@@ -18,8 +18,8 @@ background error:
         write diagnostics: true
         compute nicas: true
         write global nicas: true 
-        write local nicas: false #can be removed for 2 MPI tasks     
-        write nicas grids: false #can be removed for 2 MPI tasks         
+        write local nicas: true #can be removed for 2 MPI tasks     
+        write nicas grids: true #can be removed for 2 MPI tasks         
         # write universe radius: true #a model file containing length-scales (in m) defining the size of the “known universe” for each MPI task in the domain decomposition
       model:
         do not cross mask boundaries: true
