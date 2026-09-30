@@ -12,11 +12,9 @@
 #include "eckit/config/Configuration.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/increment/Increment.h"
 #include "orca-jedi/state/State.h"
 
@@ -28,9 +26,7 @@ class Norm : public util::Printable,
   static const std::string classname() {return "orcamodel::Norm";}
 
 // Constructor, destructor
-  Norm(const Geometry &,
-       const oops::Variables &,
-       const util::DateTime &,
+  Norm(const oops::Variables &,
        const eckit::Configuration &);
   ~Norm();
 

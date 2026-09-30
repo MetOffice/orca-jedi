@@ -11,9 +11,7 @@
 
 namespace orcamodel {
 
-Norm::Norm(const Geometry & resol,
-           const oops::Variables & vars,
-           const util::DateTime & validTime,
+Norm::Norm(const oops::Variables & vars,
            const eckit::Configuration & conf) {
   throw eckit::NotImplemented(Here());
 }
