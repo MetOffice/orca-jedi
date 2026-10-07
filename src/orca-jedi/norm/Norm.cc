@@ -16,8 +16,6 @@ Norm::Norm(const oops::Variables & vars,
   throw eckit::NotImplemented(Here());
 }
 
-Norm::~Norm() {}
-
 void Norm::calculate(const State & xx) {
   throw eckit::NotImplemented(Here());
 }

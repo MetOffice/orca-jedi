@@ -28,7 +28,7 @@ class Norm : public util::Printable,
 // Constructor, destructor
   Norm(const oops::Variables &,
        const eckit::Configuration &);
-  ~Norm();
+  ~Norm() = default;
 
 // Compute values for norm
   void calculate(const State &);
