@@ -27,8 +27,6 @@ cost function:
           horizontal length-scale:
           - groups: 
             - ice_area_fraction
-            # value: 2.0e6
-            # value: 4000.0e+3  #too large
             value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
           vertical length-scale:
           - groups:
@@ -86,12 +84,14 @@ cost function:
         name: Sea Ice
         obsdatain:
           engine:
-            type: H5File
-            obsfile: Data/sic_obs_ideal.nc
+            type: ODB
+            obsfile: Data/hofx_sic_ostia_obs.odb
+            mapping file: testinput/odb_sic_mapping.yaml
+            query file: testinput/odb_sic_query.yaml
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_sic.nc
+            obsfile: testoutput/obsdataout_3dvar_ostia_odb_sic.nc
         simulated variables: [ice_area_fraction]
       get values:
         time interpolation: linear
@@ -104,8 +104,90 @@ cost function:
         name: Composite
         components:
         - name: Identity
+          observation alias file: testinput/test_name_map.yaml
+        - name: BackgroundErrorIdentity
+          observation alias file: testinput/test_name_map.yaml
       obs error:
         covariance model: diagonal
+      obs filters:
+      - filter: Perform Action
+        filter variables:
+        - name: seaIceFraction
+        action:
+          name: assign error
+          error parameter: 0.3162277
+      - filter: RejectList
+        defer to post: true
+        where:
+        - variable:
+            name: ObsValue/seaIceFraction
+          value: is_not_valid
+        actions:
+        - name: set
+          flag: FinalReject
+        - name: set
+          flag: ObNotDefinedReject
+        - name: reject
+      - filter: RejectList
+        defer to post: true
+        where:
+        - variable:
+            name: HofX/seaIceFraction
+          value: is_not_valid
+        actions:
+        - name: set
+          flag: FinalReject
+        - name: set
+          flag: BgNotDefinedReject
+        - name: reject
+      - filter: Bounds Check
+        defer to post: true
+        filter variables:
+        - name: seaIceFraction
+        minvalue: 0.0
+        maxvalue: 1.0
+        actions:
+        - name: set
+          flag: FinalReject
+        - name: set
+          flag: ObOutOfBoundsReject
+        - name: reject
+      - filter: Bounds Check
+        defer to post: true
+        filter variables:
+        - name: HofX/seaIceFraction
+        minvalue: 0.0
+        maxvalue: 1.0
+        actions:
+        - name: set
+          flag: FinalReject
+        - name: set
+          flag: BgOutOfBoundsReject
+        - name: reject
+      - filter: Bayesian Background Check
+        observation alias file: testinput/test_name_map.yaml
+        filter variables:
+        - name: seaIceFraction
+        prob density bad obs: 1.0
+        PGE threshold: 0.5
+        actions:
+        - name: set
+          flag: FinalReject
+        - name: set
+          flag: BayBgCheckReject
+        - name: reject
+      - filter: NEMO Feedback Writer
+        filename: odb_nemo_fdbk_writer_out.nc
+        reference date: 1950-01-01T00:00:00Z
+        variables:
+        - name: seaIceFraction
+          nemo name: ICECONC
+          long name: ice area fraction
+          units: Fraction
+          additional variables:
+            - name: seaIceFraction
+              feedback suffix: Hx
+              ioda group: HofX
 variational:
   minimizer:
     algorithm: DRPCG
@@ -118,7 +200,7 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_sic.nc
+          output path: testoutput/increments_3dvar_odb_sic.nc
           date: 2021-06-30T00:00:00Z
 final:
   diagnostics:
@@ -127,7 +209,7 @@ output:
   date: 2021-06-30T00:00:00Z
   state variables: [ ice_area_fraction ]
   nemo field file: testoutput/3dvar_sic2.nc
-  output nemo field file: testoutput/analysis_3dvar_sic.nc
+  output nemo field file: testoutput/analysis_3dvar_odb_sic.nc
 test:
-  reference filename: testoutput/test_3dvar_sic.ref
-  test output filename: testoutput/test_3dvar_sic.out
+  reference filename: testoutput/test_3dvar_odb_sic.ref
+  test output filename: testoutput/test_3dvar_odb_sic.out

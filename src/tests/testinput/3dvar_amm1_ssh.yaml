@@ -3,7 +3,7 @@ cost function:
   time window:
     begin: '2021-06-29T00:00:00Z'
     length: P1D
-  analysis variables: [ice_area_fraction]
+  analysis variables: [sea_surface_height_anomaly]
   background error:
     covariance model: SABER
     saber central block:
@@ -13,8 +13,8 @@ cost function:
           testing: true
         io:
           data directory: Data
-          files prefix: dirac_my_bump_nicas/orca2
-          overriding nicas file: orca2_my_bump_files_nicas
+          files prefix: dirac_my_bump_nicas/amm1
+          overriding nicas file: amm1_my_bump_files_nicas
           parallel netcdf: true
         drivers:
           multivariate strategy: univariate
@@ -26,13 +26,13 @@ cost function:
           explicit length-scales: true
           horizontal length-scale:
           - groups: 
-            - ice_area_fraction
+            - sea_surface_height_anomaly
             # value: 2.0e6
             # value: 4000.0e+3  #too large
             value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
           vertical length-scale:
           - groups:
-            - ice_area_fraction 
+            - sea_surface_height_anomaly
             value: 10
       msvalr: 1e30
     saber outer blocks:
@@ -42,57 +42,48 @@ cost function:
           testing: true
         io:
           data directory: Data
-          files prefix: orca2
+          files prefix: amm1
         drivers:
           compute variance: true
         variance:
           explicit stddev: true
           stddev:
           - variables:
-            - ice_area_fraction
+            - sea_surface_height_anomaly
             value: 1
       msvalr: 1e30
   geometry: &Geom
     nemo variables:
-      - name: ice_area_fraction
-        nemo field name: iiceconc
+      - name: sea_surface_height_anomaly
+        nemo field name: sossheig
         model space: surface
-        field precision: double
-      - name: sea_surface_temperature
-        nemo field name: votemperh
+      - name: sea_surface_height_anomaly_background_error
+        nemo field name: sossheig
         model space: surface
-        field precision: double
-      - name: sea_water_potential_temperature
-        nemo field name: votemper
-        model space: volume
-        field precision: double
-      - name: ice_area_fraction_background_error
-        nemo field name: sic_tot_var
-        model space: surface
-        variable type: background variance
-        field precision: double
-    grid name: ORCA2_T
-    number levels: 10
+        variable type: background error standard deviation
+    grid name: Data/amm1_atlas_grid_spec.yaml
+    number levels: 1
     initialise extra fields: true
     partitioner: checkerboard 
+    source mesh halo: 1
   background:
     date: 2021-06-29T12:00:00Z
-    state variables: [ ice_area_fraction ]
-    nemo field file: Data/orca2_t_nemo.nc
+    state variables: [ sea_surface_height_anomaly ]
+    nemo field file: Data/amm1_nemo.nc
     set gmask: true
   observations:
     observers:
     - obs space:
-        name: Sea Ice
+        name: Sea Surface Height 
         obsdatain:
           engine:
             type: H5File
-            obsfile: Data/sic_obs_ideal.nc
+            obsfile: Data/hofx_ssh_amm_obs.nc
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_sic.nc
-        simulated variables: [ice_area_fraction]
+            obsfile: testoutput/obsdataout_3dvar_amm1_ssh.nc
+        simulated variables: [seaSurfaceHeightAnomaly]
       get values:
         time interpolation: linear
         atlas-interpolator:
@@ -100,7 +91,7 @@ cost function:
           non_linear: missing-if-any-missing
           max_fraction_elems_to_try: 0.0
           adjoint: true
-      obs operator:
+      obs operator: 
         name: Composite
         components:
         - name: Identity
@@ -118,16 +109,18 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_sic.nc
+          output path: testoutput/increments_3dvar_amm1_ssh.nc
           date: 2021-06-30T00:00:00Z
 final:
   diagnostics:
     departures: oman
 output:
   date: 2021-06-30T00:00:00Z
-  state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_sic2.nc
-  output nemo field file: testoutput/analysis_3dvar_sic.nc
+  state variables: [ sea_surface_height_anomaly ]
+  nemo field file: testoutput/3dvar_amm1_ssh.nc
+  output nemo field file: testoutput/analysis_3dvar_amm1_ssh.nc
 test:
-  reference filename: testoutput/test_3dvar_sic.ref
-  test output filename: testoutput/test_3dvar_sic.out
+  #reference filename: testoutput/test_3dvar_amm1_ssh.ref
+  test output filename: testoutput/test_3dvar_amm1_ssh.out
+  float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
+

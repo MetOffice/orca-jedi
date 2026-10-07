@@ -1,0 +1,74 @@
+background error:
+  covariance model: SABER
+  saber central block:
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    read:
+      general:
+        testing: true
+      io:
+        data directory: Data
+        files prefix: amm1_ssh_my_bump_files
+        overriding nicas file: amm1_ssh_my_bump_files_nicas
+      drivers:
+        multivariate strategy: univariate
+        # read global nicas: true
+        read local nicas: true
+      model:
+        do not cross mask boundaries: true
+      nicas:
+        explicit length-scales: true
+        horizontal length-scale:
+        - groups: 
+          - sea_surface_height_anomaly
+          value: 1000.0e+3 
+        vertical length-scale:
+        - groups:
+          - sea_surface_height_anomaly 
+          value: 10
+      msvalr: 1e30
+  saber outer blocks:
+  - saber block name: BUMP_StdDev
+    read:
+      general:
+        testing: true
+      io:
+        data directory: Data
+        files prefix: amm1_ssh_my_bump_files
+      drivers:
+        compute variance: true
+      variance:
+        explicit stddev: true
+        stddev:
+        - variables:
+          - sea_surface_height_anomaly
+          value: 1
+      msvalr: 1e30
+
+dirac:
+  x indices: [10]
+  y indices: [15]
+  z indices: [0]
+
+geometry:
+  nemo variables:
+    - name: sea_surface_height_anomaly
+      nemo field name: sossheig
+      model space: surface
+    - name: sea_surface_height_anomaly_background_error
+      nemo field name: sossheig
+      model space: surface
+      variable type: background error standard deviation
+  grid name: Data/amm1_atlas_grid_spec.yaml
+  number levels: 10
+  partitioner: checkerboard
+background:
+  date: 2021-06-30T12:00:00Z
+  state variables: [ sea_surface_height_anomaly ]
+  nemo field file: Data/amm1_nemo.nc
+output dirac:
+  date: 2021-06-30T12:00:00Z
+  output path: testoutput/dirac_cov_amm1_ssh_%id%.nc
+test:
+  #reference filename: testoutput/test_dirac_amm1_ssh.ref
+  test output filename: testoutput/test_dirac_amm1_ssh.out

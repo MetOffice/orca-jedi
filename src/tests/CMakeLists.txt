@@ -92,26 +92,87 @@ ecbuild_add_test( TARGET orcajedi_hofx3D_prof_2var
                   COMMAND orcamodel_hofx3D.x )
 
 ecbuild_add_test( TARGET orcajedi_3DVar_sic
-                  MPI 2
+                  MPI 4
                   OMP 1
                   ARGS testinput/3dvar_sic.yaml
                   COMMAND orcamodel_3DVar.x )
 
 ecbuild_add_test( TARGET orcajedi_3DVar_sic_identity
-                  MPI 2
+                  MPI 4
                   OMP 1
                   ARGS testinput/3dvar_sic_identity.yaml
                   COMMAND orcamodel_3DVar.x )
 
+ecbuild_add_test( TARGET orcajedi_3DVar_odb_sic
+                  MPI 4
+                  OMP 1
+                  ARGS testinput/3dvar_odb_sic.yaml
+                  COMMAND orcamodel_3DVar.x )
+
 ecbuild_add_test( TARGET orcajedi_Dirac
-                  MPI 2
+                  MPI 4
                   OMP 1
                   ARGS testinput/dirac.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
                   
 ecbuild_add_test( TARGET orcajedi_bump_nicas_setup
-                  MPI 2
+                  MPI 4
                   OMP 1
                   ARGS testinput/bump_nicas_setup.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
+
+ecbuild_add_test( TARGET orcajedi_3DVar_amm1_ssh
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/3dvar_amm1_ssh.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET orcajedi_Dirac_amm1_ssh
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/dirac_amm1_ssh.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+                  
+ecbuild_add_test( TARGET orcajedi_bump_nicas_grid_setup_amm1_ssh
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/bump_nicas_grid_setup_amm1_ssh.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )                
+
+ecbuild_add_test( TARGET orcajedi_3DVar_orca1_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/3dvar_orca1_sst.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET orcajedi_Dirac_orca1_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/dirac_orca1_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+                  
+ecbuild_add_test( TARGET orcajedi_bump_nicas_grid_setup_orca1_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/bump_nicas_grid_setup_orca1_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )        
+                  
+ecbuild_add_test( TARGET orcajedi_3DVar_orca025_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/3dvar_orca025_sst.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET orcajedi_Dirac_orca025_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/dirac_orca025_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+                  
+ecbuild_add_test( TARGET orcajedi_bump_nicas_grid_setup_orca025_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/bump_nicas_grid_setup_orca025_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )   
+
 

@@ -8,9 +8,8 @@ background error:
         testing: true
       io:
         data directory: Data
-        files prefix: dirac_my_bump_nicas/orca2
-        overriding nicas file: orca2_my_bump_files_nicas
-        parallel netcdf: true
+        files prefix: orca1_sst_my_bump_files
+        overriding nicas file: orca1_sst_my_bump_files_nicas
       drivers:
         multivariate strategy: univariate
         # read global nicas: true
@@ -21,13 +20,11 @@ background error:
         explicit length-scales: true
         horizontal length-scale:
         - groups: 
-          - ice_area_fraction
-          # value: 2.0e6
-          value: 1000.0e+3 #works
-          # value: 4000.0e+3 #too large
+          - sea_surface_temperature
+          value: 1000.0e+3 
         vertical length-scale:
         - groups:
-          - ice_area_fraction 
+          - sea_surface_temperature 
           value: 10
       msvalr: 1e30
   saber outer blocks:
@@ -37,14 +34,14 @@ background error:
         testing: true
       io:
         data directory: Data
-        files prefix: orca2
+        files prefix: orca1_sst_my_bump_files
       drivers:
         compute variance: true
       variance:
         explicit stddev: true
         stddev:
         - variables:
-          - ice_area_fraction
+          - sea_surface_temperature
           value: 1
       msvalr: 1e30
 
@@ -55,35 +52,21 @@ dirac:
 
 geometry:
   nemo variables:
-    - name: ice_area_fraction
-      nemo field name: iiceconc
-      model space: surface
-      field precision: double
     - name: sea_surface_temperature
       nemo field name: votemper
       model space: surface
       field precision: double
-    - name: sea_water_potential_temperature
-      nemo field name: votemper
-      model space: volume
-      field precision: double
-    - name: ice_area_fraction_background_error
-      nemo field name: sic_tot_var
-      model space: surface
-      variable type: background variance
-      field precision: double
-  grid name: ORCA2_T
-  number levels: 10
+  grid name: ORCA1_T
+  number levels: 1
   initialise extra fields: true
   partitioner: checkerboard
 background:
   date: 2021-06-30T12:00:00Z
-  state variables: [ ice_area_fraction ]
-  nemo field file: Data/orca2_t_nemo.nc
-  set gmask: true
+  state variables: [ sea_surface_temperature ]
+  nemo field file: Data/orca1_t_nemo.nc
 output dirac:
   date: 2021-06-30T12:00:00Z
-  output path: testoutput/dirac_cov_%id%.nc
+  output path: testoutput/dirac_cov_orca1_sst_%id%.nc
 test:
-  reference filename: testoutput/test_dirac.ref
-  test output filename: testoutput/test_dirac.out
+  reference filename: testoutput/test_dirac_orca1_sst.ref
+  test output filename: testoutput/test_dirac_orca1_sst.out

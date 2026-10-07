@@ -1,0 +1,55 @@
+background error:
+  covariance model: SABER
+  saber central block:
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    calibration:
+      general:
+        testing: true
+      io:
+        data directory: testoutput
+        files prefix: orca1_sst_my_bump_files
+      drivers:
+        compute covariance: false
+        compute correlation: false
+        compute moments: false
+        multivariate strategy: univariate
+        write diagnostics: true
+        compute nicas: true
+        write global nicas: true 
+        write local nicas: true     
+        write nicas grids: true        
+      nicas:
+        explicit length-scales: true
+        # resolution: 3.0
+        resolution: 8.0 #unitless real number, and it can be understood as the number of points that would be used in a 1D case to discretize the 
+        # Gaspari-Cohn function from its origin to the limit of its support. The function representation is more precise with a larger resolution
+        horizontal length-scale:
+        - groups: 
+          - sea_surface_temperature
+          # Horizontal lengthscale (in m), single value for var_1, decreasing this slows down the test
+          value: 1000.0e+3 
+        vertical length-scale:
+        - groups:
+          - sea_surface_temperature
+          value: 10
+      msvalr: 1e30
+background:
+  date: '2021-06-30T12:00:00Z'
+  state variables: &vars [ sea_surface_temperature ]
+  nemo field file: Data/orca1_t_nemo.nc
+
+geometry:
+  nemo variables:
+    - name: sea_surface_temperature
+      nemo field name: votemper
+      model space: surface
+      field precision: double
+  grid name: ORCA1_T
+  number levels: 1
+  initialise extra fields: true
+  partitioner: checkerboard
+
+test:
+  reference filename: testoutput/test_bump_nicas_orca1_sst.ref
+  test output filename: testoutput/test_bump_nicas_orca1_sst.out

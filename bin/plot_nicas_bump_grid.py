@@ -9,19 +9,22 @@ import numpy as np
 
 # original 1 MPI
 # testdata="/data/users/sophia.moreton/jedi/mo-bundle-dev/orca-jedi/src/tests/Data"
-# # testfile="orca2_nicas_grids_local_000001-000001.nc"
-# global_flag = False
+# testfile="orca2_nicas_grids_local_000001-000001.nc"
+testdata="/data/users/sophia.moreton/jedi/build-mo-bundle-dev-spice_gnu/orca-jedi/src/tests/Data"
+# testfile="orca1_sst_my_bump_files_nicas_grids_local_000001-000001.nc"
+testfile="orca025_sst_my_bump_files_nicas_grids_local_000001-000001.nc"
+global_flag = False
 
 # old:
 # testdata="/data/users/sophia.moreton/jedi/mo-bundle-dev/orca-jedi/src/tests/Data/100res"
 # testfile="orca2_nicas.nc"
 # global_flag = True
 
-testdata="/data/users/sophia.moreton/jedi/mo-bundle-dev/orca-jedi/src/tests/Data"
-# testfile="orca2_my_bump_files_nicas_1e6_hlength.nc" #8 resolution #looks ok
-# testfile="orca2_my_bump_files_nicas_4e7_hlength.nc" #8 resolution #not good
-testfile="orca2_my_bump_files_nicas_4e6_hlength.nc" #8 resolution
-global_flag = True
+# testdata="/data/users/sophia.moreton/jedi/mo-bundle-dev/orca-jedi/src/tests/Data"
+# # testfile="orca2_my_bump_files_nicas_1e6_hlength.nc" #8 resolution #looks ok
+# # testfile="orca2_my_bump_files_nicas_4e7_hlength.nc" #8 resolution #not good
+# testfile="orca2_my_bump_files_nicas_4e6_hlength.nc" #8 resolution
+# global_flag = True
 
 fname=testdata+"/"+testfile
 print("Opening ",fname)
@@ -56,7 +59,7 @@ if global_flag:
 
             plt.figure()
             plt.scatter(lon, lat, s=1)
-            plt.savefig(f"bump_grid_{group}_{group2}_2MPI_global_4e6_hlength.png")
+            plt.savefig(f"bump_grid_{group}_{group2}_orca025_sst.png")
             plt.close() 
 
     f.close()
@@ -73,7 +76,7 @@ else:
         lat = f.groups[group].groups[group2]["lat_sc"][:]
         
         plt.scatter(lon,lat)
-        plt.savefig("bump_grid_"+group+"_"+group2+"_2MPI_2_1.png")
+        plt.savefig("bump_grid_"+group+"_"+group2+"_orca025_sst.png")
 
     f.close()
     

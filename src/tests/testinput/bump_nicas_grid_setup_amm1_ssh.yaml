@@ -1,0 +1,61 @@
+background error:
+  covariance model: SABER
+  saber central block:
+#    saber block name: ID
+    saber block name: BUMP_NICAS
+    calibration:
+      general:
+        testing: true
+      io:
+        data directory: testoutput
+        files prefix: amm1_ssh_my_bump_files
+      drivers:
+        compute covariance: false
+        compute correlation: false
+        compute moments: false
+        multivariate strategy: univariate
+        write diagnostics: true
+        compute nicas: true
+        write global nicas: true 
+        write local nicas: true     
+        write nicas grids: true     
+      model:
+        do not cross mask boundaries: true   
+      nicas:
+        explicit length-scales: true
+        # resolution: 3.0
+        resolution: 8.0 #unitless real number, and it can be understood as the number of points that would be used in a 1D case to discretize the 
+        # Gaspari-Cohn function from its origin to the limit of its support. The function representation is more precise with a larger resolution
+        horizontal length-scale:
+        - groups: 
+          - sea_surface_height_anomaly
+          # Horizontal lengthscale (in m), single value for var_1, decreasing this slows down the test
+          # value: 4.0e7 #too coarse with 2 MPI tasks, but works with 1 MPI task
+          # value: 4000.0e+3 # lower res grid than 1000.0e+3, length scales are too large
+          value: 1000.0e+3 #works
+        vertical length-scale:
+        - groups:
+          - sea_surface_height_anomaly 
+          value: 10
+      msvalr: 1e30
+background:
+  date: '2021-06-30T12:00:00Z'
+  state variables: &vars [ sea_surface_height_anomaly ]
+  nemo field file: Data/amm1_nemo.nc
+
+geometry:
+  nemo variables:
+    - name: sea_surface_height_anomaly
+      nemo field name: sossheig
+      model space: surface
+    - name: sea_surface_height_anomaly_background_error
+      nemo field name: sossheig
+      model space: surface
+      variable type: background error standard deviation
+  grid name: Data/amm1_atlas_grid_spec.yaml
+  number levels: 1
+  partitioner: serial
+
+test:
+  #reference filename: testoutput/test_bump_nicas_amm1_ssh.ref
+  test output filename: testoutput/test_bump_nicas_amm1_ssh.out
