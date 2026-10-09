@@ -11,24 +11,24 @@
 
 namespace orcamodel {
 
-Norm::Norm(const oops::Variables & vars,
-           const eckit::Configuration & conf) {
+Norm::Norm(const oops::Variables &,
+           const eckit::Configuration &) {
   throw eckit::NotImplemented(Here());
 }
 
-void Norm::calculate(const State & xx) {
+void Norm::calculate(const State &) {
   throw eckit::NotImplemented(Here());
 }
 
-void Norm::apply(Increment & dx) const {
+void Norm::apply(Increment &) const {
   throw eckit::NotImplemented(Here());
 }
 
-void Norm::applyInverse(Increment & dx) const {
+void Norm::applyInverse(Increment &) const {
   throw eckit::NotImplemented(Here());
 }
 
-void Norm::print(std::ostream & os) const {
+void Norm::print(std::ostream &) const {
   throw eckit::NotImplemented(Here());
 }
 
