@@ -40,7 +40,7 @@ namespace orcamodel {
 // -----------------------------------------------------------------------------
 /// Geometry handles for ORCA model.
 
-  oops::Variables orcaVariableFactory(const eckit::Configuration & config);
+oops::Variables orcaVariableFactory(const eckit::Configuration & config);
 
 class Geometry : public util::Printable,
                  private util::ObjectCounter<Geometry>{

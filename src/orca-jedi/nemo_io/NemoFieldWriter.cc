@@ -7,6 +7,10 @@
 // https://github.com/Unidata/netcdf-cxx4
 #include <netcdf>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "orca-jedi/utilities/Types.h"
 
 #include "eckit/exception/Exceptions.h"

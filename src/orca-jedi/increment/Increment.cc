@@ -2,12 +2,13 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
-#include <string>
-#include <vector>
 #include <cmath>
+#include <iostream>
+#include <limits>
 #include <ostream>
 #include <sstream>
-#include <limits>
+#include <string>
+#include <vector>
 
 #include "atlas/array/MakeView.h"  // IWYU pragma: keep
 #include "atlas/field/Field.h"
@@ -121,8 +122,7 @@ Increment & Increment::operator+=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field = incrementFields_[i];
     atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
@@ -165,8 +165,7 @@ Increment & Increment::operator-=(const Increment & dx) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field = incrementFields_[i];
     atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
@@ -238,8 +237,7 @@ void Increment::diff(const State & x1, const State & x2) {
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field1 = x1.getField(i);
     atlas::Field field2 = x2.getField(i);
     atlas::Field fieldi = incrementFields_[i];
@@ -341,8 +339,7 @@ void Increment::axpy(const double & zz, const Increment & dx, const bool check) 
 
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field = incrementFields_[i];
     atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
@@ -380,8 +377,7 @@ double Increment::dot_product_with(const Increment & dx) const {
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
   // Deals with multiple fields
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field = incrementFields_[i];
     atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
@@ -419,8 +415,7 @@ double Increment::dot_product_with(const Increment & dx) const {
 void Increment::schur_product_with(const Increment & dx) {
   auto ghost = atlas::array::make_view<int32_t, 1>(
       geom_->mesh().nodes().ghost());
-  for (int i = 0; i< incrementFields_.size(); i++)
-  {
+  for (int i = 0; i< incrementFields_.size(); i++) {
     atlas::Field field = incrementFields_[i];
     atlas::Field field_dx = dx.incrementFields_[i];
     std::string fieldName = field.name();
@@ -695,8 +690,8 @@ struct Increment::stats Increment::stats(const std::string & fieldName) const {
     for (atlas::idx_t k = 0; k < field_view.shape(1); ++k) {
       if (!ghost(j)) {
         if (!has_mv || (has_mv && !mv(field_view(j, k)))) {
-          if (field_view(j, k) > s.max) { s.max=field_view(j, k); }
-          if (field_view(j, k) < s.min) { s.min=field_view(j, k); }
+          if (field_view(j, k) > s.max) s.max=field_view(j, k);
+          if (field_view(j, k) < s.min) s.min=field_view(j, k);
           s.sumx += field_view(j, k);
           s.sumx2 += field_view(j, k)*field_view(j, k);
           ++s.valid_points;

@@ -2,6 +2,11 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "eckit/log/Bytes.h"
 #include "eckit/testing/Test.h"
 

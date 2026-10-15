@@ -2,6 +2,9 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <limits>
+#include <vector>
+
 #include "eckit/log/Bytes.h"
 
 #include "oops/util/DateTime.h"

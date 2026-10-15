@@ -3,10 +3,23 @@ add_subdirectory(testoutput)
 add_subdirectory(orca-jedi)
 add_subdirectory(Data)
 
-ecbuild_add_test( TARGET orcajedi_coding_norms
-                  TYPE SCRIPT
-                  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/cpplint.py
-                  ARGS --recursive ${CMAKE_CURRENT_SOURCE_DIR}/../ )
+# We can make use of CMake's native support of cpplint in future. If we set
+# `CMAKE_<LANG>_CPPLINT` (where `<LANG>` is either `C` or `CXX`) to point to
+# the `cpplint` executable, it will run `cpplint` as part of the build.
+find_program(
+  CPPLINT_EXECUTABLE
+  NAMES cpplint
+  DOC "Path to the cpplint executable"
+)
+if( CPPLINT_EXECUTABLE )
+  ecbuild_add_test(
+    TARGET "${PROJECT_NAME}_coding_norms"
+    LABELS lint
+    TYPE SCRIPT
+    COMMAND "${CPPLINT_EXECUTABLE}"
+    ARGS --quiet --recursive "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  )
+endif()
 
 ecbuild_add_test( TARGET orcajedi_hofx_sic
                   OMP 1

@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <string>
 
 #include "atlas/array/MakeView.h"  // IWYU pragma: keep
 #include "atlas/field/Field.h"  // IWYU pragma: keep

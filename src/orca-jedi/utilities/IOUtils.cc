@@ -4,9 +4,10 @@
 
 #include "orca-jedi/utilities/IOUtils.h"
 
-#include <sstream>
-#include <vector>
 #include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "eckit/config/Configuration.h"
 #include "oops/util/Logger.h"
@@ -157,7 +158,7 @@ void writeFieldsToFile(
                        << nemo_field_path << std::endl;
     std::vector<util::DateTime> datetimes = {valid_date};
     std::vector<double> levels((*fs.begin()).shape(1), 0);
-    for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
+    for (size_t iLev = 0; iLev < levels.size(); ++iLev) levels[iLev] = iLev;
 
     WriteServer writer(geom.timer(), nemo_field_path, geom.mesh(), datetimes, levels,
                        geom.distributionType() == "serial");

@@ -7,7 +7,6 @@
 namespace orcamodel {
 
 constexpr char FieldDTypeParameterTraitsHelper::enumTypeName[];
-constexpr util::NamedEnumerator<FieldDType>
-  FieldDTypeParameterTraitsHelper::namedValues[];
+constexpr util::NamedEnumerator<FieldDType> FieldDTypeParameterTraitsHelper::namedValues[];
 
 }  // namespace orcamodel

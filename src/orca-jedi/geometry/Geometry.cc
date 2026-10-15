@@ -2,6 +2,9 @@
  * (C) British Crown Copyright 2026 Met Office
  */
 
+#include <string>
+#include <vector>
+
 #include "orca-jedi/geometry/Geometry.h"
 
 #include <algorithm>
@@ -280,8 +283,7 @@ void Geometry::create_extrafields() {
 ///        have 1 level, volumetric variables have "number levels" levels.
 /// \param[in]     vars  variables to check.
 /// \return        vector of number of levels in each variable.
-std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const
-{
+std::vector<size_t> Geometry::variableSizes(const oops::Variables & vars) const {
   std::vector<size_t> varSizes(vars.size());
   std::fill(varSizes.begin(), varSizes.end(), 0);
 
