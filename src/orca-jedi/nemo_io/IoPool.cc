@@ -40,13 +40,13 @@ IoPool::IoPool(const eckit::mpi::Comm& parent, size_t n_io_ranks,
   n_io_ranks_ = std::max<size_t>(1, std::min({n_io_ranks, size, ny == 0 ? size : ny}));
 
   const int idx = pool_index(rank, size, n_io_ranks_);
-  const int color = (idx >= 0) ? 0 : 1;
+  const int colour = (idx >= 0) ? 0 : 1;
 
   // split() is collective over the parent communicator; every rank must call it.
   // It registers the resulting sub-communicator (for this rank's colour) under
   // \p name in eckit's global registry, so both the I/O group and the non-I/O
   // group hold a communicator under this name and both must free it later.
-  eckit::mpi::Comm& split_comm = parent.split(color, name);
+  eckit::mpi::Comm& split_comm = parent.split(colour, name);
   comm_name_ = name;
 
   if (idx >= 0) {

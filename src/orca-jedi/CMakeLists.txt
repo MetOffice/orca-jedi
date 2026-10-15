@@ -27,6 +27,7 @@ nemo_io/NemoFieldReader.cc
 nemo_io/NemoFieldWriter.h
 nemo_io/NemoFieldWriter.cc
 nemo_io/AtlasIndex.h
+nemo_io/NetCDFUtil.h
 nemo_io/SlabDecomposition.h
 nemo_io/IoBackend.h
 nemo_io/IoPool.h

@@ -15,36 +15,14 @@
 
 #include "eckit/exception/Exceptions.h"
 
+#include "orca-jedi/nemo_io/NetCDFUtil.h"
+
 #include "oops/util/Logger.h"
 #include "oops/util/Duration.h"
 
 namespace orcamodel {
 
 namespace {
-
-/// \brief Throw an eckit::ReadError if a netcdf-c call returned an error.
-void nc_check(int status, const std::string& where) {
-  if (status != NC_NOERR) {
-    throw eckit::ReadError(std::string("orcamodel::NemoFieldReader ") + where
-        + ": " + nc_strerror(status), Here());
-  }
-}
-
-/// \brief Return true (and set varid) if a variable of the given name exists.
-bool nc_var_exists(int ncid, const std::string& name, int& varid) {
-  const int status = nc_inq_varid(ncid, name.c_str(), &varid);
-  if (status == NC_ENOTVAR) return false;
-  nc_check(status, "nc_inq_varid " + name);
-  return true;
-}
-
-/// \brief Return true (and set dimid) if a dimension of the given name exists.
-bool nc_dim_exists(int ncid, const std::string& name, int& dimid) {
-  const int status = nc_inq_dimid(ncid, name.c_str(), &dimid);
-  if (status == NC_EBADDIM) return false;
-  nc_check(status, "nc_inq_dimid " + name);
-  return true;
-}
 
 /// \brief Look up a variable id, throwing eckit::BadValue if it is absent.
 int get_varid_or_throw(int ncid, const std::string& name,

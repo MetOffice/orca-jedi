@@ -6,6 +6,7 @@
 
 #include <netcdf.h>
 
+#include "orca-jedi/nemo_io/NetCDFUtil.h"
 #include "orca-jedi/utilities/Types.h"
 
 #include "eckit/exception/Exceptions.h"
@@ -21,23 +22,6 @@
 namespace orcamodel {
 
 namespace {
-
-/// \brief Throw an eckit::FailedLibraryCall if a netcdf-c call failed.
-void nc_check(int status, const std::string& where) {
-  if (status != NC_NOERR) {
-    throw eckit::FailedLibraryCall("NetCDF",
-        "orcamodel::NemoFieldWriter", where + ": " + nc_strerror(status),
-        Here());
-  }
-}
-
-/// \brief Return true (and set varid) if a variable of the given name exists.
-bool nc_var_exists(int ncid, const std::string& name, int& varid) {
-  const int status = nc_inq_varid(ncid, name.c_str(), &varid);
-  if (status == NC_ENOTVAR) return false;
-  nc_check(status, "nc_inq_varid " + name);
-  return true;
-}
 
 /// \brief Look up a dimension id by name.
 int get_dimid(int ncid, const std::string& name) {

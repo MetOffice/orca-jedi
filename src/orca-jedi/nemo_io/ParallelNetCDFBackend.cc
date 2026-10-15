@@ -21,17 +21,11 @@
 #include "oops/util/Logger.h"
 
 #include "orca-jedi/nemo_io/NemoFieldWriter.h"
+#include "orca-jedi/nemo_io/NetCDFUtil.h"
 
 namespace orcamodel {
 
 namespace {
-
-/// \brief Throw an eckit exception if a netCDF C call did not succeed.
-void nc_check(int status, const std::string& where) {
-  if (status != NC_NOERR) {
-    throw eckit::FailedLibraryCall("NetCDF", where, nc_strerror(status), Here());
-  }
-}
 
 /// \brief Enable filling with NemoFieldWriter::fillValue for a just-defined
 ///        variable (must be called in define mode).
