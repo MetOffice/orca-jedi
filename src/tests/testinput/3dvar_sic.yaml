@@ -25,7 +25,7 @@ cost function:
           horizontal length-scale:
           - groups: 
             - ice_area_fraction
-            value: 2.0e6
+            value: 1000.0e+3
           vertical length-scale:
           - groups:
             - ice_area_fraction 

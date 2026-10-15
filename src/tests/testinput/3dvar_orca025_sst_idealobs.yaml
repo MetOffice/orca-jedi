@@ -1,0 +1,122 @@
+cost function:
+  cost type: 3D-Var
+  time window:
+    begin: '2021-06-29T00:00:00Z'
+    length: P1D
+  analysis variables: [sea_surface_temperature]
+  background error:
+    covariance model: SABER
+    saber central block:
+      saber block name: BUMP_NICAS
+      read:
+        general:
+          testing: true
+        io:
+          data directory: Data
+          files prefix: dirac_my_bump_nicas/orca025_sst
+          overriding nicas file: orca025_sst_my_bump_files_nicas
+          parallel netcdf: true
+        drivers:
+          multivariate strategy: univariate
+          # read global nicas: true
+          read local nicas: true
+        model:
+          do not cross mask boundaries: true
+        nicas:
+          explicit length-scales: true
+          horizontal length-scale:
+          - groups: 
+            - sea_surface_temperature
+            # value: 2.0e6
+            # value: 4000.0e+3  #too large
+            value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
+          vertical length-scale:
+          - groups:
+            - sea_surface_temperature
+            value: 10
+      msvalr: 1e30
+    saber outer blocks:
+    - saber block name: BUMP_StdDev
+      read:
+        general:
+          testing: true
+        io:
+          data directory: Data
+          files prefix: orca025_sst
+        drivers:
+          compute variance: true
+        variance:
+          explicit stddev: true
+          stddev:
+          - variables:
+            - sea_surface_temperature
+            value: 1
+      msvalr: 1e30
+  geometry: &Geom
+    nemo variables:
+      - name: sea_surface_temperature
+        nemo field name: votemper
+        model space: surface
+        field precision: double
+    grid name: eORCA025_T
+    number levels: 1
+    initialise extra fields: true
+    partitioner: checkerboard 
+  background:
+    date: 2021-06-29T12:00:00Z
+    state variables: [ sea_surface_temperature ]
+    nemo field file: Data/orca025ext_t_mersea_nemo.nc
+    set gmask: true
+  observations:
+    observers:
+    - obs space:
+        name: Sea Surface Temperature 
+        obsdatain:
+          engine:
+            type: H5File
+            obsfile: Data/hofx_sst_obs.nc
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: testoutput/obsdataout_3dvar_orca025_sst.nc
+        simulated variables: [seaSurfaceTemperature]
+      get values:
+        time interpolation: linear
+        atlas-interpolator:
+          type: unstructured-bilinear-lonlat
+          non_linear: missing-if-any-missing
+          max_fraction_elems_to_try: 0.0
+          adjoint: true
+      obs operator: 
+        name: Composite
+        components:
+        - name: Identity
+      obs error:
+        covariance model: diagonal
+variational:
+  minimizer:
+    algorithm: DRPCG
+  iterations:
+  - ninner: 2
+    gradient norm reduction: 1e-30
+    geometry: *Geom
+    test: on
+    online diagnostics:
+      write increment: true
+      increment:
+        state component:
+          output path: testoutput/increments_3dvar_orca025_sst.nc
+          date: 2021-06-30T00:00:00Z
+final:
+  diagnostics:
+    departures: oman
+output:
+  date: 2021-06-30T00:00:00Z
+  state variables: [ sea_surface_temperature ]
+  nemo field file: testoutput/3dvar_orca025_sst.nc
+  output nemo field file: testoutput/analysis_3dvar_orca025_sst.nc
+test:
+  reference filename: testoutput/test_3dvar_orca025_sst.ref
+  test output filename: testoutput/test_3dvar_orca025_sst.out
+  float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
+

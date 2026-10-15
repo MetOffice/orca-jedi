@@ -125,3 +125,34 @@ ecbuild_add_test( TARGET orcajedi_bump_nicas_setup
                   ARGS testinput/bump_nicas_setup.yaml
                   COMMAND orcamodel_ErrorCovarianceToolbox.x )
 
+ecbuild_add_test( TARGET orcajedi_bump_nicas_grid_setup_orca025_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/bump_nicas_grid_setup_orca025_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )   
+                
+ecbuild_add_test( TARGET orcajedi_Dirac_orca025_sst
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/dirac_orca025_sst.yaml
+                  COMMAND orcamodel_ErrorCovarianceToolbox.x )
+
+ecbuild_add_test( TARGET orcajedi_3DVar_orca025_sst_idealobs
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/3dvar_orca025_sst_idealobs.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET orcajedi_3DVar_orca025_sst_realobs
+                  MPI 1
+                  OMP 1
+                  ARGS testinput/3dvar_orca025_sst_realobs.yaml
+                  COMMAND orcamodel_3DVar.x )
+
+ecbuild_add_test( TARGET orcajedi_3DVar_orca025_sst_realobs_nv
+                  MPI 1
+                  OMP 1
+                  ENVIRONMENT "NEMOVAR_NAMELIST_PREFIX=testinput/namelists/orca2_sic/"
+                              "NEMOVAR_ANCIL_PREFIX=Data/"
+                  ARGS testinput/nv_3dvar_orca025_sst_realobs.yaml
+                  COMMAND orcamodel_3DVar.x )

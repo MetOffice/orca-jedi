@@ -6,7 +6,7 @@ background error:
     read:
       general:
         testing: true
-        universe length-scale: 40000.0e3
+        #universe length-scale: 40000.0e3
       io:
         data directory: testoutput
         files prefix: orca2
@@ -23,12 +23,13 @@ background error:
         do not cross mask boundaries: true
       nicas:
         explicit length-scales: true
-        resolution: 3.0
-#        resolution: 8.0
+        # resolution: 3.0
+        resolution: 8.0
         horizontal length-scale:
         - groups: 
           - ice_area_fraction
-          value: 4.0e7
+          value: 1000.0e+3
+          # value: 4.0e7
 #          value: 4.0e6
         vertical length-scale:
         - groups:
