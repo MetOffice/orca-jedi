@@ -12,11 +12,8 @@
 namespace orcamodel {
 
 Norm::Norm(const oops::Variables &,
-           const eckit::Configuration &) {
-  throw eckit::NotImplemented(Here());
-}
-
-void Norm::calculate(const State &) {
+           const eckit::Configuration &,
+           const State &) {
   throw eckit::NotImplemented(Here());
 }
 
