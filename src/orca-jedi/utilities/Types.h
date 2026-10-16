@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <netcdf>
+#include <netcdf.h>
 
 #include <string>
 
@@ -46,23 +46,23 @@ void ApplyForFieldType(const Functor& functor, atlas::DataType datatype,
   }
 }
 
-// create a mapping between C++ types and NetCDF type objects
+// create a mapping between C++ types and NetCDF (netcdf-c) type constants
 template <typename T>
 struct NetCDFTypeMap;
 
 template <>
 struct NetCDFTypeMap<float> {
-  inline static const netCDF::NcType ncType = netCDF::ncFloat;
+  inline static const nc_type ncType = NC_FLOAT;
 };
 
 template <>
 struct NetCDFTypeMap<double> {
-  inline static const netCDF::NcType ncType = netCDF::ncDouble;
+  inline static const nc_type ncType = NC_DOUBLE;
 };
 
 template <>
 struct NetCDFTypeMap<int> {
-  inline static const netCDF::NcType ncType = netCDF::ncInt;
+  inline static const nc_type ncType = NC_INT;
 };
 
 }  // namespace orcamodel
