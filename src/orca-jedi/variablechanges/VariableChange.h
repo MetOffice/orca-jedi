@@ -30,13 +30,10 @@ class VariableChange: public util::Printable,
     state.subsetFieldSet(variables);
   }
 
-  void changeVarInverse(State &, const oops::Variables &) const {}
-
  private:
   void print(std::ostream & out) const override {
     out << "orcamodel::VariableChange: Not Implemented"; };
 };
 
 }  // namespace orcamodel
-
 
