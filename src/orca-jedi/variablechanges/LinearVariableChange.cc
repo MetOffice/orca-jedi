@@ -28,13 +28,7 @@ LinearVariableChange::LinearVariableChange(const Geometry &, const eckit::Config
 void LinearVariableChange::changeVarTL(Increment & dx, const oops::Variables & vars)
 const {}
 
-void LinearVariableChange::changeVarInverseTL(Increment & dx, const oops::Variables & vars)
-const {}
-
 void LinearVariableChange::changeVarAD(Increment & dx, const oops::Variables & vars)
-const {}
-
-void LinearVariableChange::changeVarInverseAD(Increment & dx, const oops::Variables & vars)
 const {}
 
 void LinearVariableChange::changeVarTraj(const State & xbg, const oops::Variables & xfg)

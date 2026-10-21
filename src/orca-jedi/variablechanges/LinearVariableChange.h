@@ -33,9 +33,7 @@ class LinearVariableChange: public util::Printable {
   LinearVariableChange(const Geometry &, const eckit::Configuration &);
 
   void changeVarTL(Increment &, const oops::Variables &) const;
-  void changeVarInverseTL(Increment &, const oops::Variables &) const;
   void changeVarAD(Increment &, const oops::Variables &) const;
-  void changeVarInverseAD(Increment &, const oops::Variables &) const;
 
   void changeVarTraj(const State &, const oops::Variables &);
 
@@ -46,5 +44,4 @@ class LinearVariableChange: public util::Printable {
 };
 
 }  // namespace orcamodel
-
 
