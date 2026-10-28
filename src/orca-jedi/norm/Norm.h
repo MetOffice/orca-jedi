@@ -34,7 +34,7 @@ class Norm : public util::Printable,
 // Apply norm to increment
   void apply(Increment &) const;
   void applyInverse(Increment &) const;
-  const double computeNorm(Increment &) const;
+  const double computeNorm(const Increment &) const;
 
  private:
   void print(std::ostream &) const override;

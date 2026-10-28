@@ -25,7 +25,7 @@ void Norm::applyInverse(Increment &) const {
   throw eckit::NotImplemented(Here());
 }
 
-const double Norm::computeNorm(Increment &) const {
+const double Norm::computeNorm(const Increment &) const {
   throw eckit::NotImplemented(Here());
 }
 
