@@ -3,12 +3,14 @@
  */
 
 #include <netcdf.h>
+#include <netcdf_meta.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <string>
 #include <vector>
 
+#include "eckit/exception/Exceptions.h"
 #include "eckit/testing/Test.h"
 #include "eckit/filesystem/PathName.h"
 
@@ -200,6 +202,39 @@ CASE("ParallelNetCDFReadBackend reads NEMO-layout slabs in parallel") {
 }
 
 //-----------------------------------------------------------------------------
+
+#if !NC_HAS_PNETCDF
+CASE("ParallelNetCDFReadBackend explains unsupported classic input") {
+  const eckit::PathName path(std::string("../testoutput/test_parallel_netcdf_classic_") +
+                            std::to_string(atlas::mpi::size()) + ".nc");
+  if (atlas::mpi::rank() == 0) {
+    int ncid = -1;
+    ASSERT(nc_create(path.fullName().asString().c_str(), NC_CLOBBER, &ncid) == NC_NOERR);
+    ASSERT(nc_close(ncid) == NC_NOERR);
+  }
+  atlas::mpi::comm().barrier();
+
+  bool caught = false;
+  try {
+    ParallelNetCDFReadBackend backend(atlas::mpi::comm(), path);
+  } catch (const eckit::FailedLibraryCall& error) {
+    caught = true;
+    const std::string message = error.what();
+    EXPECT(message.find(path.fullName().asString()) != std::string::npos);
+    EXPECT(message.find("detected format: classic NetCDF-3") != std::string::npos);
+    EXPECT(message.find("PnetCDF support") != std::string::npos);
+    EXPECT(message.find("nccopy -k netCDF-4") != std::string::npos);
+    EXPECT(message.find("parallel input: false") != std::string::npos);
+    EXPECT(message.find(nc_strerror(NC_ENOTBUILT)) != std::string::npos);
+  }
+  EXPECT(caught);
+
+  atlas::mpi::comm().barrier();
+  if (atlas::mpi::rank() == 0) {
+    std::remove(path.fullName().asString().c_str());
+  }
+}
+#endif
 
 }  // namespace test
 }  // namespace orcamodel

@@ -358,9 +358,34 @@ ParallelNetCDFReadBackend::ParallelNetCDFReadBackend(
   oops::Log::trace() << "orcamodel::ParallelNetCDFReadBackend::ctor "
                      << path.fullName().asString() << std::endl;
   MPI_Comm comm = MPI_Comm_f2c(io_comm.communicator());
-  nc_check(nc_open_par(path.fullName().asString().c_str(), NC_NOWRITE,
-                       comm, MPI_INFO_NULL, &ncid_),
-           "ParallelNetCDFReadBackend::nc_open_par");
+  const std::string filename = path.fullName().asString();
+  const int status = nc_open_par(filename.c_str(), NC_NOWRITE,
+                                 comm, MPI_INFO_NULL, &ncid_);
+  std::string context = "ParallelNetCDFReadBackend::nc_open_par file '" + filename + "'";
+  if (status == NC_ENOTBUILT) {
+    std::string format_name = "unknown";
+    int probe_id = -1;
+    if (nc_open(filename.c_str(), NC_NOWRITE, &probe_id) == NC_NOERR) {
+      int format = 0;
+      if (nc_inq_format(probe_id, &format) == NC_NOERR) {
+        switch (format) {
+          case NC_FORMAT_CLASSIC: format_name = "classic NetCDF-3"; break;
+          case NC_FORMAT_64BIT_OFFSET: format_name = "64-bit offset NetCDF-3"; break;
+          case NC_FORMAT_64BIT_DATA: format_name = "CDF-5"; break;
+          case NC_FORMAT_NETCDF4: format_name = "NetCDF-4/HDF5"; break;
+          case NC_FORMAT_NETCDF4_CLASSIC: format_name = "NetCDF-4/HDF5 classic model"; break;
+        }
+      }
+      nc_close(probe_id);
+    }
+    context += " (detected format: " + format_name +
+        "). Parallel NetCDF-4 input requires NetCDF built with parallel HDF5 support; "
+        "classic NetCDF-3/CDF-5 input requires PnetCDF support. "
+        "For classic files, convert a copy with nccopy -k netCDF-4 -d 0 input.nc output.nc "
+        "and use output.nc, or set 'parallel input: false'. "
+        "Check nc-config --has-parallel4 and --has-pnetcdf for the runtime library";
+  }
+  nc_check(status, context);
 }
 
 ParallelNetCDFReadBackend::~ParallelNetCDFReadBackend() {
