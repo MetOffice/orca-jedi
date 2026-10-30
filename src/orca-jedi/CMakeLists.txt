@@ -20,6 +20,8 @@ model/ModelBiasCovariance.h
 model/ModelBias.h
 model/ModelBiasIncrement.h
 model/Model.h
+norm/Norm.h
+norm/Norm.cc
 state/State.h
 state/State.cc
 nemo_io/NemoFieldReader.h

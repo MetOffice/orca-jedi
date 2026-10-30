@@ -16,6 +16,7 @@
 #include "orca-jedi/model/ModelBias.h"
 #include "orca-jedi/model/ModelBiasIncrement.h"
 #include "orca-jedi/model/ModelBiasCovariance.h"
+#include "orca-jedi/norm/Norm.h"
 #include "orca-jedi/state/State.h"
 #include "orca-jedi/utilities/ModelData.h"
 #include "orca-jedi/variablechanges/VariableChange.h"
@@ -38,6 +39,7 @@ struct OrcaModelTraits {
   typedef orcamodel::ModelBiasIncrement        ModelAuxIncrement;
   typedef orcamodel::ModelBiasCovariance       ModelAuxCovariance;
   typedef orcamodel::Model                     Model;
+  typedef orcamodel::Norm                      Norm;
   typedef orcamodel::State                     State;
   typedef orcamodel::LinearModel               LinearModel;
   typedef orcamodel::VariableChange            VariableChange;
