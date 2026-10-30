@@ -27,6 +27,12 @@ class AtlasIndexToBufferIndex {
   virtual std::pair<int, int> ij(const size_t inode) const  = 0;
   virtual size_t nx() const = 0;
   virtual size_t ny() const = 0;
+  /// \brief Whether a mesh node maps onto a cell of the global i/j buffer.
+  ///        Nodes that fall outside the buffer (e.g. ORCA north-fold pivot
+  ///        ghost nodes) have no corresponding file cell and must be excluded
+  ///        from the parallel i/o scatter/gather; they are filled by the halo
+  ///        exchange instead.
+  virtual bool maps_to_buffer(const size_t inode) const = 0;
 };
 
 /// \brief Indexer from the orca netcdf i, j field to an index of a 1D buffer
@@ -85,6 +91,18 @@ class OrcaIndexToBufferIndex : public AtlasIndexToBufferIndex {
   int64_t operator()(const size_t inode) const {
       auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
       return (*this)(ij(inode, 0), ij(inode, 1));
+  }
+
+  /// \brief Whether a mesh node maps onto a cell of the global i/j buffer.
+  ///        ORCA north-fold pivot ghost nodes have a j index one beyond the
+  ///        buffer and have no corresponding file cell; they are filled by the
+  ///        halo exchange rather than the parallel scatter.
+  bool maps_to_buffer(const size_t inode) const {
+      auto ij = atlas::array::make_view<int32_t, 2>(mesh_.nodes().field("ij"));
+      const int i = ij(inode, 0);
+      const int j = ij(inode, 1);
+      return i >= ix_glb_min && i <= ix_glb_max
+          && j >= iy_glb_min && j <= iy_glb_max;
   }
 
   /// \brief i, j pair corresponding to a node number. Only use this for diagnostic purposes as
@@ -156,6 +174,12 @@ class RegLonLatIndexToBufferIndex : public AtlasIndexToBufferIndex {
   /// \return std::pair of the 2D indices corresponding to the node.
   std::pair<int, int> ij(const size_t inode) const {
     return inode2ij[inode];
+  }
+
+  /// \brief Whether a mesh node maps onto a cell of the global i/j buffer.
+  bool maps_to_buffer(const size_t inode) const {
+    const auto[i, j] = inode2ij[inode];
+    return i >= 0 && i <= ix_glb_max && j >= 0 && j <= iy_glb_max;
   }
 
  private:

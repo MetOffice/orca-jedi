@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 #include "atlas/field/Field.h"
 #include "atlas/field/FieldSet.h"
@@ -71,6 +72,12 @@ class Geometry : public util::Printable,
   bool levelsAreTopDown() const {return true;}
   std::string distributionType() const {
       return params_.partitioner.value();}
+  bool parallelOutput() const {return params_.parallelOutput.value();}
+  size_t outputIoRanks() const {
+      return static_cast<size_t>(std::max(0, params_.outputIoRanks.value()));}
+  bool parallelInput() const {return params_.parallelInput.value();}
+  size_t inputIoRanks() const {
+      return static_cast<size_t>(std::max(0, params_.inputIoRanks.value()));}
   FieldDType fieldPrecision(std::string variable_name) const;
   std::shared_ptr<eckit::Timer> timer() const {return eckit_timer_;}
   void log_status() const;
