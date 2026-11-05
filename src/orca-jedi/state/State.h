@@ -107,6 +107,9 @@ class State : public util::Printable,
   atlas::FieldSet & stateFields() {invalidatePrintCache(); return stateFields_;}
   void subsetFieldSet(const oops::Variables & variables);
 
+  void addFields(const oops::Variables & varsToAdd);
+  void removeFields(const oops::Variables & varsToRemove);
+
   const oops::Variables & variables() const {return vars_;}
 
   atlas::Field getField(int) const;
