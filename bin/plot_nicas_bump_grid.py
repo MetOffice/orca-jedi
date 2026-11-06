@@ -12,8 +12,10 @@ import numpy as np
 # testfile="orca2_nicas_grids_local_000001-000001.nc"
 testdata="/data/users/sophia.moreton/jedi/build-mo-bundle-dev-spice_gnu/orca-jedi/src/tests/Data"
 # testfile="orca1_sst_my_bump_files_nicas_grids_local_000001-000001.nc"
-testfile="orca025_sst_my_bump_files_nicas_grids_local_000001-000001.nc"
-global_flag = False
+# testfile="orca025_sst_my_bump_files_nicas_grids_local_000001-000001.nc"
+# testfile="orca025_ssh_my_bump_files_nicas_grids_local_000001-000001.nc"
+# testfile="orca025_sit_my_bump_files_nicas_grids_local_000001-000001.nc"
+# global_flag = False
 
 # old:
 # testdata="/data/users/sophia.moreton/jedi/mo-bundle-dev/orca-jedi/src/tests/Data/100res"
@@ -25,6 +27,9 @@ global_flag = False
 # # testfile="orca2_my_bump_files_nicas_4e7_hlength.nc" #8 resolution #not good
 # testfile="orca2_my_bump_files_nicas_4e6_hlength.nc" #8 resolution
 # global_flag = True
+
+testfile="orca025_sst_my_bump_files_nicas.nc"
+global_flag = True
 
 fname=testdata+"/"+testfile
 print("Opening ",fname)
@@ -75,8 +80,8 @@ else:
         lon = f.groups[group].groups[group2]["lon_sc"][:]
         lat = f.groups[group].groups[group2]["lat_sc"][:]
         
-        plt.scatter(lon,lat)
-        plt.savefig("bump_grid_"+group+"_"+group2+"_orca025_sst.png")
+        plt.scatter(lon,lat, s=1)
+        plt.savefig("bump_grid_"+group+"_"+group2+"_orca025_ssh_500km_6res.png")
 
     f.close()
     

@@ -1,7 +1,8 @@
 cost function:
   cost type: 3D-Var
   time window:
-    begin: '2021-06-29T00:00:00Z'
+    # begin: '2021-06-29T00:00:00Z'
+    begin: '2025-01-09T00:00:00Z'
     length: P1D
   analysis variables: [sea_surface_height_anomaly]
   background error:
@@ -13,8 +14,8 @@ cost function:
           testing: true
         io:
           data directory: Data
-          files prefix: dirac_my_bump_nicas/amm1
-          overriding nicas file: amm1_my_bump_files_nicas
+          files prefix: dirac_my_bump_nicas/orca025_ssh
+          overriding nicas file: orca025_ssh_my_bump_files_nicas
           parallel netcdf: true
         drivers:
           multivariate strategy: univariate
@@ -27,9 +28,7 @@ cost function:
           horizontal length-scale:
           - groups: 
             - sea_surface_height_anomaly
-            # value: 2.0e6
-            # value: 4000.0e+3  #too large
-            value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
+            value: 400.0e+3 
           vertical length-scale:
           - groups:
             - sea_surface_height_anomaly
@@ -42,7 +41,7 @@ cost function:
           testing: true
         io:
           data directory: Data
-          files prefix: amm1
+          files prefix: orca025_ssh
         drivers:
           compute variance: true
         variance:
@@ -50,26 +49,22 @@ cost function:
           stddev:
           - variables:
             - sea_surface_height_anomaly
-            value: 1
+            value: 0.1
       msvalr: 1e30
   geometry: &Geom
     nemo variables:
       - name: sea_surface_height_anomaly
         nemo field name: sossheig
         model space: surface
-      - name: sea_surface_height_anomaly_background_error
-        nemo field name: sossheig
-        model space: surface
-        variable type: background error standard deviation
-    grid name: Data/amm1_atlas_grid_spec.yaml
+        field precision: double
+    grid name: eORCA025_T
     number levels: 1
     initialise extra fields: true
     partitioner: checkerboard 
-    source mesh halo: 1
   background:
-    date: 2021-06-29T12:00:00Z
+    date: 2025-01-09T12:00:00Z
     state variables: [ sea_surface_height_anomaly ]
-    nemo field file: Data/amm1_nemo.nc
+    nemo field file: Data/orca025ext_t_mersea_nemo.nc
     set gmask: true
   observations:
     observers:
@@ -78,25 +73,47 @@ cost function:
         obsdatain:
           engine:
             type: H5File
-            obsfile: Data/hofx_ssh_amm_obs.nc
+            obsfile: Data/orca025ext_sla-multi-multi-jopa_20250109T0000Z.nc
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_amm1_ssh.nc
+            obsfile: testoutput/obsdataout_3dvar_orca025_ssh_realobs.nc
         simulated variables: [seaSurfaceHeightAnomaly]
       get values:
         time interpolation: linear
         atlas-interpolator:
           type: unstructured-bilinear-lonlat
           non_linear: missing-if-any-missing
-          max_fraction_elems_to_try: 0.0
           adjoint: true
       obs operator: 
         name: Composite
         components:
         - name: Identity
+          observation alias file: testinput/test_name_map.yaml
       obs error:
         covariance model: diagonal
+      # no derived obs errors for seaSurfaceHeightAnomaly
+      obs pre filters:
+      - filter: Variable Assignment
+        assignments:
+        - name: DerivedObsValue/seaSurfaceHeightAnomaly
+          type: float
+          function:
+            name: ObsFunction/LinearCombination
+            options:
+              variables: [ObsValue/seaSurfaceHeightAnomaly, DerivedObsValue/mdt]
+              coefs: [1.0, 1.0]
+              # adding MDT to obs
+      - filter: Perform Action
+        filter variables: [{name: seaSurfaceHeightAnomaly}]
+        action:
+          name: assign error
+          error parameter: 0.1
+      obs post filters:
+      - filter: Background Check
+        filter variables: [{name: seaSurfaceHeightAnomaly}]
+        absolute threshold: 2.0
+        # manually set the absolute threshold for sea surface height anomaly observations
 variational:
   minimizer:
     algorithm: DRPCG
@@ -109,18 +126,18 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_amm1_ssh.nc
-          date: 2021-06-30T00:00:00Z
+          output path: testoutput/increments_3dvar_orca025_ssh_realobs.nc
+          date: 2025-01-09T00:00:00Z
 final:
   diagnostics:
     departures: oman
 output:
-  date: 2021-06-30T00:00:00Z
+  date: 2025-01-09T00:00:00Z
   state variables: [ sea_surface_height_anomaly ]
-  nemo field file: testoutput/3dvar_amm1_ssh.nc
-  output nemo field file: testoutput/analysis_3dvar_amm1_ssh.nc
+  nemo field file: testoutput/3dvar_orca025_ssh_realobs.nc
+  output nemo field file: testoutput/analysis_3dvar_orca025_ssh_realobs.nc
 test:
-  #reference filename: testoutput/test_3dvar_amm1_ssh.ref
-  test output filename: testoutput/test_3dvar_amm1_ssh.out
+  reference filename: testoutput/test_3dvar_orca025_ssh_realobs.ref
+  test output filename: testoutput/test_3dvar_orca025_ssh_realobs.out
   float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
 

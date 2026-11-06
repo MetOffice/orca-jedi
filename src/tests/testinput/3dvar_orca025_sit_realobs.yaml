@@ -1,0 +1,137 @@
+cost function:
+  cost type: 3D-Var
+  time window:
+    begin: '2025-01-09T00:00:00Z'
+    length: P1D
+  analysis variables: [ice_thickness]
+  background error:
+    covariance model: SABER
+    saber central block:
+      saber block name: ID
+    #   saber block name: BUMP_NICAS
+    #   read:
+    #     general:
+    #       testing: true
+    #     io:
+    #       data directory: Data
+    #       files prefix: dirac_my_bump_nicas/orca025_sit
+    #       overriding nicas file: orca025_sit_my_bump_files_nicas
+    #       parallel netcdf: true
+    #     drivers:
+    #       multivariate strategy: univariate
+    #       # read global nicas: true
+    #       read local nicas: true
+    #     model:
+    #       do not cross mask boundaries: true
+    #     nicas:
+    #       explicit length-scales: true
+    #       horizontal length-scale:
+    #       - groups: 
+    #         - ice_thickness
+    #         value: 1000.0e+3 
+    #       vertical length-scale:
+    #       - groups:
+    #         - ice_thickness
+    #         value: 10
+    #   msvalr: 1e30
+    # saber outer blocks:
+    # - saber block name: BUMP_StdDev
+    #   read:
+    #     general:
+    #       testing: true
+    #     io:
+    #       data directory: Data
+    #       files prefix: orca025_sit
+    #     drivers:
+    #       compute variance: true
+    #     variance:
+    #       explicit stddev: true
+    #       stddev:
+    #       - variables:
+    #         - ice_thickness
+    #         value: 1
+    #   msvalr: 1e30
+  geometry: &Geom
+    nemo variables:
+      - name: ice_thickness
+        nemo field name: sivolu
+        model space: surface
+        field precision: double
+    grid name: eORCA025_T
+    number levels: 1
+    initialise extra fields: true
+    partitioner: checkerboard 
+  background:
+    date: 2025-01-09T12:00:00Z
+    state variables: [ ice_thickness ]
+    nemo field file: Data/orca025ext_t_mersea_nemo.nc
+    set gmask: false
+  observations:
+    observers:
+    - obs space:
+        name: Ice Thickness 
+        obsdatain:
+          engine:
+            type: H5File
+            obsfile: Data/orca025ext_sit-cryosat2-siral-jopa_20250109T0000Z.nc
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: testoutput/obsdataout_3dvar_orca025_sit-cryosat2_realobs.nc
+        simulated variables: [iceThickness]
+        derived variables: [iceThickness]
+      get values:
+        time interpolation: linear
+        atlas-interpolator:
+          type: unstructured-bilinear-lonlat
+          non_linear: missing-if-all-missing
+          adjoint: true
+      obs operator: 
+        name: Composite
+        components:
+        - name: Identity
+          observation alias file: testinput/test_name_map.yaml
+      obs error:
+        covariance model: diagonal
+      obs pre filters:
+      - filter: Bounds Check
+        filter variables: [{name: iceThickness}]
+        test variables: [{name: DerivedObsValue/iceThickness}]
+        minvalue: 0.0
+        maxvalue: 15.0
+      - filter: Bounds Check
+        filter variables: [{name: iceThickness}]
+        test variables: [{name: DerivedObsError/iceThickness}]
+        minvalue: 0.01
+        maxvalue: 5.0
+      obs post filters:
+      - filter: Background Check
+        filter variables: [{name: iceThickness}]
+        absolute threshold: 3.0
+variational:
+  minimizer:
+    algorithm: DRPCG
+  iterations:
+  - ninner: 2
+    gradient norm reduction: 1e-30
+    geometry: *Geom
+    test: on
+    online diagnostics:
+      write increment: true
+      increment:
+        state component:
+          output path: testoutput/increments_3dvar_orca025_sit-cryosat2_realobs.nc
+          date: 2025-01-09T00:00:00Z
+final:
+  diagnostics:
+    departures: oman
+output:
+  date: 2025-01-09T00:00:00Z
+  state variables: [ ice_thickness ]
+  nemo field file: testoutput/3dvar_orca025_sit-cryosat2_realobs.nc
+  output nemo field file: testoutput/analysis_3dvar_orca025_sit-cryosat2_realobs.nc
+test:
+  reference filename: testoutput/test_3dvar_orca025_sit-cryosat2_realobs.ref
+  test output filename: testoutput/test_3dvar_orca025_sit-cryosat2_realobs.out
+  float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
+

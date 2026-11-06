@@ -8,7 +8,7 @@ background error:
         testing: true
       io:
         data directory: testoutput
-        files prefix: amm1_ssh_my_bump_files
+        files prefix: orca025_ssh_my_bump_files
       drivers:
         compute covariance: false
         compute correlation: false
@@ -18,44 +18,41 @@ background error:
         compute nicas: true
         write global nicas: true 
         write local nicas: true     
-        write nicas grids: true     
-      model:
-        do not cross mask boundaries: true   
+        write nicas grids: true        
       nicas:
         explicit length-scales: true
-        # resolution: 3.0
-        resolution: 8.0 #unitless real number, and it can be understood as the number of points that would be used in a 1D case to discretize the 
+        resolution: 10.0
+        #resolution: 8.0 #unitless real number, and it can be understood as the number of points that would be used in a 1D case to discretize the 
         # Gaspari-Cohn function from its origin to the limit of its support. The function representation is more precise with a larger resolution
+        max horizontal grid size: 25000
         horizontal length-scale:
         - groups: 
           - sea_surface_height_anomaly
           # Horizontal lengthscale (in m), single value for var_1, decreasing this slows down the test
-          # value: 4.0e7 #too coarse with 2 MPI tasks, but works with 1 MPI task
-          # value: 4000.0e+3 # lower res grid than 1000.0e+3, length scales are too large
-          value: 1000.0e+3 #works
+          # value: 1000.0e+3 
+          value: 400.0e+3 
         vertical length-scale:
         - groups:
-          - sea_surface_height_anomaly 
+          - sea_surface_height_anomaly
           value: 10
       msvalr: 1e30
 background:
   date: '2021-06-30T12:00:00Z'
   state variables: &vars [ sea_surface_height_anomaly ]
-  nemo field file: Data/amm1_nemo.nc
-
+  nemo field file: Data/orca025ext_t_mersea_nemo.nc
+  set gmask: true
+  
 geometry:
   nemo variables:
     - name: sea_surface_height_anomaly
       nemo field name: sossheig
       model space: surface
-    - name: sea_surface_height_anomaly_background_error
-      nemo field name: sossheig
-      model space: surface
-      variable type: background error standard deviation
-  grid name: Data/amm1_atlas_grid_spec.yaml
+      field precision: double
+  grid name: eORCA025_T
   number levels: 1
-  partitioner: serial
+  initialise extra fields: true
+  partitioner: checkerboard
 
 test:
-  #reference filename: testoutput/test_bump_nicas_amm1_ssh.ref
-  test output filename: testoutput/test_bump_nicas_amm1_ssh.out
+  reference filename: testoutput/test_bump_nicas_orca025_ssh.ref
+  test output filename: testoutput/test_bump_nicas_orca025_ssh.out

@@ -1,7 +1,8 @@
 cost function:
   cost type: 3D-Var
   time window:
-    begin: '2021-06-29T00:00:00Z'
+    # begin: '2021-06-29T00:00:00Z'
+    begin: '2025-01-09T00:00:00Z'
     length: P1D
   analysis variables: [sea_surface_temperature]
   background error:
@@ -27,9 +28,7 @@ cost function:
           horizontal length-scale:
           - groups: 
             - sea_surface_temperature
-            # value: 2.0e6
-            # value: 4000.0e+3  #too large
-            value: 1000.0e+3 #works, needs to be the same as in bump_nicas_setup
+            value: 400.0e+3 
           vertical length-scale:
           - groups:
             - sea_surface_temperature
@@ -63,9 +62,9 @@ cost function:
     initialise extra fields: true
     partitioner: checkerboard 
   background:
-    date: 2021-06-29T12:00:00Z
+    date: 2025-01-09T12:00:00Z
     state variables: [ sea_surface_temperature ]
-    nemo field file: Data/mersea.grid_T_orca025ext.nc
+    nemo field file: Data/orca025ext_t_mersea_nemo.nc
     set gmask: true
   observations:
     observers:
@@ -74,11 +73,11 @@ cost function:
         obsdatain:
           engine:
             type: H5File
-            obsfile: Data/hofx_sst_obs.nc
+            obsfile: Data/orca025ext_sst-surface-multi-jopa_20250109T0000Z.nc
         obsdataout:
           engine:
             type: H5File
-            obsfile: testoutput/obsdataout_3dvar_orca025_sst.nc
+            obsfile: testoutput/hofx.obsdataout_3dvar_orca025_insitu_sst_realobs.nc
         simulated variables: [seaSurfaceTemperature]
       get values:
         time interpolation: linear
@@ -93,6 +92,55 @@ cost function:
         - name: Identity
       obs error:
         covariance model: diagonal
+    - obs space:
+        name: Sea Surface Temperature 
+        obsdatain:
+          engine:
+            type: H5File
+            obsfile: Data/orca025ext_sst-msg-seviri-jopa_20250109T0000Z.nc
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: testoutput/hofx.obsdataout_3dvar_orca025_msg_seviri_sst_realobs.nc
+        simulated variables: [seaSurfaceTemperature]
+      get values:
+        time interpolation: linear
+        atlas-interpolator:
+          type: unstructured-bilinear-lonlat
+          non_linear: missing-if-any-missing
+          max_fraction_elems_to_try: 0.0
+          adjoint: true
+      obs operator: 
+        name: Composite
+        components:
+        - name: Identity
+      obs error:
+        covariance model: diagonal
+    - obs space:
+        name: Sea Surface Temperature 
+        obsdatain:
+          engine:
+            type: H5File
+            obsfile: Data/orca025ext_sst-multi-viirs-day-jopa_20250109T0000Z.nc
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: testoutput/hofx.obsdataout_3dvar_orca025_multi_viirs_sst_realobs.nc
+        simulated variables: [seaSurfaceTemperature]
+      get values:
+        time interpolation: linear
+        atlas-interpolator:
+          type: unstructured-bilinear-lonlat
+          non_linear: missing-if-any-missing
+          max_fraction_elems_to_try: 0.0
+          adjoint: true
+      obs operator: 
+        name: Composite
+        components:
+        - name: Identity
+      obs error:
+        covariance model: diagonal
+
 variational:
   minimizer:
     algorithm: DRPCG
@@ -105,18 +153,18 @@ variational:
       write increment: true
       increment:
         state component:
-          output path: testoutput/increments_3dvar_orca025_sst.nc
-          date: 2021-06-30T00:00:00Z
+          output path: testoutput/increments_3dvar_orca025_sst_realobs.nc
+          date: 2025-01-09T00:00:00Z
 final:
   diagnostics:
     departures: oman
 output:
-  date: 2021-06-30T00:00:00Z
+  date: 2025-01-09T00:00:00Z
   state variables: [ sea_surface_temperature ]
-  nemo field file: testoutput/3dvar_orca025_sst.nc
-  output nemo field file: testoutput/analysis_3dvar_orca025_sst.nc
+  nemo field file: testoutput/3dvar_orca025_sst_realobs.nc
+  output nemo field file: testoutput/analysis_3dvar_orca025_sst_realobs.nc
 test:
-  #reference filename: testoutput/test_3dvar_orca025_sst.ref
-  test output filename: testoutput/test_3dvar_orca025_sst.out
+  reference filename: testoutput/test_3dvar_orca025_sst_realobs.ref
+  test output filename: testoutput/test_3dvar_orca025_sst_realobs.out
   float absolute tolerance: 5.0e-7 # tolerance for MPI sum-order related differences
 

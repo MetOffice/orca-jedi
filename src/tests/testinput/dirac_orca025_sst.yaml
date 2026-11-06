@@ -45,6 +45,7 @@ background error:
           value: 1
       msvalr: 1e30
 
+# note this location is assumed over land currently and needs updating 
 dirac:
   x indices: [20]
   y indices: [25]
@@ -63,7 +64,8 @@ geometry:
 background:
   date: 2021-06-30T12:00:00Z
   state variables: [ sea_surface_temperature ]
-  nemo field file: Data/mersea.grid_T_orca025ext.nc
+  nemo field file: Data/orca025ext_t_mersea_nemo.nc
+  set gmask: true
 output dirac:
   date: 2021-06-30T12:00:00Z
   output path: testoutput/dirac_cov_orca025_sst_%id%.nc

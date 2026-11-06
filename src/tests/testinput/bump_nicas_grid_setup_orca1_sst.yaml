@@ -38,6 +38,7 @@ background:
   date: '2021-06-30T12:00:00Z'
   state variables: &vars [ sea_surface_temperature ]
   nemo field file: Data/orca1_t_nemo.nc
+  # no land mask in orca1 test file
 
 geometry:
   nemo variables:

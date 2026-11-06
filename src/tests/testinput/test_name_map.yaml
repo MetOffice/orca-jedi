@@ -17,4 +17,6 @@ variable maps:
     alias: salinity
   - name: depthBelowWaterSurface
     alias: depth
+  - name: iceThickness
+    alias: ice_thickness
 
