@@ -16,7 +16,7 @@ _orca-jedi_ includes executables to calculate model values at observation locati
 ### Dependencies
 
   * [cmake](https://cmake.org/)
-  * [Unidata/netcdf-cxx4](https://github.com/Unidata/netcdf-cxx4)
+  * [Unidata/netcdf-c](https://github.com/Unidata/netcdf-c)
   * [ecmwf/ecbuild](https://github.com/ecmwf/ecbuild)
   * [ecmwf/eckit](https://github.com/ecmwf/eckit)
   * [JCSDA/oops](https://github.com/JCSDA/oops)

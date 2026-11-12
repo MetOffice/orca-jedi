@@ -9,18 +9,18 @@
 
 #include "oops/util/DateTime.h"
 
-#include "atlas/parallel/mpi/mpi.h"
-#include "atlas/array.h"
+#include "atlas/parallel/mpi/mpi.h"  // IWYU pragma: keep
+#include "atlas/array.h"  // IWYU pragma: keep
 #include "atlas/util/Config.h"
 #include "atlas/functionspace/NodeColumns.h"
-#include "atlas/mesh.h"
-#include "atlas/grid.h"
-#include "atlas/meshgenerator.h"
+#include "atlas/mesh.h"  // IWYU pragma: keep
+#include "atlas/grid.h"  // IWYU pragma: keep
+#include "atlas/meshgenerator.h"  // IWYU pragma: keep
 #include "atlas/field/Field.h"
 
 #include "atlas-orca/grid/OrcaGrid.h"
 
-#include "eckit/exception/Exceptions.h"
+#include "eckit/exception/Exceptions.h"  // IWYU pragma: keep
 
 #include "orca-jedi/nemo_io/ReadServer.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"

@@ -18,6 +18,9 @@
 
 #include "orca-jedi/nemo_io/AtlasIndex.h"
 #include "orca-jedi/nemo_io/NemoFieldReader.h"
+#include "orca-jedi/nemo_io/IoPool.h"
+#include "orca-jedi/nemo_io/Redistributor.h"
+#include "orca-jedi/nemo_io/IoBackend.h"
 
 #include "eckit/log/Timer.h"
 #include "eckit/system/ResourceUsage.h"
@@ -27,7 +30,8 @@ class ReadServer {
  public:
   explicit ReadServer(std::shared_ptr<eckit::Timer> eckit_timer,
       const eckit::PathName& file_path,
-      const atlas::Mesh& mesh);
+      const atlas::Mesh& mesh,
+      bool parallel_io = false, size_t n_io_ranks = 0);
   ReadServer(ReadServer &&) = default;
   ReadServer(const ReadServer &) = delete;
   ReadServer &operator=(ReadServer &&) = delete;
@@ -58,11 +62,25 @@ void log_status() const {
       atlas::array::ArrayView<T, 2>& field_view) const;
   template<class T> void fill_vertical_field(const std::vector<T>& buffer,
       atlas::array::ArrayView<T, 2>& field_view) const;
+
+  /// \brief Build the parallel I/O pool, redistributor and (on I/O ranks) the
+  ///        parallel-netCDF read backend. Only used when parallel_ is true.
+  void setup_parallel(const eckit::PathName& file_path, size_t n_io_ranks);
+  /// \brief Read one horizontal slice on the pool and scatter it onto the
+  ///        per-node field view (fills all nodes, including ghost nodes).
+  template<class T> void read_var_parallel(const std::string& var_name,
+      const size_t t_index, atlas::array::ArrayView<T, 2>& field_view);
+
   const size_t mpiroot = 0;
   const size_t myrank = atlas::mpi::rank();
   const atlas::Mesh& mesh_;
   std::unique_ptr<AtlasIndexToBufferIndex> buffer_indices_;
   std::unique_ptr<NemoFieldReader> reader_;
   std::shared_ptr<eckit::Timer> eckit_timer_;
+
+  bool parallel_ = false;
+  std::unique_ptr<IoPool> pool_;
+  std::unique_ptr<Redistributor> redist_;
+  std::unique_ptr<FieldReadBackend> backend_;
 };
 }  // namespace orcamodel
