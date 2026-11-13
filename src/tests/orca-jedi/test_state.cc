@@ -16,6 +16,7 @@
 #include "orca-jedi/geometry/Geometry.h"
 #include "orca-jedi/state/State.h"
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/FloatCompare.h"
 #include "orca-jedi/state/StateParameters.h"
 
 #include "tests/orca-jedi/OrcaModelTestEnvironment.h"
@@ -166,6 +167,30 @@ CASE("test basic state") {
     // The sum should be equal to the number of horizontal ocean points in the orca2 grid
     // minus ghost points and some additional masked points needed for BUMP to work.
     EXPECT(gmask_sum == 26460);
+  }
+
+  SECTION("test state addFields and removeFields") {
+    const oops::Variables allvars(state.variables());
+    // Choose last variable as one to remove.
+    const oops::Variables rmvars({allvars[allvars.size() - 1]});
+
+    oops::Variables subvars(allvars);
+    subvars -= rmvars;
+    oops::Log::info() << "test state addFields and removeFields: removing " << rmvars
+                  << " and adding them back" << std::endl;
+    State xx(state);
+    xx.removeFields(rmvars);
+    EXPECT(xx.variables() == subvars);
+
+    // Re-add fields and expect they are zeroes.
+    xx.addFields(rmvars);
+    EXPECT(xx.variables() == allvars);
+    EXPECT(xx.validTime() == state.validTime());
+
+    // Expect that these added fields have been zeroed.
+    for (const std::string& addedVar : rmvars.variables()) {
+      EXPECT(xx.norm<double>(addedVar) == 0.0);
+    }
   }
 }
 
