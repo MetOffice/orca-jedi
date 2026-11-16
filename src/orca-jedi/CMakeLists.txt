@@ -31,6 +31,7 @@ nemo_io/ReadServer.h
 nemo_io/ReadServer.cc
 nemo_io/WriteServer.h
 nemo_io/WriteServer.cc
+utilities/OrcaModelTraits.cc
 utilities/OrcaModelTraits.h
 utilities/Types.h
 utilities/IOUtils.h
