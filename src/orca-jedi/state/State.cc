@@ -201,6 +201,31 @@ void State::subsetFieldSet(const oops::Variables & variables) {
   oops::Log::trace() << "State(ORCA)::subsetFieldSet complete" << std::endl;
 }
 
+void State::addFields(const oops::Variables & varsToAdd) {
+  oops::Log::trace() << "State(ORCA)::addFields starting" << std::endl;
+
+  // NOTE that there should already be a check in OOPS to ensure vars are not
+  // already in the State via `state->variables()`.
+  // Double check this holds true with the Atlas FieldSet.
+  for (const std::string& var : varsToAdd.variables()) {
+    ASSERT(!stateFields_.has(var));
+  }
+  vars_ += varsToAdd;
+  setupStateFields();  // Add missing fields.
+
+  oops::Log::trace() << "State(ORCA)::addFields finished" << std::endl;
+}
+
+void State::removeFields(const oops::Variables & varsToRemove) {
+  oops::Log::trace() << "State(ORCA)::removeFields starting" << std::endl;
+
+  oops::Variables subset(vars_);
+  subset -= varsToRemove;
+  subsetFieldSet(subset);
+
+  oops::Log::trace() << "State(ORCA)::removeFields finished" << std::endl;
+}
+
 
 // Basic operators
 
