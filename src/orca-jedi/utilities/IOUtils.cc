@@ -40,7 +40,8 @@ void readFieldsFromFile(
     auto nemo_field_path = eckit::PathName(nemo_file_name);
     oops::Log::debug() << "orcamodel::readFieldsFromFile:: nemo_field_path "
                        << nemo_field_path << std::endl;
-    ReadServer nemo_reader(geom.timer(), nemo_field_path, geom.mesh());
+    ReadServer nemo_reader(geom.timer(), nemo_field_path, geom.mesh(),
+        geom.parallelInput(), geom.inputIoRanks());
 
     // Read fields from Nemo field file
     // field names in the atlas fieldset are assumed to match their names in
@@ -160,7 +161,8 @@ void writeFieldsToFile(
     for (size_t iLev = 0; iLev < levels.size(); ++iLev) { levels[iLev] = iLev; }
 
     WriteServer writer(geom.timer(), nemo_field_path, geom.mesh(), datetimes, levels,
-                       geom.distributionType() == "serial");
+                       geom.distributionType() == "serial",
+                       geom.parallelOutput(), geom.outputIoRanks());
     for (atlas::Field field : fs) {
       std::string fieldName = field.name();
       std::string nemoName = geom.nemo_var_name(fieldName);
