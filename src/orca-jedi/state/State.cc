@@ -157,14 +157,6 @@ State::State(const Geometry & resol, const State & other)
   }
 }
 
-State::State(const oops::Variables & variables, const State & other)
-  : State(other) {
-  eckit::LocalConfiguration change_config;
-  VariableChange change(change_config, *geom_);
-  change.changeVar(*this, variables);
-  oops::Log::trace() << "State(ORCA)::State created with variable change." << std::endl;
-}
-
 State::State(const State & other)
   : geom_(other.geom_)
     , params_(other.params_)
