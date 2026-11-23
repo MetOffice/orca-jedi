@@ -28,7 +28,6 @@ struct OrcaModelTraits {
 
   typedef orcamodel::ErrorCovariance           Covariance;
   typedef orcamodel::Geometry                  Geometry;
-
   typedef orcamodel::Interpolator              LocalInterpolator;
   typedef orcamodel::Increment                 Increment;
   typedef orcamodel::ModelBias                 ModelAuxControl;
