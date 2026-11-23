@@ -18,7 +18,7 @@ namespace orcamodel {
 void OrcaModelTraits::registerModels() {
   static oops::ModelMaker<OrcaModelTraits,
                           oops::interface::Model<OrcaModelTraits, orcamodel::Model> >
-    makerLfricjedi_("OrcaModel");
+    makerOrcaModel_("OrcaModel");
 }
 
 }  // namespace orcamodel
