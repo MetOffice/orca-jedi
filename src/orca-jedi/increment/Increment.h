@@ -11,6 +11,8 @@
 
 #include "atlas/field/FieldSet.h"
 
+#include "eckit/exception/Exceptions.h"
+
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -76,9 +78,17 @@ class Increment : public util::Printable,
   void axpy(const double &, const Increment &, const bool check = true);
   double dot_product_with(const Increment &) const;
   void schur_product_with(const Increment &);
+  void schur_quotient_with(const Increment &) {
+    throw eckit::NotImplemented("orcamodel::Increment::schur_quotient_with: not implemented",
+                                Here());
+  }
   void random();
   void dirac(const OrcaDiracParameters &);
   void dirac(const eckit::Configuration &);
+  void allReduceInPlace(const eckit::mpi::Comm& comm) {
+    throw eckit::NotImplemented("orcamodel::Increment::allReduceInPlace: not implemented",
+                                Here());
+  }
 
 /// ATLAS
   void toFieldSet(atlas::FieldSet &) const;

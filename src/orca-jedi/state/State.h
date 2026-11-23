@@ -98,6 +98,10 @@ class State : public util::Printable,
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
 
+  void allReduceInPlace(const eckit::mpi::Comm& comm) {
+    throw eckit::NotImplemented("orcamodel::State::allReduceInPlace: not implemented", Here());
+  }
+
 
   State(const Geometry & geom, const atlas::FieldSet & fs, util::DateTime & dt)
     : geom_(new Geometry(geom)), vars_(fs.field_names()), time_(dt)
