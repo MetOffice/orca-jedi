@@ -41,6 +41,7 @@ struct OrcaModelTraits {
   typedef orcamodel::ModelData                 ModelData;
 
   static void registerModels();
+  static void registerNorms() {}
 };
 
 }  // namespace orcamodel
