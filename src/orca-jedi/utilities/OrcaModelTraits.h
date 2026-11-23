@@ -43,6 +43,8 @@ struct OrcaModelTraits {
   typedef orcamodel::VariableChange            VariableChange;
   typedef orcamodel::LinearVariableChange      LinearVariableChange;
   typedef orcamodel::ModelData                 ModelData;
+
+  static void registerNorms() {}
 };
 
 }  // namespace orcamodel
