@@ -75,14 +75,12 @@ variational:
         state component:
           output path: testoutput/increments_3dvar_sic_identity.nc
           date: 2021-06-30T00:00:00Z
-final:
-  diagnostics:
-    departures: oman
 output:
-  date: 2021-06-30T00:00:00Z
-  state variables: [ ice_area_fraction ]
-  nemo field file: testoutput/3dvar_sic_identity2.nc
-  output nemo field file: testoutput/analysis_3dvar_sic_identity.nc
+  analysis:
+    date: 2021-06-30T00:00:00Z
+    state variables: [ ice_area_fraction ]
+    nemo field file: testoutput/3dvar_sic_identity2.nc
+    output nemo field file: testoutput/analysis_3dvar_sic_identity.nc
 test:
   reference filename: testoutput/test_3dvar_sic_identity.ref
   test output filename: testoutput/test_3dvar_sic_identity.out

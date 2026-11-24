@@ -98,6 +98,10 @@ class State : public util::Printable,
 
   void updateTime(const util::Duration & dt) {time_ += dt;}
 
+  void allReduceInPlace(const eckit::mpi::Comm& comm) {
+    throw eckit::NotImplemented("orcamodel::State::allReduceInPlace: not implemented", Here());
+  }
+
 
   State(const Geometry & geom, const atlas::FieldSet & fs, util::DateTime & dt)
     : geom_(new Geometry(geom)), vars_(fs.field_names()), time_(dt)
@@ -106,6 +110,11 @@ class State : public util::Printable,
   const atlas::FieldSet & stateFields() const {return stateFields_;}
   atlas::FieldSet & stateFields() {invalidatePrintCache(); return stateFields_;}
   void subsetFieldSet(const oops::Variables & variables);
+
+  /// \brief Add zeroed fields to the State.
+  void addFields(const oops::Variables & varsToAdd);
+  /// \brief Remove fields from State.
+  void removeFields(const oops::Variables & varsToRemove);
 
   const oops::Variables & variables() const {return vars_;}
 
