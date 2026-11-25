@@ -426,20 +426,28 @@ template<typename T> std::vector<T> NemoFieldReader::read_vertical_var(
   int n_dims = 0;
   nc_check(nc_inq_varndims(ncid_, varid, &n_dims),
       "read_vertical_var ndims " + varname);
-  std::string first_dim_name;
-  if (n_dims == 1) {
-    int dimids[1] = {-1};
-    nc_check(nc_inq_vardimid(ncid_, varid, dimids),
-        "read_vertical_var vardimid " + varname);
-    char dim_name[NC_MAX_NAME + 1] = {0};
-    nc_check(nc_inq_dimname(ncid_, dimids[0], dim_name),
-        "read_vertical_var dimname " + varname);
-    first_dim_name = dim_name;
-  }
-  if (n_dims != 1 || first_dim_name != z_dimvar_name_) {
+
+  if (n_dims != 1) {
     std::ostringstream err_stream;
     err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
-               << varname << "' has " << n_dims << " dimensions.";
+               << varname << "' has " << n_dims << " dimensions, when 1 dimension is expected.";
+    throw eckit::BadValue(err_stream.str(), Here());
+  }
+
+  std::string first_dim_name;
+  int dimids[1] = {-1};
+  nc_check(nc_inq_vardimid(ncid_, varid, dimids),
+      "read_vertical_var vardimid " + varname);
+  char dim_name[NC_MAX_NAME + 1] = {0};
+  nc_check(nc_inq_dimname(ncid_, dimids[0], dim_name),
+      "read_vertical_var dimname " + varname);
+  first_dim_name = dim_name;
+
+  if (first_dim_name != z_dimvar_name_) {
+    std::ostringstream err_stream;
+    err_stream << "orcamodel::NemoFieldReader::read_vertical_var ncVar '"
+               << varname << "' first dimension is '" << first_dim_name
+               << "' rather than the required z-dimension, '" << z_dimvar_name_ << "'.";
     throw eckit::BadValue(err_stream.str(), Here());
   }
 
