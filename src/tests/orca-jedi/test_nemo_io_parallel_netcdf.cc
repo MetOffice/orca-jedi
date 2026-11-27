@@ -36,7 +36,8 @@ CASE("ParallelNetCDFWriteBackend writes a NEMO-layout file in parallel") {
   const std::vector<double> depths{0.0, 1.0, 2.0};
   const std::vector<util::DateTime> datetimes{util::DateTime("2021-06-30T00:00:00Z")};
 
-  const eckit::PathName path("test_parallel_netcdf.nc");
+  const eckit::PathName path(std::string("../testoutput/test_parallel_netcdf_") +
+                             std::to_string(atlas::mpi::size()) + ".nc");
 
   // Known-value generators keyed on the flattened global buffer index, so the
   // reader can verify placement independently of the write-side decomposition.
@@ -126,7 +127,8 @@ CASE("ParallelNetCDFReadBackend reads NEMO-layout slabs in parallel") {
   const std::vector<double> depths{0.0, 1.0, 2.0};
   const std::vector<util::DateTime> datetimes{util::DateTime("2021-06-30T00:00:00Z")};
 
-  const eckit::PathName path("test_parallel_netcdf_read.nc");
+  const eckit::PathName path(std::string("../testoutput/test_parallel_netcdf_read_") +
+                             std::to_string(atlas::mpi::size()) + ".nc");
 
   const auto surf_val = [](size_t g) { return static_cast<double>(g) * 0.5 + 1.0; };
   const auto vol_val = [](size_t k, size_t g) {

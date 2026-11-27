@@ -41,6 +41,18 @@ void set_fill(int ncid, int varid, int nc_type) {
   }
 }
 
+/// \brief Log why nc_close failed. For netCDF-4 most I/O failures (full disk,
+///        quota, Lustre/MPI-IO errors) collapse into NC_EHDFERR.
+void report_close_failure(const eckit::PathName& path, size_t io_rank,
+                          int status) {
+  std::ostringstream oss;
+  oss << "orcamodel::ParallelNetCDFWriteBackend: nc_close failed on I/O rank "
+      << io_rank << " for " << path.fullName().asString() << ": "
+      << nc_strerror(status) << " (status " << status << ")."
+      << " The file is likely incomplete or corrupt.";
+  oops::Log::error() << oss.str() << std::endl;
+}
+
 }  // namespace
 
 ParallelNetCDFWriteBackend::ParallelNetCDFWriteBackend(
@@ -187,8 +199,13 @@ ParallelNetCDFWriteBackend::ParallelNetCDFWriteBackend(
 
 ParallelNetCDFWriteBackend::~ParallelNetCDFWriteBackend() {
   if (ncid_ >= 0) {
-    // Close is collective; ignore the status in the destructor.
-    nc_close(ncid_);
+    // Destructors are implicitly noexcept, so a throw here would call
+    // std::terminate on this rank only. Log the failure locally and carry on so
+    // every rank still reaches the collective reopen in report_effective_hints.
+    const int status = nc_close(ncid_);
+    if (status != NC_NOERR) {
+      report_close_failure(path_, io_comm_->rank(), status);
+    }
   }
   // The file is now flushed and closed, so its final on-disk layout is fixed:
   // reopen it read-only and report the hints the MPI-IO layer actually used.
